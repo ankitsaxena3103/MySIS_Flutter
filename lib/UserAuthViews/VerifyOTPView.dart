@@ -1,9 +1,7 @@
+import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/material.dart';
-import 'package:mysis/SharedClasses/APIHelper.dart';
 import 'package:mysis/CommonViews/CustomAlertView.dart';
-import 'package:mysis/MyTabBarView.dart';
 import 'package:mysis/CommonViews/LoaderView.dart';
-import 'package:mysis/SharedClasses/Preferences.dart';
 import 'package:mysis/CommonViews/ToastMessageView.dart';
 import 'package:mysis/CommonViews/Utility.dart';
 import 'package:mysis/UserAuthViews/SetPINView.dart';
@@ -31,21 +29,21 @@ class VerifyOTPViewState extends State<VerifyOTPView> {
   bool showToastMessageView = false;
   String toastMessage = '';
 
-  String lblOTPVerification =  'OTP Verification';
+  String lblOTPVerification =  'otp_verification'.tr();
 
-  Color nextBgColor = Color.fromRGBO(51, 51, 51, 0.2);
-  Color nextFontColor = Color.fromRGBO(51, 51, 51, 0.6);
+  Color nextBgColor = isDarkMode ? greyColor5 : greyColor2;
+  Color nextFontColor = isDarkMode ? greyColor7 : greyColor3;
   Color nextShadowColor = Colors.transparent;
 
-  Color lineBorderColor = Color.fromRGBO(255, 0, 0, 1);
-  String lblErrorMsg = '* Incorrect OTP';
 
-  String lblCompany = 'Company';
+  String lblErrorMsg = 'txt_incorrect_otp'.tr();
 
-  String lblUserIdHintMsg = 'Enter the verification code we just sent on your registered mobile no.';
+  String lblCompany = 'company'.tr();
+
+  String lblUserIdHintMsg = 'enter_otp_msg'.tr();
   String lblUserIdHintText = '';
 
-  String btnNext = 'Next';
+  String btnNext = 'next'.tr();
 
 
   @override
@@ -57,11 +55,7 @@ class VerifyOTPViewState extends State<VerifyOTPView> {
   @override
   Widget build(BuildContext context) {
     calculateSizes(context);
-    var backgroundGradient = LinearGradient(
-      colors: [Colors.white, Color.fromRGBO(217, 217, 217, 1)],
-      begin: Alignment.topCenter,
-      end: Alignment.bottomCenter,
-    );
+
     return Material(
       child: Scaffold(
         body: SingleChildScrollView(
@@ -70,7 +64,7 @@ class VerifyOTPViewState extends State<VerifyOTPView> {
             height: logicalHeight,
             alignment: Alignment.center,
             decoration: BoxDecoration(
-              gradient: backgroundGradient,
+              gradient:  isDarkMode ? backgroundGradientDark : backgroundGradient,
               // border: Border.all(color: Colors.lightBlue.shade300, width: pathS/18),
               // borderRadius: BorderRadius.circular(pathS/15),
             ),
@@ -124,18 +118,17 @@ class VerifyOTPViewState extends State<VerifyOTPView> {
                         ),
                       ),
                     ),
-                    SizedBox(height: pathS / 2),
+                    SizedBox(height: pathS / 3),
                     Text(
                       lblOTPVerification,
                       style: TextStyle(
                         color: Color.fromRGBO(51, 51, 51, 1),
-                        fontSize: pathS / 3.5,
-                        fontWeight: FontWeight.normal,
+                        fontSize: pathS / 4,
+                        fontWeight: FontWeight.w500,
                       ),
                       textAlign: TextAlign.center,
                     ),
                     SizedBox(height: pathS / 3),
-
                     Container(
                       width: screenWidth-2.5*marginValue,
                       height: pathL/1.5,
@@ -167,7 +160,8 @@ class VerifyOTPViewState extends State<VerifyOTPView> {
                                     style: TextStyle(
                                       color: Color.fromRGBO(51, 51, 51, 0.7),
                                       fontSize: pathS / 6.5,
-                                      fontWeight: FontWeight.normal,
+                                      fontWeight: FontWeight.w500,
+                                      fontFamily: 'Roboto'
                                     ),
                                     textAlign: TextAlign.center,
                                   ),
@@ -191,8 +185,9 @@ class VerifyOTPViewState extends State<VerifyOTPView> {
                                         'SIS INDIA',
                                         style: TextStyle(
                                           color: Color.fromRGBO(51, 51, 51, 1),
-                                          fontSize: pathS / 5.5,
+                                          fontSize: pathS / 5,
                                           fontWeight: FontWeight.bold,
+                                            fontFamily: 'Roboto'
                                         ),
                                         textAlign: TextAlign.center,
                                       ),
@@ -240,7 +235,7 @@ class VerifyOTPViewState extends State<VerifyOTPView> {
                                     style: TextStyle(
                                       color: Color.fromRGBO(51, 51, 51, 1),
                                       fontSize: pathS / 6.5,
-                                      fontWeight: FontWeight.normal,
+                                      fontWeight: FontWeight.w500,
                                     ),
                                     textAlign: TextAlign.center,
                                   ),
@@ -250,6 +245,7 @@ class VerifyOTPViewState extends State<VerifyOTPView> {
                                   length: 4,
                                   width: pathL*1.2,
                                   fieldWidth: pathS/2.2,
+                                  obscureText: true,
                                   style: TextStyle(
                                       color: Color.fromRGBO(51, 51, 51, 1),
                                       fontSize: pathS/3.5,
@@ -263,6 +259,8 @@ class VerifyOTPViewState extends State<VerifyOTPView> {
                                       onUserIdChange(pin);
                                     },
                                   onCompleted: (pin) {
+                                    txtUserOTP.text = pin;
+                                    onUserIdChange(pin);
                                     print("OTP completed: " + pin);
 
                                   },
@@ -280,8 +278,8 @@ class VerifyOTPViewState extends State<VerifyOTPView> {
                         lblErrorMsg,
                         style: TextStyle(
                           color: Color.fromRGBO(255, 0, 0, 1),
-                          fontSize: pathS / 7,
-                          fontWeight: FontWeight.normal,
+                          fontSize: pathS / 6.5,
+                          fontWeight: FontWeight.w500,
 
                         ),
                         textAlign: TextAlign.center,
@@ -322,7 +320,7 @@ class VerifyOTPViewState extends State<VerifyOTPView> {
                         style: TextStyle(
                           color: nextFontColor,
                           fontSize: pathS / 4.5,
-                          fontWeight: FontWeight.bold,
+                          fontWeight: FontWeight.w700,
                         ),
                       ),
                     ),
@@ -361,22 +359,27 @@ class VerifyOTPViewState extends State<VerifyOTPView> {
   void onUserIdChange(String otp){
 
     if(otp.length == 4){
+
       setState(() {
-        nextBgColor = Color.fromRGBO(195, 50, 30, 1);
-        nextFontColor = Colors.white;
-        nextShadowColor = Colors.black.withOpacity(0.2);
-        lineBorderColor = Color.fromRGBO(51, 51, 51, 0.5);
-        lblErrorMsg = '';
+        if(otp != '1234'){
+          lblErrorMsg = 'txt_incorrect_otp'.tr();
+          return;
+
+        }else {
+          nextBgColor = isDarkMode ? redColor1 : redColor3;
+          nextFontColor = isDarkMode ? whiteColor : whiteColor;
+          nextShadowColor = shadowColor;
+          lblErrorMsg = '';
+        }
       });
 
 
     }else{
       setState(() {
-        nextBgColor = Color.fromRGBO(51, 51, 51, 0.2);
-        nextFontColor = Color.fromRGBO(51, 51, 51, 0.6);
+        nextBgColor = isDarkMode ? greyColor8 : greyColor2;
+        nextFontColor = isDarkMode ? greyColor7 : greyColor3;
         nextShadowColor = Colors.transparent;
-        lineBorderColor = Color.fromRGBO(255, 0, 0, 1);
-        lblErrorMsg = '* Incorrect OTP';
+        lblErrorMsg = 'txt_incorrect_otp'.tr();
 
       });
 
@@ -387,9 +390,11 @@ class VerifyOTPViewState extends State<VerifyOTPView> {
 
   void onTapLogin() {
     if (txtUserOTP.text.isEmpty) {
-      // showToastView("All fields are required");
+      showToastView("valid_OTP".tr());
       return;
     }
+
+
 
     Navigator.push(
           context,

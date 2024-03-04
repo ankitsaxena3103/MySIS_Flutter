@@ -18,25 +18,28 @@ class ToastMessageView extends StatelessWidget {
       child: Stack(
         children: [
           Center(
-            child: Container(
-              width: logicalWidth- 2*marginValue,
-              decoration: BoxDecoration(
-                shape: BoxShape.rectangle,
-                // border: Border.all(color: Colors.red, width: 2),
-                color: Colors.black.withOpacity(0.4),
-                borderRadius: BorderRadius.circular(pathS / 10),
+            child: Padding(
+              padding:  EdgeInsets.only(left: pathS/3,right: pathS/3),
+              child: Container(
+                // width: logicalWidth- 2*marginValue,
+                decoration: BoxDecoration(
+                  shape: BoxShape.rectangle,
+                  // border: Border.all(color: Colors.red, width: 2),
+                  color: Colors.black.withOpacity(0.7),
+                  borderRadius: BorderRadius.circular(pathS / 6),
 
-              ),
-              child: Padding(
-                padding:  EdgeInsets.fromLTRB(marginValue, pathS/6, marginValue, pathS/6),
-                child: Text(
-                  message,
-                  style: TextStyle(
-                    color: Colors.white,
-                    fontSize: pathS / 4,
-                    fontWeight: FontWeight.bold,
+                ),
+                child: Padding(
+                  padding:  EdgeInsets.fromLTRB(pathS/5,pathS/15,pathS/5,pathS/15),
+                  child: Text(
+                    message,
+                    style: TextStyle(
+                      color: Colors.white,
+                      fontSize: pathS / 5,
+                      fontWeight: FontWeight.normal,
+                    ),
+                    textAlign: TextAlign.center,
                   ),
-                  textAlign: TextAlign.center,
                 ),
               ),
             ),

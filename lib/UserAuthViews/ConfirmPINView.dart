@@ -1,15 +1,13 @@
 import 'package:flutter/material.dart';
-import 'package:mysis/SharedClasses/APIHelper.dart';
+import 'package:flutter_otp_text_field/flutter_otp_text_field.dart';
 import 'package:mysis/CommonViews/CustomAlertView.dart';
 import 'package:mysis/MyTabBarView.dart';
 import 'package:mysis/CommonViews/LoaderView.dart';
-import 'package:mysis/SharedClasses/Preferences.dart';
 import 'package:mysis/CommonViews/ToastMessageView.dart';
 import 'package:mysis/CommonViews/Utility.dart';
-import 'package:mysis/UserAuthViews/LoginViewError.dart';
-import 'package:otp_text_field/otp_field.dart';
-import 'package:otp_text_field/style.dart';
 import 'package:easy_localization/easy_localization.dart';
+
+import '../SharedClasses/Preferences.dart';
 
 class ConfirmPINView extends StatefulWidget {
   final String userPIN;
@@ -37,21 +35,21 @@ class ConfirmPINViewState extends State<ConfirmPINView> {
   bool showToastMessageView = false;
   String toastMessage = '';
 
-  String lblOTPVerification =  'Repeat PIN';
+  String lblHeader =  'repeat_pin'.tr();
 
-  Color nextBgColor = Color.fromRGBO(51, 51, 51, 0.2);
-  Color nextFontColor = Color.fromRGBO(51, 51, 51, 0.6);
+  Color nextBgColor = isDarkMode ? greyColor5 : greyColor2;
+  Color nextFontColor = isDarkMode ? greyColor7 : greyColor3;
+  Color pinBorderColor = isDarkMode ? whiteColor:greyColor6;
   Color nextShadowColor = Colors.transparent;
 
-  Color lineBorderColor = Color.fromRGBO(255, 0, 0, 1);
-  String lblErrorMsg = '* Incorrect PIN';
+  String lblErrorMsg = '';
 
   String lblCompany = 'Company';
 
-  String lblUserIdHintMsg = 'Repeat PIN you just entered.';
+  String lblUserIdHintMsg = 'repeat_pin_enter'.tr();
   String lblUserIdHintText = '';
 
-  String btnNext = 'Next';
+  String btnNext = 'confirm'.tr();
 
 
   @override
@@ -76,7 +74,7 @@ class ConfirmPINViewState extends State<ConfirmPINView> {
             height: logicalHeight,
             alignment: Alignment.center,
             decoration: BoxDecoration(
-              gradient: backgroundGradient,
+              gradient: isDarkMode ? backgroundGradientDark : backgroundGradient,
               // border: Border.all(color: Colors.lightBlue.shade300, width: pathS/18),
               // borderRadius: BorderRadius.circular(pathS/15),
             ),
@@ -85,32 +83,40 @@ class ConfirmPINViewState extends State<ConfirmPINView> {
               children: [
 
                 Positioned(
-                  top: paddingTop+pathS/8,
-                  right: 0,
+                  top: paddingTop,
                   child: Container(
-                  width: pathS / 1.45,
-                  height: pathS / 1.5,
-                  decoration: const BoxDecoration(
-                    shape: BoxShape.rectangle,
-                    image: DecorationImage(
-                      image: AssetImage("assets/images/icons/icon@3x.png"),
-                      fit: BoxFit.cover,
-                    ),
-                  ),
-                ),
-                ),
-                Positioned(
-                  top: paddingTop+pathS/8,
-                  left: -0,
-
-                  child: Container(
-                    width: pathL,
-                    height: pathS / 1.5,
-                    decoration: const BoxDecoration(
-                      shape: BoxShape.rectangle,
-                      image: DecorationImage(
-                        image: AssetImage("assets/images/icons/logo@3x.png"),
-                        fit: BoxFit.cover,
+                    width: logicalWidth,
+                    height: pathS/1.2,
+                    color: isDarkMode?whiteColor:Colors.transparent, // Set white background color here
+                    child: Padding(
+                      padding: EdgeInsets.only(top: 0, bottom: 0,left: pathS/5,right: pathS/5), // Adjust the padding values as needed
+                      child: Row(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        children: [
+                          Container(
+                            width: pathL,
+                            height: pathS / 1.5,
+                            decoration: const BoxDecoration(
+                              shape: BoxShape.rectangle,
+                              image: DecorationImage(
+                                image: AssetImage("assets/images/icons/logo@3x.png"),
+                                fit: BoxFit.cover,
+                              ),
+                            ),
+                          ),
+                          Spacer(),
+                          Container(
+                            width: pathS / 1.45,
+                            height: pathS / 1.5,
+                            decoration: const BoxDecoration(
+                              shape: BoxShape.rectangle,
+                              image: DecorationImage(
+                                image: AssetImage("assets/images/icons/icon@3x.png"),
+                                fit: BoxFit.cover,
+                              ),
+                            ),
+                          ),
+                        ],
                       ),
                     ),
                   ),
@@ -119,6 +125,9 @@ class ConfirmPINViewState extends State<ConfirmPINView> {
                 Column(
                   mainAxisAlignment: MainAxisAlignment.center,
                   children: [
+                    Container(
+                      width: screenWidth,
+                    ),
                     Container(
                       width: pathS * 1.5,
                       height: pathS * 1.5,
@@ -132,94 +141,24 @@ class ConfirmPINViewState extends State<ConfirmPINView> {
                     ),
                     SizedBox(height: pathS / 2),
                     Text(
-                      lblOTPVerification,
+                      lblHeader,
                       style: TextStyle(
-                        color: Color.fromRGBO(51, 51, 51, 1),
-                        fontSize: pathS / 3.5,
-                        fontWeight: FontWeight.normal,
+                        color: isDarkMode ? whiteColor:greyColor6,
+                        fontSize: pathS / 4,
+                        fontWeight: FontWeight.w500,
+                        fontFamily: 'Roboto'
                       ),
                       textAlign: TextAlign.center,
                     ),
+
                     SizedBox(height: pathS / 3),
-
-                    Container(
-                      width: screenWidth-2.5*marginValue,
-                      height: pathL/1.5,
-                      decoration:  BoxDecoration(
-                        shape: BoxShape.rectangle,
-                        borderRadius: BorderRadius.circular(pathS/8),
-                        color: Colors.white,
-                        boxShadow: [
-                          BoxShadow(
-                            color: Colors.black.withOpacity(0.1), // Shadow color
-                            blurRadius: pathS/10, // Spread of the shadow
-                            // spreadRadius: pathS/15, // How far the shadow extends
-                            offset:  Offset(-pathS/12, pathS/12),
-                          ),
-                        ],
-                      ),
-                      child: Stack(
-                        alignment: Alignment.topLeft,
-                        children: [
-                          Padding(
-                            padding: EdgeInsets.only(left: pathS/5, top: pathS/6), // Adjust top and left as needed
-                            child: Align(
-                              alignment: Alignment.topLeft,
-                              child: Column(
-                                crossAxisAlignment: CrossAxisAlignment.start,
-                                children: [
-                                  Text(
-                                    lblCompany,
-                                    style: TextStyle(
-                                      color: Color.fromRGBO(51, 51, 51, 0.7),
-                                      fontSize: pathS / 6.5,
-                                      fontWeight: FontWeight.normal,
-                                    ),
-                                    textAlign: TextAlign.center,
-                                  ),
-                                  SizedBox(height: pathS / 8),
-                                  Row(
-                                    mainAxisAlignment: MainAxisAlignment.start,
-                                    children: [
-                                      Container(
-                                        width: pathS / 1.9,
-                                        height: pathS / 1.9,
-                                        decoration: const BoxDecoration(
-                                          shape: BoxShape.rectangle,
-                                          image: DecorationImage(
-                                            image: AssetImage("assets/images/icons/icon@3x.png"),
-                                            fit: BoxFit.cover,
-                                          ),
-                                        ),
-                                      ),
-                                      SizedBox(width: pathS / 6),
-                                      Text(
-                                        'SIS INDIA',
-                                        style: TextStyle(
-                                          color: Color.fromRGBO(51, 51, 51, 1),
-                                          fontSize: pathS / 5.5,
-                                          fontWeight: FontWeight.bold,
-                                        ),
-                                        textAlign: TextAlign.center,
-                                      ),
-                                    ],
-                                  ),
-                                ],
-                              ),
-                            ),
-                          ),
-                        ],
-                      ),
-
-                    ),
-                    SizedBox(height: pathS / 6),
                     Container(
                       width: screenWidth-2.5*marginValue,
                       height: pathL,
                       decoration:  BoxDecoration(
                         shape: BoxShape.rectangle,
                         borderRadius: BorderRadius.circular(pathS/8),
-                        color: Colors.white,
+                        color: isDarkMode ? greyColor8:whiteColor,
                         boxShadow: [
                           BoxShadow(
                             color: Colors.black.withOpacity(0.1), // Shadow color
@@ -244,31 +183,41 @@ class ConfirmPINViewState extends State<ConfirmPINView> {
                                   child: Text(
                                     lblUserIdHintMsg,
                                     style: TextStyle(
-                                      color: Color.fromRGBO(51, 51, 51, 1),
+                                      color: isDarkMode ? whiteColor:greyColor6,
                                       fontSize: pathS / 6.5,
-                                      fontWeight: FontWeight.normal,
+                                        fontWeight: FontWeight.w500,
+                                        fontFamily: 'Roboto'
                                     ),
                                     textAlign: TextAlign.center,
                                   ),
                                 ),
                                 SizedBox(height: pathS / 12),
-                                OTPTextField(
-                                  length: 4,
-                                  width: pathL*1.2,
-                                  fieldWidth: pathS/2.2,
-                                  style: TextStyle(
-                                      color: Color.fromRGBO(51, 51, 51, 1),
-                                      fontSize: pathS/3.5,
 
+
+                                OtpTextField(
+                                  numberOfFields: 4,
+                                  obscureText: true,
+                                  keyboardType: TextInputType.number,
+                                  borderColor: pinBorderColor,
+                                  focusedBorderColor: Colors.blue,
+                                  styles: PINTextStyle(
+                                    isDarkMode ? whiteColor : greyColor6,
+                                    4,
                                   ),
-                                  textFieldAlignment: MainAxisAlignment.spaceAround,
-                                  fieldStyle: FieldStyle.underline,
-                                    onChanged:(pin){
-                                      print("OTP Entered: " + pin);
-                                      txtUserConfirmPIN.text = pin;
-                                      onUserIdChange(pin);
-                                    },
-                                  onCompleted: (pin) {
+                                  showFieldAsBox: false,
+                                  borderWidth: 2.0,
+                                  fieldWidth: pathS/2.5,
+                                  //runs when a code is typed in
+                                  onCodeChanged: (String pin) {
+                                    print("OTP entered: " + pin);
+
+                                    txtUserConfirmPIN.text = pin;
+                                    onPINChange(pin);
+                                  },
+                                  //runs when every textfield is filled
+                                  onSubmit: (String pin) {
+                                    txtUserConfirmPIN.text = pin;
+                                    onPINChange(pin);
                                     print("OTP completed: " + pin);
 
                                   },
@@ -285,9 +234,10 @@ class ConfirmPINViewState extends State<ConfirmPINView> {
                       child:Text(
                         lblErrorMsg,
                         style: TextStyle(
-                          color: Color.fromRGBO(255, 0, 0, 1),
+                          color: isDarkMode ? redColor1 : redColor3,
                           fontSize: pathS / 7,
-                          fontWeight: FontWeight.normal,
+                            fontWeight: FontWeight.w500,
+                            fontFamily: 'Roboto'
 
                         ),
                         textAlign: TextAlign.center,
@@ -304,7 +254,7 @@ class ConfirmPINViewState extends State<ConfirmPINView> {
 
                   child: GestureDetector(
                     onTap: (){
-                      onTapLogin();
+                      onTapPINUpdate();
 
                     },
                     child: Container(
@@ -327,8 +277,9 @@ class ConfirmPINViewState extends State<ConfirmPINView> {
                         btnNext,
                         style: TextStyle(
                           color: nextFontColor,
-                          fontSize: pathS / 4.5,
-                          fontWeight: FontWeight.bold,
+                          fontSize: pathS / 4,
+                            fontWeight: FontWeight.w500,
+                            fontFamily: 'Roboto'
                         ),
                       ),
                     ),
@@ -364,7 +315,7 @@ class ConfirmPINViewState extends State<ConfirmPINView> {
 
   void initialSetup() {}
 
-  void onUserIdChange(String confirmPIN){
+  void onPINChange(String confirmPIN){
 
     if(confirmPIN.length == 4){
       setState(() {
@@ -372,11 +323,14 @@ class ConfirmPINViewState extends State<ConfirmPINView> {
         if(widget.userPIN != confirmPIN){
           lblErrorMsg = '* Confirm PIN not matched';
         }else{
-          nextBgColor = Color.fromRGBO(195, 50, 30, 1);
+          nextBgColor = isDarkMode ? redColor1 : redColor3;
           nextFontColor = Colors.white;
-          nextShadowColor = Colors.black.withOpacity(0.2);
-          lineBorderColor = Color.fromRGBO(51, 51, 51, 0.5);
+          nextShadowColor = shadowColor;
+
           lblErrorMsg = '';
+          pinBorderColor = isDarkMode ? whiteColor:greyColor6;
+
+
         }
 
       });
@@ -384,11 +338,12 @@ class ConfirmPINViewState extends State<ConfirmPINView> {
 
     }else{
       setState(() {
-        nextBgColor = Color.fromRGBO(51, 51, 51, 0.2);
-        nextFontColor = Color.fromRGBO(51, 51, 51, 0.6);
+        nextBgColor = isDarkMode ? greyColor5 : greyColor2;
+        nextFontColor = isDarkMode ? greyColor7 : greyColor3;
         nextShadowColor = Colors.transparent;
-        lineBorderColor = Color.fromRGBO(255, 0, 0, 1);
         lblErrorMsg = '* Confirm PIN not matched';
+        pinBorderColor = isDarkMode ? redColor1:redColor3;
+
 
       });
 
@@ -397,11 +352,14 @@ class ConfirmPINViewState extends State<ConfirmPINView> {
   }
 
 
-  void onTapLogin() {
-    if (txtUserConfirmPIN.text.isEmpty) {
-      // showToastView("All fields are required");
+  void onTapPINUpdate() {
+    if (txtUserConfirmPIN.text.isEmpty || txtUserConfirmPIN.text != widget.userPIN) {
+       showToastView('repeat_not_match'.tr());
       return;
     }
+
+    Preferences.saveUserPreference(keyPIN, txtUserConfirmPIN.text);
+
 
     Navigator.push(
           context,

@@ -2,12 +2,13 @@
 
 import 'dart:io';
 import 'package:flutter/material.dart';
+import 'package:mysis/SharedClasses/LanguageProvider.dart';
 import 'package:mysis/SharedClasses/Preferences.dart';
-import 'package:mysis/PreAuthViews/SelectLanguageView.dart';
+import 'package:mysis/Language/SelectLanguageView.dart';
 import 'package:mysis/CommonViews/Utility.dart';
 import 'package:easy_localization/easy_localization.dart';
-import 'package:mysis/languages.dart';
-import 'package:mysis/ThemeProvider.dart';
+import 'package:mysis/SharedClasses/languages.dart';
+import 'package:mysis/SharedClasses/ThemeProvider.dart';
 import 'package:provider/provider.dart';
 import 'package:mysis/UserAuthViews/EnterPINView.dart';
 import 'package:package_info_plus/package_info_plus.dart';
@@ -22,6 +23,7 @@ Future<void> main() async {
     MultiProvider(
       providers: [
         ChangeNotifierProvider(create: (context) => ThemeProvider()),
+        ChangeNotifierProvider(create: (context) => LanguageProvider()),
         // Add other providers if needed
       ],
       child: EasyLocalization(
@@ -91,14 +93,14 @@ Future<void> initPackageInfo() async {
 
 Future<bool> futureBuilderData() async {
 
-  bool isLoggedIn = true;
+  bool isLoggedIn = false;
   initPackageInfo();
-  token = await Preferences.getUserPreference(keyUserToken) ?? '';
-  userName = await Preferences.getUserPreference(keyUserName) ?? '';
-  String userIdString = await Preferences.getUserPreference(keyUserID) ?? '0';
-  userId = int.tryParse(userIdString) ?? 0;
+ String currentPIN = await Preferences.getUserPreference(keyPIN) ?? '';
+  // userName = await Preferences.getUserPreference(keyUserName) ?? '';
+  // String userIdString = await Preferences.getUserPreference(keyUserID) ?? '0';
+  // userId = int.tryParse(userIdString) ?? 0;
 
-  if (token.isNotEmpty && userName.isNotEmpty && userId != null) {
+  if (currentPIN.isNotEmpty && currentPIN != null && currentPIN.length == 4) {
     isLoggedIn = true;
   }
 

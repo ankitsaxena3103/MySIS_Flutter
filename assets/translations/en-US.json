@@ -78,7 +78,7 @@
   "sick_txt": "Sick",
   "family_emergency_txt": "Family Emergency",
   "other_reason_txt": "Other Reason",
-  "reason_for_leaves_txt": "Reason For Leaves :",
+  "reason_for_leaves_txt": "Reason For Leaves:",
   "sign_in": "Sign In",
   "next": "Next",
   "change": "CHANGE",
@@ -389,7 +389,7 @@
   "submit_more_logo": "submit more logos",
   "name": "Name",
   "received_date": "Received date",
-  "due_date": "DUE Date",
+  "due_date": "Due Date",
   "dob": "DOB *",
   "father_name": "Father’s Name*",
   "name_g2g": "Name*",
@@ -482,7 +482,7 @@
   "past_leaves": "Past leaves",
   "enter_correct_regisered_number": "Enter Correct Registration number",
   "sync_now": "Sync now",
-  "unsynced_data": "Unsync data",
+  "unsynced_data": "Unsynced data",
   "apply_for_leave": "Apply for leave",
   "leave_application_status": "Leave application status",
   "Leave_record": "Leave Record",
@@ -595,7 +595,14 @@
   "transfer_shift": "Transfer Shift",
 
 
-  "enter_pin": "Please Enter PIN"
+  "enter_pin": "Please Enter PIN",
+  "no_existing_issues" : "No Existing Issues",
+  "no_issues_available" : "No Issues are available right now. Come back later",
+  "no_leave_status" : "No Application Status",
+  "no_leave_available" : "You have no application status right now",
+  "no_notifications_available" : "You have no notifications right now. Come back later",
+  "duty_time_left" : "mins left for your duty"
+
 }
 
 

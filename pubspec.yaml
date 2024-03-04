@@ -48,6 +48,10 @@ dependencies:
   # The following adds the Cupertino Icons font to your application.
   # Use with the CupertinoIcons class for iOS style icons.
   cupertino_icons: ^1.0.2
+  table_calendar: ^3.0.9
+  flutter_barcode_scanner: ^2.0.0
+  social_share: ^2.3.1
+  flutter_otp_text_field: ^1.1.1
 
 dev_dependencies:
   flutter_test:
@@ -65,6 +69,25 @@ dev_dependencies:
 
 # The following section is specific to Flutter packages.
 flutter:
+  fonts:
+    - family: Roboto
+      fonts:
+        - asset: assets/fonts/Roboto-Black.ttf
+        - asset: assets/fonts/Roboto-BlackItalic.ttf
+        - asset: assets/fonts/Roboto-Bold.ttf
+        - asset: assets/fonts/Roboto-BoldCondensed.ttf
+        - asset: assets/fonts/Roboto-BoldCondensedItalic.ttf
+        - asset: assets/fonts/Roboto-BoldItalic.ttf
+        - asset: assets/fonts/Roboto-Condensed.ttf
+        - asset: assets/fonts/Roboto-CondensedItalic.ttf
+        - asset: assets/fonts/Roboto-Italic.ttf
+        - asset: assets/fonts/Roboto-Light.ttf
+        - asset: assets/fonts/Roboto-LightItalic.ttf
+        - asset: assets/fonts/Roboto-Medium.ttf
+        - asset: assets/fonts/Roboto-MediumItalic.ttf
+        - asset: assets/fonts/Roboto-Regular.ttf
+        - asset: assets/fonts/Roboto-Thin.ttf
+        - asset: assets/fonts/Roboto-ThinItalic.ttf
 
   # The following line ensures that the Material Icons font is
   # included with your application, so that you can use the icons in
@@ -74,11 +97,18 @@ flutter:
   assets:
     - assets/images/
     - assets/images/icons/
-    - assets/images/Dashboard-icons/
+    - assets/images/dashboard-icons/
     - assets/gifs/
     - assets/translations/
-    - assets/images/Onboarding/
+    - assets/images/onboarding/
     - assets/images/profile/
+    - assets/images/home/
+    - assets/images/notifications/
+
+
+
+
+
 
   # For details regarding fonts from package dependencies,
   # see https://flutter.dev/custom-fonts/#from-packages

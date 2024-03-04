@@ -1,16 +1,14 @@
 import 'package:flutter/material.dart';
-import 'package:mysis/SharedClasses/APIHelper.dart';
+import 'package:flutter_otp_text_field/flutter_otp_text_field.dart';
 import 'package:mysis/CommonViews/CustomAlertView.dart';
 import 'package:mysis/MyTabBarView.dart';
 import 'package:mysis/CommonViews/LoaderView.dart';
 import 'package:mysis/SharedClasses/Preferences.dart';
 import 'package:mysis/CommonViews/ToastMessageView.dart';
 import 'package:mysis/CommonViews/Utility.dart';
-import 'package:mysis/UserAuthViews/LoginViewError.dart';
-import 'package:otp_text_field/otp_field.dart';
-import 'package:otp_text_field/style.dart';
+import 'package:mysis/UserAuthViews/SetPINView.dart';
 import 'package:easy_localization/easy_localization.dart';
-import 'package:mysis/ThemeProvider.dart';
+import 'package:mysis/SharedClasses/ThemeProvider.dart';
 import 'package:provider/provider.dart';
 
 class EnterPINView extends StatefulWidget {
@@ -37,14 +35,11 @@ class EnterPINViewState extends State<EnterPINView> {
   bool showToastMessageView = false;
   String toastMessage = '';
 
-  String lblOTPVerification =  'Repeat PIN';
-
-  Color nextBgColor = isDarkMode ? whiteFontColor: greyButtonBGColor;
-  Color nextFontColor = isDarkMode ? whiteBGColor:greyButtonFontColor ;
+  Color nextBgColor = isDarkMode ? greyColor5 : greyColor2;
+  Color nextFontColor = isDarkMode ? greyColor7 : greyColor3;
   Color nextShadowColor = Colors.transparent;
 
-  Color lineBorderColor = Color.fromRGBO(255, 0, 0, 1);
-  String lblErrorMsg = 'repeat_not_match'.tr();
+  String lblErrorMsg = '';
 
 
 
@@ -57,11 +52,6 @@ class EnterPINViewState extends State<EnterPINView> {
   @override
   Widget build(BuildContext context) {
     calculateSizes(context);
-    var backgroundGradient = LinearGradient(
-      colors: [Colors.white, Color.fromRGBO(217, 217, 217, 1)],
-      begin: Alignment.topCenter,
-      end: Alignment.bottomCenter,
-    );
     return Consumer<ThemeProvider>(
       builder: (context, themeProvider, child) {
         return Material(
@@ -84,7 +74,7 @@ class EnterPINViewState extends State<EnterPINView> {
                       child: Container(
                       width: logicalWidth,
                       height: pathS/1.2,
-                        color: isDarkMode?whiteFontColor:Colors.transparent, // Set white background color here
+                        color: isDarkMode?whiteColor:Colors.transparent, // Set white background color here
                       child: Padding(
                         padding: EdgeInsets.only(top: 0, bottom: 0,left: pathS/5,right: pathS/5), // Adjust the padding values as needed
                         child: Row(
@@ -140,13 +130,14 @@ class EnterPINViewState extends State<EnterPINView> {
                             ),
                           ),
                         ),
-                        SizedBox(height: pathS / 2),
+                        SizedBox(height: pathS / 3),
                         Text(
                           'Enter_pin'.tr(),
                           style: TextStyle(
-                            color: isDarkMode ? whiteFontColor:greyFontColor,
-                            fontSize: pathS / 3.5,
-                            fontWeight: FontWeight.normal,
+                            color: isDarkMode ? whiteColor:greyColor6,
+                            fontSize: pathS / 4,
+                            fontWeight: FontWeight.w500,
+                            fontFamily: 'Roboto'
                           ),
                           textAlign: TextAlign.center,
                         ),
@@ -158,7 +149,7 @@ class EnterPINViewState extends State<EnterPINView> {
                           decoration:  BoxDecoration(
                             shape: BoxShape.rectangle,
                             borderRadius: BorderRadius.circular(pathS/8),
-                            color: isDarkMode?darkTileBgcolor:Colors.white,
+                            color: isDarkMode?greyColor8:Colors.white,
                             boxShadow: [
                               BoxShadow(
                                 color: Colors.black.withOpacity(0.1), // Shadow color
@@ -183,35 +174,41 @@ class EnterPINViewState extends State<EnterPINView> {
                                       child: Text(
                                         'enter_current_pin'.tr(),
                                         style: TextStyle(
-                                          color: isDarkMode ? whiteFontColor:greyFontColor,
+                                          color: isDarkMode ? whiteColor:greyColor6,
                                           fontSize: pathS / 6.5,
-                                          fontWeight: FontWeight.normal,
+                                          fontWeight: FontWeight.w500,
+                                            fontFamily: 'Roboto'
                                         ),
                                         textAlign: TextAlign.center,
                                       ),
                                     ),
                                     SizedBox(height: pathS / 12),
-                                    OTPTextField(
-                                      length: 4,
-                                      width: pathL*1.2,
-                                      fieldWidth: pathS/2.2,
-                                      style: TextStyle(
-                                        color: isDarkMode? whiteFontColor:Color.fromRGBO(51, 51, 51, 1),
-                                        fontSize: pathS/3.5,
 
+                                    OtpTextField(
+                                      numberOfFields: 4,
+                                      obscureText: true,
+                                      keyboardType: TextInputType.number,
+                                      borderColor: isDarkMode ? whiteColor : greyColor6,
+                                      focusedBorderColor: Colors.blue,
+                                      styles: PINTextStyle(
+                                        isDarkMode ? whiteColor : greyColor6,
+                                        4,
                                       ),
-                                      textFieldAlignment: MainAxisAlignment.spaceAround,
-                                      fieldStyle: FieldStyle.underline,
-                                      onChanged:(pin){
-                                        print("OTP Entered: " + pin);
+                                      showFieldAsBox: false,
+                                      borderWidth: 2.0,
+                                      fieldWidth: pathS/2.5,
+                                      //runs when a code is typed in
+                                      onCodeChanged: (String pin) {
+
+
+                                      },
+                                      //runs when every textfield is filled
+                                      onSubmit: (String pin) {
                                         txtEnterPIN.text = pin;
                                         onUserIdChange(pin);
-                                      },
-                                      onCompleted: (pin) {
                                         print("OTP completed: " + pin);
 
                                       },
-
                                     ),
                                   ],
                                 ),
@@ -225,54 +222,75 @@ class EnterPINViewState extends State<EnterPINView> {
                           child:Text(
                             lblErrorMsg,
                             style: TextStyle(
-                              color: Color.fromRGBO(255, 0, 0, 1),
-                              fontSize: pathS / 7,
-                              fontWeight: FontWeight.normal,
+                              color: isDarkMode ? redColor1 : redColor3,
+                              fontSize: pathS / 6.5,
+                              fontWeight: FontWeight.w500,
+                              fontFamily: 'Roboto',
 
                             ),
                             textAlign: TextAlign.center,
                           ),
                         ),
 
-                        SizedBox(height: pathS),
+                        SizedBox(height: pathS/2),
+                        GestureDetector(
+                          onTap: (){
+                            onTapLogin();
+
+                          },
+                          child: Container(
+                            width: pathL,
+                            height: pathS / 1.5,
+                            alignment: Alignment.center,
+                            decoration: BoxDecoration(
+                              color:  nextBgColor,                          // border: Border.all(color: Colors.yellow, width: pathS/18),
+                              borderRadius: BorderRadius.circular(pathS/3),
+                              boxShadow: [
+                                BoxShadow(
+                                  color: nextShadowColor, // Shadow color
+                                  blurRadius: pathS/10, // Spread of the shadow
+                                  // spreadRadius: pathS/15, // How far the shadow extends
+                                  offset:  Offset(-pathS/12, pathS/12),
+                                ),
+                              ],
+                            ),
+                            child: Text(
+                              'next'.tr(),
+                              style: TextStyle(
+                                color: nextFontColor,
+                                fontSize: pathS / 4.5,
+                                fontWeight: FontWeight.w700,
+                                fontFamily: 'Roboto',
+                              ),
+                            ),
+                          ),
+                        ),
+
+                        SizedBox(height: pathS/2),
+                        GestureDetector(
+                          onTap: (){
+                            onLoadNewPIN();
+                          },
+                          child: Container(
+                            // width: pathL,
+                            height: pathS / 1.5,
+                            alignment: Alignment.center,
+
+                            child: Text(
+                              'forget_current_pin'.tr(),
+                              style: TextStyle(
+                                color: isDarkMode ? redColor1 : redColor3,
+                                fontSize: pathS / 4.5,
+                                fontWeight: FontWeight.bold,
+                                fontFamily: 'Roboto',
+                              ),
+                            ),
+                          ),
+                        ),
 
                       ],
                     ),
 
-                    Positioned(
-                      bottom: paddingBottom+pathS/2,
-                      child: GestureDetector(
-                        onTap: (){
-                          onTapLogin();
-
-                        },
-                        child: Container(
-                          width: pathL,
-                          height: pathS / 1.5,
-                          alignment: Alignment.center,
-                          decoration: BoxDecoration(
-                            color:  nextBgColor,                          // border: Border.all(color: Colors.yellow, width: pathS/18),
-                            borderRadius: BorderRadius.circular(pathS/3),
-                            boxShadow: [
-                              BoxShadow(
-                                color: nextShadowColor, // Shadow color
-                                blurRadius: pathS/10, // Spread of the shadow
-                                // spreadRadius: pathS/15, // How far the shadow extends
-                                offset:  Offset(-pathS/12, pathS/12),
-                              ),
-                            ],
-                          ),
-                          child: Text(
-                            'confirm'.tr(),
-                            style: TextStyle(
-                              color: nextFontColor,
-                              fontSize: pathS / 4.5,
-                              fontWeight: FontWeight.bold,
-                            ),
-                          ),
-                        ),
-                      ),
-                    ),
 
                     LoaderView(isVisible: showLoaderView, message: 'Loading...'),
                     Visibility(
@@ -306,31 +324,32 @@ class EnterPINViewState extends State<EnterPINView> {
 
   void initialSetup() {}
 
-  void onUserIdChange(String confirmPIN){
+  Future<void> onUserIdChange(String enteredPIN) async {
 
-    if(confirmPIN.length == 4){
+    String? currentPIN = await Preferences.getUserPreference(keyPIN);
+
+    if(enteredPIN.length == 4){
       setState(() {
-
-        if('1234' != txtEnterPIN.text){
+        if(currentPIN != enteredPIN){
           lblErrorMsg = 'repeat_not_match'.tr();
+          return;
 
         }else{
-          nextBgColor = Color.fromRGBO(195, 50, 30, 1);
-          nextFontColor = Colors.white;
-          nextShadowColor = Colors.black.withOpacity(0.2);
-          lineBorderColor = Color.fromRGBO(51, 51, 51, 0.5);
+          nextBgColor = isDarkMode ? redColor1 : redColor3;
+          nextFontColor = isDarkMode ? whiteColor : whiteColor;
+          nextShadowColor = shadowColor;
           lblErrorMsg = '';
         }
 
       });
 
 
-    }else{
+    }
+    else{
       setState(() {
-        nextBgColor = isDarkMode ? whiteFontColor: whiteBGColor;
-         nextFontColor = isDarkMode ? whiteBGColor:greyFontColor ;
+        nextBgColor = isDarkMode ? greyColor8 : greyColor2;
+        nextFontColor = isDarkMode ? greyColor7 : greyColor3;
         nextShadowColor = Colors.transparent;
-        lineBorderColor = Color.fromRGBO(255, 0, 0, 1);
         lblErrorMsg = 'repeat_not_match'.tr();
 
       });
@@ -340,12 +359,22 @@ class EnterPINViewState extends State<EnterPINView> {
   }
 
 
-  void onTapLogin() {
-    if (txtEnterPIN.text.isEmpty) {
-      showToastView(
-          'repeat_not_match'.tr());
+  Future<void> onTapLogin() async {
+    if (txtEnterPIN.text.isEmpty || txtEnterPIN.text.length != 4) {
+      showToastView('repeat_not_match'.tr());
       return;
     }
+
+    String? currentPIN = await Preferences.getUserPreference(keyPIN);
+
+
+      if(currentPIN != txtEnterPIN.text){
+        showToastView('repeat_not_match'.tr());
+        return;
+
+      }
+
+
 
     Navigator.push(
       context,
@@ -353,7 +382,7 @@ class EnterPINViewState extends State<EnterPINView> {
         builder: (context) => MyTabBarView(),
       ),
     );
-    
+
   }
 
   void showToastView(String message) {
@@ -368,4 +397,16 @@ class EnterPINViewState extends State<EnterPINView> {
       });
     });
   }
+
+   void onLoadNewPIN(){
+
+    Navigator.push(
+        context,
+        MaterialPageRoute(builder: (context) => SetPINView(),
+        ),
+    );
+}
+
+
+
 }

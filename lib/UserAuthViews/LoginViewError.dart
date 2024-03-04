@@ -200,9 +200,6 @@ class LoginViewErrorState extends State<LoginViewError> {
                   ],
                 ),
 
-
-
-
                 LoaderView(isVisible: showLoaderView, message: 'Loading...'),
                 Visibility(
                   visible: isAlertVisible,

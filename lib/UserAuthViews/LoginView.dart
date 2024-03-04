@@ -1,15 +1,13 @@
+import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/material.dart';
-import 'package:mysis/SharedClasses/APIHelper.dart';
+import 'package:flutter_otp_text_field/flutter_otp_text_field.dart';
 import 'package:mysis/CommonViews/CustomAlertView.dart';
-import 'package:mysis/MyTabBarView.dart';
 import 'package:mysis/CommonViews/LoaderView.dart';
-import 'package:mysis/SharedClasses/Preferences.dart';
 import 'package:mysis/CommonViews/ToastMessageView.dart';
 import 'package:mysis/CommonViews/Utility.dart';
-import 'package:mysis/UserAuthViews/LoginViewError.dart';
 import 'package:mysis/UserAuthViews/VerifyOTPView.dart';
-import 'package:otp_text_field/otp_field.dart';
-import 'package:otp_text_field/style.dart';
+
+
 class LoginView extends StatefulWidget {
   const LoginView({super.key});
 
@@ -32,20 +30,20 @@ class LoginViewState extends State<LoginView> {
   String toastMessage = '';
 
 
-  String lblSignIn =  'Sign In';
+  String lblSignIn =  'sign_in'.tr();
   Color nextBgColor = Color.fromRGBO(51, 51, 51, 0.2);
   Color nextFontColor = Color.fromRGBO(51, 51, 51, 0.6);
   Color nextShadowColor = Colors.transparent;
 
   Color lineBorderColor = Color.fromRGBO(255, 0, 0, 1);
-  String lblErrorMsg = '* Enter 10 digit mobile number';
+  String lblErrorMsg = '';
 
-  String lblCompany = 'Company';
+  String lblCompany = 'company'.tr();
 
-  String lblUserIdHintMsg = 'Enter Mobile / Registration N0.';
-  String lblUserIdHintText = 'Eg. 9876543210 / PAT 561202';
+  String lblUserIdHintMsg = 'enter_mobile_no'.tr();
+  String lblUserIdHintText = 'ex_mobile'.tr();
 
-  String btnNext = 'Next';
+  String btnNext = 'next'.tr();
 
 
   @override
@@ -123,7 +121,7 @@ class LoginViewState extends State<LoginView> {
                         ),
                       ),
                     ),
-                    SizedBox(height: pathS / 2),
+                    SizedBox(height: pathS / 3),
                     Text(
                       lblSignIn,
                       style: TextStyle(
@@ -208,7 +206,7 @@ class LoginViewState extends State<LoginView> {
                     SizedBox(height: pathS / 6),
                     Container(
                       width: screenWidth-2.5*marginValue,
-                      height: pathL/1.2,
+                      // height: pathL/1.2,
                       decoration:  BoxDecoration(
                         shape: BoxShape.rectangle,
                         borderRadius: BorderRadius.circular(pathS/8),
@@ -226,7 +224,7 @@ class LoginViewState extends State<LoginView> {
                         alignment: Alignment.topLeft,
                         children: [
                           Padding(
-                            padding: EdgeInsets.only(left: pathS/5, top: pathS/3), // Adjust top and left as needed
+                            padding: EdgeInsets.only(left: pathS/3, top: pathS/3,bottom: pathS/3,right: pathS/4), // Adjust top and left as needed
                             child: Align(
                               alignment: Alignment.topLeft,
                               child: Column(
@@ -235,40 +233,49 @@ class LoginViewState extends State<LoginView> {
                                   Text(
                                     lblUserIdHintMsg,
                                     style: TextStyle(
-                                      color: Color.fromRGBO(51, 51, 51, 0.7),
+                                      color: greyColor6,
                                       fontSize: pathS / 6.5,
-                                      fontWeight: FontWeight.normal,
+                                      fontWeight: FontWeight.w500,
                                     ),
                                     textAlign: TextAlign.center,
                                   ),
-                                  // SizedBox(height: pathS / 12),
-                                  OTPTextField(
-                                    length: 10,
-                                    width: pathL*2.2,
-                                    fieldWidth: pathS/3,
-                                    style: TextStyle(
-                                      color: Color.fromRGBO(51, 51, 51, 1),
-                                      fontSize: pathS/3.5,
+
+                                  OtpTextField(
+
+                                    numberOfFields: 10,
+                                    obscureText: false,
+                                    keyboardType: TextInputType.streetAddress,
+                                    borderColor: isDarkMode ? whiteColor : greyColor6,
+                                    focusedBorderColor: isDarkMode ? whiteColor : greyColor1,
+                                    styles: PINTextStyle(
+                                      isDarkMode ? whiteColor : greyColor6,
+                                      10,
                                     ),
-                                    textFieldAlignment: MainAxisAlignment.spaceAround,
-                                    fieldStyle: FieldStyle.underline,
-                                    onChanged:(pin){
-                                      print("OTP Entered: " + pin);
+                                    showFieldAsBox: false,
+                                    borderWidth: 2.0,
+                                    fieldWidth: pathS/2.4,
+                                    margin:EdgeInsets.only(right: 0,left: 1),
+                                    //runs when a code is typed in
+                                    onCodeChanged: (String pin) {
                                       txtUserId.text = pin;
                                       onUserIdChange(pin);
+
                                     },
-                                    onCompleted: (pin) {
+                                    //runs when every textfield is filled
+                                    onSubmit: (String pin) {
+                                      txtUserId.text = pin;
+                                      onUserIdChange(pin);
                                       print("OTP completed: " + pin);
 
                                     },
                                   ),
-                                  SizedBox(height: pathS / 12),
+                                  SizedBox(height: pathS / 8),
                                   Text(
                                     lblUserIdHintText,
                                     style: TextStyle(
                                       color: Color.fromRGBO(51, 51, 51, 0.7),
                                       fontSize: pathS / 6.5,
-                                      fontWeight: FontWeight.normal,
+                                      fontWeight: FontWeight.w500,
                                     ),
                                     textAlign: TextAlign.center,
                                   ),
@@ -285,9 +292,9 @@ class LoginViewState extends State<LoginView> {
                       child:Text(
                         lblErrorMsg,
                         style: TextStyle(
-                          color: Color.fromRGBO(255, 0, 0, 1),
-                          fontSize: pathS / 7,
-                          fontWeight: FontWeight.normal,
+                          color: redColor2,
+                          fontSize: pathS / 6,
+                          fontWeight: FontWeight.w500,
 
                         ),
                         textAlign: TextAlign.left,
@@ -330,7 +337,7 @@ class LoginViewState extends State<LoginView> {
                         style: TextStyle(
                           color: nextFontColor,
                           fontSize: pathS / 4.5,
-                          fontWeight: FontWeight.bold,
+                          fontWeight: FontWeight.w600,
                         ),
                       ),
                     ),
@@ -385,7 +392,7 @@ class LoginViewState extends State<LoginView> {
         nextFontColor = Color.fromRGBO(51, 51, 51, 0.6);
         nextShadowColor = Colors.transparent;
         lineBorderColor = Color.fromRGBO(255, 0, 0, 1);
-        lblErrorMsg = '* Enter 10 digit mobile number';
+        lblErrorMsg = 'enter_10_digit_number'.tr();
 
       });
 

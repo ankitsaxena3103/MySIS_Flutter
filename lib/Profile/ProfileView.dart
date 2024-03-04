@@ -1,10 +1,12 @@
 import 'package:flutter/material.dart';
 import 'package:mysis/CommonViews/Utility.dart';
-import 'package:mysis/UserAuthViews/LoginView.dart';
+import 'package:mysis/Profile/ChangeMobileView.dart';
+import 'package:mysis/Profile/ContactSISView.dart';
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:easy_localization/easy_localization.dart';
-import 'package:mysis/ThemeProvider.dart';
-import 'package:provider/provider.dart';
+
+import '../UserAuthViews/SetPINView.dart';
+import 'EditProfileImageView.dart';
 
 class ProfileView extends StatefulWidget {
   @override
@@ -13,7 +15,7 @@ class ProfileView extends StatefulWidget {
 
 class ProfileViewState extends State<ProfileView>{
 
-  String assetsImagePath = "assets/images/Dashboard-icons/profile-icon.png";
+  String assetsImagePath = "assets/images/dashboard-icons/profile-icon.png";
   String imagePath = '';
 
   String userName = 'Rajkumar Singh';
@@ -70,9 +72,6 @@ class ProfileViewState extends State<ProfileView>{
         alignment: Alignment.center,
         children: [
 
-
-
-
           Column(
             children: [
 
@@ -97,8 +96,8 @@ class ProfileViewState extends State<ProfileView>{
             ],
           ),
           Positioned(
-            top: paddingTop+pathS/5,
-            left: paddingLeft +pathS/5,
+            top: MediaQuery.of(context).padding.top+pathS/12,
+            left: paddingLeft +pathS/3,
             child: GestureDetector(
               onTap: (){
                 Navigator.pop(context);
@@ -107,21 +106,21 @@ class ProfileViewState extends State<ProfileView>{
                 children: [
                   Container(
                     width: pathS/5,
-                    height: pathS/5,
+                    height: pathS/2,
                       child: Image.asset(
-                      'assets/images/Dashboard-icons/left-arrow.png',
-                      color: isDarkMode ? whiteFontColor:greyFontColor,
+                      'assets/images/dashboard-icons/left-arrow.png',
+                      color: isDarkMode ? whiteColor:whiteColor,
 
                     ),
 
                   ),
                   SizedBox(width: pathS/8),
                   Text(
-                    'back'.tr(),
+                    'profile'.tr(),
                     style: TextStyle(
-                      color: isDarkMode ?  whiteFontColor:greyFontColor,
-                      fontSize: pathS / 5.5,
-                      fontWeight: FontWeight.normal,
+                      color: isDarkMode ?  whiteColor:whiteColor,
+                      fontSize: pathS / 5,
+                      fontWeight: FontWeight.w500,
                       fontFamily: 'Roboto',
                     ),
                     textAlign: TextAlign.center,
@@ -136,7 +135,7 @@ class ProfileViewState extends State<ProfileView>{
             height: screenHeight,
 
             child: Padding(
-              padding: EdgeInsets.only(left: 0, top: pathL-pathS *1.2/2,bottom: pathS/1.5), // Adjust top and left as needed
+              padding: EdgeInsets.only(left: 0, top: pathL-pathS *1.2/2,bottom: pathS/1.2), // Adjust top and left as needed
               child: SingleChildScrollView(
               scrollDirection: Axis.vertical,
               child: Stack(
@@ -151,7 +150,7 @@ class ProfileViewState extends State<ProfileView>{
                         decoration:  BoxDecoration(
                           shape: BoxShape.rectangle,
                           borderRadius: BorderRadius.circular(pathS/8),
-                          color: isDarkMode?darkTileBgcolor:Colors.white,
+                          color: isDarkMode?greyColor8:Colors.white,
                           boxShadow: [
                             BoxShadow(
                               color: Colors.black.withOpacity(0.1), // Shadow color
@@ -175,7 +174,7 @@ class ProfileViewState extends State<ProfileView>{
                                     Text(
                                       userName,
                                       style: TextStyle(
-                                        color: isDarkMode ?  whiteFontColor:greyFontColor,
+                                        color: isDarkMode ?  whiteColor:greyColor6,
                                         fontSize: pathS / 4.5,
                                         fontWeight: FontWeight.w700,
                                         fontFamily: 'Roboto',
@@ -186,7 +185,7 @@ class ProfileViewState extends State<ProfileView>{
                                     Text(
                                       degination,
                                       style: TextStyle(
-                                        color: isDarkMode ?  whiteFontColor:greyFontColor,
+                                        color: isDarkMode ?  whiteColor:greyColor6,
                                         fontSize: pathS / 7,
                                         fontWeight: FontWeight.w500,
                                         fontFamily: 'Roboto',
@@ -197,7 +196,7 @@ class ProfileViewState extends State<ProfileView>{
                                     Text(
                                       description,
                                       style: TextStyle(
-                                        color: isDarkMode ?  whiteFontColor:greyFontColor,
+                                        color: isDarkMode ?  whiteColor:greyColor6,
                                         fontSize: pathS / 4,
                                         fontWeight: FontWeight.w800,
                                         fontFamily: 'Roboto',
@@ -210,7 +209,10 @@ class ProfileViewState extends State<ProfileView>{
                                         decoration: BoxDecoration(
                                             shape: BoxShape.rectangle,
                                           borderRadius: BorderRadius.circular(pathS / 8),
-                                          border: Border.all(color: whiteBGColor, width: 1),
+                                          border: Border.all(
+                                              color: isDarkMode ?  greyColorDark : greyColor1,
+                                              width: 1
+                                          ),
                                         ),
                                       child: Padding(
                                         padding: EdgeInsets.only(left: pathS/4,right: pathS/4,top: pathS/4), // Adjust top and left as needed
@@ -222,7 +224,7 @@ class ProfileViewState extends State<ProfileView>{
                                                 Text(
                                                   'age'.tr(),
                                                   style: TextStyle(
-                                                    color: isDarkMode ?  whiteFontColor:greyFontColor,
+                                                    color: isDarkMode ?  whiteColor:greyColor6,
                                                     fontSize: pathS / 5,
                                                     fontWeight: FontWeight.w300,
                                                     fontFamily: 'Roboto',
@@ -233,7 +235,7 @@ class ProfileViewState extends State<ProfileView>{
                                                 Text(
                                                   age,
                                                   style: TextStyle(
-                                                    color: isDarkMode ?  whiteFontColor:greyFontColor,
+                                                    color: isDarkMode ?  whiteColor:greyColor6,
                                                     fontSize: pathS / 5,
                                                     fontWeight: FontWeight.w700,
                                                     fontFamily: 'Roboto',
@@ -248,7 +250,7 @@ class ProfileViewState extends State<ProfileView>{
                                                 Text(
                                                   'qualification'.tr(),
                                                   style: TextStyle(
-                                                    color: isDarkMode ?  whiteFontColor:greyFontColor,
+                                                    color: isDarkMode ?  whiteColor:greyColor6,
                                                     fontSize: pathS / 5,
                                                     fontWeight: FontWeight.w300,
                                                     fontFamily: 'Roboto',
@@ -259,7 +261,7 @@ class ProfileViewState extends State<ProfileView>{
                                                 Text(
                                                   qualification,
                                                   style: TextStyle(
-                                                    color: isDarkMode ?  whiteFontColor:greyFontColor,
+                                                    color: isDarkMode ?  whiteColor:greyColor6,
                                                     fontSize: pathS / 5,
                                                     fontWeight: FontWeight.w700,
                                                     fontFamily: 'Roboto',
@@ -275,7 +277,7 @@ class ProfileViewState extends State<ProfileView>{
                                                 Text(
                                                   'height'.tr(),
                                                   style: TextStyle(
-                                                    color: isDarkMode ?  whiteFontColor:greyFontColor,
+                                                    color: isDarkMode ?  whiteColor:greyColor6,
                                                     fontSize: pathS / 5,
                                                     fontWeight: FontWeight.w300,
                                                     fontFamily: 'Roboto',
@@ -286,7 +288,7 @@ class ProfileViewState extends State<ProfileView>{
                                                 Text(
                                                   height,
                                                   style: TextStyle(
-                                                    color: isDarkMode ?  whiteFontColor:greyFontColor,
+                                                    color: isDarkMode ?  whiteColor:greyColor6,
                                                     fontSize: pathS / 5,
                                                     fontWeight: FontWeight.w700,
                                                     fontFamily: 'Roboto',
@@ -302,7 +304,7 @@ class ProfileViewState extends State<ProfileView>{
                                                 Text(
                                                   'weight'.tr(),
                                                   style: TextStyle(
-                                                    color: isDarkMode ?  whiteFontColor:greyFontColor,
+                                                    color: isDarkMode ?  whiteColor:greyColor6,
                                                     fontSize: pathS / 5,
                                                     fontWeight: FontWeight.w300,
                                                     fontFamily: 'Roboto',
@@ -313,7 +315,7 @@ class ProfileViewState extends State<ProfileView>{
                                                 Text(
                                                   weight,
                                                   style: TextStyle(
-                                                    color: isDarkMode ?  whiteFontColor:greyFontColor,
+                                                    color: isDarkMode ?  whiteColor:greyColor6,
                                                     fontSize: pathS / 5,
                                                     fontWeight: FontWeight.w700,
                                                     fontFamily: 'Roboto',
@@ -328,7 +330,7 @@ class ProfileViewState extends State<ProfileView>{
                                                 Text(
                                                   'branch_name'.tr(),
                                                   style: TextStyle(
-                                                    color: isDarkMode ?  whiteFontColor:greyFontColor,
+                                                    color: isDarkMode ?  whiteColor:greyColor6,
                                                     fontSize: pathS / 5,
                                                     fontWeight: FontWeight.w300,
                                                     fontFamily: 'Roboto',
@@ -339,7 +341,7 @@ class ProfileViewState extends State<ProfileView>{
                                                 Text(
                                                   branchName,
                                                   style: TextStyle(
-                                                    color: isDarkMode ?  whiteFontColor:greyFontColor,
+                                                    color: isDarkMode ?  whiteColor:greyColor6,
                                                     fontSize: pathS / 5,
                                                     fontWeight: FontWeight.w700,
                                                     fontFamily: 'Roboto',
@@ -354,7 +356,7 @@ class ProfileViewState extends State<ProfileView>{
                                                 Text(
                                                   'TA'.tr(),
                                                   style: TextStyle(
-                                                    color: isDarkMode ?  whiteFontColor:greyFontColor,
+                                                    color: isDarkMode ?  whiteColor:greyColor6,
                                                     fontSize: pathS / 5,
                                                     fontWeight: FontWeight.w300,
                                                     fontFamily: 'Roboto',
@@ -365,7 +367,7 @@ class ProfileViewState extends State<ProfileView>{
                                                 Text(
                                                   ta,
                                                   style: TextStyle(
-                                                    color: isDarkMode ?  whiteFontColor:greyFontColor,
+                                                    color: isDarkMode ?  whiteColor:greyColor6,
                                                     fontSize: pathS / 5,
                                                     fontWeight: FontWeight.w700,
                                                     fontFamily: 'Roboto',
@@ -408,7 +410,7 @@ class ProfileViewState extends State<ProfileView>{
                         decoration:  BoxDecoration(
                           shape: BoxShape.rectangle,
                           borderRadius: BorderRadius.circular(pathS/8),
-                          color: isDarkMode?darkTileBgcolor:Color.fromRGBO(250, 244, 220, 1),
+                          color: isDarkMode?greyColor8:yellowColor,
                           boxShadow: [
                             BoxShadow(
                               color: Colors.black.withOpacity(0.1), // Shadow color
@@ -428,7 +430,7 @@ class ProfileViewState extends State<ProfileView>{
                                 Text(
                                   'txt_base_unit'.tr(),
                                   style: TextStyle(
-                                    color: isDarkMode ?  whiteFontColor:darkGreyFontColor,
+                                    color: isDarkMode ?  whiteColor:greyColor7,
                                     fontSize: pathS / 5,
                                     fontWeight: FontWeight.w800,
                                     fontFamily: 'Roboto',
@@ -441,9 +443,9 @@ class ProfileViewState extends State<ProfileView>{
                                   child: Text(
                                     companyName,
                                     style: TextStyle(
-                                      color: isDarkMode ?  whiteFontColor:darkGreyFontColor,
+                                      color: isDarkMode ?  whiteColor:greyColor7,
                                       fontSize: pathS / 5,
-                                      fontWeight: FontWeight.normal,
+                                      fontWeight: FontWeight.w500,
                                       fontFamily: 'Roboto',
                                     ),
                                     textAlign: TextAlign.start,
@@ -452,7 +454,7 @@ class ProfileViewState extends State<ProfileView>{
                                 Text(
                                   unit,
                                   style: TextStyle(
-                                    color: isDarkMode ?  whiteFontColor:darkGreyFontColor,
+                                    color: isDarkMode ?  whiteColor:greyColor7,
                                     fontSize: pathS / 5,
                                     fontWeight: FontWeight.w500,
                                     fontFamily: 'Roboto',
@@ -483,7 +485,7 @@ class ProfileViewState extends State<ProfileView>{
                         decoration:  BoxDecoration(
                           shape: BoxShape.rectangle,
                           borderRadius: BorderRadius.circular(pathS/8),
-                          color: isDarkMode?darkTileBgcolor:whiteFontColor,
+                          color: isDarkMode?greyColor8:whiteColor,
                           boxShadow: [
                             BoxShadow(
                               color: Colors.black.withOpacity(0.1), // Shadow color
@@ -503,9 +505,9 @@ class ProfileViewState extends State<ProfileView>{
                                 Text(
                                   'contact'.tr(),
                                   style: TextStyle(
-                                    color: isDarkMode ?  whiteFontColor:darkGreyFontColor,
-                                    fontSize: pathS / 5.5,
-                                    fontWeight: FontWeight.w400,
+                                    color: isDarkMode ?  whiteColor:greyColor7,
+                                    fontSize: pathS / 7,
+                                    fontWeight: FontWeight.w500,
                                     fontFamily: 'Roboto',
                                   ),
                                   textAlign: TextAlign.start,
@@ -520,7 +522,7 @@ class ProfileViewState extends State<ProfileView>{
                                         height: pathS/3,
                                         child: Image.asset(
                                           'assets/images/profile/phone.png',
-                                          color: isDarkMode ? whiteFontColor:greyFontColor,
+                                          color: isDarkMode ? whiteColor:greyColor6,
 
                                         ),
                                       ),
@@ -528,7 +530,7 @@ class ProfileViewState extends State<ProfileView>{
                                       Text(
                                         contactNum,
                                         style: TextStyle(
-                                          color: isDarkMode ?  whiteFontColor:darkGreyFontColor,
+                                          color: isDarkMode ?  whiteColor:greyColor7,
                                           fontSize: pathS / 5,
                                           fontWeight: FontWeight.w700,
                                           fontFamily: 'Roboto',
@@ -536,29 +538,41 @@ class ProfileViewState extends State<ProfileView>{
                                         textAlign: TextAlign.start,
                                       ),
                                       Spacer(),
-                                      Container(
-                                        width: pathS*1.5,
-                                        height: pathS / 1.8,
-                                        alignment: Alignment.center,
-                                        decoration: BoxDecoration(
-                                          color: redBgcolor,                          // border: Border.all(color: Colors.yellow, width: pathS/18),
-                                          borderRadius: BorderRadius.circular(pathS/3),
-                                          boxShadow: [
-                                            BoxShadow(
-                                              color: Colors.black.withOpacity(0.1), // Shadow color
-                                              blurRadius: pathS/10, // Spread of the shadow
-                                              // spreadRadius: pathS/15, // How far the shadow extends
-                                              offset:  Offset(-pathS/12, pathS/12),
+                                      GestureDetector(
+                                        onTap: (){
+                                          Navigator.push(
+                                            context,
+                                            MaterialPageRoute(
+                                              builder: (context) => ChangeMobileView(),
                                             ),
-                                          ],
-                                        ),
-                                        child: Text(
-                                          'change'.tr(),
-                                          style: TextStyle(
-                                            color: whiteFontColor,
-                                            fontSize: pathS / 4.5,
-                                            fontWeight: FontWeight.bold,
-                                            fontFamily: 'Roboto',
+                                          );
+                                        },
+                                        child: Container(
+
+                                          alignment: Alignment.center,
+                                          decoration: BoxDecoration(
+                                            color: isDarkMode ? redColor1 : redColor3,                          // border: Border.all(color: Colors.yellow, width: pathS/18),
+                                            borderRadius: BorderRadius.circular(pathS/3),
+                                            boxShadow: [
+                                              BoxShadow(
+                                                color: Colors.black.withOpacity(0.1), // Shadow color
+                                                blurRadius: pathS/10, // Spread of the shadow
+                                                // spreadRadius: pathS/15, // How far the shadow extends
+                                                offset:  Offset(-pathS/12, pathS/12),
+                                              ),
+                                            ],
+                                          ),
+                                          child: Padding(
+                                            padding:  EdgeInsets.only(left: pathS/5,right: pathS/5,top: pathS/10,bottom: pathS/11),
+                                            child: Text(
+                                              'change'.tr(),
+                                              style: TextStyle(
+                                                color: whiteColor,
+                                                fontSize: pathS / 5.5,
+                                                fontWeight: FontWeight.w400,
+                                                fontFamily: 'Roboto',
+                                              ),
+                                            ),
                                           ),
                                         ),
                                       ),
@@ -581,7 +595,7 @@ class ProfileViewState extends State<ProfileView>{
                         decoration:  BoxDecoration(
                           shape: BoxShape.rectangle,
                           borderRadius: BorderRadius.circular(pathS/8),
-                          color: isDarkMode?darkTileBgcolor:whiteFontColor,
+                          color: isDarkMode?greyColor8:whiteColor,
                           boxShadow: [
                             BoxShadow(
                               color: Colors.black.withOpacity(0.1), // Shadow color
@@ -601,9 +615,9 @@ class ProfileViewState extends State<ProfileView>{
                                 Text(
                                   'security'.tr(),
                                   style: TextStyle(
-                                    color: isDarkMode ?  whiteFontColor:darkGreyFontColor,
-                                    fontSize: pathS / 5.5,
-                                    fontWeight: FontWeight.w400,
+                                    color: isDarkMode ?  whiteColor:greyColor7,
+                                    fontSize: pathS / 7,
+                                    fontWeight: FontWeight.w500,
                                     fontFamily: 'Roboto',
                                   ),
                                   textAlign: TextAlign.start,
@@ -618,7 +632,7 @@ class ProfileViewState extends State<ProfileView>{
                                         height: pathS/3,
                                         child: Image.asset(
                                           'assets/images/profile/lock.png',
-                                          color: isDarkMode ? whiteFontColor:greyFontColor,
+                                          color: isDarkMode ? whiteColor:greyColor6,
 
                                         ),
                                       ),
@@ -627,7 +641,7 @@ class ProfileViewState extends State<ProfileView>{
                                       Text(
                                         '****',
                                         style: TextStyle(
-                                          color: isDarkMode ?  whiteFontColor:darkGreyFontColor,
+                                          color: isDarkMode ?  whiteColor:greyColor7,
                                           fontSize: pathS / 3.5,
                                           fontWeight: FontWeight.w700,
                                           fontFamily: 'Roboto',
@@ -635,29 +649,39 @@ class ProfileViewState extends State<ProfileView>{
                                         textAlign: TextAlign.start,
                                       ),
                                       Spacer(),
-                                      Container(
-                                        width: pathS*1.5,
-                                        height: pathS / 1.8,
-                                        alignment: Alignment.center,
-                                        decoration: BoxDecoration(
-                                          color: redBgcolor,                          // border: Border.all(color: Colors.yellow, width: pathS/18),
-                                          borderRadius: BorderRadius.circular(pathS/3),
-                                          boxShadow: [
-                                            BoxShadow(
-                                              color: Colors.black.withOpacity(0.1), // Shadow color
-                                              blurRadius: pathS/10, // Spread of the shadow
-                                              // spreadRadius: pathS/15, // How far the shadow extends
-                                              offset:  Offset(-pathS/12, pathS/12),
+                                      GestureDetector(
+                                        onTap: (){
+                                          onLoadNewPIN();
+                                        },
+
+                                        child: Container(
+
+                                          alignment: Alignment.center,
+                                          decoration: BoxDecoration(
+                                            color: isDarkMode ? redColor1 : redColor3,                          // border: Border.all(color: Colors.yellow, width: pathS/18),
+                                            // border: Border.all(color: Colors.yellow, width: pathS/18),
+                                            borderRadius: BorderRadius.circular(pathS/3),
+                                            boxShadow: [
+                                              BoxShadow(
+                                                color: Colors.black.withOpacity(0.1), // Shadow color
+                                                blurRadius: pathS/10, // Spread of the shadow
+                                                // spreadRadius: pathS/15, // How far the shadow extends
+                                                offset:  Offset(-pathS/12, pathS/12),
+                                              ),
+                                            ],
+                                          ),
+                                          child: Padding(
+                                            padding:  EdgeInsets.only(left: pathS/5,right: pathS/5,top: pathS/10,bottom: pathS/10),
+
+                                            child: Text(
+                                              'change'.tr(),
+                                              style: TextStyle(
+                                                color: whiteColor,
+                                                fontSize: pathS / 5.5,
+                                                fontWeight: FontWeight.w400,
+                                                fontFamily: 'Roboto',
+                                              ),
                                             ),
-                                          ],
-                                        ),
-                                        child: Text(
-                                          'change'.tr(),
-                                          style: TextStyle(
-                                            color: whiteFontColor,
-                                            fontSize: pathS / 4.5,
-                                            fontWeight: FontWeight.bold,
-                                            fontFamily: 'Roboto',
                                           ),
                                         ),
                                       ),
@@ -680,7 +704,7 @@ class ProfileViewState extends State<ProfileView>{
                         decoration:  BoxDecoration(
                           shape: BoxShape.rectangle,
                           borderRadius: BorderRadius.circular(pathS/8),
-                          color: isDarkMode?darkTileBgcolor:whiteFontColor,
+                          color: isDarkMode?greyColor8:whiteColor,
                           boxShadow: [
                             BoxShadow(
                               color: Colors.black.withOpacity(0.1), // Shadow color
@@ -700,9 +724,9 @@ class ProfileViewState extends State<ProfileView>{
                                 Text(
                                   'bank_account'.tr(),
                                   style: TextStyle(
-                                    color: isDarkMode ?  whiteFontColor:darkGreyFontColor,
-                                    fontSize: pathS / 5.5,
-                                    fontWeight: FontWeight.w400,
+                                    color: isDarkMode ?  whiteColor:greyColor7,
+                                    fontSize: pathS / 6.5,
+                                    fontWeight: FontWeight.w500,
                                     fontFamily: 'Roboto',
                                   ),
                                   textAlign: TextAlign.start,
@@ -736,9 +760,9 @@ class ProfileViewState extends State<ProfileView>{
                                       Text(
                                         bankName,
                                         style: TextStyle(
-                                          color: isDarkMode ?  whiteFontColor:darkGreyFontColor,
-                                          fontSize: pathS / 5.5,
-                                          fontWeight: FontWeight.w700,
+                                          color: isDarkMode ?  whiteColor:greyColor7,
+                                          fontSize: pathS / 6.5,
+                                          fontWeight: FontWeight.w800,
                                           fontFamily: 'Roboto',
                                         ),
                                         textAlign: TextAlign.start,
@@ -757,9 +781,9 @@ class ProfileViewState extends State<ProfileView>{
                                       Text(
                                         accountHolderName,
                                         style: TextStyle(
-                                          color: isDarkMode ?  whiteFontColor:darkGreyFontColor,
-                                          fontSize: pathS / 5.5,
-                                          fontWeight: FontWeight.w400,
+                                          color: isDarkMode ?  whiteColor:greyColor7,
+                                          fontSize: pathS / 6.5,
+                                          fontWeight: FontWeight.w500,
                                           fontFamily: 'Roboto',
                                         ),
                                         textAlign: TextAlign.start,
@@ -767,9 +791,9 @@ class ProfileViewState extends State<ProfileView>{
                                       Text(
                                         accountN,
                                         style: TextStyle(
-                                          color: isDarkMode ?  whiteFontColor:darkGreyFontColor,
-                                          fontSize: pathS / 5.5,
-                                          fontWeight: FontWeight.w400,
+                                          color: isDarkMode ?  whiteColor:greyColor7,
+                                          fontSize: pathS / 6.5,
+                                          fontWeight: FontWeight.w500,
                                           fontFamily: 'Roboto',
                                         ),
                                         textAlign: TextAlign.start,
@@ -777,9 +801,9 @@ class ProfileViewState extends State<ProfileView>{
                                       Text(
                                         addres,
                                         style: TextStyle(
-                                          color: isDarkMode ?  whiteFontColor:darkGreyFontColor,
-                                          fontSize: pathS / 5.5,
-                                          fontWeight: FontWeight.w400,
+                                          color: isDarkMode ?  whiteColor:greyColor7,
+                                          fontSize: pathS / 6.5,
+                                          fontWeight: FontWeight.w500,
                                           fontFamily: 'Roboto',
                                         ),
                                         textAlign: TextAlign.start,
@@ -787,9 +811,9 @@ class ProfileViewState extends State<ProfileView>{
                                       Text(
                                        ifscCode,
                                         style: TextStyle(
-                                          color: isDarkMode ?  whiteFontColor:darkGreyFontColor,
-                                          fontSize: pathS / 5.5,
-                                          fontWeight: FontWeight.w400,
+                                          color: isDarkMode ?  whiteColor:greyColor7,
+                                          fontSize: pathS / 6.5,
+                                          fontWeight: FontWeight.w500,
                                           fontFamily: 'Roboto',
                                         ),
                                         textAlign: TextAlign.start,
@@ -812,7 +836,7 @@ class ProfileViewState extends State<ProfileView>{
                         decoration:  BoxDecoration(
                           shape: BoxShape.rectangle,
                           borderRadius: BorderRadius.circular(pathS/8),
-                          color: isDarkMode?darkTileBgcolor:whiteFontColor,
+                          color: isDarkMode?greyColor8:whiteColor,
                           boxShadow: [
                             BoxShadow(
                               color: Colors.black.withOpacity(0.1), // Shadow color
@@ -832,9 +856,9 @@ class ProfileViewState extends State<ProfileView>{
                                 Text(
                                   'document'.tr() ,
                                   style: TextStyle(
-                                    color: isDarkMode ?  whiteFontColor:darkGreyFontColor,
-                                    fontSize: pathS / 5.5,
-                                    fontWeight: FontWeight.w400,
+                                    color: isDarkMode ?  whiteColor:greyColor7,
+                                    fontSize: pathS / 6.5,
+                                    fontWeight: FontWeight.w500,
                                     fontFamily: 'Roboto',
                                   ),
                                   textAlign: TextAlign.start,
@@ -872,9 +896,9 @@ class ProfileViewState extends State<ProfileView>{
                                               Text(
                                                 'aadhar_no'.tr(),
                                                 style: TextStyle(
-                                                  color: isDarkMode ?  whiteFontColor:darkGreyFontColor,
-                                                  fontSize: pathS / 6,
-                                                  fontWeight: FontWeight.w600,
+                                                  color: isDarkMode ?  whiteColor:greyColor7,
+                                                  fontSize: pathS / 6.5,
+                                                  fontWeight: FontWeight.w800,
                                                   fontFamily: 'Roboto',
                                                 ),
                                                 textAlign: TextAlign.start,
@@ -882,9 +906,9 @@ class ProfileViewState extends State<ProfileView>{
                                               Text(
                                                 aAdhar,
                                                 style: TextStyle(
-                                                  color: isDarkMode ?  whiteFontColor:darkGreyFontColor,
-                                                  fontSize: pathS / 6,
-                                                  fontWeight: FontWeight.w400,
+                                                  color: isDarkMode ?  whiteColor:greyColor7,
+                                                  fontSize: pathS / 6.5,
+                                                  fontWeight: FontWeight.w300,
                                                   fontFamily: 'Roboto',
                                                 ),
                                                 textAlign: TextAlign.start,
@@ -921,9 +945,9 @@ class ProfileViewState extends State<ProfileView>{
                                               Text(
                                                 'esi_No'.tr(),
                                                 style: TextStyle(
-                                                  color: isDarkMode ?  whiteFontColor:darkGreyFontColor,
-                                                  fontSize: pathS / 6,
-                                                  fontWeight: FontWeight.w600,
+                                                  color: isDarkMode ?  whiteColor:greyColor7,
+                                                  fontSize: pathS / 6.5,
+                                                  fontWeight: FontWeight.w500,
                                                   fontFamily: 'Roboto',
                                                 ),
                                                 textAlign: TextAlign.start,
@@ -931,9 +955,9 @@ class ProfileViewState extends State<ProfileView>{
                                               Text(
                                                 esic,
                                                 style: TextStyle(
-                                                  color: isDarkMode ?  whiteFontColor:darkGreyFontColor,
-                                                  fontSize: pathS / 6,
-                                                  fontWeight: FontWeight.w400,
+                                                  color: isDarkMode ?  whiteColor:greyColor7,
+                                                  fontSize: pathS / 6.5,
+                                                  fontWeight: FontWeight.w300,
                                                   fontFamily: 'Roboto',
                                                 ),
                                                 textAlign: TextAlign.start,
@@ -943,7 +967,6 @@ class ProfileViewState extends State<ProfileView>{
                                           ),
                                         ],
                                       ),
-
                                       SizedBox(height: pathS/5),
                                       Row(
                                         children: [
@@ -971,9 +994,9 @@ class ProfileViewState extends State<ProfileView>{
                                               Text(
                                                 'uan_no'.tr(),
                                                 style: TextStyle(
-                                                  color: isDarkMode ?  whiteFontColor:darkGreyFontColor,
-                                                  fontSize: pathS / 6,
-                                                  fontWeight: FontWeight.w600,
+                                                  color: isDarkMode ?  whiteColor:greyColor7,
+                                                  fontSize: pathS / 6.5,
+                                                  fontWeight: FontWeight.w500,
                                                   fontFamily: 'Roboto',
                                                 ),
                                                 textAlign: TextAlign.start,
@@ -981,9 +1004,9 @@ class ProfileViewState extends State<ProfileView>{
                                               Text(
                                                 pf,
                                                 style: TextStyle(
-                                                  color: isDarkMode ?  whiteFontColor:darkGreyFontColor,
-                                                  fontSize: pathS / 6,
-                                                  fontWeight: FontWeight.w400,
+                                                  color: isDarkMode ?  whiteColor:greyColor7,
+                                                  fontSize: pathS / 6.5,
+                                                  fontWeight: FontWeight.w300,
                                                   fontFamily: 'Roboto',
                                                 ),
                                                 textAlign: TextAlign.start,
@@ -1012,43 +1035,64 @@ class ProfileViewState extends State<ProfileView>{
 
                       decoration: BoxDecoration(
                         shape: BoxShape.circle,
+                        color: whiteColor,
 
                         boxShadow: [
                           BoxShadow(
-                            color: Colors.black.withOpacity(0.1), // Shadow color
+                            color: Colors.black.withOpacity(0.2), // Shadow color
                             blurRadius: pathS/10, // Spread of the shadow
                             // spreadRadius: pathS/15, // How far the shadow extends
                             offset:  Offset(-pathS/20, pathS/20),
                           ),
                         ],
                       ),
-                      child: CachedNetworkImage(
-                        height: pathS *1.2,
-                        width: pathS *1.2,
-                        imageUrl: imagePath,
-                        placeholder: (context, url) => CircleAvatar(
-                          backgroundImage: AssetImage(assetsImagePath),
-                          backgroundColor: Colors.white,
-                        ),
-                        errorWidget: (context, url, error) => CircleAvatar(
-                          backgroundImage: AssetImage(assetsImagePath),
-                          backgroundColor: Colors.white,
-                        ),
-                        imageBuilder: (context, imageProvider) => CircleAvatar(
-                          backgroundImage: imageProvider,
-                          backgroundColor: Colors.white,
+                      child: Padding(
+                        padding: const EdgeInsets.all(2.0),
+                        child: CachedNetworkImage(
+                          height: pathS *1.2,
+                          width: pathS *1.2,
+                          imageUrl: imagePath,
+                          placeholder: (context, url) => CircleAvatar(
+                            backgroundImage: AssetImage(assetsImagePath),
+                            backgroundColor: Colors.white,
+                          ),
+                          errorWidget: (context, url, error) => CircleAvatar(
+                            backgroundImage: AssetImage(assetsImagePath),
+                            backgroundColor: Colors.white,
+                          ),
+                          imageBuilder: (context, imageProvider) => CircleAvatar(
+                            backgroundImage: imageProvider,
+                            backgroundColor: Colors.white,
+                          ),
                         ),
                       ),
                     ),
                   ),
+                  Positioned(
+                     top: pathS/1.1,
+                    left: screenWidth/2,
+                    child: GestureDetector(
+                      onTap: (){
+                        onTapEditProfile();
+
+                      },
+                      child: Container(
+                        child: Image.asset(
+                          'assets/images/profile/edit-icon.png',
+                              width: pathS/2.5,
+                              height: pathS/2.5,
+                        ),
+                      ),
+                    ),
+                  ),
+
                 ],
               ),
             ),
             )
           ),
-
           Positioned(
-            bottom: paddingBottom,
+            bottom: 0,
 
             child: GestureDetector(
               onTap: (){
@@ -1060,7 +1104,7 @@ class ProfileViewState extends State<ProfileView>{
                 height: pathS / 1.5,
                 alignment: Alignment.center,
                 decoration: BoxDecoration(
-                  color: isDarkMode ? darkTileBgcolor:whiteFontColor,                          // border: Border.all(color: Colors.yellow, width: pathS/18),
+                  color: isDarkMode ? greyColor8:whiteColor,                          // border: Border.all(color: Colors.yellow, width: pathS/18),
                   // borderRadius: BorderRadius.circular(pathS/3),
                   boxShadow: [
                     BoxShadow(
@@ -1071,12 +1115,39 @@ class ProfileViewState extends State<ProfileView>{
                     ),
                   ],
                 ),
+
+              ),
+            ),
+          ),
+          Positioned(
+            bottom: MediaQuery.of(context).padding.bottom,
+
+            child: GestureDetector(
+              onTap: (){
+                Navigator.push(
+                    context,
+                    MaterialPageRoute(
+                        builder: (context) => ContactSISView(),
+                    ),
+                );
+
+              },
+              child: Container(
+                width: screenWidth,
+                height: pathS / 1.4,
+                alignment: Alignment.center,
+                decoration: BoxDecoration(
+                  color: isDarkMode ? greyColor8:whiteColor,                          // border: Border.all(color: Colors.yellow, width: pathS/18),
+                  // borderRadius: BorderRadius.circular(pathS/3),
+
+                ),
                 child: Text(
                   'contact_sis'.tr(),
                   style: TextStyle(
-                    color: isDarkMode ? brightRedFontcolor:redFontcolor,                          // border: Border.all(color: Colors.yellow, width: pathS/18),
+                    color: isDarkMode ? redColor1:redColor3,                          // border: Border.all(color: Colors.yellow, width: pathS/18),
                     fontSize: pathS / 4.5,
                     fontWeight: FontWeight.bold,
+                    fontFamily: 'Roboto'
                   ),
                 ),
               ),
@@ -1084,12 +1155,45 @@ class ProfileViewState extends State<ProfileView>{
           ),
 
 
-
-
-
-
-
         ],
+      ),
+    );
+  }
+
+  void onTapEditProfile() {
+    showModalBottomSheet(
+      context: context,
+      isScrollControlled: true,
+      builder: (BuildContext context) {
+        return FractionallySizedBox(
+          heightFactor: 0.25,
+          child: Container(
+            decoration: BoxDecoration(
+              color: Colors.white,
+              borderRadius: BorderRadius.only(
+                topLeft: Radius.circular(pathS/8),
+                topRight: Radius.circular(pathS/8),
+              ),
+            ),
+            clipBehavior: Clip.antiAlias, // Add this line
+            child: EditProfileImageView(
+              onCloseBottomSheet: () {
+                Navigator.pop(context);
+              },
+              onTabSelected: (val , name, designation) {
+                
+              }, name: userName, designation: degination,
+            ),
+          ),
+        );
+      },
+    );
+  }
+  void onLoadNewPIN(){
+
+    Navigator.push(
+      context,
+      MaterialPageRoute(builder: (context) => SetPINView(),
       ),
     );
   }

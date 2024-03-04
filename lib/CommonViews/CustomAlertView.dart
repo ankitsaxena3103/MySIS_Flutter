@@ -26,12 +26,6 @@ class CustomAlertView extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    calculateSizes(context);
-    var backgroundGradient =  LinearGradient(
-      colors: [Colors.blue.shade50, Colors.lightBlue.shade100],
-      begin: Alignment.topCenter,
-      end: Alignment.bottomCenter,
-    );
     return GestureDetector(
       onTap: () {
         print('Tapped setting popover');
