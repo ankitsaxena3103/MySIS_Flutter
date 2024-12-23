@@ -6,6 +6,8 @@ import 'package:mysis/CommonViews/LoaderView.dart';
 import 'package:mysis/CommonViews/ToastMessageView.dart';
 import 'package:mysis/CommonViews/Utility.dart';
 import 'package:easy_localization/easy_localization.dart';
+import 'package:otp_text_field/otp_field.dart';
+import 'package:otp_text_field/style.dart';
 
 import '../SharedClasses/Preferences.dart';
 
@@ -99,7 +101,7 @@ class ConfirmPINViewState extends State<ConfirmPINView> {
                             decoration: const BoxDecoration(
                               shape: BoxShape.rectangle,
                               image: DecorationImage(
-                                image: AssetImage("assets/images/icons/logo@3x.png"),
+                                image: AssetImage("assets/images/icons/logo.png"),
                                 fit: BoxFit.cover,
                               ),
                             ),
@@ -111,7 +113,7 @@ class ConfirmPINViewState extends State<ConfirmPINView> {
                             decoration: const BoxDecoration(
                               shape: BoxShape.rectangle,
                               image: DecorationImage(
-                                image: AssetImage("assets/images/icons/icon@3x.png"),
+                                image: AssetImage("assets/images/icons/icon.png"),
                                 fit: BoxFit.cover,
                               ),
                             ),
@@ -193,35 +195,61 @@ class ConfirmPINViewState extends State<ConfirmPINView> {
                                 ),
                                 SizedBox(height: pathS / 12),
 
-
-                                OtpTextField(
-                                  numberOfFields: 4,
+                                OTPTextField(
+                                  length: 4,
+                                  width: pathL * 1.2,
+                                  fieldWidth: pathS / 2.2,
                                   obscureText: true,
-                                  keyboardType: TextInputType.number,
-                                  borderColor: pinBorderColor,
-                                  focusedBorderColor: Colors.blue,
-                                  styles: PINTextStyle(
-                                    isDarkMode ? whiteColor : greyColor6,
-                                    4,
-                                  ),
-                                  showFieldAsBox: false,
-                                  borderWidth: 2.0,
-                                  fieldWidth: pathS/2.5,
-                                  //runs when a code is typed in
-                                  onCodeChanged: (String pin) {
-                                    print("OTP entered: " + pin);
 
+                                  keyboardType: TextInputType.number,
+                                  style: TextStyle(
+                                    color: isDarkMode ? whiteColor : greyColor6,
+                                    fontSize: pathS / 5,
+                                    fontFamily: 'Roboto',
+                                  ),
+                                  textFieldAlignment: MainAxisAlignment.spaceAround,
+                                  fieldStyle: FieldStyle.underline,
+
+                                  onChanged: (pin) {
+                                    print(" Entered PIN : " + pin);
                                     txtUserConfirmPIN.text = pin;
                                     onPINChange(pin);
                                   },
-                                  //runs when every textfield is filled
-                                  onSubmit: (String pin) {
-                                    txtUserConfirmPIN.text = pin;
-                                    onPINChange(pin);
+                                  onCompleted: (pin) {
                                     print("OTP completed: " + pin);
 
+                                    // txtUserPIN.text = pin;
+                                    // onUserIdChange(pin);
                                   },
                                 ),
+                                // OtpTextField(
+                                //   numberOfFields: 4,
+                                //   obscureText: true,
+                                //   keyboardType: TextInputType.number,
+                                //   borderColor: pinBorderColor,
+                                //   focusedBorderColor: Colors.blue,
+                                //   styles: PINTextStyle(
+                                //     isDarkMode ? whiteColor : greyColor6,
+                                //     4,
+                                //   ),
+                                //   showFieldAsBox: false,
+                                //   borderWidth: 2.0,
+                                //   fieldWidth: pathS/2.5,
+                                //   //runs when a code is typed in
+                                //   onCodeChanged: (String pin) {
+                                //     print("OTP entered: " + pin);
+                                //
+                                //     txtUserConfirmPIN.text = pin;
+                                //     onPINChange(pin);
+                                //   },
+                                //   //runs when every textfield is filled
+                                //   onSubmit: (String pin) {
+                                //     txtUserConfirmPIN.text = pin;
+                                //     onPINChange(pin);
+                                //     print("OTP completed: " + pin);
+                                //
+                                //   },
+                                // ),
                               ],
                             ),
                           ),
@@ -354,7 +382,7 @@ class ConfirmPINViewState extends State<ConfirmPINView> {
 
   void onTapPINUpdate() {
     if (txtUserConfirmPIN.text.isEmpty || txtUserConfirmPIN.text != widget.userPIN) {
-       showToastView('repeat_not_match'.tr());
+       // showToastView('repeat_not_match'.tr());
       return;
     }
 

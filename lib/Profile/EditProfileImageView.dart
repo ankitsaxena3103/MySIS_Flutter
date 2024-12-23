@@ -96,6 +96,7 @@ class EditProfileImageViewState extends State<EditProfileImageView> {
                                 },
                                 child: Image.asset(
                                   'assets/images/profile/photo-icon.png',
+                                  width: pathS/1.2,
                                 ),
                               ),
                               SizedBox(width: pathS/5),
@@ -105,6 +106,7 @@ class EditProfileImageViewState extends State<EditProfileImageView> {
                                 },
                                 child: Image.asset(
                                   'assets/images/profile/camera-icon.png',
+                                  width: pathS/1.2,
                                 ),
                               ),
 

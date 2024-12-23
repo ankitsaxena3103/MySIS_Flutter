@@ -3,8 +3,19 @@ import 'package:flutter/material.dart';
 import 'package:mysis/CommonViews/Utility.dart';
 import 'package:easy_localization/easy_localization.dart';
 import 'package:mysis/HomeView/ScanUnitShiftView.dart';
+import 'package:mysis/Profile/UserProfile.dart';
 
 class ConfirmProfileView extends StatefulWidget {
+
+  final UserProfile userProfile;
+
+  const ConfirmProfileView({
+    super.key,
+    required this.userProfile
+  });
+
+
+
   @override
   ConfirmProfileViewState createState() => ConfirmProfileViewState();
 }
@@ -13,10 +24,13 @@ class ConfirmProfileViewState extends State<ConfirmProfileView>{
 
   String profileImage = 'assets/images/home/profile.png';
   String profileUrl = '';
-  String name  = 'Raj Kumar Singh';
-  String position  = 'Guard-SO';
+  String name  = '';
+  String position  = '';
+
   @override
   void initState() {
+
+    onLoadUpdateUI();
     super.initState();
   }
 
@@ -217,11 +231,19 @@ class ConfirmProfileViewState extends State<ConfirmProfileView>{
     );
   }
 
+  void onLoadUpdateUI(){
+
+    profileUrl = widget.userProfile.profileImageUrl;
+    name = widget.userProfile.empName;
+    position = widget.userProfile.symbol;
+
+  }
+
   void onLoadScanUnitShift(){
     Navigator.push(
       context,
       MaterialPageRoute(
-        builder: (context) => ScanUnitShiftView(name: 'Raj Kumar Singh', designation: 'Guard - SO',),
+        builder: (context) => ScanUnitShiftView(userProfile: widget.userProfile),
       ),
     );
   }

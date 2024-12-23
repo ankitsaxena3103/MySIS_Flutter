@@ -5,9 +5,11 @@ import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:mysis/CommonViews/Utility.dart';
 import 'package:easy_localization/easy_localization.dart';
+import 'package:mysis/Leaves/Leaves-Help/LeaveViewHelp.dart';
 import 'package:mysis/Notifications/NotificationsView.dart';
 import 'package:mysis/SharedClasses/ThemeProvider.dart';
 import 'package:mysis/SyncData/SyncDataView.dart';
+import 'package:mysis/SyncData/SyncDataViewHelp.dart';
 import 'package:provider/provider.dart';
 import 'package:mysis/Language/SelectLanguageView.dart';
 import 'package:mysis/Profile/ProfileView.dart';
@@ -92,7 +94,6 @@ class MenuItemViewState extends State<MenuItemView> {
                                   onTap: (){
                                     widget.onCloseBottomSheet();
                                    widget.onTabSelected(0);
-
                                   },
                                   child:  Column(
                                     children: [
@@ -811,7 +812,7 @@ class MenuItemViewState extends State<MenuItemView> {
     Navigator.push(
       context,
       MaterialPageRoute(
-        builder: (context) => LeaveView(),
+        builder: (context) => LeaveViewHelp(),
       ),
     );
   }
@@ -819,7 +820,7 @@ class MenuItemViewState extends State<MenuItemView> {
     Navigator.push(
       context,
       MaterialPageRoute(
-        builder: (context) => SyncDataView(),
+        builder: (context) => SyncDataViewHelp(),
       ),
     );
   }

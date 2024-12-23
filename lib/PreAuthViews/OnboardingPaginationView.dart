@@ -55,7 +55,7 @@ class OnboardingPaginationViewState extends State<OnboardingPaginationView>{
                 decoration: const BoxDecoration(
                   shape: BoxShape.rectangle,
                   image: DecorationImage(
-                    image: AssetImage("assets/images/icons/logo@3x.png"),
+                    image: AssetImage("assets/images/icons/logo.png"),
                     fit: BoxFit.cover,
                   ),
                 ),

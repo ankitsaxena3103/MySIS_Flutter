@@ -4,13 +4,15 @@ import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
 import 'package:mysis/CommonViews/Utility.dart';
 import 'package:easy_localization/easy_localization.dart';
+import 'package:mysis/Profile/UserProfile.dart';
 import '../CommonViews/ToastMessageView.dart';
 
 class ThanksDutyView extends StatefulWidget {
 
-  final name;
+  final UserProfile userProfile;
+
   final regNo;
-  final designation;
+
   final location;
 
   final shiftData;
@@ -21,14 +23,14 @@ class ThanksDutyView extends StatefulWidget {
   ThanksDutyView(
       {
         super.key,
-        required this.name,
-        required this.designation,
+
         this.regNo,
         this.location,
         this.shiftData,
         this.post,
         this.postRank,
         this.imageData,
+        required this.userProfile,
 
       });
 
@@ -44,8 +46,14 @@ class ThanksDutyViewState extends State<ThanksDutyView>{
   bool showToastMessageView = false;
   String toastMessage = '';
 
+  String name  = '';
+
+  String position  = '';
+  String positionSymbol  = '';
+
   @override
   void initState() {
+    onLoadUpdateUI();
     super.initState();
 
   }
@@ -150,7 +158,7 @@ class ThanksDutyViewState extends State<ThanksDutyView>{
                     ),
                     SizedBox(height: pathS/5),
                     Text(
-                      widget.name,
+                      name,
                       style: TextStyle(
                         color: isDarkMode ? whiteColor : greyColor6,
                         fontSize: pathS / 3.2,
@@ -159,7 +167,7 @@ class ThanksDutyViewState extends State<ThanksDutyView>{
                       ),
                     ),
                     Text(
-                      widget.designation,
+                      position,
                       style: TextStyle(
                         color: isDarkMode ? whiteColor : greyColor6,
                         fontSize: pathS / 5,
@@ -168,7 +176,7 @@ class ThanksDutyViewState extends State<ThanksDutyView>{
                       ),
                     ),
                     Text(
-                      '(SMW)',
+                     positionSymbol,
                       style: TextStyle(
                         color: isDarkMode ? whiteColor : greyColor6,
                         fontSize: pathS / 6.5,
@@ -382,7 +390,15 @@ class ThanksDutyViewState extends State<ThanksDutyView>{
     );
   }
 
+  void onLoadUpdateUI(){
 
+    imagePath = widget.userProfile.profileImageUrl;
+    name = widget.userProfile.empName;
+    position = widget.userProfile.serviceName;
+    positionSymbol = widget.userProfile.symbol;
+
+
+  }
   void showToastView(String message) {
     setState(() {
       showToastMessageView = true;

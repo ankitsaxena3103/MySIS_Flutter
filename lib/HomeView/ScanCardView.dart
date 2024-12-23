@@ -69,7 +69,7 @@ class ScanCardViewState extends State<ScanCardView>{
                                 width: pathS / 1.5,
                                 height: pathS / 1.2,
                                 child: Image.asset(
-                                  'assets/images/home/card-icon@2x.png',
+                                  'assets/images/home/card-icon.png',
                                   color: isDarkMode ? whiteColor : redColor3,
                                 ),
                               ),

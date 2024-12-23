@@ -4,9 +4,17 @@ import 'package:mysis/Profile/ChangeMobileView.dart';
 import 'package:mysis/Profile/ContactSISView.dart';
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:easy_localization/easy_localization.dart';
+import 'package:mysis/Profile/UserPosting.dart';
+import 'package:mysis/Profile/UserShiftDetailView.dart';
+import 'package:mysis/SharedClasses/DatabaseHelper.dart';
 
+import '../CommonViews/LoaderView.dart';
+import '../SharedClasses/APIHelper.dart';
 import '../UserAuthViews/SetPINView.dart';
 import 'EditProfileImageView.dart';
+import 'UnitDutyPost.dart';
+import 'UnitShiftDetail.dart';
+import 'UserProfile.dart';
 
 class ProfileView extends StatefulWidget {
   @override
@@ -18,7 +26,7 @@ class ProfileViewState extends State<ProfileView>{
   String assetsImagePath = "assets/images/dashboard-icons/profile-icon.png";
   String imagePath = '';
 
-  String userName = 'Rajkumar Singh';
+  String userName = 'Priya';
   String degination = 'ASSISTANT ASSESSMENT MANAGER | ABC124563';
   String description = '10 Years with SIS';
 
@@ -52,10 +60,24 @@ class ProfileViewState extends State<ProfileView>{
   String esicLogoUrl = '';
   String pfLogoUrl = '';
 
+  bool showLoaderView = false;
+  List <UserProfile> userProfile = [];
+  List<UserPosting> userPostings = [];
+  List<UnitDutyPost> unitDutyPosts = [];
+  List<UnitShiftDetail> unitShiftDetails = [];
+
+  bool showUserShiftDetail = false;
+
 
   @override
   void initState() {
     super.initState();
+
+    getProfileTableData();
+    getPostingTableData();
+
+    onLoadData();
+    onLoadUserPostingData();
 
   }
 
@@ -91,8 +113,6 @@ class ProfileViewState extends State<ProfileView>{
                   gradient: isDarkMode ? backgroundGradientDark : backgroundGradient,
                 ),
               ),
-
-
             ],
           ),
           Positioned(
@@ -205,7 +225,7 @@ class ProfileViewState extends State<ProfileView>{
                                     ),
                                     SizedBox(height: pathS/3),
                                     Container(
-                                      height: pathL*1.55,
+                                      height: pathL*1.4,
                                         decoration: BoxDecoration(
                                             shape: BoxShape.rectangle,
                                           borderRadius: BorderRadius.circular(pathS / 8),
@@ -350,32 +370,6 @@ class ProfileViewState extends State<ProfileView>{
                                                 ),
                                               ],
                                             ),
-                                            SizedBox(height: pathS/5),
-                                            Row(
-                                              children: [
-                                                Text(
-                                                  'TA'.tr(),
-                                                  style: TextStyle(
-                                                    color: isDarkMode ?  whiteColor:greyColor6,
-                                                    fontSize: pathS / 5,
-                                                    fontWeight: FontWeight.w300,
-                                                    fontFamily: 'Roboto',
-                                                  ),
-                                                  textAlign: TextAlign.left,
-                                                ),
-                                                Spacer(),
-                                                Text(
-                                                  ta,
-                                                  style: TextStyle(
-                                                    color: isDarkMode ?  whiteColor:greyColor6,
-                                                    fontSize: pathS / 5,
-                                                    fontWeight: FontWeight.w700,
-                                                    fontFamily: 'Roboto',
-                                                  ),
-                                                  textAlign: TextAlign.right,
-                                                ),
-                                              ],
-                                            ),
                                             // Text(
                                             //   'view_details_tv'.tr(),
                                             //   style: TextStyle(
@@ -404,79 +398,20 @@ class ProfileViewState extends State<ProfileView>{
                       ),//profile summary
 
                       SizedBox(height: pathS/5),
-                      Container(
-                        width: screenWidth-2.5*marginValue,
-                        // height: pathL,
-                        decoration:  BoxDecoration(
-                          shape: BoxShape.rectangle,
-                          borderRadius: BorderRadius.circular(pathS/8),
-                          color: isDarkMode?greyColor8:yellowColor,
-                          boxShadow: [
-                            BoxShadow(
-                              color: Colors.black.withOpacity(0.1), // Shadow color
-                              blurRadius: pathS/10, // Spread of the shadow
-                              // spreadRadius: pathS/15, // How far the shadow extends
-                              offset:  Offset(-pathS/12, pathS/12),
-                            ),
-                          ],
-                        ),
-                        child: Padding(
-                          padding: EdgeInsets.only(left: pathS/4, top: pathS/4,bottom: pathS/4), // Adjust top and left as needed
-                          child: Align(
-                            alignment: Alignment.topLeft,
-                            child: Column(
-                              crossAxisAlignment: CrossAxisAlignment.start,
-                              children: [
-                                Text(
-                                  'txt_base_unit'.tr(),
-                                  style: TextStyle(
-                                    color: isDarkMode ?  whiteColor:greyColor7,
-                                    fontSize: pathS / 5,
-                                    fontWeight: FontWeight.w800,
-                                    fontFamily: 'Roboto',
-                                  ),
-                                  textAlign: TextAlign.start,
-                                ),
-                                SizedBox(height: pathS/5),
-                                Padding(
-                                  padding: EdgeInsets.only(right: pathS/5), // Adjust top and left as needed
-                                  child: Text(
-                                    companyName,
-                                    style: TextStyle(
-                                      color: isDarkMode ?  whiteColor:greyColor7,
-                                      fontSize: pathS / 5,
-                                      fontWeight: FontWeight.w500,
-                                      fontFamily: 'Roboto',
-                                    ),
-                                    textAlign: TextAlign.start,
-                                  ),
-                                ),
-                                Text(
-                                  unit,
-                                  style: TextStyle(
-                                    color: isDarkMode ?  whiteColor:greyColor7,
-                                    fontSize: pathS / 5,
-                                    fontWeight: FontWeight.w500,
-                                    fontFamily: 'Roboto',
-                                  ),
-                                  textAlign: TextAlign.start,
-                                ),
-                                // Text(
-                                //   department,
-                                //   style: TextStyle(
-                                //     color: isDarkMode ?  whiteFontColor:darkGreyFontColor,
-                                //     fontSize: pathS / 5,
-                                //     fontWeight: FontWeight.normal,
-                                //     fontFamily: 'Roboto',
-                                //   ),
-                                //   textAlign: TextAlign.start,
-                                // ),
 
-                              ],
-                            ),
-                          ),
-                        ),
+                      Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: userPostings.map((posting) {
+                          return buildUserPostingContainer(
+                            posting,
+                            isDarkMode,
+                            screenWidth,
+                            marginValue,
+                            pathS,
+                          );
+                        }).toList(),
                       ),
+
 
                       SizedBox(height: pathS/5),
                       Container(
@@ -832,6 +767,110 @@ class ProfileViewState extends State<ProfileView>{
                       SizedBox(height: pathS/5),
                       Container(
                         width: screenWidth-2.5*marginValue,
+                        // height: pathS*1.3,
+                        decoration:  BoxDecoration(
+                          shape: BoxShape.rectangle,
+                          borderRadius: BorderRadius.circular(pathS/8),
+                          color: isDarkMode?greyColor8:whiteColor,
+                          boxShadow: [
+                            BoxShadow(
+                              color: Colors.black.withOpacity(0.1), // Shadow color
+                              blurRadius: pathS/10, // Spread of the shadow
+                              // spreadRadius: pathS/15, // How far the shadow extends
+                              offset:  Offset(-pathS/12, pathS/12),
+                            ),
+                          ],
+                        ),
+                        child: Padding(
+                          padding: EdgeInsets.only(left: pathS/4, top: pathS/4,bottom: pathS/4), // Adjust top and left as needed
+                          child: Align(
+                            alignment: Alignment.topLeft,
+                            child: Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                Text(
+                                  'esi_No'.tr(),
+                                  style: TextStyle(
+                                    color: isDarkMode ?  whiteColor:greyColor7,
+                                    fontSize: pathS / 7,
+                                    fontWeight: FontWeight.w500,
+                                    fontFamily: 'Roboto',
+                                  ),
+                                  textAlign: TextAlign.start,
+                                ),
+                                SizedBox(height: pathS/15),
+                                Text(
+                                  esic,
+                                  style: TextStyle(
+                                    color: isDarkMode ?  whiteColor:greyColor7,
+                                    fontSize: pathS / 5,
+                                    fontWeight: FontWeight.w700,
+                                    fontFamily: 'Roboto',
+                                  ),
+                                  textAlign: TextAlign.start,
+                                ),
+
+                              ],
+                            ),
+                          ),
+                        ),
+                      ),
+
+                      SizedBox(height: pathS/5),
+                      Container(
+                        width: screenWidth-2.5*marginValue,
+                        // height: pathS*1.3,
+                        decoration:  BoxDecoration(
+                          shape: BoxShape.rectangle,
+                          borderRadius: BorderRadius.circular(pathS/8),
+                          color: isDarkMode?greyColor8:whiteColor,
+                          boxShadow: [
+                            BoxShadow(
+                              color: Colors.black.withOpacity(0.1), // Shadow color
+                              blurRadius: pathS/10, // Spread of the shadow
+                              // spreadRadius: pathS/15, // How far the shadow extends
+                              offset:  Offset(-pathS/12, pathS/12),
+                            ),
+                          ],
+                        ),
+                        child: Padding(
+                          padding: EdgeInsets.only(left: pathS/4, top: pathS/4,bottom: pathS/4), // Adjust top and left as needed
+                          child: Align(
+                            alignment: Alignment.topLeft,
+                            child: Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                Text(
+                                  'uan_no'.tr(),
+                                  style: TextStyle(
+                                    color: isDarkMode ?  whiteColor:greyColor7,
+                                    fontSize: pathS / 7,
+                                    fontWeight: FontWeight.w500,
+                                    fontFamily: 'Roboto',
+                                  ),
+                                  textAlign: TextAlign.start,
+                                ),
+                                SizedBox(height: pathS/15),
+                                Text(
+                                  pf,
+                                  style: TextStyle(
+                                    color: isDarkMode ?  whiteColor:greyColor7,
+                                    fontSize: pathS / 5,
+                                    fontWeight: FontWeight.w700,
+                                    fontFamily: 'Roboto',
+                                  ),
+                                  textAlign: TextAlign.start,
+                                ),
+
+                              ],
+                            ),
+                          ),
+                        ),
+                      ),
+
+                      SizedBox(height: pathS/5),
+                      Container(
+                        width: screenWidth-2.5*marginValue,
                         // height: pathL*1.25,
                         decoration:  BoxDecoration(
                           shape: BoxShape.rectangle,
@@ -1076,12 +1115,10 @@ class ProfileViewState extends State<ProfileView>{
                         onTapEditProfile();
 
                       },
-                      child: Container(
-                        child: Image.asset(
-                          'assets/images/profile/edit-icon.png',
-                              width: pathS/2.5,
-                              height: pathS/2.5,
-                        ),
+                      child: Image.asset(
+                        'assets/images/profile/edit-icon.png',
+                            width: pathS/2.5,
+                            height: pathS/2.5,
                       ),
                     ),
                   ),
@@ -1155,10 +1192,140 @@ class ProfileViewState extends State<ProfileView>{
           ),
 
 
+          LoaderView(isVisible: showLoaderView, message: 'checking'.tr()),
+
+          Visibility(
+            visible: showUserShiftDetail,
+              child: UserShiftDetailView(unitDutyPosts: unitDutyPosts, unitShiftDetails: unitShiftDetails, userPosting: userPostings.first, callBack: (value) {
+                if (value == 0){
+                  setState(() {
+                    showUserShiftDetail  = false;
+                  });
+                }
+
+                if (value == 1){
+                  setState(() {
+                    showUserShiftDetail  = false;
+                  });
+
+
+
+                }
+              },
+              ),
+          ),
+
         ],
       ),
     );
   }
+
+  Widget buildUserPostingContainer(UserPosting userPosting, bool isDarkMode, double screenWidth, double marginValue, double pathS) {
+    return Container(
+      width: screenWidth - 2.5 * marginValue,
+      decoration: BoxDecoration(
+        shape: BoxShape.rectangle,
+        borderRadius: BorderRadius.circular(pathS / 8),
+
+        color: isDarkMode ? userPosting.isPrimary == 1 ? yellowColor : greyColor8 : userPosting.isPrimary == 1 ? yellowColor : Colors.white,
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withOpacity(0.1),
+            blurRadius: pathS / 10,
+            offset: Offset(-pathS / 12, pathS / 12),
+          ),
+        ],
+      ),
+      child: Padding(
+        padding: EdgeInsets.only(left: pathS / 4, top: pathS / 4, bottom: pathS / 4, right: pathS/4),
+        child: Align(
+          alignment: Alignment.topLeft,
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Text(
+                userPosting.isPrimary == 1 ? 'txt_base_unit'.tr() : 'AdditionalUnits'.tr(),
+                style: TextStyle(
+                  color: isDarkMode ? greyColorDark : greyColor7,
+                  fontSize: pathS / 5,
+                  fontWeight: FontWeight.w800,
+                  fontFamily: 'Roboto',
+                ),
+                textAlign: TextAlign.start,
+              ),
+              SizedBox(height: pathS / 5),
+              Padding(
+                padding: EdgeInsets.only(right: pathS),
+                child: Text(
+                  userPosting.siteName,
+                  style: TextStyle(
+                    color: isDarkMode ? greyColorDark : greyColor7,
+                    fontSize: pathS / 5,
+                    fontWeight: FontWeight.w500,
+                    fontFamily: 'Roboto',
+                  ),
+                  textAlign: TextAlign.start,
+                ),
+              ),
+              Row(
+                children: [
+                  Text(
+                    userPosting.unitCode,
+                    style: TextStyle(
+                      color: isDarkMode ? greyColorDark : greyColor7,
+                      fontSize: pathS / 5,
+                      fontWeight: FontWeight.w500,
+                      fontFamily: 'Roboto',
+                    ),
+                    textAlign: TextAlign.start,
+                  ),
+                  Spacer(),
+                  GestureDetector(
+                    onTap: (){
+
+                      setState(() {
+                        showUserShiftDetail = true;
+                      });
+
+                    },
+                    child: Container(
+
+                      alignment: Alignment.center,
+                      decoration: BoxDecoration(
+                        color: isDarkMode ? redColor1 : redColor3,                          // border: Border.all(color: Colors.yellow, width: pathS/18),
+                        borderRadius: BorderRadius.circular(pathS/3),
+                        boxShadow: [
+                          BoxShadow(
+                            color: Colors.black.withOpacity(0.1), // Shadow color
+                            blurRadius: pathS/10, // Spread of the shadow
+                            // spreadRadius: pathS/15, // How far the shadow extends
+                            offset:  Offset(-pathS/12, pathS/12),
+                          ),
+                        ],
+                      ),
+                      child: Padding(
+                        padding:  EdgeInsets.only(left: pathS/5,right: pathS/5,top: pathS/10,bottom: pathS/11),
+                        child: Text(
+                          '  ${'View'.tr()}  ',
+                          style: TextStyle(
+                            color: whiteColor,
+                            fontSize: pathS / 5.5,
+                            fontWeight: FontWeight.w400,
+                            fontFamily: 'Roboto',
+                          ),
+                        ),
+                      ),
+                    ),
+                  ),
+                ],
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+
 
   void onTapEditProfile() {
     showModalBottomSheet(
@@ -1197,6 +1364,264 @@ class ProfileViewState extends State<ProfileView>{
       ),
     );
   }
+
+Future<void> getProfileTableData() async {
+  final userProfiles = await DatabaseHelper.instance.getAllRecords<UserProfile>(
+    keyTableUserProfile,
+        (map) => UserProfile.fromMap(map),
+  );
+
+  userProfiles.forEach((profile) {
+    printInDebug('profile ID: ${profile.id}');
+    printInDebug('profile emp name: ${profile.empName}');
+  });
+
+  showDataOnUI(userProfiles.first);
+
+}
+  void showDataOnUI(UserProfile userProfile){
+
+    setState(() {
+
+
+      imagePath = userProfile.profileImageUrl;
+
+      userName = userProfile.empName;
+      degination = userProfile.serviceName;
+
+
+      final joiningDate = userProfile.joiningDate; // Assuming this is a DateTime object
+      final currentDate = DateTime.now();
+
+// Calculate the difference in years
+      final yearsWithSIS = currentDate.year - joiningDate.year;
+
+// Adjust for incomplete years
+      final isBeforeAnniversary = (currentDate.month < joiningDate.month) ||
+          (currentDate.month == joiningDate.month && currentDate.day < joiningDate.day);
+
+      final actualYearsWithSIS = isBeforeAnniversary ? yearsWithSIS - 1 : yearsWithSIS;
+
+// Assign description
+      description = '$actualYearsWithSIS ${'sis_years'.tr()} ${'with_sis'.tr()}';
+
+
+
+      age = '${userProfile.age}';
+      qualification = userProfile.qualification;
+      height = '${userProfile.height}';
+      weight = '${userProfile.weight}';
+      branchName = userProfile.branchName;
+      ta = '';
+
+      companyName = userProfile.branchName;
+      unit = userProfile.branchCode;
+      department = userProfile.unitCode;
+      contactNum = userProfile.mobile;
+
+      bankLogoUrl = userProfile.bankLogo;
+      bankName = userProfile.bankName;
+      accountHolderName = userProfile.empName;
+      accountN = userProfile.accountNo;
+      addres = userProfile.bankAddress;
+      ifscCode = userProfile.bankIfscCode;
+
+
+      aAdhar = '';
+      esic= userProfile.esiNo;
+      pf = userProfile.uanNo;
+
+      aAdharLogoUrl = '';
+      esicLogoUrl = '';
+      pfLogoUrl = '';
+
+
+
+    });
+  }
+  Future<void> getPostingTableData() async {
+    final userPosting = await DatabaseHelper.instance.getAllRecords<UserPosting>(
+      keyTableUserPosting,
+          (map) => UserPosting.fromMap(map),
+    );
+
+    userPosting.forEach((profile) {
+      printInDebug('profile ID: ${profile.id}');
+      printInDebug('profile emp name: ${profile.siteName}');
+    });
+
+    setState(() {
+      userPostings = userPosting;
+    });
+
+
+  }
+  void onLoadData() {
+
+
+    // setState(() {
+    //   showLoaderView = true;
+    // });
+    Map <String,String> inputData = {
+
+    };
+
+    APIHelper.instance.getData(profileApi,inputData, (data) {
+
+      // setState(() {
+      //   showLoaderView = false;
+      // });
+      if(data.isNotEmpty){
+
+
+        print(data);
+        List<UserProfile> userProfiles = data.map((json) => UserProfile.fromJson(json)).toList();
+        userProfiles.forEach((profile) {
+          printInDebug('profile ID: ${profile.id}');
+          printInDebug('profile emp name: ${profile.empName}');
+        });
+
+        showDataOnUI(userProfiles.first);
+
+        userProfile = userProfiles;
+
+        syncUserProfileData();
+
+      }
+
+    },(error){
+      // setState(() {
+      //   showLoaderView = false;
+      // });
+
+    }
+    );
+
+  }
+
+  void onLoadUserPostingData() {
+    // setState(() {
+    //   showLoaderView = true;
+    // });
+
+    Map <String, String> inputData = {
+    };
+
+    APIHelper.instance.getUserData(userPostingApi, inputData, (data) {
+
+      // setState(() {
+      //   showLoaderView = false;
+      // });
+
+      if (data.isNotEmpty) {
+        if (data.containsKey('UserPosting')) {
+          final List<dynamic> dataList = data['UserPosting'];
+          setState(() {
+            userPostings = dataList.map((json) => UserPosting.fromJson(json)).toList();
+          });
+          userPostings.forEach((profile) {
+            printInDebug('userPosting ID: ${profile.id}');
+            printInDebug('userPosting  name: ${profile.siteName}');
+          });
+
+          syncUserPostingData();
+
+        }
+        if (data.containsKey('UnitDutyPost')) {
+          final List<dynamic> dataList = data['UnitDutyPost'];
+          unitDutyPosts = dataList.map((json) => UnitDutyPost.fromJson(json)).toList();
+          unitDutyPosts.forEach((profile) {
+            printInDebug('UnitDutyPost ID: ${profile.id}');
+            printInDebug('UnitDutyPost  name: ${profile.postName}');
+          });
+
+          syncUnitDutyPostData();
+        }
+        if (data.containsKey('UnitShiftDetail')) {
+          final List<dynamic> dataList = data['UnitShiftDetail'];
+          unitShiftDetails = dataList.map((json) => UnitShiftDetail.fromJson(json)).toList();
+          unitShiftDetails.forEach((profile) {
+            printInDebug('UnitShiftDetail ID: ${profile.id}');
+            printInDebug('UnitShiftDetail  name: ${profile.shiftName}');
+          });
+
+          syncUnitShiftDetailData();
+
+
+        }
+
+      }
+    }, (error) {
+      // setState(() {
+      //   showLoaderView = false;
+      // });
+      setState(() {
+        // isAlertVisible = true;
+        // alertMessage = '$error';
+      });
+    });
+  }
+
+  Future<void> syncUserProfileData() async {
+    await DatabaseHelper.instance.replaceTableData<UserProfile>(keyTableUserProfile, userProfile, (userProfile) =>
+        userProfile.toMap());
+  }
+  Future<void> syncUnitShiftDetailData() async {
+    await DatabaseHelper.instance.replaceTableData<UnitShiftDetail>(keyTableUnitShiftDetail, unitShiftDetails, (unitShiftDetail) =>
+        unitShiftDetail.toMap());
+
+    return;
+
+    for (var unitShiftDetail in unitShiftDetails) {
+      if (unitShiftDetail.deleted == 1) {
+        // If the record is marked as deleted, delete it
+        final result = await DatabaseHelper.instance.deleteTableData(
+          keyTableUnitShiftDetail,
+          'id',
+          unitShiftDetail.id,
+        );
+        print('deleted = $result');
+      }
+      else {
+        // Check if the record already exists
+        final existingRecords = await DatabaseHelper.instance.getSingleRow(
+          keyTableUnitShiftDetail,
+          'id',
+          unitShiftDetail.id,
+        );
+
+        if (existingRecords!.isEmpty) {
+          // If the record does not exist, insert it
+          final result = await DatabaseHelper.instance.insertRecord<UnitShiftDetail>(
+            keyTableUnitShiftDetail,
+            unitShiftDetail,
+                (unitShiftDetail) => unitShiftDetail.toMap(),
+          );
+          print('inserted = $result');
+        } else {
+          // If the record exists, update it
+          final result = await DatabaseHelper.instance.updateTableData(
+            keyTableUnitShiftDetail,
+            unitShiftDetail.toMap(),
+            unitShiftDetail.id,
+
+          );
+          print('updated = $result');
+        }
+      }
+    }
+  }
+  Future<void> syncUnitDutyPostData() async {
+    await DatabaseHelper.instance.replaceTableData<UnitDutyPost>(keyTableUnitDutyPost, unitDutyPosts, (unitDutyPosts) =>
+        unitDutyPosts.toMap());
+
+  }
+  Future<void> syncUserPostingData() async {
+    await DatabaseHelper.instance.replaceTableData<UserPosting>(keyTableUserPosting, userPostings, (userPosting) =>
+        userPosting.toMap());
+
+  }
+
 
 
 }

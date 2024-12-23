@@ -5,24 +5,19 @@ import 'package:connectivity_plus/connectivity_plus.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:mysis/HomeView/DutyAlertView.dart';
+import 'package:mysis/HomeView/UserRoaster.dart';
 import 'package:mysis/Profile/ProfileView.dart';
-import 'package:mysis/SharedClasses/APIHelper.dart';
-import 'package:mysis/CommonViews/CustomAlertView.dart';
-import 'package:mysis/MyTabBarView.dart';
 import 'package:mysis/CommonViews/LoaderView.dart';
 import 'package:mysis/SharedClasses/LanguageProvider.dart';
-import 'package:mysis/SharedClasses/Preferences.dart';
-import 'package:mysis/CommonViews/ToastMessageView.dart';
 import 'package:mysis/CommonViews/Utility.dart';
-import 'package:mysis/UserAuthViews/LoginViewError.dart';
-import 'package:otp_text_field/otp_field.dart';
-import 'package:otp_text_field/style.dart';
 import 'package:easy_localization/easy_localization.dart';
 import 'package:mysis/SharedClasses/ThemeProvider.dart';
 import 'package:provider/provider.dart';
 
+import '../Profile/UserProfile.dart';
+import '../SharedClasses/APIHelper.dart';
+import '../SharedClasses/DatabaseHelper.dart';
 import '../SharedClasses/NetworkConnectivity.dart';
-import 'ConfirmProfileView.dart';
 import 'OthersDutyView.dart';
 import 'ScanCardView.dart';
 
@@ -39,6 +34,7 @@ class HomeView extends StatefulWidget {
   HomeViewState createState() => HomeViewState();
 }
 
+
 class HomeViewState extends State<HomeView> {
 
   bool showLoaderView = false;
@@ -46,11 +42,13 @@ class HomeViewState extends State<HomeView> {
   String exclamationImage = isDarkMode ? "assets/images/dashboard-icons/exclamation-icon.png" : "assets/images/dashboard-icons/exclamation-red.png";
   String imagePath = '';
   bool isAttendanceMarked = false;
-String attendanceTime = '06:12';
-  String dutyInTime = '8 Hrs Morning';
-String companyName = 'IL & FS Environmental Infrastructure & Services Limited';
-String place = 'DLE UNT 12345';
-String location = 'Maingate SS';
+  String attendanceTime = '06:12';
+  String dutyShiftName = '8 Hrs Morning';
+  String siteName = 'IL & FS Environmental Infrastructure & Services Limited';
+  String unitCode = 'DLE UNT 12345';
+  String postName = 'Maingate SS';
+  String currentDutyStartTime = '19:00:00';
+  String postGeoLocation = '';
   DateTime dutyTime = DateTime.now();
 
 
@@ -67,8 +65,8 @@ String location = 'Maingate SS';
 
   String userName = 'Rajkumar Singh';
   String degination = 'ASSISTANT ASSESSMENT MANAGER | ABC124563';
-  String description = '10 Years with SIS';
-  String areaOfficeName = 'Samant Kumar Jaiswal';
+  String description = '';
+  String areaOfficeName = '';
 
   String presentDays = "10.625";
   String leaves = '53.235';
@@ -81,13 +79,18 @@ String location = 'Maingate SS';
   NetworkConnectivity connection = NetworkConnectivity.instance;
   bool isInternet = true;
 
+  List <UserProfile> userProfile = [];
+
+  List <UserRoaster> userRoasters = [];
+
+
   @override
   void initState() {
     super.initState();
 
-    Future.delayed(Duration(milliseconds: 3), () {
-      onLoadDutyAlert();
-    });
+    // Future.delayed(Duration(milliseconds: 3), () {
+    //   onLoadDutyAlert();
+    // });
 
     initialSetup();
     connection.myStream.listen((_source) {
@@ -130,7 +133,7 @@ String location = 'Maingate SS';
                                 decoration: const BoxDecoration(
                                   shape: BoxShape.rectangle,
                                   image: DecorationImage(
-                                    image: AssetImage("assets/images/icons/logo@3x.png"),
+                                    image: AssetImage("assets/images/icons/logo.png"),
                                     fit: BoxFit.cover,
                                   ),
                                 ),
@@ -142,7 +145,7 @@ String location = 'Maingate SS';
                                 decoration: const BoxDecoration(
                                   shape: BoxShape.rectangle,
                                   image: DecorationImage(
-                                    image: AssetImage("assets/images/icons/icon@3x.png"),
+                                    image: AssetImage("assets/images/icons/icon.png"),
                                     fit: BoxFit.cover,
                                   ),
                                 ),
@@ -389,6 +392,7 @@ String location = 'Maingate SS';
                                 ),//internet
                                 SizedBox(height: pathS/5),
 
+                                //current day duty ui
                                 Container(
                                   width: screenWidth-2.5*marginValue,
                                   height: pathL*2.8,
@@ -450,7 +454,7 @@ String location = 'Maingate SS';
                                                     child:Padding(
                                                       padding: EdgeInsets.only(left: pathS/5, top: pathS/10,right: pathS/8,bottom: pathS/10), // Adjust top and left as needed
                                                       child: Text(
-                                                        dutyInTime,
+                                                        dutyShiftName,
                                                         style: TextStyle(
                                                           color: isDarkMode ?  greyColor7:greenColor6,
                                                           fontSize: pathS / 5.5,
@@ -467,7 +471,7 @@ String location = 'Maingate SS';
                                               Padding(
                                                 padding: EdgeInsets.only(right: pathS/5), // Adjust top and left as needed
                                                 child: Text(
-                                                  companyName,
+                                                  siteName,
                                                   style: TextStyle(
                                                     color: isDarkMode ?  greyColor1:greyColor5,
                                                     fontSize: pathS / 5.5,
@@ -479,7 +483,7 @@ String location = 'Maingate SS';
                                               ),
 
                                               Text(
-                                                place,
+                                                unitCode,
                                                 style: TextStyle(
                                                   color: isDarkMode ?  whiteColor:greyColor6,
                                                   fontSize: pathS / 5.5,
@@ -489,7 +493,7 @@ String location = 'Maingate SS';
                                                 textAlign: TextAlign.start,
                                               ),
                                               Text(
-                                                location,
+                                                postName,
                                                 style: TextStyle(
                                                   color: isDarkMode ?  greyColor1:greyColor5,
                                                   fontSize: pathS / 5.5,
@@ -500,7 +504,7 @@ String location = 'Maingate SS';
                                               ),
                                               SizedBox(height: pathS/5),
 
-                                              Container(
+                                              SizedBox(
                                                 width: screenWidth-2.5*marginValue,
                                                 child: Text(
                                                   getDateTime('EEEE d MMM'),
@@ -518,7 +522,7 @@ String location = 'Maingate SS';
                                                 mainAxisAlignment: MainAxisAlignment.center,
                                                 children: [
                                                   Text(
-                                                    DateFormat('hh:mm',selectedLocale).format(dutyTime),
+                                                    formatInHrs(currentDutyStartTime,"h:mm"),
                                                     style: TextStyle(
                                                       color: isDarkMode ?  whiteColor:greyColor7,
                                                       fontSize: pathS / 1.6,
@@ -529,7 +533,7 @@ String location = 'Maingate SS';
                                                   ),
                                                   SizedBox(width: pathS/8),
                                                   Text(
-                                                    DateFormat('a',selectedLocale).format(DateTime.now()),
+                                                    formatInHrs(currentDutyStartTime,"a").toUpperCase(),
 
                                                     style: TextStyle(
                                                       color: isDarkMode ?  greyColor1:greyColor4,
@@ -563,13 +567,6 @@ String location = 'Maingate SS';
                                                     ),
                                                   );
 
-                                                  // Navigator.push(
-                                                  //   context,
-                                                  //   MaterialPageRoute(
-                                                  //     builder: (context) => ScanCardView(),
-                                                  //   ),
-                                                  // );
-
                                                 },
                                                 child: Container(
                                                   width: pathL,
@@ -599,7 +596,6 @@ String location = 'Maingate SS';
                                                 ),
                                               ),
                                               SizedBox(width: pathS/5),
-
                                               GestureDetector(
                                                 onTap: (){
 
@@ -648,6 +644,12 @@ String location = 'Maingate SS';
 
                                               GestureDetector(
                                                 onTap: (){
+                                                  List<String> activeDayList = postGeoLocation.split(',').map((e) => e.trim()).toList();
+
+                                                  double lat = double.parse(activeDayList[1]); // Latitude
+                                                  double lng = double.parse(activeDayList[0]); // Longitude
+
+                                                  launchGoogleMap(lat, lng);
 
                                                 },
                                                 child: Container(
@@ -775,7 +777,7 @@ String location = 'Maingate SS';
                                               Padding(
                                                 padding: EdgeInsets.only(right: pathS/5), // Adjust top and left as needed
                                                 child: Text(
-                                                  companyName,
+                                                  siteName,
                                                   style: TextStyle(
                                                     color: isDarkMode ?  greyColor1:greyColor4,
                                                     fontSize: pathS / 5.5,
@@ -787,7 +789,7 @@ String location = 'Maingate SS';
                                               ),
 
                                               Text(
-                                                place,
+                                                unitCode,
                                                 style: TextStyle(
                                                   color: isDarkMode ?  whiteColor:greyColor7,
                                                   fontSize: pathS / 5.5,
@@ -797,7 +799,7 @@ String location = 'Maingate SS';
                                                 textAlign: TextAlign.start,
                                               ),
                                               Text(
-                                                location,
+                                                postName,
                                                 style: TextStyle(
                                                   color: isDarkMode ?  greyColor1:greyColor4,
                                                   fontSize: pathS / 5.5,
@@ -1095,7 +1097,7 @@ String location = 'Maingate SS';
                                                                     ),
                                                                   ],
                                                                   image: DecorationImage(
-                                                                    image: AssetImage("assets/images/dashboard-icons/whatsApp@3x.png"),
+                                                                    image: AssetImage("assets/images/dashboard-icons/whatsApp.png"),
                                                                     fit: BoxFit.cover,
                                                                   ),
                                                                 ),
@@ -1478,6 +1480,13 @@ String location = 'Maingate SS';
 
 
   void initialSetup() {
+
+    onLoadProfileData();
+    getProfileTableData();
+
+    onLoadRoasterData();
+    getRoasterTableData();
+
   }
 
     void onConnectionChange(){
@@ -1512,10 +1521,190 @@ String location = 'Maingate SS';
       Navigator.push(
         context,
         MaterialPageRoute(
-          builder: (context) => DutyAlertView(dutyTime: DateTime.now(),shift: shift,place: place,location: location),
+          builder: (context) => DutyAlertView(dutyTime: DateTime.now(),shift: shift,place: unitCode,location: postName),
         ),
       );
     }
+
+  Future<void> getProfileTableData() async {
+    final userProfiles = await DatabaseHelper.instance.getAllRecords<UserProfile>(
+      keyTableUserProfile,
+          (map) => UserProfile.fromMap(map),
+    );
+
+    userProfiles.forEach((profile) {
+      printInDebug('profile ID: ${profile.id}');
+      printInDebug('profile emp name: ${profile.empName}');
+    });
+
+    showDataOnUI(userProfiles.first);
+
+  }
+  void showDataOnUI(UserProfile userProfile){
+
+    setState(() {
+
+
+      imagePath = userProfile.profileImageUrl;
+
+      userName = userProfile.empName;
+      degination = userProfile.serviceName;
+
+
+      final joiningDate = userProfile.joiningDate; // Assuming this is a DateTime object
+      final currentDate = DateTime.now();
+
+// Calculate the difference in years
+      final yearsWithSIS = currentDate.year - joiningDate.year;
+
+// Adjust for incomplete years
+      final isBeforeAnniversary = (currentDate.month < joiningDate.month) ||
+          (currentDate.month == joiningDate.month && currentDate.day < joiningDate.day);
+
+      final actualYearsWithSIS = isBeforeAnniversary ? yearsWithSIS - 1 : yearsWithSIS;
+
+// Assign description
+      description = '$actualYearsWithSIS ${'sis_years'.tr()} ${'with_sis'.tr()}';
+
+      areaOfficeName = userProfile.empName;
+
+    });
+  }
+  void onLoadProfileData() {
+
+
+    // setState(() {
+    //   showLoaderView = true;
+    // });
+    Map <String,String> inputData = {
+
+    };
+
+    APIHelper.instance.getData(profileApi,inputData, (data) {
+
+      // setState(() {
+      //   showLoaderView = false;
+      // });
+      if(data.isNotEmpty){
+
+
+        print(data);
+        List<UserProfile> userProfiles = data.map((json) => UserProfile.fromJson(json)).toList();
+        userProfiles.forEach((profile) {
+          printInDebug('profile ID: ${profile.id}');
+          printInDebug('profile emp name: ${profile.empName}');
+        });
+
+        showDataOnUI(userProfiles.first);
+
+        List <UserProfile> userProfile = [];
+
+        userProfile = userProfiles;
+
+        syncUserProfileData(userProfile);
+
+      }
+
+    },(error){
+      // setState(() {
+      //   showLoaderView = false;
+      // });
+
+    }
+    );
+
+  }
+  Future<void> syncUserProfileData(   List <UserProfile> userProfile) async {
+    await DatabaseHelper.instance.replaceTableData<UserProfile>(keyTableUserProfile, userProfile, (userProfile) =>
+        userProfile.toMap());
+  }
+
+
+  Future<void> getRoasterTableData() async {
+    final userRoasters = await DatabaseHelper.instance.getAllRecords<UserRoaster>(
+      keyTableUserRoster,
+          (map) => UserRoaster.fromMap(map),
+    );
+
+    userRoasters.forEach((profile) {
+      printInDebug('profile ID: ${profile.id}');
+      printInDebug('profile emp name: ${profile.siteName}');
+    });
+
+
+    updateCurrentDayUI(userRoasters);
+
+  }
+  void onLoadRoasterData() {
+
+
+    // setState(() {
+    //   showLoaderView = true;
+    // });
+    Map <String,String> inputData = {
+
+    };
+
+    APIHelper.instance.getData(userRosterApi,inputData, (data) {
+
+      // setState(() {
+      //   showLoaderView = false;
+      // });
+      if(data.isNotEmpty){
+
+        List<UserRoaster> roasters = data.map((json) => UserRoaster.fromJson(json)).toList();
+        roasters.forEach((profile) {
+          printInDebug('profile ID: ${profile.id}');
+          printInDebug('profile emp name: ${profile.siteName}');
+        });
+
+
+
+
+        userRoasters = roasters;
+
+        syncUserRoasterData(userRoasters);
+
+      }
+
+    },(error){
+      // setState(() {
+      //   showLoaderView = false;
+      // });
+
+    }
+    );
+
+  }
+  Future<void> syncUserRoasterData(   List <UserRoaster> userRoaster) async {
+    await DatabaseHelper.instance.replaceTableData<UserRoaster>(keyTableUserRoster, userRoasters, (userRoasters) =>
+        userRoasters.toMap());
+  }
+
+  void updateCurrentDayUI(List<UserRoaster> userRoasters) {
+    String todayDate = DateFormat('yyyy-MM-dd').format(DateTime.now());
+
+    // Filter roster data for today
+    List<UserRoaster> todaysRoster = userRoasters
+        .where((roster) => roster.rosterDate == todayDate)
+        .toList();
+
+
+    if (todaysRoster.isNotEmpty) {
+       UserRoaster roaster = todaysRoster.first;
+      setState(() {
+
+         dutyShiftName = roaster.shiftName;
+         siteName = roaster.siteName;
+         unitCode = roaster.unitCode;
+         postName = roaster.postName;
+         currentDutyStartTime = roaster.startTime;
+
+         postGeoLocation = roaster.geoLocation;
+      });
+
+    }
+  }
 
 
 }

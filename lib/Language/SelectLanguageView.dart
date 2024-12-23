@@ -47,6 +47,13 @@ class SelectLanguageViewState extends State<SelectLanguageView> {
     'Marathi',
   ];
 
+  var backgroundGradient =  LinearGradient(
+    colors: [Colors.white, Color.fromRGBO(217, 217, 217, 1)],
+    begin: Alignment.topCenter,
+    end: Alignment.bottomCenter,
+  );
+
+
   @override
   void initState() {
     initialSetup();
@@ -72,7 +79,7 @@ class SelectLanguageViewState extends State<SelectLanguageView> {
                   // borderRadius: BorderRadius.circular(pathS/15),
                 ),
                 child: Stack(
-                  alignment: Alignment.center,
+                  alignment: Alignment.topCenter,
                   children: [
                     Positioned(
                       top: MediaQuery.of(context).padding.top+pathS/12,
@@ -113,10 +120,11 @@ class SelectLanguageViewState extends State<SelectLanguageView> {
                       ),
                     ),
                     Column(
-                      mainAxisAlignment: MainAxisAlignment.center,
+                      mainAxisAlignment: MainAxisAlignment.start,
                       children: [
                         Container(
                           width: screenWidth,
+                          height: paddingTop+pathS,
 
                         ),
 
@@ -124,9 +132,8 @@ class SelectLanguageViewState extends State<SelectLanguageView> {
                           'Select_language'.tr(),
                           style: TextStyle(
                             color: isDarkMode ? whiteColor:greyColor6,
-
                             fontSize: pathS / 4,
-                            fontWeight: FontWeight.w600,
+                            fontWeight: FontWeight.w500,
                             fontFamily: 'Roboto'
                           ),
                           textAlign: TextAlign.center,
@@ -326,7 +333,9 @@ class SelectLanguageViewState extends State<SelectLanguageView> {
 
 
 
-  void initialSetup() {}
+  void initialSetup() {
+
+  }
 
   void onTapNext() {
     if(selectedLanguageCode.isEmpty){

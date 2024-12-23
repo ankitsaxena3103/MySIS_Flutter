@@ -4,11 +4,16 @@ import 'package:mysis/CommonViews/Utility.dart';
 import 'package:easy_localization/easy_localization.dart';
 import 'package:mysis/HomeView/ConfirmProfileView.dart';
 import 'package:mysis/HomeView/ScanCardView.dart';
+import 'package:sqflite/sqflite.dart';
 
+import '../Profile/UserProfile.dart';
+import '../SharedClasses/DatabaseHelper.dart';
 import 'ScanUnitShiftView.dart';
 
 
 class EnterManuallyView extends StatefulWidget {
+  const EnterManuallyView({super.key});
+
   @override
   EnterManuallyViewState createState() => EnterManuallyViewState();
 }
@@ -28,16 +33,18 @@ class EnterManuallyViewState extends State<EnterManuallyView>{
 
   String lblErrorMsg = '';
 
-  String lblCompany = 'company'.tr();
 
   String lblUserIdHintMsg = 'enter_mobile_no'.tr();
   String lblUserIdHintText = 'ex_mobile'.tr();
 
   String btnNext = 'next'.tr();
 
+  List<UserProfile> userProfile = [];
+
 
   @override
   void initState() {
+    getProfileTableData();
     super.initState();
 
   }
@@ -93,7 +100,7 @@ class EnterManuallyViewState extends State<EnterManuallyView>{
                                 width: pathS / 1.5,
                                 height: pathS / 1.2,
                                 child: Image.asset(
-                                  'assets/images/home/card-icon@2x.png',
+                                  'assets/images/home/card-icon.png',
                                   color: isDarkMode ? whiteColor : redColor3,
                                 ),
                               ),
@@ -360,7 +367,7 @@ class EnterManuallyViewState extends State<EnterManuallyView>{
 
   void onUserIdChange(String userid){
 
-    if(userid.length == 10){
+    if(userid.length >= 9){
       setState(() {
         nextBgColor = isDarkMode ? redColor1:redColor3;
         nextFontColor = Colors.white;
@@ -421,12 +428,34 @@ class EnterManuallyViewState extends State<EnterManuallyView>{
   }
 
   void onLoadConfirmProfile(){
-    Navigator.push(
-      context,
-      MaterialPageRoute(
-        builder: (context) => ConfirmProfileView(),
-      ),
-    );
+    printInDebug(txtUserId.text);
+    if(userProfile.first.mobile == txtUserId.text) {
+      Navigator.push(
+        context,
+        MaterialPageRoute(
+          builder: (context) => ConfirmProfileView(userProfile: userProfile.first,),
+        ),
+      );
+    }else{
+     // call API to show data
+    }
   }
+
+  Future<void> getProfileTableData() async {
+    final userProfiles = await DatabaseHelper.instance.getAllRecords<UserProfile>(
+      keyTableUserProfile,
+          (map) => UserProfile.fromMap(map),
+    );
+
+    userProfiles.forEach((profile) {
+      printInDebug('profile ID: ${profile.id}');
+      printInDebug('profile emp name: ${profile.empName}');
+    });
+
+    userProfile = userProfiles;
+
+
+  }
+
 
 }

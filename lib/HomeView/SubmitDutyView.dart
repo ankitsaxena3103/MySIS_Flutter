@@ -6,12 +6,14 @@ import 'package:image_picker/image_picker.dart';
 import 'package:mysis/CommonViews/Utility.dart';
 import 'package:easy_localization/easy_localization.dart';
 import 'package:mysis/HomeView/ThanksDutyView.dart';
+import 'package:mysis/Profile/UserProfile.dart';
 
 class SubmitDutyView extends StatefulWidget {
 
-  final name;
+  final UserProfile userProfile;
+
   final regNo;
-  final designation;
+
   final location;
 
   final shift;
@@ -23,14 +25,13 @@ class SubmitDutyView extends StatefulWidget {
   SubmitDutyView(
       {
         super.key,
-        required this.name,
-        required this.designation,
         required this.regNo,
         required this.location,
         required this.shift,
         this.post,
         this.postRank,
-        this.imageData
+        this.imageData,
+        required this.userProfile
       });
   @override
   SubmitDutyViewState createState() => SubmitDutyViewState();
@@ -39,6 +40,9 @@ class SubmitDutyView extends StatefulWidget {
 class SubmitDutyViewState extends State<SubmitDutyView>{
   String assetsImagePath = "assets/images/dashboard-icons/profile-icon.png";
   String imagePath = '';
+  String name  = '';
+  String position  = '';
+
   bool noData = true;
   late String imageData;
   List<Widget> containers = [];
@@ -51,6 +55,7 @@ class SubmitDutyViewState extends State<SubmitDutyView>{
   @override
   void initState() {
     imageData = widget.imageData;
+    onLoadUpdateUI();
     initialSetup();
     super.initState();
 
@@ -122,48 +127,45 @@ class SubmitDutyViewState extends State<SubmitDutyView>{
                               ),
 
                               SizedBox(width: pathS/5),
-                              Flexible(
-                                fit: FlexFit.loose,
-                                child: Row(
-                                  crossAxisAlignment: CrossAxisAlignment.start,
-                                  mainAxisAlignment: MainAxisAlignment.start,
-                                  children: [
-                                    Flexible(
-                                      fit: FlexFit.loose,
-                                      child: Column(
-                                        mainAxisAlignment: MainAxisAlignment.start,
-                                        crossAxisAlignment: CrossAxisAlignment.start,
-                                        children: [
-                                          Text(
-                                            widget.name,
-                                            style: TextStyle(
-                                              color: isDarkMode ? whiteColor : greyColor6,
-                                              fontSize: pathS / 4.5,
-                                              fontWeight: FontWeight.w500,
-                                              fontFamily: 'Roboto',
-                                            ),
-                                            textAlign: TextAlign.left,
+                              Row(
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                mainAxisAlignment: MainAxisAlignment.start,
+                                children: [
+                                  Column(
+                                    mainAxisAlignment: MainAxisAlignment.start,
+                                    crossAxisAlignment: CrossAxisAlignment.start,
+                                    children: [
+                                      SizedBox(
+                                        width: pathL*1.7,
+                                        child: Text(
+                                          name,
+                                          style: TextStyle(
+                                            color: isDarkMode ? whiteColor : greyColor6,
+                                            fontSize: pathS / 4.5,
+                                            fontWeight: FontWeight.w500,
+                                            fontFamily: 'Roboto',
                                           ),
-                                          Container(
-                                            width:pathL*1.8,
-                                            child: Text(
-                                              widget.designation,
-                                              style: TextStyle(
-                                                color: isDarkMode ? whiteColor : greyColor6,
-                                                fontSize: pathS / 6.5,
-                                                fontWeight: FontWeight.w300,
-                                                fontFamily: 'Roboto',
-                                              ),
-                                              textAlign: TextAlign.left,
-                                            ),
-                                          ),
-
-                                        ],
+                                          textAlign: TextAlign.left,
+                                        ),
                                       ),
-                                    ),
+                                      Container(
+                                        width:pathL*1.5,
+                                        child: Text(
+                                          position,
+                                          style: TextStyle(
+                                            color: isDarkMode ? whiteColor : greyColor6,
+                                            fontSize: pathS / 6.5,
+                                            fontWeight: FontWeight.w300,
+                                            fontFamily: 'Roboto',
+                                          ),
+                                          textAlign: TextAlign.left,
+                                        ),
+                                      ),
 
-                                  ],
-                                ),
+                                    ],
+                                  ),
+
+                                ],
                               ),
                               Spacer(),
                               GestureDetector(
@@ -426,6 +428,16 @@ class SubmitDutyViewState extends State<SubmitDutyView>{
     }
   }
 
+
+  void onLoadUpdateUI(){
+
+    imagePath = widget.userProfile.profileImageUrl;
+    name = widget.userProfile.empName;
+    position = widget.userProfile.symbol;
+
+  }
+
+
   Future<void> capturePhoto() async {
     final picker = ImagePicker();
     final pickedFile = await picker.pickImage(source: ImageSource.camera);
@@ -444,7 +456,7 @@ class SubmitDutyViewState extends State<SubmitDutyView>{
     Navigator.push(
       context,
       MaterialPageRoute(
-        builder: (context) => ThanksDutyView(name: widget.name, designation: widget.designation,shiftData: widget.shift,post: widget.post,postRank: widget.postRank,location: widget.location, imageData: imageData),
+        builder: (context) => ThanksDutyView(shiftData: widget.shift,post: widget.post,postRank: widget.postRank,location: widget.location, imageData: imageData, userProfile: widget.userProfile,),
       ),
     );
   }

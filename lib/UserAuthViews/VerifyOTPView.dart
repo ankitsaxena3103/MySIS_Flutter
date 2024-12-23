@@ -4,12 +4,24 @@ import 'package:mysis/CommonViews/CustomAlertView.dart';
 import 'package:mysis/CommonViews/LoaderView.dart';
 import 'package:mysis/CommonViews/ToastMessageView.dart';
 import 'package:mysis/CommonViews/Utility.dart';
+import 'package:mysis/UserAuthViews/EnterPINView.dart';
 import 'package:mysis/UserAuthViews/SetPINView.dart';
 import 'package:otp_text_field/otp_field.dart';
 import 'package:otp_text_field/style.dart';
 
+import '../SharedClasses/Preferences.dart';
+
 class VerifyOTPView extends StatefulWidget {
-  const VerifyOTPView({super.key});
+  final String otpReceived;
+  final int otpTimer;
+  final String pinReceived;
+
+  const VerifyOTPView({
+    super.key,
+    required this.otpReceived,
+    required this.otpTimer,
+    required this.pinReceived
+  });
 
   @override
   VerifyOTPViewState createState() => VerifyOTPViewState();
@@ -71,6 +83,9 @@ class VerifyOTPViewState extends State<VerifyOTPView> {
             child: Stack(
               alignment: Alignment.center,
               children: [
+                Container(
+                  width: screenWidth,
+                ),
 
                 Positioned(
                   top: paddingTop+pathS/8,
@@ -81,7 +96,7 @@ class VerifyOTPViewState extends State<VerifyOTPView> {
                   decoration: const BoxDecoration(
                     shape: BoxShape.rectangle,
                     image: DecorationImage(
-                      image: AssetImage("assets/images/icons/icon@3x.png"),
+                      image: AssetImage("assets/images/icons/icon.png"),
                       fit: BoxFit.cover,
                     ),
                   ),
@@ -97,7 +112,7 @@ class VerifyOTPViewState extends State<VerifyOTPView> {
                     decoration: const BoxDecoration(
                       shape: BoxShape.rectangle,
                       image: DecorationImage(
-                        image: AssetImage("assets/images/icons/logo@3x.png"),
+                        image: AssetImage("assets/images/icons/logo.png"),
                         fit: BoxFit.cover,
                       ),
                     ),
@@ -175,7 +190,7 @@ class VerifyOTPViewState extends State<VerifyOTPView> {
                                         decoration: const BoxDecoration(
                                           shape: BoxShape.rectangle,
                                           image: DecorationImage(
-                                            image: AssetImage("assets/images/icons/icon@3x.png"),
+                                            image: AssetImage("assets/images/icons/icon.png"),
                                             fit: BoxFit.cover,
                                           ),
                                         ),
@@ -361,7 +376,7 @@ class VerifyOTPViewState extends State<VerifyOTPView> {
     if(otp.length == 4){
 
       setState(() {
-        if(otp != '1234'){
+        if(otp != widget.otpReceived){
           lblErrorMsg = 'txt_incorrect_otp'.tr();
           return;
 
@@ -374,7 +389,8 @@ class VerifyOTPViewState extends State<VerifyOTPView> {
       });
 
 
-    }else{
+    }
+    else{
       setState(() {
         nextBgColor = isDarkMode ? greyColor8 : greyColor2;
         nextFontColor = isDarkMode ? greyColor7 : greyColor3;
@@ -388,54 +404,44 @@ class VerifyOTPViewState extends State<VerifyOTPView> {
   }
 
 
-  void onTapLogin() {
-    if (txtUserOTP.text.isEmpty) {
-      showToastView("valid_OTP".tr());
+  Future<void> onTapLogin() async {
+    printInDebug(widget.otpReceived);
+    printInDebug(txtUserOTP.text);
+
+    if (txtUserOTP.text.length != 4) {
       return;
     }
 
 
 
-    Navigator.push(
+    if(widget.otpReceived == txtUserOTP.text ) {
+
+      String? currentPIN = widget.pinReceived;
+
+      if(currentPIN != null && currentPIN!.isNotEmpty && currentPIN!.length == 4){
+        Preferences.saveUserPreference(keyPIN, currentPIN);
+
+        Navigator.push(
+          context,
+          MaterialPageRoute(
+            builder: (context) => EnterPINView(),
+          ),
+        );
+      }
+      else {
+        Navigator.push(
           context,
           MaterialPageRoute(
             builder: (context) => SetPINView(),
           ),
         );
-
-    // setState(() {
-    //   showLoaderView = true;
-    // });
-    // Map<String, dynamic> data = {"email": txtUserId.text, "password": txtPassword.text};
-
-    // APIHelper.instance.postData(authenticateApi, data, (userData) {
-    //   setState(() {
-    //     showLoaderView = false;
-    //   });
-    //   if (userData.isNotEmpty) {
-    //     token = userData['jwtToken'] ?? '';
-    //     userName = userData['agentName'] ?? 'Agent';
-    //     userId = userData['id'] ?? 0;
-    //     Preferences.saveUserPreference(keyUserToken, token);
-    //     Preferences.saveUserPreference(keyUserName, userName);
-    //     Preferences.saveUserPreference(keyUserID, '$userId');
-    //
-    //     Navigator.push(
-    //       context,
-    //       MaterialPageRoute(
-    //         builder: (context) => HomeScreen(),
-    //       ),
-    //     );
-    //   }
-    // }, (error) {
-    //   setState(() {
-    //     showLoaderView = false;
-    //   });
-    //   setState(() {
-    //     isAlertVisible = true;
-    //     alertMessage = '$error';
-    //   });
-    // });
+      }
+    }
+    else {
+      setState(() {
+        txtUserOTP.text = '';
+      });
+    }
   }
 
   void showToastView(String message) {

@@ -9,56 +9,38 @@ import 'package:flutter_phone_direct_caller/flutter_phone_direct_caller.dart';
 import 'package:intl/intl.dart';
 import 'package:package_info_plus/package_info_plus.dart';
 import 'package:social_share/social_share.dart';
+import 'package:url_launcher/url_launcher.dart';
 
 
-// https://ciapimobile.creditinsta.com/api/User/authenticate
+const String baseUrl = 'mysis.sisersys.com:8446';
+const String authenticateApi = '/api/guardApp/Auth/isValidUser';
+const String profileApi = '/api/guardApp/Auth/UserProfile';
+const String tokenApi = '/api/guardApp/Auth/GenerateToken';
+const String userPostingApi = '/api/guardApp/Auth/UserPosting';
+const String contactSISApi = '/api/guardApp/Auth/ContactSIS';
+const String userRosterApi = '/api/guardApp/Auth/UserRoster';
 
-const String baseUrl = 'ciapimobile.creditinsta.com';
-const String authenticateApi = 'api/User/authenticate';
+
+const keyTableUserProfile = 'UserProfile';
+const keyTableUserPosting = 'UserPosting';
+const keyTableUnitShiftDetail = 'UnitShiftDetail';
+const keyTableUnitDutyPost = 'UnitDutyPost';
+const keyTableContactSIS = 'ContactSIS';
+const keyTableUserRoster = 'UserRoster';
 
 
-const phoneNo = '+919311435804';
+String phoneNo = '';
 String token = '';
-int userId = 0;
+String userId = '';
+
 String userName = '';
+String designation = '';
+
 int selectedServiceId = 0;
 
 bool isDarkMode = false;
 String selectedLocale = 'en-US';
 String selectedLanguageCode = 'en';
-
-
-// String selectedLanguage = '';
-// final FlutterView view = WidgetsBinding.instance.platformDispatcher.views.first;
-//
-// // Dimensions in physical pixels (px)
-// final Size size = view.physicalSize;
-//
-//
-// final double pixelRatio = view.devicePixelRatio;
-//
-// Size physicalScreenSize =  view.physicalSize;
-// final double physicalHeight = physicalScreenSize.height;
-// final double physicalWidth =  physicalScreenSize.width;
-//
-// // Size in logical pixels
-// final Size logicalScreenSize = physicalScreenSize / pixelRatio;
-// final double logicalWidth = logicalScreenSize.width;
-// final double logicalHeight = logicalScreenSize.height;
-//
-// // Safe area paddings in logical pixels
-// final double paddingLeft = view.padding.left / pixelRatio;
-// final double paddingRight = view.padding.right / pixelRatio;
-// final double paddingTop = view.padding.top / pixelRatio;
-// final double paddingBottom = view.padding.bottom / pixelRatio;
-
-// final double screenWidth = logicalWidth - paddingLeft - paddingRight;
-// final double screenHeight = logicalHeight - paddingTop - paddingBottom;
-//
-// final double marginValue = screenWidth < 600 ? 20 : 100 ;
-//
-// final double pathL = (screenWidth - (marginValue * 2)) / 2.5;
-// final double pathS = pathL / 2;
 
 late Size physicalScreenSize ;
 
@@ -190,6 +172,49 @@ int getDiffrenceInMinutes(String time1, String time2){
 
 
 }
+
+String formatTime(String timeString, String format) {
+  String  convertedTime = timeString;
+  try {
+    // Parse the input time string as a time-only format
+    final DateFormat inputFormat = DateFormat('HH:mm:ss');
+    final DateTime parsedTime = inputFormat.parse(timeString);
+
+    // Format it into "HH:mm"
+    final DateFormat outputFormat = DateFormat(format);
+    return outputFormat.format(parsedTime);
+  } catch (e) {
+    // Return the original time if parsing fails
+    return convertedTime;
+  }
+
+
+}
+
+String formatInHrs(String timeString, String format) {
+  String  convertedTime = timeString;
+  try {
+    // Parse the input time string as a time-only format
+    final DateFormat inputFormat = DateFormat('HH:mm');
+    final DateTime parsedTime = inputFormat.parse(timeString);
+
+    // Format it into "HH:mm"
+    final DateFormat outputFormat = DateFormat(format);
+    return outputFormat.format(parsedTime);
+  } catch (e) {
+    // Return the original time if parsing fails
+    return convertedTime;
+  }
+
+
+}
+
+
+
+
+
+
+
 var backgroundGradient =  LinearGradient(
   colors: [Colors.white, Color.fromRGBO(217, 217, 217, 1)],
   begin: Alignment.topCenter,
@@ -207,6 +232,12 @@ var backgroundGradientRed =  LinearGradient(
   begin: Alignment.topLeft,
   end: Alignment.bottomRight,
 );
+
+void launchGoogleMap(double lat, double lng){
+  final googleMapUrl = 'https://www.google.com/maps/search/?api=1&query=$lat,$lng';
+  Uri web = Uri.parse(googleMapUrl);
+  launchUrl(web);
+}
 
 
 const Color redColor1 = Color.fromRGBO(235, 74, 77, 1);
@@ -239,8 +270,8 @@ const Color greyColor3 =Color.fromRGBO(51, 51, 51, 0.6);
 const Color greyColor4 =Color.fromRGBO(51, 51, 51, 0.7);
 const Color greyColor5 = Color.fromRGBO(96, 96, 96, 1);
 const Color greyColor6 =Color.fromRGBO(51, 51, 51, 1);
-const Color greyColor7 =Color.fromRGBO(22, 22, 22, 1);
 const Color greyColor8 = Color.fromRGBO(53, 53, 53, 1);
+const Color greyColor7 =Color.fromRGBO(22, 22, 22, 1);
 const Color greyColorDark = Color.fromRGBO(0, 0, 0, 1);
 
 

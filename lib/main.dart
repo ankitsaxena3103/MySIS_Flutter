@@ -96,6 +96,9 @@ Future<bool> futureBuilderData() async {
   bool isLoggedIn = false;
   initPackageInfo();
  String currentPIN = await Preferences.getUserPreference(keyPIN) ?? '';
+  token = await Preferences.getUserPreference(keyUserToken) ?? '';
+  userName = await Preferences.getUserPreference(keyUserName) ?? '';
+  userId = await Preferences.getUserPreference(keyUserID) ?? '0';
   // userName = await Preferences.getUserPreference(keyUserName) ?? '';
   // String userIdString = await Preferences.getUserPreference(keyUserID) ?? '0';
   // userId = int.tryParse(userIdString) ?? 0;

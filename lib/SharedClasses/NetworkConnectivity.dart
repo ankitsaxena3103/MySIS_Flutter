@@ -11,7 +11,7 @@ class NetworkConnectivity {
   Stream get myStream => _controller.stream;
   // 1.
   void initialise() async {
-    ConnectivityResult result = await _networkConnectivity.checkConnectivity();
+    List<ConnectivityResult> result = (await _networkConnectivity.checkConnectivity()) ;
     _checkStatus(result);
     _networkConnectivity.onConnectivityChanged.listen((result) {
       print(result);
@@ -19,7 +19,7 @@ class NetworkConnectivity {
     });
   }
 // 2.
-  void _checkStatus(ConnectivityResult result) async {
+  void _checkStatus(List<ConnectivityResult> result) async {
     bool isOnline = false;
     try {
       final result = await InternetAddress.lookup('google.com');

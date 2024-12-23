@@ -6,6 +6,8 @@ import 'package:mysis/CommonViews/ToastMessageView.dart';
 import 'package:mysis/CommonViews/Utility.dart';
 import 'package:mysis/UserAuthViews/ConfirmPINView.dart';
 import 'package:flutter_otp_text_field/flutter_otp_text_field.dart';
+import 'package:otp_text_field/otp_field.dart';
+import 'package:otp_text_field/style.dart';
 
 class SetPINView extends StatefulWidget {
   const SetPINView({super.key});
@@ -90,7 +92,7 @@ class SetPINViewState extends State<SetPINView> {
                             decoration: const BoxDecoration(
                               shape: BoxShape.rectangle,
                               image: DecorationImage(
-                                image: AssetImage("assets/images/icons/logo@3x.png"),
+                                image: AssetImage("assets/images/icons/logo.png"),
                                 fit: BoxFit.cover,
                               ),
                             ),
@@ -102,7 +104,7 @@ class SetPINViewState extends State<SetPINView> {
                             decoration: const BoxDecoration(
                               shape: BoxShape.rectangle,
                               image: DecorationImage(
-                                image: AssetImage("assets/images/icons/icon@3x.png"),
+                                image: AssetImage("assets/images/icons/icon.png"),
                                 fit: BoxFit.cover,
                               ),
                             ),
@@ -183,58 +185,61 @@ class SetPINViewState extends State<SetPINView> {
                                   ),
                                 ),
                                 SizedBox(height: pathS / 12),
-                                // OTPTextField(
-                                //   length: 4,
-                                //   width: pathL * 1.2,
-                                //   fieldWidth: pathS / 2.2,
-                                //   obscureText: true,
-                                //
-                                //   keyboardType: TextInputType.number,
-                                //   style: TextStyle(
-                                //     color: isDarkMode ? whiteColor : greyColor6,
-                                //     fontSize: pathS / 3,
-                                //     fontFamily: 'Roboto',
-                                //   ),
-                                //   textFieldAlignment: MainAxisAlignment.spaceAround,
-                                //   fieldStyle: FieldStyle.underline,
-                                //
-                                //   onChanged: (pin) {
-                                //     print("OTP Entered: " + pin);
-                                //     txtUserPIN.text = pin;
-                                //     onUserIdChange(pin);
-                                //   },
-                                //   onCompleted: (pin) {
-                                //     print("OTP completed: " + pin);
-                                //   },
-                                // ),
-
-                                OtpTextField(
-                                  numberOfFields: 4,
+                                OTPTextField(
+                                  length: 4,
+                                  width: pathL * 1.2,
+                                  fieldWidth: pathS / 2.2,
                                   obscureText: true,
-                                  keyboardType: TextInputType.number,
-                                  borderColor: isDarkMode ? whiteColor:greyColor6,
-                                  focusedBorderColor: Colors.blue,
-                                  styles: PINTextStyle(
-                                      isDarkMode ? whiteColor : greyColor6,
-                                      4,
-                                  ),
-                                  showFieldAsBox: false,
-                                  borderWidth: 2.0,
-                                  fieldWidth: pathS/2.5,
-                                  //runs when a code is typed in
-                                  onCodeChanged: (String code) {
-                                    print("OTP entered: " + code);
 
-                                    onUserIdChange(code);
-                                  },
-                                  //runs when every textfield is filled
-                                  onSubmit: (String pin) {
+                                  keyboardType: TextInputType.number,
+                                  style: TextStyle(
+                                    color: isDarkMode ? whiteColor : greyColor6,
+                                    fontSize: pathS / 5,
+                                    fontFamily: 'Roboto',
+                                  ),
+                                  textFieldAlignment: MainAxisAlignment.spaceAround,
+                                  fieldStyle: FieldStyle.underline,
+
+                                  onChanged: (pin) {
+                                    print("OTP Entered: " + pin);
                                     txtUserPIN.text = pin;
                                     onUserIdChange(pin);
+                                  },
+                                  onCompleted: (pin) {
                                     print("OTP completed: " + pin);
 
+                                    // txtUserPIN.text = pin;
+                                    // onUserIdChange(pin);
                                   },
                                 ),
+
+                                // OtpTextField(
+                                //   numberOfFields: 4,
+                                //   obscureText: true,
+                                //   keyboardType: TextInputType.number,
+                                //   borderColor: isDarkMode ? whiteColor:greyColor6,
+                                //   focusedBorderColor: Colors.blue,
+                                //   styles: PINTextStyle(
+                                //       isDarkMode ? whiteColor : greyColor6,
+                                //       4,
+                                //   ),
+                                //   showFieldAsBox: false,
+                                //   borderWidth: 2.0,
+                                //   fieldWidth: pathS/2.5,
+                                //   //runs when a code is typed in
+                                //   onCodeChanged: (String code) {
+                                //     print("OTP entered: " + code);
+                                //
+                                //     onUserIdChange(code);
+                                //   },
+                                //   //runs when every textfield is filled
+                                //   onSubmit: (String pin) {
+                                //     txtUserPIN.text = pin;
+                                //     onUserIdChange(pin);
+                                //     print("OTP completed: " + pin);
+                                //
+                                //   },
+                                // ),
 
 
                               ],

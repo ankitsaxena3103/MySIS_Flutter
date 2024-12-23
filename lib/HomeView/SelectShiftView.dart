@@ -7,13 +7,15 @@ import 'package:image_picker/image_picker.dart';
 import 'package:mysis/CommonViews/Utility.dart';
 import 'package:easy_localization/easy_localization.dart';
 import 'package:mysis/HomeView/SubmitDutyView.dart';
+import 'package:mysis/Profile/UserProfile.dart';
 
 import '../CommonViews/ToastMessageView.dart';
 
 class SelectShiftView extends StatefulWidget {
 
-  final name;
+  final UserProfile userProfile;
   final regNo;
+
   final designation;
   final location;
   final post;
@@ -22,13 +24,13 @@ class SelectShiftView extends StatefulWidget {
   SelectShiftView(
       {
         super.key,
-        required this.name,
         required this.designation,
         this.regNo,
         this.location,
 
         this.post,
-        this.postRank
+        this.postRank,
+        required this.userProfile
       });
   @override
   SelectShiftViewState createState() => SelectShiftViewState();
@@ -64,9 +66,12 @@ class SelectShiftViewState extends State<SelectShiftView>{
   ];
   bool showToastMessageView = false;
   String toastMessage = '';
+  String name  = '';
+  String position  = '';
 
   @override
   void initState() {
+    onLoadUpdateUI();
     initialSetup();
     super.initState();
 
@@ -150,7 +155,7 @@ class SelectShiftViewState extends State<SelectShiftView>{
                                           crossAxisAlignment: CrossAxisAlignment.start,
                                           children: [
                                             Text(
-                                              widget.name,
+                                              name,
                                               style: TextStyle(
                                                 color: isDarkMode ? whiteColor : greyColor6,
                                                 fontSize: pathS / 4.5,
@@ -161,7 +166,7 @@ class SelectShiftViewState extends State<SelectShiftView>{
                                               overflow: TextOverflow.ellipsis,
                                             ),
                                             Text(
-                                              widget.designation,
+                                              position,
                                               style: TextStyle(
                                                 color: isDarkMode ? whiteColor : greyColor6,
                                                 fontSize: pathS / 6.5,
@@ -417,6 +422,14 @@ void initialSetup(){
 }
 
 
+  void onLoadUpdateUI(){
+
+    imagePath = widget.userProfile.profileImageUrl;
+    name = widget.userProfile.empName;
+    position = widget.userProfile.symbol;
+
+  }
+
   void onTapProceed(){
 
     if(selectedIndex <  0){
@@ -447,7 +460,7 @@ void initialSetup(){
     Navigator.push(
       context,
       MaterialPageRoute(
-        builder: (context) => SubmitDutyView(name: widget.name, designation: widget.designation, regNo: widget.regNo, location: widget.location, shift: shift[selectedIndex],post: widget.post,postRank: widget.postRank,imageData: data),
+        builder: (context) => SubmitDutyView(  regNo: widget.regNo, location: widget.location, shift: shift[selectedIndex],post: widget.post,postRank: widget.postRank,imageData: data,  userProfile: widget.userProfile,),
       ),
     );
   }
@@ -463,6 +476,8 @@ void initialSetup(){
       });
     });
   }
+
+
 
 }
 

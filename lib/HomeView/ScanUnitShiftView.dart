@@ -4,17 +4,17 @@ import 'package:flutter_barcode_scanner/flutter_barcode_scanner.dart';
 import 'package:mysis/CommonViews/Utility.dart';
 import 'package:easy_localization/easy_localization.dart';
 import 'package:mysis/HomeView/SelectShiftView.dart';
+import 'package:mysis/Profile/UserProfile.dart';
 
 class ScanUnitShiftView extends StatefulWidget {
 
-  final name;
-  final designation;
+  final UserProfile userProfile;
 
   ScanUnitShiftView(
       {
         super.key,
-        required this.name,
-        required this.designation
+        required this.userProfile,
+
       });
   @override
   ScanUnitShiftViewState createState() => ScanUnitShiftViewState();
@@ -24,8 +24,15 @@ class ScanUnitShiftViewState extends State<ScanUnitShiftView>{
   String assetsImagePath = "assets/images/dashboard-icons/profile-icon.png";
   String imagePath = '';
   bool noData = true;
+
+  String name  = '';
+  String position  = '';
+
+
   @override
   void initState() {
+
+    onLoadUpdateUI();
     super.initState();
 
   }
@@ -103,7 +110,7 @@ class ScanUnitShiftViewState extends State<ScanUnitShiftView>{
                                     crossAxisAlignment: CrossAxisAlignment.start,
                                     children: [
                                       Text(
-                                        widget.name,
+                                        name,
                                         style: TextStyle(
                                           color: isDarkMode ? whiteColor : greyColor6,
                                           fontSize: pathS / 5,
@@ -113,7 +120,7 @@ class ScanUnitShiftViewState extends State<ScanUnitShiftView>{
                                         textAlign: TextAlign.left,
                                       ),
                                       Text(
-                                        widget.designation,
+                                        position,
                                         style: TextStyle(
                                           color: isDarkMode ? whiteColor : greyColor6,
                                           fontSize: pathS / 6.5,
@@ -244,14 +251,21 @@ class ScanUnitShiftViewState extends State<ScanUnitShiftView>{
     );
   }
 
-  
   void onLoadSelectShift(){
     Navigator.push(
       context,
       MaterialPageRoute(
-        builder: (context) => SelectShiftView(name: 'Raj Kumar Singh',regNo:'ABC 562314 ' , designation: 'Assistent Manager',location: 'AXIS BANK DLE UNT 12345',post: 'MAIN GATE',postRank: 'SO Rank',),
+        builder: (context) => SelectShiftView(regNo:'ABC 562314 ' , designation: 'Assistent Manager',location: 'AXIS BANK DLE UNT 12345',post: 'MAIN GATE',postRank: 'SO Rank', userProfile: widget.userProfile,),
       ),
     );
+  }
+
+  void onLoadUpdateUI(){
+
+    imagePath = widget.userProfile.profileImageUrl;
+    name = widget.userProfile.empName;
+    position = widget.userProfile.symbol;
+
   }
 
 

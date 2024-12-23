@@ -122,7 +122,7 @@ class DutyViewState extends State<DutyView> {
                                 decoration: const BoxDecoration(
                                   shape: BoxShape.rectangle,
                                   image: DecorationImage(
-                                    image: AssetImage("assets/images/icons/logo@3x.png"),
+                                    image: AssetImage("assets/images/icons/logo.png"),
                                     fit: BoxFit.cover,
                                   ),
                                 ),
@@ -134,7 +134,7 @@ class DutyViewState extends State<DutyView> {
                                 decoration: const BoxDecoration(
                                   shape: BoxShape.rectangle,
                                   image: DecorationImage(
-                                    image: AssetImage("assets/images/icons/icon@3x.png"),
+                                    image: AssetImage("assets/images/icons/icon.png"),
                                     fit: BoxFit.cover,
                                   ),
                                 ),

@@ -9,6 +9,8 @@ import 'package:mysis/CommonViews/Utility.dart';
 import 'package:mysis/UserAuthViews/SetPINView.dart';
 import 'package:easy_localization/easy_localization.dart';
 import 'package:mysis/SharedClasses/ThemeProvider.dart';
+import 'package:otp_text_field/otp_field.dart';
+import 'package:otp_text_field/style.dart';
 import 'package:provider/provider.dart';
 
 class EnterPINView extends StatefulWidget {
@@ -86,7 +88,7 @@ class EnterPINViewState extends State<EnterPINView> {
                               decoration: const BoxDecoration(
                                 shape: BoxShape.rectangle,
                                 image: DecorationImage(
-                                  image: AssetImage("assets/images/icons/logo@3x.png"),
+                                  image: AssetImage("assets/images/icons/logo.png"),
                                   fit: BoxFit.cover,
                                 ),
                               ),
@@ -98,7 +100,7 @@ class EnterPINViewState extends State<EnterPINView> {
                               decoration: const BoxDecoration(
                                 shape: BoxShape.rectangle,
                                 image: DecorationImage(
-                                  image: AssetImage("assets/images/icons/icon@3x.png"),
+                                  image: AssetImage("assets/images/icons/icon.png"),
                                   fit: BoxFit.cover,
                                 ),
                               ),
@@ -183,33 +185,60 @@ class EnterPINViewState extends State<EnterPINView> {
                                       ),
                                     ),
                                     SizedBox(height: pathS / 12),
-
-                                    OtpTextField(
-                                      numberOfFields: 4,
+                                    OTPTextField(
+                                      length: 4,
+                                      width: pathL * 1.2,
+                                      fieldWidth: pathS / 2.2,
                                       obscureText: true,
+
                                       keyboardType: TextInputType.number,
-                                      borderColor: isDarkMode ? whiteColor : greyColor6,
-                                      focusedBorderColor: Colors.blue,
-                                      styles: PINTextStyle(
-                                        isDarkMode ? whiteColor : greyColor6,
-                                        4,
+                                      style: TextStyle(
+                                        color: isDarkMode ? whiteColor : greyColor6,
+                                        fontSize: pathS / 5,
+                                        fontFamily: 'Roboto',
                                       ),
-                                      showFieldAsBox: false,
-                                      borderWidth: 2.0,
-                                      fieldWidth: pathS/2.5,
-                                      //runs when a code is typed in
-                                      onCodeChanged: (String pin) {
+                                      textFieldAlignment: MainAxisAlignment.spaceAround,
+                                      fieldStyle: FieldStyle.underline,
 
-
-                                      },
-                                      //runs when every textfield is filled
-                                      onSubmit: (String pin) {
+                                      onChanged: (pin) {
+                                        print(" Entered PIN : " + pin);
                                         txtEnterPIN.text = pin;
-                                        onUserIdChange(pin);
+                                        onPINChange(pin);
+                                      },
+                                      onCompleted: (pin) {
                                         print("OTP completed: " + pin);
 
+                                        // txtUserPIN.text = pin;
+                                        // onUserIdChange(pin);
                                       },
                                     ),
+
+                                    // OtpTextField(
+                                    //   numberOfFields: 4,
+                                    //   obscureText: true,
+                                    //   keyboardType: TextInputType.number,
+                                    //   borderColor: isDarkMode ? whiteColor : greyColor6,
+                                    //   focusedBorderColor: Colors.blue,
+                                    //   styles: PINTextStyle(
+                                    //     isDarkMode ? whiteColor : greyColor6,
+                                    //     4,
+                                    //   ),
+                                    //   showFieldAsBox: false,
+                                    //   borderWidth: 2.0,
+                                    //   fieldWidth: pathS/2.5,
+                                    //   //runs when a code is typed in
+                                    //   onCodeChanged: (String pin) {
+                                    //
+                                    //
+                                    //   },
+                                    //   //runs when every textfield is filled
+                                    //   onSubmit: (String pin) {
+                                    //     txtEnterPIN.text = pin;
+                                    //     onUserIdChange(pin);
+                                    //     print("OTP completed: " + pin);
+                                    //
+                                    //   },
+                                    // ),
                                   ],
                                 ),
                               ),
@@ -235,7 +264,7 @@ class EnterPINViewState extends State<EnterPINView> {
                         SizedBox(height: pathS/2),
                         GestureDetector(
                           onTap: (){
-                            onTapLogin();
+                            onTapNext();
 
                           },
                           child: Container(
@@ -324,7 +353,7 @@ class EnterPINViewState extends State<EnterPINView> {
 
   void initialSetup() {}
 
-  Future<void> onUserIdChange(String enteredPIN) async {
+  Future<void> onPINChange(String enteredPIN) async {
 
     String? currentPIN = await Preferences.getUserPreference(keyPIN);
 
@@ -359,7 +388,7 @@ class EnterPINViewState extends State<EnterPINView> {
   }
 
 
-  Future<void> onTapLogin() async {
+  Future<void> onTapNext() async {
     if (txtEnterPIN.text.isEmpty || txtEnterPIN.text.length != 4) {
       showToastView('repeat_not_match'.tr());
       return;

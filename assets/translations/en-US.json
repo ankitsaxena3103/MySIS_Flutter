@@ -81,7 +81,7 @@
   "reason_for_leaves_txt": "Reason For Leaves:",
   "sign_in": "Sign In",
   "next": "Next",
-  "change": "CHANGE",
+  "change": "Change",
   "enter_mobile_no": "Enter Mobile / Registration No.",
   "enter_Registration_no": "Enter Registration No",
   "repeat_not_match": "Not match. Please enter valid PIN",
@@ -601,7 +601,12 @@
   "no_leave_status" : "No Application Status",
   "no_leave_available" : "You have no application status right now",
   "no_notifications_available" : "You have no notifications right now. Come back later",
-  "duty_time_left" : "mins left for your duty"
+  "duty_time_left" : "Mins left for your duty",
+
+  "active_shifts" : "Active Shifts",
+  "active_posts" : "Active Posts",
+  "post": "Post",
+  "unit_commander" : "Unit Commander"
 
 }
 
