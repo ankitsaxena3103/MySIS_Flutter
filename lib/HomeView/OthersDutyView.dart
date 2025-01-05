@@ -3,6 +3,7 @@
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
+import 'package:mysis/Profile/UserProfile.dart';
 import 'package:mysis/SharedClasses/APIHelper.dart';
 import 'package:mysis/CommonViews/CustomAlertView.dart';
 import 'package:mysis/MyTabBarView.dart';
@@ -18,13 +19,27 @@ import 'package:easy_localization/easy_localization.dart';
 import 'package:mysis/SharedClasses/ThemeProvider.dart';
 import 'package:provider/provider.dart';
 
+import '../Profile/UnitDutyPost.dart';
+import '../Profile/UnitShiftDetail.dart';
+import '../Profile/UserPosting.dart';
 import 'ConfirmProfileView.dart';
 import 'ScanCardView.dart';
 
 class OthersDutyView extends StatefulWidget {
-  OthersDutyView(
+  final UserProfile userProfile;
+  final String attendanceMode;
+  final List<UnitDutyPost> unitDutyPosts;
+  final List<UnitShiftDetail> unitShiftDetails;
+  final List<UserPosting> userPostings;
+
+  const OthersDutyView(
       {
         super.key,
+        required this.userProfile,
+        required this.attendanceMode,
+        required this.unitDutyPosts,
+        required this.unitShiftDetails,
+        required this.userPostings,
         // required this.username,
       });
 
@@ -156,7 +171,14 @@ class OthersDutyViewState extends State<OthersDutyView> {
                                 Navigator.push(
                                   context,
                                   MaterialPageRoute(
-                                    builder: (context) => ScanCardView(),
+                                    builder: (context) => ScanCardView(
+                                        userProfile: widget.userProfile,
+                                        attendanceMode: widget.attendanceMode,
+                                      unitDutyPosts: widget.unitDutyPosts,
+                                      unitShiftDetails: widget.unitShiftDetails,
+                                      userPostings: widget.userPostings,
+                                      attendanceStatus: keyAttendanceStatusDutyIn,
+                                    ),
                                   ),
                                 );
 
@@ -191,6 +213,19 @@ class OthersDutyViewState extends State<OthersDutyView> {
 
                             GestureDetector(
                               onTap: (){
+                                Navigator.push(
+                                  context,
+                                  MaterialPageRoute(
+                                    builder: (context) => ScanCardView(
+                                      userProfile: widget.userProfile,
+                                      attendanceMode: widget.attendanceMode,
+                                      unitDutyPosts: widget.unitDutyPosts,
+                                      unitShiftDetails: widget.unitShiftDetails,
+                                      userPostings: widget.userPostings,
+                                      attendanceStatus: keyAttendanceStatusDutyOut,
+                                    ),
+                                  ),
+                                );
 
 
                               },

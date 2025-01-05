@@ -1,10 +1,15 @@
 
 // import 'dart:html';
+import 'dart:async';
+
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:connectivity_plus/connectivity_plus.dart';
 import 'package:flutter/cupertino.dart';
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:mysis/HomeView/DutyAlertView.dart';
+import 'package:mysis/HomeView/ScanUnitShiftView.dart';
+import 'package:mysis/HomeView/UserAttendance.dart';
 import 'package:mysis/HomeView/UserRoaster.dart';
 import 'package:mysis/Profile/ProfileView.dart';
 import 'package:mysis/CommonViews/LoaderView.dart';
@@ -12,18 +17,21 @@ import 'package:mysis/SharedClasses/LanguageProvider.dart';
 import 'package:mysis/CommonViews/Utility.dart';
 import 'package:easy_localization/easy_localization.dart';
 import 'package:mysis/SharedClasses/ThemeProvider.dart';
+import 'package:mysis/UserAuthViews/LoginView.dart';
 import 'package:provider/provider.dart';
 
+import '../Profile/UnitDutyPost.dart';
+import '../Profile/UnitShiftDetail.dart';
+import '../Profile/UserPosting.dart';
 import '../Profile/UserProfile.dart';
 import '../SharedClasses/APIHelper.dart';
 import '../SharedClasses/DatabaseHelper.dart';
 import '../SharedClasses/NetworkConnectivity.dart';
 import 'OthersDutyView.dart';
-import 'ScanCardView.dart';
 
 class HomeView extends StatefulWidget {
   final Function(int) onTabSelected;
-  HomeView(
+  const HomeView(
       {
     super.key,
     // required this.username,
@@ -41,36 +49,46 @@ class HomeViewState extends State<HomeView> {
   String assetsImagePath = "assets/images/dashboard-icons/profile-icon.png";
   String exclamationImage = isDarkMode ? "assets/images/dashboard-icons/exclamation-icon.png" : "assets/images/dashboard-icons/exclamation-red.png";
   String imagePath = '';
-  bool isAttendanceMarked = false;
-  String attendanceTime = '06:12';
-  String dutyShiftName = '8 Hrs Morning';
-  String siteName = 'IL & FS Environmental Infrastructure & Services Limited';
-  String unitCode = 'DLE UNT 12345';
-  String postName = 'Maingate SS';
-  String currentDutyStartTime = '19:00:00';
-  String postGeoLocation = '';
-  DateTime dutyTime = DateTime.now();
+  bool todayDutyInMarked = false;
+  bool todayDutyOutMarked = false;
 
+  String dutyInHourBannner = '';
+  String dutyInBtnText = 'duty_in'.tr();
+  String dutyOutBtnText = 'duty_out'.tr();
+
+  String dutyShiftName = '';
+  String siteName = '';
+  String unitCode = '';
+  String postName = '';
+  String currentDutyStartTime = '';
+  String postGeoLocation = '';
+  List<UserRoaster> todaysRoster = [];
+  List<UserRoaster> monthlyRosters = [];
+
+  List<UserAttendance> todayAttendance = [];
+
+  DateTime dutyTime = DateTime.now();
 
   Color dutyInBgColor = redColor3;
   Color dutyInFontColor = whiteColor;
   Color dutyInShadowColor = Colors.black.withOpacity(0.2);
-
+  bool isDutyInTapEnabled = true;
 
   Color dutyOutBgColor = isDarkMode? greyColor5:greyColor1;
   Color dutyOutFontColor = isDarkMode? greyColor7:greyColor4;
   Color dutyOutShadowColor = Colors.transparent;
+  bool isDutyOutTapEnabled = false;
 
   String shift = 'shift_a_txt'.tr();
 
-  String userName = 'Rajkumar Singh';
-  String degination = 'ASSISTANT ASSESSMENT MANAGER | ABC124563';
+  String userName = '';
+  String designation = '';
   String description = '';
   String areaOfficeName = '';
 
-  String presentDays = "10.625";
-  String leaves = '53.235';
-  String extraDays = '11.245';
+  String presentDays = "";
+  String leaves = '';
+  String extraDays = '';
 
   DateTime _focusedDay = DateTime.now();
 
@@ -83,21 +101,15 @@ class HomeViewState extends State<HomeView> {
 
   List <UserRoaster> userRoasters = [];
 
+  List <UserAttendance> userAttendance = [];
 
-  @override
-  void initState() {
-    super.initState();
+  List<UserPosting> userPostings = [];
+  List<UnitDutyPost> unitDutyPosts = [];
+  List<UnitShiftDetail> unitShiftDetails = [];
 
-    // Future.delayed(Duration(milliseconds: 3), () {
-    //   onLoadDutyAlert();
-    // });
+  Timer? dutyOutTimer;
+  Timer? dutyInTimer;
 
-    initialSetup();
-    connection.myStream.listen((_source) {
-      source = _source;
-      onConnectionChange();
-    });
-  }
 
   @override
   Widget build(BuildContext context) {
@@ -156,7 +168,7 @@ class HomeViewState extends State<HomeView> {
                       ),
                     ),//header logo
 
-                   if(!isAttendanceMarked) Positioned(
+                   if(!todayDutyInMarked ) Positioned(
                       top: MediaQuery.of(context).padding.top+pathS/1.2,
                       left: paddingLeft,
                       child: Container(
@@ -201,7 +213,7 @@ class HomeViewState extends State<HomeView> {
                               SizedBox(width: pathS/5),
                               Container(
                                 width: 1.7*pathL,
-                                
+
                                 child: Text(
                                   'attendance_not_marked'.tr(),
                                   style: TextStyle(
@@ -221,59 +233,72 @@ class HomeViewState extends State<HomeView> {
                         ),
                       ),
                     ),//Attendance not marked
-                    if(isAttendanceMarked) Positioned(
+                    if(todayDutyInMarked ) Positioned(
                       top: MediaQuery.of(context).padding.top+pathS/1.2,
                       left: paddingLeft,
                       child: Container(
                         width: logicalWidth,
                         height: pathS/1.2,
-                        color: isDarkMode ?  greenColor5:greenColor1,
+                        color: isDarkMode ?  greenColor2:greenColor1,
                         child: Padding(
-                          padding: EdgeInsets.only(top: 0, bottom: 0,left: pathS/5,right: pathS/5), // Adjust the padding values as needed
+                          padding: EdgeInsets.only(top: 0, bottom: 0,left: pathS/3,right: pathS/5), // Adjust the padding values as needed
                           child: Row(
                             mainAxisAlignment: MainAxisAlignment.start,
                             children: [
 
-                              Column(
-                                mainAxisAlignment: MainAxisAlignment.center,
-                                children: [
-                                  Text(
-                                    attendanceTime,
-                                    style: TextStyle(
-                                      color: isDarkMode ? whiteColor:greenColor6,
-                                      fontSize: pathS / 3,
-                                      fontWeight: FontWeight.bold,
-                                      fontFamily: 'Roboto',
+                              Padding(
+                                padding: EdgeInsets.only(top: pathS/10), // Adjust the padding values as needed
+                                child: Column(
+                                  mainAxisAlignment: MainAxisAlignment.start,
+                                  crossAxisAlignment: CrossAxisAlignment.start,
+                                  children: [
+                                    Text(
+                                      dutyInHourBannner,
+                                      style: TextStyle(
+                                        color: isDarkMode ? greenColor6:greenColor6,
+                                        fontSize: pathS / 3.8,
+                                        fontWeight: FontWeight.w900,
+                                        fontFamily: 'Roboto',
+                                      ),
+                                      textAlign: TextAlign.left,
                                     ),
-                                    textAlign: TextAlign.left,
-
-
-                                  ),
-                                  Text(
-                                    'hours'.tr() +"     "+ 'minutes'.tr(),
-                                    style: TextStyle(
-                                      color: isDarkMode ? whiteColor:greyColor4,
-                                      fontSize: pathS / 6,
-                                      fontWeight: FontWeight.bold,
-                                      fontFamily: 'Roboto',
+                                    Row(
+                                      children: [
+                                        SizedBox(width: pathS/20),
+                                        Text(
+                                          'HR',
+                                          style: TextStyle(
+                                            color: isDarkMode ? greyColor6:greyColor6,
+                                            fontSize: pathS / 7,
+                                            fontWeight: FontWeight.w300,
+                                            fontFamily: 'Roboto',
+                                          ),
+                                          textAlign: TextAlign.right,
+                                        ),
+                                        SizedBox(width: pathS/5),
+                                        Text(
+                                           'MIN',
+                                          style: TextStyle(
+                                            color: isDarkMode ? greyColor6:greyColor6,
+                                            fontSize: pathS / 7,
+                                            fontWeight: FontWeight.w300,
+                                            fontFamily: 'Roboto',
+                                          ),
+                                          textAlign: TextAlign.left,
+                                        ),
+                                      ],
                                     ),
-                                    textAlign: TextAlign.left,
-
-
-                                  ),
-                                ],
+                                  ],
+                                ),
                               ),
-
-
                               SizedBox(width: pathS/5),
-                              Container(
-                                width: 1.85*pathL,
+                              SizedBox(
                                 child: Text(
                                   'attendance_marked'.tr(),
                                   style: TextStyle(
-                                    color: isDarkMode ? whiteColor:greenColor6,
+                                    color: isDarkMode ? greenColor6:greenColor6,
                                     fontSize: pathS / 5.5,
-                                    fontWeight: FontWeight.w500,
+                                    fontWeight: FontWeight.w700,
                                     fontFamily: 'Roboto',
                                   ),
                                   textAlign: TextAlign.left,
@@ -298,11 +323,11 @@ class HomeViewState extends State<HomeView> {
                       children: [
                         SizedBox(
                           width: screenWidth,
-                          height: pathS/5,
+                          height: 1,
 
                         ),
-                        Container(
-                          height: screenHeight- 4.2*pathS/1.2-MediaQuery.of(context).padding.top-MediaQuery.of(context).padding.bottom,
+                        SizedBox(
+                          height: screenHeight- 4*pathS/1.2 -marginValue,
                           child: SingleChildScrollView(
                             scrollDirection: Axis.vertical,
                             child: Column(
@@ -390,10 +415,10 @@ class HomeViewState extends State<HomeView> {
 
                                   ),
                                 ),//internet
-                                SizedBox(height: pathS/5),
+                                // SizedBox(height: pathS/5),
 
                                 //current day duty ui
-                                Container(
+                                if(todaysRoster.isNotEmpty)Container(
                                   width: screenWidth-2.5*marginValue,
                                   height: pathL*2.8,
                                   decoration:  BoxDecoration(
@@ -425,14 +450,14 @@ class HomeViewState extends State<HomeView> {
                                                     decoration: BoxDecoration(
                                                       shape: BoxShape.rectangle,
                                                       borderRadius: BorderRadius.circular(pathS / 15),
-                                                      color: isDarkMode ?  greenColor5:greenColor1,
+                                                      color: isDarkMode ?  greenColor1:greenColor1,
                                                     ),
                                                     child:Padding(
                                                       padding: EdgeInsets.only(left: pathS/5, top: pathS/10,right: pathS/5,bottom: pathS/10), // Adjust top and left as needed
                                                       child: Text(
                                                         'current_duty_txt'.tr(),
                                                         style: TextStyle(
-                                                          color: isDarkMode ?  greyColor7:greenColor6,
+                                                          color: isDarkMode ?  greenColor6:greenColor6,
                                                           fontSize: pathS / 5.5,
                                                           fontWeight: FontWeight.bold,
                                                           fontFamily: 'Roboto',
@@ -449,14 +474,14 @@ class HomeViewState extends State<HomeView> {
                                                         topLeft: Radius.circular(pathS / 15), // Adjust as needed
                                                         bottomLeft: Radius.circular(pathS / 15), // Adjust as needed
                                                       ),
-                                                      color: isDarkMode ?  greenColor5:greenColor1,
+                                                      color: isDarkMode ?  greenColor1:greenColor1,
                                                     ),
                                                     child:Padding(
                                                       padding: EdgeInsets.only(left: pathS/5, top: pathS/10,right: pathS/8,bottom: pathS/10), // Adjust top and left as needed
                                                       child: Text(
                                                         dutyShiftName,
                                                         style: TextStyle(
-                                                          color: isDarkMode ?  greyColor7:greenColor6,
+                                                          color: isDarkMode ?  greenColor6:greenColor6,
                                                           fontSize: pathS / 5.5,
                                                           fontWeight: FontWeight.bold,
                                                           fontFamily: 'Roboto',
@@ -522,7 +547,7 @@ class HomeViewState extends State<HomeView> {
                                                 mainAxisAlignment: MainAxisAlignment.center,
                                                 children: [
                                                   Text(
-                                                    formatInHrs(currentDutyStartTime,"h:mm"),
+                                                    getFormattedTime(currentDutyStartTime,"h:mm"),
                                                     style: TextStyle(
                                                       color: isDarkMode ?  whiteColor:greyColor7,
                                                       fontSize: pathS / 1.6,
@@ -533,7 +558,7 @@ class HomeViewState extends State<HomeView> {
                                                   ),
                                                   SizedBox(width: pathS/8),
                                                   Text(
-                                                    formatInHrs(currentDutyStartTime,"a").toUpperCase(),
+                                                    getFormattedTime(currentDutyStartTime,"a").toUpperCase(),
 
                                                     style: TextStyle(
                                                       color: isDarkMode ?  greyColor1:greyColor4,
@@ -558,16 +583,25 @@ class HomeViewState extends State<HomeView> {
                                             mainAxisAlignment: MainAxisAlignment.center,
                                             children: [
                                               GestureDetector(
-                                                onTap: (){
-
+                                                onTap: isDutyInTapEnabled
+                                                    ? () {
                                                   Navigator.push(
                                                     context,
                                                     MaterialPageRoute(
-                                                      builder: (context) => ScanCardView(),
+                                                      builder: (context) => ScanUnitShiftView(
+                                                          userProfile: userProfile.first,
+                                                          attendanceMode: keyAttendanceModeSelf,
+                                                        unitDutyPosts: unitDutyPosts,
+                                                        unitShiftDetails: unitShiftDetails,
+                                                        userPostings: userPostings,
+                                                        attendanceStatus: keyAttendanceStatusDutyIn,
+
+                                                      ),
                                                     ),
                                                   );
-
-                                                },
+                                                }
+                                                    : null,
+                                                // Disable tap if isTapEnabled is false
                                                 child: Container(
                                                   width: pathL,
                                                   height: pathS / 1.5,
@@ -585,7 +619,7 @@ class HomeViewState extends State<HomeView> {
                                                     ],
                                                   ),
                                                   child: Text(
-                                                    'duty_in'.tr(),
+                                                  dutyInBtnText,
                                                     style: TextStyle(
                                                       color: dutyInFontColor,
                                                       fontSize: pathS / 4.5,
@@ -597,16 +631,28 @@ class HomeViewState extends State<HomeView> {
                                               ),
                                               SizedBox(width: pathS/5),
                                               GestureDetector(
-                                                onTap: (){
-
-
-                                                },
+                                                  onTap: isDutyOutTapEnabled ?  () {
+                                                      Navigator.push(
+                                                      context,
+                                                      MaterialPageRoute(
+                                                          builder: (context) => ScanUnitShiftView(
+                                                              userProfile: userProfile.first,
+                                                              attendanceMode: keyAttendanceModeSelf,
+                                                            unitDutyPosts: unitDutyPosts,
+                                                            unitShiftDetails: unitShiftDetails,
+                                                            userPostings: userPostings,
+                                                            attendanceStatus: keyAttendanceStatusDutyOut,
+                                                          ),
+                                                           ),
+                                                         );
+                                                      }
+                                                          : null,
                                                 child: Container(
                                                   width: pathL,
                                                   height: pathS / 1.5,
                                                   alignment: Alignment.center,
                                                   decoration: BoxDecoration(
-                                                    color: isDarkMode? greyColor5:greyColor1,                          // border: Border.all(color: Colors.yellow, width: pathS/18),
+                                                    color: dutyOutBgColor,                          // border: Border.all(color: Colors.yellow, width: pathS/18),
                                                     borderRadius: BorderRadius.circular(pathS/3),
                                                     boxShadow: [
                                                       BoxShadow(
@@ -618,9 +664,9 @@ class HomeViewState extends State<HomeView> {
                                                     ],
                                                   ),
                                                   child: Text(
-                                                    'duty_out'.tr(),
+                                                    dutyOutBtnText,
                                                     style: TextStyle(
-                                                      color: isDarkMode? greyColor7:greyColor4,
+                                                      color: dutyOutFontColor,
                                                       fontSize: pathS / 4.5,
                                                       fontWeight: FontWeight.w600,
                                                       fontFamily: 'Roboto',
@@ -698,170 +744,183 @@ class HomeViewState extends State<HomeView> {
                                   ),
 
                                 ),//duty in out
-                                SizedBox(height: pathS/5),
-                                Container(
-                                  width: screenWidth-2.5*marginValue,
-                                  // height: pathL*2,
-                                  decoration:  BoxDecoration(
-                                    shape: BoxShape.rectangle,
-                                    borderRadius: BorderRadius.circular(pathS/8),
-                                    color: isDarkMode?greyColor8:Colors.white,
-                                    boxShadow: [
-                                      BoxShadow(
-                                        color: Colors.black.withOpacity(0.1), // Shadow color
-                                        blurRadius: pathS/10, // Spread of the shadow
-                                        // spreadRadius: pathS/15, // How far the shadow extends
-                                        offset:  Offset(-pathS/12, pathS/12),
-                                      ),
-                                    ],
-                                  ),
-                                  child: Stack(
-                                    alignment: Alignment.topLeft,
-                                    children: [
-                                      Padding(
-                                        padding: EdgeInsets.only(left: pathS/4, top: pathS/4), // Adjust top and left as needed
-                                        child: Align(
-                                          alignment: Alignment.topLeft,
-                                          child: Column(
-                                            crossAxisAlignment: CrossAxisAlignment.start,
+                                if(todaysRoster.isNotEmpty)SizedBox(height: pathS/5),
+
+                                Column(
+                                  crossAxisAlignment: CrossAxisAlignment.start,
+                                  children: monthlyRosters.map((monthlyRoaster) {
+                                    return  Column(
+                                      children: [
+                                        Container(
+                                          width: screenWidth-2.5*marginValue,
+                                          // height: pathL*2,
+                                          decoration:  BoxDecoration(
+                                            shape: BoxShape.rectangle,
+                                            borderRadius: BorderRadius.circular(pathS/8),
+                                            color: isDarkMode?greyColor8:Colors.white,
+                                            boxShadow: [
+                                              BoxShadow(
+                                                color: Colors.black.withOpacity(0.1), // Shadow color
+                                                blurRadius: pathS/10, // Spread of the shadow
+                                                // spreadRadius: pathS/15, // How far the shadow extends
+                                                offset:  Offset(-pathS/12, pathS/12),
+                                              ),
+                                            ],
+                                          ),
+                                          child: Stack(
+                                            alignment: Alignment.topLeft,
                                             children: [
-                                              Row(
-                                                children: [
-                                                  Container(
-                                                    decoration: BoxDecoration(
-                                                      shape: BoxShape.rectangle,
-                                                      borderRadius: BorderRadius.circular(pathS / 15),
-                                                      color: isDarkMode ?  yellowColor2:yellowColor1,
-                                                    ),
-                                                    child:Padding(
-                                                      padding: EdgeInsets.only(left: pathS/5, top: pathS/10,right: pathS/5,bottom: pathS/10), // Adjust top and left as needed
-                                                      child: Text(
-                                                        'next_duty'.tr(),
-                                                        style: TextStyle(
-                                                          color: isDarkMode ? greyColor7:brownColor,
-                                                          fontSize: pathS / 5.5,
-                                                          fontWeight: FontWeight.bold,
-                                                          fontFamily: 'Roboto',
-                                                        ),
-                                                        textAlign: TextAlign.center,
-                                                      ),
-                                                    ),
-                                                  ),
-                                                  Spacer(),
-                                                  Container(
-                                                    decoration: BoxDecoration(
-                                                      shape: BoxShape.rectangle,
-                                                      borderRadius: BorderRadius.only(
-                                                        topLeft: Radius.circular(pathS / 15), // Adjust as needed
-                                                        bottomLeft: Radius.circular(pathS / 15), // Adjust as needed
-                                                      ),
-                                                      color: isDarkMode ?  yellowColor2:yellowColor1,
-                                                    ),
-                                                    child:Padding(
-                                                      padding: EdgeInsets.only(left: pathS/5, top: pathS/10,right: pathS/8,bottom: pathS/10), // Adjust top and left as needed
-                                                      child: Text(
-                                                        shift,
-                                                        style: TextStyle(
-                                                          color: isDarkMode ? greyColor7:brownColor,
-                                                          fontSize: pathS / 5.5,
-                                                          fontWeight: FontWeight.bold,
-                                                          fontFamily: 'Roboto',
-                                                        ),
-                                                        textAlign: TextAlign.center,
-                                                      ),
-                                                    ),
-                                                  ),
-                                                ],
-                                              ),
-                                              SizedBox(height: pathS / 5),
                                               Padding(
-                                                padding: EdgeInsets.only(right: pathS/5), // Adjust top and left as needed
-                                                child: Text(
-                                                  siteName,
-                                                  style: TextStyle(
-                                                    color: isDarkMode ?  greyColor1:greyColor4,
-                                                    fontSize: pathS / 5.5,
-                                                    fontWeight: FontWeight.w500,
-                                                    fontFamily: 'Roboto',
+                                                padding: EdgeInsets.only(left: pathS/4, top: pathS/4), // Adjust top and left as needed
+                                                child: Align(
+                                                  alignment: Alignment.topLeft,
+                                                  child: Column(
+                                                    crossAxisAlignment: CrossAxisAlignment.start,
+                                                    children: [
+                                                      Row(
+                                                        children: [
+                                                          Container(
+                                                            decoration: BoxDecoration(
+                                                              shape: BoxShape.rectangle,
+                                                              borderRadius: BorderRadius.circular(pathS / 15),
+                                                              color: isDarkMode ?  yellowColor1:yellowColor1,
+                                                            ),
+                                                            child:Padding(
+                                                              padding: EdgeInsets.only(left: pathS/5, top: pathS/10,right: pathS/5,bottom: pathS/10), // Adjust top and left as needed
+                                                              child: Text(
+                                                                'next_duty'.tr(),
+                                                                style: TextStyle(
+                                                                  color: isDarkMode ? brownColor:brownColor,
+                                                                  fontSize: pathS / 5.5,
+                                                                  fontWeight: FontWeight.bold,
+                                                                  fontFamily: 'Roboto',
+                                                                ),
+                                                                textAlign: TextAlign.center,
+                                                              ),
+                                                            ),
+                                                          ),
+                                                          Spacer(),
+                                                          Container(
+                                                            decoration: BoxDecoration(
+                                                              shape: BoxShape.rectangle,
+                                                              borderRadius: BorderRadius.only(
+                                                                topLeft: Radius.circular(pathS / 15), // Adjust as needed
+                                                                bottomLeft: Radius.circular(pathS / 15), // Adjust as needed
+                                                              ),
+                                                              color: isDarkMode ?  yellowColor1:yellowColor1,
+                                                            ),
+                                                            child:Padding(
+                                                              padding: EdgeInsets.only(left: pathS/5, top: pathS/10,right: pathS/8,bottom: pathS/10), // Adjust top and left as needed
+                                                              child: Text(
+                                                                monthlyRoaster.shiftName,
+                                                                style: TextStyle(
+                                                                  color: isDarkMode ? brownColor:brownColor,
+                                                                  fontSize: pathS / 5.5,
+                                                                  fontWeight: FontWeight.bold,
+                                                                  fontFamily: 'Roboto',
+                                                                ),
+                                                                textAlign: TextAlign.center,
+                                                              ),
+                                                            ),
+                                                          ),
+                                                        ],
+                                                      ),
+                                                      SizedBox(height: pathS / 5),
+                                                      Padding(
+                                                        padding: EdgeInsets.only(right: pathS/5), // Adjust top and left as needed
+                                                        child: Text(
+                                                          style: TextStyle(
+                                                            color: isDarkMode ?  greyColor1:greyColor4,
+                                                            fontSize: pathS / 5.5,
+                                                            fontWeight: FontWeight.w500,
+                                                            fontFamily: 'Roboto',
+                                                          ),
+                                                          monthlyRoaster.siteName,
+                                                          textAlign: TextAlign.start,
+                                                        ),
+                                                      ),
+
+                                                      Text(
+                                                        monthlyRoaster.unitCode,
+                                                        style: TextStyle(
+                                                          color: isDarkMode ?  whiteColor:greyColor7,
+                                                          fontSize: pathS / 5.5,
+                                                          fontWeight: FontWeight.w500,
+                                                          fontFamily: 'Roboto',
+                                                        ),
+                                                        textAlign: TextAlign.start,
+                                                      ),
+                                                      Text(
+                                                      '${monthlyRoaster.postName} -${monthlyRoaster.qrId.substring(monthlyRoaster.qrId.length - 4)}',
+                                                        style: TextStyle(
+                                                          color: isDarkMode ?  greyColor1:greyColor4,
+                                                          fontSize: pathS / 5.5,
+                                                          fontWeight: FontWeight.w500,
+                                                          fontFamily: 'Roboto',
+                                                        ),
+                                                        textAlign: TextAlign.start,
+                                                      ),
+                                                      SizedBox(height: pathS/5),
+
+                                                      Container(
+                                                        width: screenWidth-2.5*marginValue,
+                                                        child: Text(
+                                                          getFormattedDateTime(monthlyRoaster.rosterDate,"yyyy-MM-dd","EEEE d MMM"),
+
+                                                          style: TextStyle(
+                                                            color: isDarkMode ?  greyColor1:greyColor4,
+                                                            fontSize: pathS / 5.5,
+                                                            fontWeight: FontWeight.w500,
+                                                            fontFamily: 'Roboto',
+                                                          ),
+                                                          textAlign: TextAlign.center,
+                                                        ),
+                                                      ),
+
+                                                      Row(
+                                                        mainAxisAlignment: MainAxisAlignment.center,
+                                                        children: [
+                                                          Text(
+                                                            getFormattedTime(monthlyRoaster.startTime,"h:mm"),
+                                                            style: TextStyle(
+                                                              color: isDarkMode ?  whiteColor:greyColor6,
+                                                              fontSize: pathS / 1.5,
+                                                              fontWeight: FontWeight.w500,
+                                                              fontFamily: 'Roboto',
+                                                            ),
+                                                            textAlign: TextAlign.center,
+                                                          ),
+                                                          SizedBox(width: pathS/8),
+                                                          Text(
+                                                            getFormattedTime(monthlyRoaster.startTime,"a").toUpperCase(),
+
+                                                            style: TextStyle(
+                                                              color: isDarkMode ?  greyColor1:greyColor4,
+                                                              fontSize: pathS / 5.5,
+                                                              fontWeight: FontWeight.w500,
+                                                              fontFamily: 'Roboto',
+                                                            ),
+                                                            textAlign: TextAlign.center,
+                                                          ),
+                                                        ],
+                                                      ),
+                                                      SizedBox(height: pathS/5),
+
+                                                    ],
                                                   ),
-                                                  textAlign: TextAlign.start,
                                                 ),
                                               ),
 
-                                              Text(
-                                                unitCode,
-                                                style: TextStyle(
-                                                  color: isDarkMode ?  whiteColor:greyColor7,
-                                                  fontSize: pathS / 5.5,
-                                                  fontWeight: FontWeight.w500,
-                                                  fontFamily: 'Roboto',
-                                                ),
-                                                textAlign: TextAlign.start,
-                                              ),
-                                              Text(
-                                                postName,
-                                                style: TextStyle(
-                                                  color: isDarkMode ?  greyColor1:greyColor4,
-                                                  fontSize: pathS / 5.5,
-                                                  fontWeight: FontWeight.w500,
-                                                  fontFamily: 'Roboto',
-                                                ),
-                                                textAlign: TextAlign.start,
-                                              ),
-                                              SizedBox(height: pathS/5),
-
-                                              Container(
-                                                width: screenWidth-2.5*marginValue,
-                                                child: Text(
-                                                  getDateTime('EEEE d MMM'),
-                                                  style: TextStyle(
-                                                    color: isDarkMode ?  greyColor1:greyColor4,
-                                                    fontSize: pathS / 5.5,
-                                                    fontWeight: FontWeight.w500,
-                                                    fontFamily: 'Roboto',
-                                                  ),
-                                                  textAlign: TextAlign.center,
-                                                ),
-                                              ),
-
-                                              Row(
-                                                mainAxisAlignment: MainAxisAlignment.center,
-                                                children: [
-                                                  Text(
-                                                    DateFormat('hh:mm',selectedLocale).format(dutyTime),
-                                                    style: TextStyle(
-                                                      color: isDarkMode ?  whiteColor:greyColor6,
-                                                      fontSize: pathS / 1.5,
-                                                      fontWeight: FontWeight.w500,
-                                                      fontFamily: 'Roboto',
-                                                    ),
-                                                    textAlign: TextAlign.center,
-                                                  ),
-                                                  SizedBox(width: pathS/8),
-                                                  Text(
-                                                    DateFormat('a',selectedLocale).format(dutyTime),
-                                                    style: TextStyle(
-                                                      color: isDarkMode ?  greyColor1:greyColor4,
-                                                      fontSize: pathS / 5.5,
-                                                      fontWeight: FontWeight.w500,
-                                                      fontFamily: 'Roboto',
-                                                    ),
-                                                    textAlign: TextAlign.center,
-                                                  ),
-                                                ],
-                                              ),
-                                              SizedBox(height: pathS/5),
 
                                             ],
                                           ),
+
                                         ),
-                                      ),
-
-
-                                    ],
-                                  ),
-
-                                ),//next duty
+                                        SizedBox(height: pathS/8),
+                                      ],
+                                    );
+                                  }).toList(),
+                                ),//next duties
                                 SizedBox(height: pathS/5),
                                 Container(
                                   width: screenWidth-2.5*marginValue,
@@ -949,7 +1008,7 @@ class HomeViewState extends State<HomeView> {
                                                   ),
                                                   SizedBox(height: pathS/10),
                                                   Text(
-                                                    degination,
+                                                    designation,
                                                     style: TextStyle(
                                                       color: isDarkMode ?  whiteColor:greyColor6,
                                                       fontSize: pathS / 6.5,
@@ -1084,7 +1143,7 @@ class HomeViewState extends State<HomeView> {
                                                               },
                                                               child: Container(
                                                                 height: pathS/2,
-                                                                
+
                                                                 width: pathS/2,
                                                                 decoration: BoxDecoration(
                                                                   // shape: BoxShape.circle,
@@ -1299,7 +1358,7 @@ class HomeViewState extends State<HomeView> {
                                                     ),
                                                     Container(
                                                       width: pathS*1.1,
-                                                      
+
                                                       child: Text(
                                                         'leave'.tr(),
                                                         style: TextStyle(
@@ -1393,7 +1452,14 @@ class HomeViewState extends State<HomeView> {
                                   Navigator.push(
                                       context,
                                     MaterialPageRoute(
-                                      builder: (context) => OthersDutyView(),
+                                      builder: (context) => OthersDutyView(
+                                          userProfile: userProfile.first,
+                                          attendanceMode: keyAttendanceModeOther,
+                                        unitDutyPosts: unitDutyPosts,
+                                        unitShiftDetails: unitShiftDetails,
+                                        userPostings: userPostings,
+
+                                      ),
                                       ),
                                   );
                                 },
@@ -1478,14 +1544,34 @@ class HomeViewState extends State<HomeView> {
     );
   }
 
+  @override
+  void initState() {
+    super.initState();
+
+    // Future.delayed(Duration(milliseconds: 3), () {
+    //   onLoadDutyAlert();
+    // });
+
+    initialSetup();
+    connection.myStream.listen((_source) {
+      source = _source;
+      onConnectionChange();
+    });
+  }
+
 
   void initialSetup() {
 
-    onLoadProfileData();
+    // onLoadRoasterData();
+    getRoasterTableData();
+
+    // onLoadAttendanceData();
+    getAttendanceTableData();
+
+    // onLoadProfileData();
     getProfileTableData();
 
-    onLoadRoasterData();
-    getRoasterTableData();
+    getPostingTableData();
 
   }
 
@@ -1516,7 +1602,6 @@ class HomeViewState extends State<HomeView> {
 
 
     }
-
     void onLoadDutyAlert(){
       Navigator.push(
         context,
@@ -1532,12 +1617,21 @@ class HomeViewState extends State<HomeView> {
           (map) => UserProfile.fromMap(map),
     );
 
-    userProfiles.forEach((profile) {
-      printInDebug('profile ID: ${profile.id}');
-      printInDebug('profile emp name: ${profile.empName}');
-    });
+    for (var data in userProfiles) {
+      printInDebug('userProfiles Data');
+      data.toMap().forEach((i, j) {
+        printInDebug('$i : $j');
+      });
 
-    showDataOnUI(userProfiles.first);
+    }
+
+   if( userProfiles.isNotEmpty){
+     userProfile = userProfiles;
+     showDataOnUI(userProfiles.first);
+   }else{
+     onLoadProfileData();
+   }
+
 
   }
   void showDataOnUI(UserProfile userProfile){
@@ -1548,7 +1642,7 @@ class HomeViewState extends State<HomeView> {
       imagePath = userProfile.profileImageUrl;
 
       userName = userProfile.empName;
-      degination = userProfile.serviceName;
+      designation = userProfile.serviceName;
 
 
       final joiningDate = userProfile.joiningDate; // Assuming this is a DateTime object
@@ -1597,7 +1691,7 @@ class HomeViewState extends State<HomeView> {
 
         showDataOnUI(userProfiles.first);
 
-        List <UserProfile> userProfile = [];
+        // List <UserProfile> userProfile = [];
 
         userProfile = userProfiles;
 
@@ -1619,21 +1713,32 @@ class HomeViewState extends State<HomeView> {
         userProfile.toMap());
   }
 
-
   Future<void> getRoasterTableData() async {
-    final userRoasters = await DatabaseHelper.instance.getAllRecords<UserRoaster>(
+    final roasterData = await DatabaseHelper.instance.getAllRecords<UserRoaster>(
       keyTableUserRoster,
           (map) => UserRoaster.fromMap(map),
     );
 
-    userRoasters.forEach((profile) {
-      printInDebug('profile ID: ${profile.id}');
-      printInDebug('profile emp name: ${profile.siteName}');
-    });
 
 
-    updateCurrentDayUI(userRoasters);
+    for (var data in roasterData) {
+        printInDebug('Roaster Data');
+        data.toMap().forEach((i, j) {
+          printInDebug('$i : $j');
+        });
 
+    }
+
+
+    if(roasterData.isNotEmpty){
+      userRoasters = roasterData;
+      updateCurrentDayUI(roasterData);
+      updateNextDaysUI(roasterData);
+
+    }else{
+      // onLoadRoasterData();
+    }
+    onLoadRoasterData();
   }
   void onLoadRoasterData() {
 
@@ -1653,17 +1758,270 @@ class HomeViewState extends State<HomeView> {
       if(data.isNotEmpty){
 
         List<UserRoaster> roasters = data.map((json) => UserRoaster.fromJson(json)).toList();
-        roasters.forEach((profile) {
-          printInDebug('profile ID: ${profile.id}');
-          printInDebug('profile emp name: ${profile.siteName}');
-        });
 
 
+        for (var data in roasters) {
+          printInDebug('Roaster Data');
+          data.toMap().forEach((i, j) {
+            printInDebug('$i : $j');
+          });
 
+        }
 
         userRoasters = roasters;
 
         syncUserRoasterData(userRoasters);
+        updateCurrentDayUI(userRoasters);
+        updateNextDaysUI(userRoasters);
+
+      }
+
+    },(error){
+      // setState(() {
+      //   showLoaderView = false;
+      // });
+
+      String errorCode = error['code'] ?? '';
+      // if(errorCode == '401'){
+      //   Navigator.pushReplacement(
+      //     context,
+      //     MaterialPageRoute(
+      //       builder: (context) => LoginView(),
+      //     ),
+      //   );
+      // }
+    }
+    );
+
+  }
+  Future<void> syncUserRoasterData(   List <UserRoaster> userRoaster) async {
+
+    await DatabaseHelper.instance.updateOrDeleteTableData<UserRoaster>(
+        keyTableUserRoster,
+        userRoaster,
+        'id',
+        (userRoaster) => userRoaster.toMap()
+    );
+  }
+  void updateCurrentDayUI(List<UserRoaster> roasters) {
+    String todayDate = DateFormat('yyyy-MM-dd').format(DateTime.now());
+
+    // Filter roster data for today
+    todaysRoster = roasters
+        .where((roster) => roster.rosterDate == todayDate && roster.deleted == 0
+    )
+        .toList();
+
+
+    if (todaysRoster.isNotEmpty) {
+       UserRoaster roaster = todaysRoster.first;
+      setState(() {
+
+         dutyShiftName = roaster.shiftName;
+         siteName = roaster.siteName;
+         unitCode = roaster.unitCode;
+         postName = '${roaster.postName} -${roaster.qrId.substring(roaster.qrId.length - 4)}';
+         currentDutyStartTime = roaster.startTime;
+
+         postGeoLocation = roaster.geoLocation;
+      });
+
+       startDutyInCheck(roaster);
+       startDutyOutCheck(roaster);
+    }
+  }
+  void updateNextDaysUI(List<UserRoaster> roasters) {
+    DateTime todayDate = DateTime.now();
+
+    // Filter roster data for dates greater than today
+    monthlyRosters = roasters
+        .where((roster) {
+      // Parse rosterDate into DateTime for comparison
+      DateTime rosterDate = DateTime.parse(roster.rosterDate);
+      return rosterDate.isAfter(todayDate) && roster.deleted == 0;
+    })
+        .toList();
+
+    // Sort the filtered rosters in ascending order by rosterDate
+    monthlyRosters.sort((a, b) {
+      DateTime dateA = DateTime.parse(a.rosterDate);
+      DateTime dateB = DateTime.parse(b.rosterDate);
+      return dateA.compareTo(dateB); // Ascending order
+    });
+
+    print("Monthly Rosters greater than today (sorted):");
+    for (var roster in monthlyRosters) {
+      print(roster.rosterDate);
+    }
+  }
+
+
+  Future<void> getPostingTableData() async {
+
+    userPostings = await DatabaseHelper.instance.getAllRecords<UserPosting>(
+      keyTableUserPosting,
+          (map) => UserPosting.fromMap(map),
+    );
+
+    for (var data in userPostings) {
+      printInDebug('userPostings Data');
+      data.toMap().forEach((i, j) {
+        printInDebug('$i : $j');
+      });
+
+    }
+
+    unitDutyPosts = await DatabaseHelper.instance.getAllRecords<UnitDutyPost>(
+      keyTableUnitDutyPost,
+          (map) => UnitDutyPost.fromMap(map),
+    );
+
+    unitShiftDetails = await DatabaseHelper.instance.getAllRecords<UnitShiftDetail>(
+      keyTableUnitShiftDetail,
+          (map) => UnitShiftDetail.fromMap(map),
+    );
+
+    if(userPostings.isNotEmpty && unitDutyPosts.isNotEmpty && unitShiftDetails.isNotEmpty) {
+      print('All duty related data fetched');
+    }else{
+      onLoadUserPostingData();
+    }
+
+
+  }
+  void onLoadUserPostingData() {
+    // setState(() {
+    //   showLoaderView = true;
+    // });
+
+    Map <String, String> inputData = {
+    };
+
+    APIHelper.instance.getUserData(userPostingApi, inputData, (data) {
+
+      // setState(() {
+      //   showLoaderView = false;
+      // });
+
+      if (data.isNotEmpty) {
+        if (data.containsKey('UserPosting')) {
+          final List<dynamic> dataList = data['UserPosting'];
+          setState(() {
+            userPostings = dataList.map((json) => UserPosting.fromJson(json)).toList();
+          });
+          userPostings.forEach((profile) {
+            printInDebug('userPosting ID: ${profile.id}');
+            printInDebug('userPosting  name: ${profile.siteName}');
+          });
+
+          syncUserPostingData();
+
+        }
+        if (data.containsKey('UnitDutyPost')) {
+          final List<dynamic> dataList = data['UnitDutyPost'];
+          unitDutyPosts = dataList.map((json) => UnitDutyPost.fromJson(json)).toList();
+          unitDutyPosts.forEach((profile) {
+            printInDebug('UnitDutyPost ID: ${profile.id}');
+            printInDebug('UnitDutyPost  name: ${profile.postName}');
+          });
+
+          syncUnitDutyPostData();
+        }
+        if (data.containsKey('UnitShiftDetail')) {
+          final List<dynamic> dataList = data['UnitShiftDetail'];
+          unitShiftDetails = dataList.map((json) => UnitShiftDetail.fromJson(json)).toList();
+          unitShiftDetails.forEach((profile) {
+            printInDebug('UnitShiftDetail ID: ${profile.id}');
+            printInDebug('UnitShiftDetail  name: ${profile.shiftName}');
+          });
+
+          syncUnitShiftDetailData();
+
+
+        }
+
+      }
+    }, (error) {
+      // setState(() {
+      //   showLoaderView = false;
+      // });
+      setState(() {
+        // isAlertVisible = true;
+        // alertMessage = '$error';
+      });
+    });
+  }
+  Future<void> syncUnitShiftDetailData() async {
+    await DatabaseHelper.instance.replaceTableData<UnitShiftDetail>(keyTableUnitShiftDetail, unitShiftDetails, (unitShiftDetail) =>
+        unitShiftDetail.toMap());
+
+  }
+  Future<void> syncUnitDutyPostData() async {
+    await DatabaseHelper.instance.replaceTableData<UnitDutyPost>(keyTableUnitDutyPost, unitDutyPosts, (unitDutyPosts) =>
+        unitDutyPosts.toMap());
+
+  }
+  Future<void> syncUserPostingData() async {
+    await DatabaseHelper.instance.replaceTableData<UserPosting>(
+        keyTableUserPosting,
+        userPostings,
+        (userPosting) => userPosting.toMap());
+
+  }
+
+
+  Future<void> getAttendanceTableData() async {
+    final userAttendances = await DatabaseHelper.instance.getAllRecords<UserAttendance>(
+      keyTableUserAttendance,
+          (map) => UserAttendance.fromMap(map),
+    );
+
+    for (var data in userAttendances) {
+        printInDebug('Attendance Data');
+        data.toMap().forEach((i, j) {
+          printInDebug('$i : $j');
+        });
+
+    }
+
+    if(userAttendances.isNotEmpty) {
+      userAttendance = userAttendances;
+      updateDutyInOutAttendance(userAttendances);
+    }
+    else{
+      // onLoadAttendanceData();
+    }
+
+    // onLoadAttendanceData();
+
+  }
+  void onLoadAttendanceData() {
+
+
+    // setState(() {
+    //   showLoaderView = true;
+    // });
+    Map <String,String> inputData = {
+
+    };
+
+    APIHelper.instance.getData(userAttendanceApi,inputData, (data) {
+
+      // setState(() {
+      //   showLoaderView = false;
+      // });
+
+      if(data.isNotEmpty){
+
+        List<UserAttendance> dataList = data.map((json) => UserAttendance.fromJson(json)).toList();
+        for (var data in dataList) {
+          printInDebug(' ID: ${data.id}');
+          printInDebug(' name: ${data.siteName}');
+        }
+
+        userAttendance = dataList;
+        updateDutyInOutAttendance(userAttendance);
+        syncUserAttendanceData(userAttendance);
 
       }
 
@@ -1676,35 +2034,188 @@ class HomeViewState extends State<HomeView> {
     );
 
   }
-  Future<void> syncUserRoasterData(   List <UserRoaster> userRoaster) async {
-    await DatabaseHelper.instance.replaceTableData<UserRoaster>(keyTableUserRoster, userRoasters, (userRoasters) =>
-        userRoasters.toMap());
+  Future<void> syncUserAttendanceData(   List <UserAttendance> userAttendance) async {
+    await DatabaseHelper.instance.updateOrDeleteTableData<UserAttendance>(
+        keyTableUserAttendance,
+        userAttendance,
+        'id',
+        (userAttendance) => userAttendance.toMap()
+    );
   }
 
-  void updateCurrentDayUI(List<UserRoaster> userRoasters) {
-    String todayDate = DateFormat('yyyy-MM-dd').format(DateTime.now());
+  void updateDutyInOutAttendance(List<UserAttendance> attendance) {
+    DateTime todayDate = DateTime.now();
+    DateTime startOfDay = DateTime(todayDate.year, todayDate.month, todayDate.day);
 
-    // Filter roster data for today
-    List<UserRoaster> todaysRoster = userRoasters
-        .where((roster) => roster.rosterDate == todayDate)
-        .toList();
+    // Filter today's attendance records
+    // List<UserAttendance> todayAttendance = attendance
+    //     .where((data) =>
+    // data.shiftStartDate.isAtSameMomentAs(startOfDay) ||
+    //     data.shiftStartDate.isAfter(startOfDay)
+    // )
+    //     .toList();
 
+    List<UserAttendance> todayAttendance = [];
 
-    if (todaysRoster.isNotEmpty) {
-       UserRoaster roaster = todaysRoster.first;
+    if (attendance.any((data) => data.dutyStatus == keyAttendanceStatusDutyIn && data.deleted == 0)) {
+      // Get all records for the date of the latest 'DUTY_IN' where deleted == 0
+      DateTime latestDutyInDate = attendance
+          .where((data) => data.dutyStatus == keyAttendanceStatusDutyIn && data.deleted == 0)
+          .map((data) => data.shiftStartDate)
+          .reduce((a, b) => a.isAfter(b) ? a : b); // Find the latest date
+      todayAttendance = attendance
+          .where((data) =>
+      data.shiftStartDate.isAtSameMomentAs(latestDutyInDate) &&
+          data.deleted == 0)
+          .toList();
+    } else if (attendance.any((data) => data.dutyStatus == keyAttendanceStatusDutyOut && data.deleted == 0)) {
+      // Get all records for the current date where deleted == 0
+      todayAttendance = attendance
+          .where((data) =>
+      (data.shiftStartDate.isAtSameMomentAs(startOfDay) ||
+          data.shiftStartDate.isAfter(startOfDay)) &&
+          data.deleted == 0)
+          .toList();
+    }
+
+    if (todayAttendance.isNotEmpty) {
+      todayDutyInMarked = true;
+
+      // Accumulate total duration for all marked attendances
+      Duration totalDutyDuration = Duration.zero;
+
+      for (final userAttendance in todayAttendance) {
+        DateTime endTime = userAttendance.actEndTime ?? DateTime.now();
+        totalDutyDuration += endTime.difference(userAttendance.actStartTime);
+      }
+
       setState(() {
+        // Convert the total accumulated duration into hours and minutes
+        final totalMinutes = totalDutyDuration.inMinutes;
+        final adjustedHour = (totalMinutes ~/ 60) % 24; // Hours (mod 24 to prevent overflow)
+        final adjustedMinute = totalMinutes % 60; // Minutes
 
-         dutyShiftName = roaster.shiftName;
-         siteName = roaster.siteName;
-         unitCode = roaster.unitCode;
-         postName = roaster.postName;
-         currentDutyStartTime = roaster.startTime;
+        // Format the result as HH:mm
+        final dutyDuration =
+            '${adjustedHour.toString().padLeft(2, '0')}: ${adjustedMinute.toString().padLeft(2, '0')}';
+        dutyInHourBannner = dutyDuration;
 
-         postGeoLocation = roaster.geoLocation;
+        // Update dutyIn button text
+        dutyInBtnText = todayAttendance.isNotEmpty
+            ? "${'duty_in'.tr()} ${DateFormat('h:mm').format(todayAttendance.first.actStartTime)} ${DateFormat('a').format(todayAttendance.first.actStartTime).toUpperCase()}"
+            : 'duty_in'.tr();
       });
 
+      disableDutyIn();
+      stopDutyInCheck();
+      enableDutyOut();
+    }
+
+    if (todayAttendance.isNotEmpty && todayAttendance.first.actEndTime != null) {
+      todayDutyOutMarked = true;
+      dutyOutBtnText =
+      "${'duty_out'.tr()} ${DateFormat('h:mm').format(todayAttendance.first.actEndTime!)} ${DateFormat('a').format(todayAttendance.first.actEndTime!).toUpperCase()}";
+      disableDutyOut();
+      stopDutyOutCheck();
     }
   }
 
+  void startDutyInCheck(UserRoaster roaster) {
+    // Cancel any existing timer
+    dutyInTimer?.cancel();
+
+    // Start a single periodic timer to check duty conditions
+    dutyInTimer = Timer.periodic(Duration(seconds: 60), (Timer timer) {
+      updateDutyInRoaster(roaster);
+    });
+  }
+  void updateDutyInRoaster(UserRoaster roaster){
+
+    if(!todayDutyInMarked) {
+      Timer.periodic(Duration(seconds: 60), (Timer timer) {
+        if (DateTime.now().isAfter(roaster.dutyStartEnableTime) && DateTime.now().isBefore(roaster.dutyStartDisableTime) && !todayDutyInMarked) {
+          enableDutyIn();
+        } else {
+          disableDutyIn();
+        }
+      });
+    } else {
+      disableDutyIn();
+      dutyInTimer?.cancel(); // Cancel the timer if conditions are not met
+    }
+
+}
+  void stopDutyInCheck() {
+    // Cancel the timer when no longer needed
+    dutyInTimer?.cancel();
+  }
+
+  void startDutyOutCheck(UserRoaster roaster) {
+    // Cancel any existing timer
+    dutyOutTimer?.cancel();
+
+    // Start a single periodic timer to check duty conditions
+    dutyOutTimer = Timer.periodic(Duration(seconds: 60), (Timer timer) {
+      updateDutyOutRoaster(roaster);
+    });
+  }
+  void updateDutyOutRoaster(UserRoaster roaster) {
+    if (todayDutyInMarked && !todayDutyOutMarked) {
+      if (DateTime.now().isAfter(roaster.dutyStartEnableTime) &&
+          DateTime.now().isBefore(roaster.dutyEndDisableTime) && todayDutyInMarked && !todayDutyOutMarked) {
+        enableDutyOut();
+      }
+      else {
+        disableDutyOut();
+      }
+    } else {
+      disableDutyOut();
+      dutyOutTimer?.cancel(); // Cancel the timer if conditions are not met
+    }
+  }
+  void stopDutyOutCheck() {
+    // Cancel the timer when no longer needed
+    dutyOutTimer?.cancel();
+  }
+
+  void enableDutyIn(){
+    setState(() {
+      dutyInBgColor =  redColor3;
+      dutyInFontColor =  whiteColor;
+      dutyInShadowColor =  Colors.black.withOpacity(0.2);
+      isDutyInTapEnabled =  true;
+    });
+
+
+  }
+  void disableDutyIn(){
+
+    setState(() {
+      dutyInBgColor =  isDarkMode? greyColor5:greyColor1;
+      dutyInFontColor =    isDarkMode? greyColor7:greyColor4 ;
+      dutyInShadowColor =   Colors.transparent ;
+      isDutyInTapEnabled =  false ;
+    });
+
+  }
+  void enableDutyOut(){
+    setState(() {
+      dutyOutBgColor =   redColor3 ;
+      dutyOutFontColor =  whiteColor ;
+      dutyOutShadowColor =   Colors.black.withOpacity(0.2);
+      isDutyOutTapEnabled =  true ;
+    });
+
+
+  }
+  void disableDutyOut(){
+    setState(() {
+      dutyOutBgColor =  isDarkMode? greyColor5:greyColor1;
+      dutyOutFontColor =  isDarkMode? greyColor7:greyColor4;
+      dutyOutShadowColor =   Colors.transparent;
+      isDutyOutTapEnabled =  false;
+    });
+
+  }
 
 }

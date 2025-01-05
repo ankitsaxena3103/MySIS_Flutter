@@ -7,30 +7,37 @@ import 'package:image_picker/image_picker.dart';
 import 'package:mysis/CommonViews/Utility.dart';
 import 'package:easy_localization/easy_localization.dart';
 import 'package:mysis/HomeView/SubmitDutyView.dart';
+import 'package:mysis/Profile/UnitDutyPost.dart';
+import 'package:mysis/Profile/UnitShiftDetail.dart';
 import 'package:mysis/Profile/UserProfile.dart';
 
 import '../CommonViews/ToastMessageView.dart';
+import '../Profile/UnitShiftDetail.dart';
+import '../Profile/UserPosting.dart';
 
 class SelectShiftView extends StatefulWidget {
 
   final UserProfile userProfile;
-  final regNo;
+  final UnitDutyPost unitDutyPost;
+  final List<UnitShiftDetail> unitShiftDetail;
+  final UserPosting userPosting;
+  final String attendanceMode;
+  final String attendanceStatus;
 
-  final designation;
-  final location;
-  final post;
-  final postRank;
+  final String latLong;
+  final String dutyDateTime;
 
-  SelectShiftView(
+  const SelectShiftView(
       {
         super.key,
-        required this.designation,
-        this.regNo,
-        this.location,
-
-        this.post,
-        this.postRank,
-        required this.userProfile
+        required this.userProfile,
+        required this.unitDutyPost,
+        required this.unitShiftDetail,
+        required this.userPosting,
+        required this.attendanceMode,
+        required this.attendanceStatus,
+        required this.latLong,
+        required this.dutyDateTime
       });
   @override
   SelectShiftViewState createState() => SelectShiftViewState();
@@ -42,32 +49,14 @@ class SelectShiftViewState extends State<SelectShiftView>{
   bool noData = true;
   List<Widget> containers = [];
   int selectedIndex = -1;
-  List <Map> shift = [
-    {
-      'id' : 0,
-      'shiftName': 'Shift A',
-      'shiftTime' : '10:00 AM',
-    },
-    {
-      'id' : 1,
-      'shiftName': 'Shift B',
-      'shiftTime' : '12:00 PM',
-    },
-    {
-      'id' : 2,
-      'shiftName': 'Shift C',
-      'shiftTime' : '01:00 PM',
-    },
-    {
-      'id' : 3,
-      'shiftName': 'Shift D',
-      'shiftTime' : '03:00 PM',
-    },
-  ];
   bool showToastMessageView = false;
   String toastMessage = '';
   String name  = '';
   String position  = '';
+
+
+  late UnitShiftDetail selectedShift;
+
 
   @override
   void initState() {
@@ -87,7 +76,7 @@ class SelectShiftViewState extends State<SelectShiftView>{
   Widget build(BuildContext context) {
     return Scaffold(
       body: Stack(
-        alignment: Alignment.center,
+        alignment: Alignment.topCenter,
         children: [
 
           Container(
@@ -100,192 +89,187 @@ class SelectShiftViewState extends State<SelectShiftView>{
             child: Stack(
               alignment: Alignment.center,
               children: [
-                Positioned(
-                  top:MediaQuery.of(context).padding.top,
-                  child: Container(
-                    width: screenWidth,
 
-                    decoration: BoxDecoration(
-                      color: isDarkMode ? greyColor8 : whiteColor,
-                      boxShadow: [
-                        BoxShadow(
-                          color: shadowColor, // Shadow color
-                          blurRadius: pathS/10, // Spread of the shadow
-                          // spreadRadius: pathS/15, // How far the shadow extends
-                          offset:  Offset(-pathS/12, pathS/12),
-                        ),
-                      ],
-                    ),
-                    child: Padding(
-                      padding: EdgeInsets.only(left: paddingLeft + pathS / 4, right: paddingRight + pathS / 3,top: pathS/5,bottom: pathS/5),
-                      child: Container(
-                        width: screenWidth,
-                        child: Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            Row(
-                              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                              children: [
-                                Flexible(
-                                  fit: FlexFit.loose,
-                                  child: Row(
-                                    children: [
-                                      CachedNetworkImage(
-                                        height: pathS / 1.55,
-                                        width: pathS / 1.55,
-                                        imageUrl: imagePath,
-                                        placeholder: (context, url) => CircleAvatar(
-                                          backgroundImage: AssetImage(assetsImagePath),
-                                          backgroundColor: Colors.white,
-                                        ),
-                                        errorWidget: (context, url, error) => CircleAvatar(
-                                          backgroundImage: AssetImage(assetsImagePath),
-                                          backgroundColor: Colors.white,
-                                        ),
-                                        imageBuilder: (context, imageProvider) => CircleAvatar(
-                                          backgroundImage: imageProvider,
-                                          backgroundColor: Colors.white,
-                                        ),
-                                      ),
-                                      SizedBox(width: pathS/5),
-                                      Flexible(
-                                        fit: FlexFit.loose,
-                                        child: Column(
-                                          mainAxisAlignment: MainAxisAlignment.start,
-                                          crossAxisAlignment: CrossAxisAlignment.start,
-                                          children: [
-                                            Text(
-                                              name,
-                                              style: TextStyle(
-                                                color: isDarkMode ? whiteColor : greyColor6,
-                                                fontSize: pathS / 4.5,
-                                                fontWeight: FontWeight.w500,
-                                                fontFamily: 'Roboto',
-                                              ),
-                                              textAlign: TextAlign.left,
-                                              overflow: TextOverflow.ellipsis,
-                                            ),
-                                            Text(
-                                              position,
-                                              style: TextStyle(
-                                                color: isDarkMode ? whiteColor : greyColor6,
-                                                fontSize: pathS / 6.5,
-                                                fontWeight: FontWeight.w300,
-                                                fontFamily: 'Roboto',
-                                              ),
-                                              textAlign: TextAlign.left,
-                                              overflow: TextOverflow.ellipsis,
-                                            ),
-                                          ],
-                                        ),
-                                      ),
-                                    ],
-                                  ),
-                                ),
-                                GestureDetector(
-                                  onTap: () {
-                                    Navigator.pop(context);
-                                  },
-                                  child: Container(
-                                    alignment: Alignment.centerRight,
-                                    width: pathS / 3,
-                                    height: pathS / 3,
-                                    child: Image.asset(
-                                      'assets/images/home/cross.png',
-                                      color: isDarkMode ? whiteColor : greyColor6,
-                                    ),
-                                  ),
-                                ),
-                              ],
-                            ),
+                Column(
+                  children: [
+                    SizedBox(height: paddingTop),
 
-
-                            Column(
-                              children: containers,
-                            ),
-
-
-                            Padding(
-                              padding:  EdgeInsets.only(left: pathS/5),
-                              child: Row(
-                                crossAxisAlignment: CrossAxisAlignment.center,
-
+                    Container(
+                      width: screenWidth,
+                      decoration: BoxDecoration(
+                        color: isDarkMode ? greyColor8 : whiteColor,
+                        boxShadow: [
+                          BoxShadow(
+                            color: shadowColor, // Shadow color
+                            blurRadius: pathS/10, // Spread of the shadow
+                            // spreadRadius: pathS/15, // How far the shadow extends
+                            offset:  Offset(-pathS/12, pathS/12),
+                          ),
+                        ],
+                      ),
+                      child: Padding(
+                        padding: EdgeInsets.only(left: paddingLeft + pathS / 4, right: paddingRight + pathS / 3,top: pathS/5,bottom: pathS/5),
+                        child: Container(
+                          width: screenWidth,
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              Row(
+                                mainAxisAlignment: MainAxisAlignment.spaceBetween,
                                 children: [
-                                  Container(
-                                    child: Image.asset(
-                                      'assets/images/icons/location.png',
-                                      height: pathS/3,
-                                      width: pathS/3,
-                                      color: isDarkMode ? redColor1 :redColor3,
-
-                                    ),
-                                  ),
-                                  SizedBox(width: pathS/5),
                                   Flexible(
                                     fit: FlexFit.loose,
                                     child: Row(
-                                      crossAxisAlignment: CrossAxisAlignment.start,
-                                      mainAxisAlignment: MainAxisAlignment.start,
                                       children: [
+                                        CachedNetworkImage(
+                                          height: pathS / 1.55,
+                                          width: pathS / 1.55,
+                                          imageUrl: imagePath,
+                                          placeholder: (context, url) => CircleAvatar(
+                                            backgroundImage: AssetImage(assetsImagePath),
+                                            backgroundColor: Colors.white,
+                                          ),
+                                          errorWidget: (context, url, error) => CircleAvatar(
+                                            backgroundImage: AssetImage(assetsImagePath),
+                                            backgroundColor: Colors.white,
+                                          ),
+                                          imageBuilder: (context, imageProvider) => CircleAvatar(
+                                            backgroundImage: imageProvider,
+                                            backgroundColor: Colors.white,
+                                          ),
+                                        ),
+                                        SizedBox(width: pathS/5),
                                         Flexible(
                                           fit: FlexFit.loose,
                                           child: Column(
                                             mainAxisAlignment: MainAxisAlignment.start,
                                             crossAxisAlignment: CrossAxisAlignment.start,
                                             children: [
-                                              Container(
-                                                width:pathL*2,
-                                                child: Text(
-                                                 widget.location,
-                                                  style: TextStyle(
-                                                    color: isDarkMode ? whiteColor : greyColor6,
-                                                    fontSize: pathS / 5,
-                                                    fontWeight: FontWeight.w500,
-                                                    fontFamily: 'Roboto',
-                                                  ),
-                                                  textAlign: TextAlign.left,
+                                              Text(
+                                                name,
+                                                style: TextStyle(
+                                                  color: isDarkMode ? whiteColor : greyColor6,
+                                                  fontSize: pathS / 4.5,
+                                                  fontWeight: FontWeight.w500,
+                                                  fontFamily: 'Roboto',
                                                 ),
+                                                textAlign: TextAlign.left,
+                                                overflow: TextOverflow.ellipsis,
                                               ),
-                                              Container(
-                                                width:pathL*2,
-                                                child: Text(
-                                                  widget.post,
-                                                  style: TextStyle(
-                                                    color: isDarkMode ? whiteColor : greyColor6,
-                                                    fontSize: pathS / 5,
-                                                    fontWeight: FontWeight.w300,
-                                                    fontFamily: 'Roboto',
-                                                  ),
-                                                  textAlign: TextAlign.left,
+                                              Text(
+                                                position,
+                                                style: TextStyle(
+                                                  color: isDarkMode ? whiteColor : greyColor6,
+                                                  fontSize: pathS / 6.5,
+                                                  fontWeight: FontWeight.w300,
+                                                  fontFamily: 'Roboto',
                                                 ),
+                                                textAlign: TextAlign.left,
+                                                overflow: TextOverflow.ellipsis,
                                               ),
-
-
                                             ],
                                           ),
                                         ),
-
                                       ],
                                     ),
                                   ),
-
-
-
+                                  GestureDetector(
+                                    onTap: () {
+                                      Navigator.pop(context);
+                                    },
+                                    child: Container(
+                                      alignment: Alignment.centerRight,
+                                      width: pathS / 3,
+                                      height: pathS / 3,
+                                      child: Image.asset(
+                                        'assets/images/home/cross.png',
+                                        color: isDarkMode ? whiteColor : greyColor6,
+                                      ),
+                                    ),
+                                  ),
                                 ],
                               ),
-                            ),
-                          ],
+
+
+                              Column(
+                                children: containers,
+                              ),
+
+
+                              Padding(
+                                padding:  EdgeInsets.only(left: pathS/5),
+                                child: Row(
+                                  crossAxisAlignment: CrossAxisAlignment.center,
+
+                                  children: [
+                                    Container(
+                                      child: Image.asset(
+                                        'assets/images/icons/location.png',
+                                        height: pathS/3,
+                                        width: pathS/3,
+                                        color: isDarkMode ? redColor1 :redColor3,
+
+                                      ),
+                                    ),
+                                    SizedBox(width: pathS/5),
+                                    Flexible(
+                                      fit: FlexFit.loose,
+                                      child: Row(
+                                        crossAxisAlignment: CrossAxisAlignment.start,
+                                        mainAxisAlignment: MainAxisAlignment.start,
+                                        children: [
+                                          Flexible(
+                                            fit: FlexFit.loose,
+                                            child: Column(
+                                              mainAxisAlignment: MainAxisAlignment.start,
+                                              crossAxisAlignment: CrossAxisAlignment.start,
+                                              children: [
+                                                Container(
+                                                  width:pathL*2,
+                                                  child: Text(
+                                                   // '${widget.userPosting.siteName}\n(${widget.userPosting.unitCode})\n${widget.unitDutyPost.address}',
+                                                    '${widget.userPosting.siteName}\n(${widget.userPosting.unitCode})',
+                                                    style: TextStyle(
+                                                      color: isDarkMode ? whiteColor : greyColor6,
+                                                      fontSize: pathS / 5,
+                                                      fontWeight: FontWeight.w500,
+                                                      fontFamily: 'Roboto',
+                                                    ),
+                                                    textAlign: TextAlign.left,
+                                                  ),
+                                                ),
+                                                Container(
+                                                  // width:pathL*2,
+                                                  child: Text(
+                                                    widget.unitDutyPost.postName,
+                                                    style: TextStyle(
+                                                      color: isDarkMode ? whiteColor : greyColor6,
+                                                      fontSize: pathS / 5,
+                                                      fontWeight: FontWeight.w300,
+                                                      fontFamily: 'Roboto',
+                                                    ),
+                                                    textAlign: TextAlign.left,
+                                                  ),
+                                                ),
+
+                                              ],
+                                            ),
+                                          ),
+
+                                        ],
+                                      ),
+                                    ),
+
+                                  ],
+                                ),
+                              ),
+                            ],
+                          ),
                         ),
                       ),
                     ),
-                  ),
 
-                ),
-
-                Column(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  children: [
-                    SizedBox(height: pathL),
+                    SizedBox(height: pathS/1.2),
                     Text(
                       'select_shift'.tr(),
                       style: TextStyle(
@@ -296,101 +280,115 @@ class SelectShiftViewState extends State<SelectShiftView>{
                       ),
                       textAlign: TextAlign.center,
                     ),
-                    SizedBox(height: pathS/2.5),
+                    SizedBox(height: pathS/2),
+                    SizedBox(
+                      height: 2.5*pathL,
+                      child: SingleChildScrollView(
+                        child: Column(
+                          mainAxisAlignment: MainAxisAlignment.start,
+                          children: [
+                            RadioButtonGroup(
+                              items: widget.unitShiftDetail,
+                              selectedId: selectedIndex,
+                              callback: (int index) {
+                                setState(() {
+                                  selectedIndex = index;
+                                });
+                                selectedShift = widget.unitShiftDetail[index];
 
-                    RadioButtonGroup(
-                      items: shift,
-                      selectedId: selectedIndex,
-                      callback: (int index) {
-                        setState(() {
-                          selectedIndex = index;
-                        });
 
-
-                      },
-                    ),
-                    
-                    SizedBox(height: pathS),
-                    Row(
-                      mainAxisAlignment: MainAxisAlignment.center,
-                      children: [
-                        GestureDetector(
-                          onTap: (){
-
-                          },
-                          child: Container(
-                            width: pathL,
-                            height: pathS / 1.5,
-                            alignment: Alignment.center,
-                            decoration: BoxDecoration(
-                              color: isDarkMode ? greyColor6:whiteColor,
-                              // border: Border.all(color: Colors.yellow, width: pathS/18),
-                              borderRadius: BorderRadius.circular(pathS/3),
-                              border: Border.all(
-                                  color: isDarkMode ? redColor1:redColor3,
-
-                                  width:1),
-                              boxShadow: [
-                                BoxShadow(
-                                  color: Colors.transparent, // Shadow color
-                                  blurRadius: pathS/10, // Spread of the shadow
-                                  // spreadRadius: pathS/15, // How far the shadow extends
-                                  offset:  Offset(-pathS/12, pathS/12),
-                                ),
-                              ],
+                              },
                             ),
-                            child: Text(
-                              'txt_cancel'.tr(),
-                              style: TextStyle(
-                                color: isDarkMode ? redColor1:redColor3,
-                                fontSize: pathS / 4.5,
-                                fontWeight: FontWeight.bold,
-                                fontFamily: 'Roboto',
-                              ),
-                            ),
-                          ),
+
+                          ],
                         ),
-                        SizedBox(width: pathS/3),
-                        GestureDetector(
-                          onTap: (){
-                            onTapProceed();
-                          },
-                          child: Container(
-                            width: pathL,
-                            height: pathS / 1.5,
-                            alignment: Alignment.center,
-                            decoration: BoxDecoration(
-                              color: isDarkMode ? redColor1:redColor3,
-                              // border: Border.all(color: Colors.yellow, width: pathS/18),
-                              borderRadius: BorderRadius.circular(pathS/3),
-                              boxShadow: [
-                                BoxShadow(
-                                  color: Colors.transparent, // Shadow color
-                                  blurRadius: pathS/10, // Spread of the shadow
-                                  // spreadRadius: pathS/15, // How far the shadow extends
-                                  offset:  Offset(-pathS/12, pathS/12),
-                                ),
-                              ],
-                            ),
-                            child: Text(
-                              'txt_proceed'.tr(),
-                              style: TextStyle(
-                                color: whiteColor,
-                                fontSize: pathS / 4.5,
-                                fontWeight: FontWeight.bold,
-                                fontFamily: 'Roboto',
-                              ),
-                            ),
-                          ),
-                        ),
-                      ],
+                      ),
                     ),
-                    
-                    
-                    
-                    
+
                   ],
                 ),
+
+
+
+
+                Positioned(
+                  bottom: paddingBottom +pathS,
+                  child: Row(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      GestureDetector(
+                        onTap: (){
+
+                        },
+                        child: Container(
+                          width: pathL,
+                          height: pathS / 1.5,
+                          alignment: Alignment.center,
+                          decoration: BoxDecoration(
+                            color: isDarkMode ? greyColor6:whiteColor,
+                            // border: Border.all(color: Colors.yellow, width: pathS/18),
+                            borderRadius: BorderRadius.circular(pathS/3),
+                            border: Border.all(
+                                color: isDarkMode ? redColor1:redColor3,
+
+                                width:1),
+                            boxShadow: [
+                              BoxShadow(
+                                color: Colors.transparent, // Shadow color
+                                blurRadius: pathS/10, // Spread of the shadow
+                                // spreadRadius: pathS/15, // How far the shadow extends
+                                offset:  Offset(-pathS/12, pathS/12),
+                              ),
+                            ],
+                          ),
+                          child: Text(
+                            'txt_cancel'.tr(),
+                            style: TextStyle(
+                              color: isDarkMode ? redColor1:redColor3,
+                              fontSize: pathS / 4.5,
+                              fontWeight: FontWeight.bold,
+                              fontFamily: 'Roboto',
+                            ),
+                          ),
+                        ),
+                      ),
+                      SizedBox(width: pathS/3),
+                      GestureDetector(
+                        onTap: (){
+                          onTapProceed();
+                        },
+                        child: Container(
+                          width: pathL,
+                          height: pathS / 1.5,
+                          alignment: Alignment.center,
+                          decoration: BoxDecoration(
+                            color: isDarkMode ? redColor1:redColor3,
+                            // border: Border.all(color: Colors.yellow, width: pathS/18),
+                            borderRadius: BorderRadius.circular(pathS/3),
+                            boxShadow: [
+                              BoxShadow(
+                                color: Colors.transparent, // Shadow color
+                                blurRadius: pathS/10, // Spread of the shadow
+                                // spreadRadius: pathS/15, // How far the shadow extends
+                                offset:  Offset(-pathS/12, pathS/12),
+                              ),
+                            ],
+                          ),
+                          child: Text(
+                            'txt_proceed'.tr(),
+                            style: TextStyle(
+                              color: whiteColor,
+                              fontSize: pathS / 4.5,
+                              fontWeight: FontWeight.bold,
+                              fontFamily: 'Roboto',
+                            ),
+                          ),
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+
 
                 ToastMessageView(isVisible: showToastMessageView, message: toastMessage),
                 
@@ -425,8 +423,8 @@ void initialSetup(){
   void onLoadUpdateUI(){
 
     imagePath = widget.userProfile.profileImageUrl;
-    name = widget.userProfile.empName;
-    position = widget.userProfile.symbol;
+    name = '${widget.userProfile.empName}\n(${widget.userProfile.regNo})';
+    position = '${widget.userProfile.serviceName} (${widget.userProfile.rank})';
 
   }
 
@@ -437,30 +435,25 @@ void initialSetup(){
       return;
     }
 
-    capturePhoto();
+    loadSubmitView();
   }
 
-  Future<void> capturePhoto() async {
-    loadSubmitView('');
-    return;
-    final picker = ImagePicker();
-    final pickedFile = await picker.pickImage(source: ImageSource.camera);
-    imagePath = (pickedFile?.path)!;
-    if (pickedFile != null) {
-      List<int> imageBytes = await pickedFile.readAsBytes();
 
-      String base64Image = base64Encode(imageBytes);
-     loadSubmitView(base64Image);
-
-    }
-
-  }
-
-  void loadSubmitView(String data){
+  void loadSubmitView(){
     Navigator.push(
       context,
       MaterialPageRoute(
-        builder: (context) => SubmitDutyView(  regNo: widget.regNo, location: widget.location, shift: shift[selectedIndex],post: widget.post,postRank: widget.postRank,imageData: data,  userProfile: widget.userProfile,),
+        builder: (context) => SubmitDutyView(
+          userProfile: widget.userProfile,
+          unitDutyPost: widget.unitDutyPost,
+          unitShiftDetail: selectedShift,
+          userPosting: widget.userPosting,
+          attendanceMode: widget.attendanceMode,
+          attendanceStatus: widget.attendanceStatus,
+          latLong: widget.latLong,
+          dutyDateTime: widget.dutyDateTime,
+
+        ),
       ),
     );
   }
@@ -587,7 +580,7 @@ class RadioButton extends StatelessWidget {
 }
 
 class RadioButtonGroup extends StatelessWidget {
-  final List<Map> items;
+  final List<UnitShiftDetail> items;
   final int selectedId;
   final Function(int) callback;
 
@@ -601,19 +594,23 @@ class RadioButtonGroup extends StatelessWidget {
   Widget build(BuildContext context) {
     return Column(
       mainAxisAlignment: MainAxisAlignment.start,
-      children: items.map((item) {
-        final index = item['id'];
-        final name = item['shiftName'];
-        final time = item['shiftTime']; // Assuming you have 'time' field in your map
+      children: items.asMap().map((index, item) {
+        final indexNo = index;
+        final name = item.shiftName;
+        final time = '${getFormattedDateTime(item.startTime, 'hh:mm:ss', 'hh:mm a')} - ${getFormattedDateTime(item.endTime, 'hh:mm:ss', 'hh:mm a')}';
 
-        return RadioButton(
-          id: index,
-          callback: callback,
-          selectedID: selectedId,
-          name: name,
-          time: time,
+        return MapEntry(
+          index,
+          RadioButton(
+            id: indexNo,
+            callback: callback,
+            selectedID: selectedId,
+            name: name,
+            time: time,
+          ),
         );
-      }).toList(),
+      }).values.toList(), // Convert MapEntry values to a list
     );
   }
+
 }

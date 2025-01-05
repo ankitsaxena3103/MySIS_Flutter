@@ -112,7 +112,7 @@ class AlertViewState extends State<AlertView> {
                             ),
                           ),
                         ),
-
+                        SizedBox(height: pathS/2),
                         Container(
                           width: screenWidth-2.5*marginValue,
                           height: pathL,

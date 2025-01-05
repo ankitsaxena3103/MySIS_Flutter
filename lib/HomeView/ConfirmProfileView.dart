@@ -1,17 +1,35 @@
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
+import 'package:mysis/CommonViews/AlertPopupView.dart';
 import 'package:mysis/CommonViews/Utility.dart';
 import 'package:easy_localization/easy_localization.dart';
 import 'package:mysis/HomeView/ScanUnitShiftView.dart';
+import 'package:mysis/HomeView/UserAttendance.dart';
 import 'package:mysis/Profile/UserProfile.dart';
+
+import '../Profile/UnitDutyPost.dart';
+import '../Profile/UnitShiftDetail.dart';
+import '../Profile/UserPosting.dart';
+import '../SharedClasses/DatabaseHelper.dart';
 
 class ConfirmProfileView extends StatefulWidget {
 
   final UserProfile userProfile;
+  final String attendanceMode;
+  final List<UnitDutyPost> unitDutyPosts;
+  final List<UnitShiftDetail> unitShiftDetails;
+  final List<UserPosting> userPostings;
+  final String attendanceStatus;
+
 
   const ConfirmProfileView({
     super.key,
-    required this.userProfile
+    required this.userProfile,
+    required this.attendanceMode,
+    required this.unitDutyPosts,
+    required this.unitShiftDetails,
+    required this.userPostings,
+    required this.attendanceStatus
   });
 
 
@@ -26,6 +44,12 @@ class ConfirmProfileViewState extends State<ConfirmProfileView>{
   String profileUrl = '';
   String name  = '';
   String position  = '';
+
+
+  bool showAlert = false;
+  String alertHeader = '';
+  String alertMessage = '';
+
 
   @override
   void initState() {
@@ -63,7 +87,7 @@ class ConfirmProfileViewState extends State<ConfirmProfileView>{
                   right: paddingRight+pathS/3,
                   child: GestureDetector(
                     onTap: () {
-                      Navigator.pop(context);
+                      Navigator.pop(context,true);
                     },
                     child: Container(
                       width: pathS / 3,
@@ -183,7 +207,7 @@ class ConfirmProfileViewState extends State<ConfirmProfileView>{
                         SizedBox(width: pathS/3),
                         GestureDetector(
                           onTap: (){
-                            onLoadScanUnitShift();
+                            onTapConfirm();
                           },
                           child: Container(
                             width: pathL,
@@ -218,6 +242,18 @@ class ConfirmProfileViewState extends State<ConfirmProfileView>{
                 ),
 
 
+                Visibility(
+                  visible: showAlert,
+                  child: AlertPopupView
+                    (header: alertHeader,
+                      message: alertMessage,
+                      callBack: (value){
+                        showAlert = false;
+                      }
+                  ),
+                )
+
+
 
 
               ],
@@ -239,11 +275,55 @@ class ConfirmProfileViewState extends State<ConfirmProfileView>{
 
   }
 
+  Future<void> onTapConfirm() async {
+    if (widget.attendanceStatus == keyAttendanceStatusDutyOut) {
+      //check for duty in
+      final attendance = await DatabaseHelper.instance.getAllRecords<UserAttendance>(
+        keyTableUserAttendance,
+            (map) => UserAttendance.fromMap(map),
+      );
+      List<UserAttendance> todayAttendance = [];
+          DateTime latestDutyInDate = attendance
+          .where((data) => data.dutyStatus == keyAttendanceStatusDutyIn && data.deleted == 0)
+          .map((data) => data.shiftStartDate)
+          .reduce((a, b) => a.isAfter(b) ? a : b); // Find the latest date
+      todayAttendance = attendance
+          .where((data) =>
+      data.shiftStartDate.isAtSameMomentAs(latestDutyInDate) &&
+          data.deleted == 0)
+          .toList();
+
+      if (todayAttendance.isNotEmpty) {
+
+      }
+      else {
+      //show error that no duty marked
+        setState(() {
+          alertHeader = 'alert'.tr();
+          alertMessage = 'already_puch_duty_in'.tr();
+          showAlert = true;
+        });
+      }
+    }else{
+      onLoadScanUnitShift();
+    }
+
+
+
+
+  }
   void onLoadScanUnitShift(){
     Navigator.push(
       context,
       MaterialPageRoute(
-        builder: (context) => ScanUnitShiftView(userProfile: widget.userProfile),
+        builder: (context) => ScanUnitShiftView(
+          userProfile: widget.userProfile,
+          attendanceMode: widget.attendanceMode,
+          unitDutyPosts: widget.unitDutyPosts,
+          unitShiftDetails: widget.unitShiftDetails,
+          userPostings: widget.userPostings,
+          attendanceStatus: widget.attendanceStatus,
+        ),
       ),
     );
   }

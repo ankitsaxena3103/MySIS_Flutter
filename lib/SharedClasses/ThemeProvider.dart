@@ -20,8 +20,20 @@ class ThemeProvider with ChangeNotifier {
     _saveTheme();
     notifyListeners();
   }
-
   Future<void> _loadTheme() async {
+    SharedPreferences prefs = await SharedPreferences.getInstance();
+    bool isDarkTheme = prefs.getBool('isDarkTheme') ?? false;
+    isDarkMode = isDarkTheme;
+    if (isDarkTheme) {
+      _themeData = ThemeData.dark();
+    } else {
+      _themeData = ThemeData.light(); // Ensure light theme is set if not dark
+    }
+    notifyListeners(); // Notify listeners after loading the theme
+  }
+
+
+  Future<void> _loadTheme1() async {
     SharedPreferences prefs = await SharedPreferences.getInstance();
     bool isDarkTheme = prefs.getBool('isDarkTheme') ?? false;
     isDarkMode = isDarkTheme;

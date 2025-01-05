@@ -389,7 +389,7 @@ class ConfirmPINViewState extends State<ConfirmPINView> {
     Preferences.saveUserPreference(keyPIN, txtUserConfirmPIN.text);
 
 
-    Navigator.push(
+    Navigator.pushReplacement(
           context,
           MaterialPageRoute(
             builder: (context) => MyTabBarView(),

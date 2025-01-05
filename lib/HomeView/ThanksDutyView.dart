@@ -1,36 +1,39 @@
 import 'dart:convert';
 
-import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
 import 'package:mysis/CommonViews/Utility.dart';
 import 'package:easy_localization/easy_localization.dart';
+import 'package:mysis/HomeView/UserAttendance.dart';
+import 'package:mysis/Profile/UserPosting.dart';
 import 'package:mysis/Profile/UserProfile.dart';
 import '../CommonViews/ToastMessageView.dart';
+import '../Profile/UnitDutyPost.dart';
+import '../Profile/UnitShiftDetail.dart';
 
 class ThanksDutyView extends StatefulWidget {
 
   final UserProfile userProfile;
 
-  final regNo;
+  final UnitDutyPost unitDutyPost;
+  final UnitShiftDetail unitShiftDetail;
+  final UserPosting userPosting;
+  final UserAttendance userAttendance;
 
-  final location;
-
-  final shiftData;
-  final post;
-  final postRank;
   final imageData;
+
+  final String latLong;
+
 
   ThanksDutyView(
       {
         super.key,
-
-        this.regNo,
-        this.location,
-        this.shiftData,
-        this.post,
-        this.postRank,
-        this.imageData,
+        required this.imageData,
         required this.userProfile,
+        required this.unitDutyPost,
+        required this.unitShiftDetail,
+        required this.userPosting,
+        required this.latLong,
+        required this.userAttendance,
 
       });
 
@@ -39,21 +42,15 @@ class ThanksDutyView extends StatefulWidget {
 }
 
 class ThanksDutyViewState extends State<ThanksDutyView>{
-  String assetsImagePath = "assets/images/dashboard-icons/profile-icon.png";
   String imagePath = '';
   bool noData = true;
   List<Widget> containers = [];
   bool showToastMessageView = false;
   String toastMessage = '';
 
-  String name  = '';
-
-  String position  = '';
-  String positionSymbol  = '';
 
   @override
   void initState() {
-    onLoadUpdateUI();
     super.initState();
 
   }
@@ -66,6 +63,10 @@ class ThanksDutyViewState extends State<ThanksDutyView>{
 
   @override
   Widget build(BuildContext context) {
+    List<String> activeDayList = widget.latLong.split(',').map((e) => e.trim()).toList();
+
+    double lat = double.parse(activeDayList[1]); // Latitude
+    double lng = double.parse(activeDayList[0]); // Longitude
     var backgroundGradientGreen =  LinearGradient(
       colors: [greyColor6,greenColor5],
       begin: Alignment.topCenter,
@@ -91,7 +92,8 @@ class ThanksDutyViewState extends State<ThanksDutyView>{
                   right: paddingRight+pathS/3,
                   child: GestureDetector(
                     onTap: () {
-                      Navigator.pop(context);
+                      Navigator.of(context).popUntil((route) => route.isFirst);
+
                     },
                     child: Container(
                       width: pathS / 3,
@@ -129,12 +131,12 @@ class ThanksDutyViewState extends State<ThanksDutyView>{
                     ),
                     SizedBox(height: pathS/2),
                     Container(
-
+                      alignment: Alignment.center,
+                      width: pathL *1.5,
+                      height: pathL*1.5 ,
                       decoration: BoxDecoration(
                         shape: BoxShape.circle,
                         gradient: isDarkMode ? backgroundGradientDark : backgroundGradientGreen ,
-
-
                         boxShadow: [
                           BoxShadow(
                             color: shadowColor, // Shadow color
@@ -145,9 +147,9 @@ class ThanksDutyViewState extends State<ThanksDutyView>{
                         ],
                       ),
                       child: Padding(
-                        padding:  EdgeInsets.all(pathS/10),
+                        padding:  EdgeInsets.all(pathS/12),
                         child: ClipOval(
-                          child: Image.memory(
+                          child:  Image.memory(
                             base64Decode(widget.imageData),
                             fit: BoxFit.cover,
                             width: double.infinity,
@@ -158,7 +160,7 @@ class ThanksDutyViewState extends State<ThanksDutyView>{
                     ),
                     SizedBox(height: pathS/5),
                     Text(
-                      name,
+                      widget.userProfile.empName,
                       style: TextStyle(
                         color: isDarkMode ? whiteColor : greyColor6,
                         fontSize: pathS / 3.2,
@@ -167,7 +169,7 @@ class ThanksDutyViewState extends State<ThanksDutyView>{
                       ),
                     ),
                     Text(
-                      position,
+                      widget.userProfile.serviceName,
                       style: TextStyle(
                         color: isDarkMode ? whiteColor : greyColor6,
                         fontSize: pathS / 5,
@@ -176,7 +178,7 @@ class ThanksDutyViewState extends State<ThanksDutyView>{
                       ),
                     ),
                     Text(
-                     positionSymbol,
+                     widget.userProfile.symbol,
                       style: TextStyle(
                         color: isDarkMode ? whiteColor : greyColor6,
                         fontSize: pathS / 6.5,
@@ -187,7 +189,7 @@ class ThanksDutyViewState extends State<ThanksDutyView>{
                     SizedBox(height: pathS/3),
 
                     Text(
-                      DateFormat('EEEE, MMM d', selectedLocale).format(DateTime.now()),
+                      DateFormat('EEEE, d MMM', selectedLocale).format(DateTime.now()),
                       style: TextStyle(
                         color: isDarkMode ? whiteColor : greyColor6,
                         fontSize: pathS / 4.3,
@@ -200,7 +202,7 @@ class ThanksDutyViewState extends State<ThanksDutyView>{
                       mainAxisAlignment: MainAxisAlignment.center,
                       children: [
                         Text(
-                          widget.shiftData['shiftName'],
+                          widget.unitShiftDetail.shiftName,
                           style: TextStyle(
                             color: isDarkMode ? whiteColor : greyColor6,
                             fontSize: pathS / 5,
@@ -210,11 +212,11 @@ class ThanksDutyViewState extends State<ThanksDutyView>{
                         ),
                         SizedBox(width: pathS/15),
                         Text(
-                          widget.shiftData['shiftTime'],
+                          getFormattedDateTime(widget.unitShiftDetail.startTime, 'hh:mm:ss', 'hh:mm a'),
                           style: TextStyle(
                             color: isDarkMode ? whiteColor : greyColor6,
-                            fontSize: pathS / 6,
-                            fontWeight: FontWeight.w500,
+                            fontSize: pathS / 5.5,
+                            fontWeight: FontWeight.w300,
                             fontFamily: 'Roboto',
                           ),
                         ),
@@ -222,64 +224,77 @@ class ThanksDutyViewState extends State<ThanksDutyView>{
                     ),
 
                     Text(
-                      widget.location,
+                      widget.userPosting.siteName,
                       style: TextStyle(
                         color: isDarkMode ? whiteColor : greyColor6,
-                        fontSize: pathS / 5.5,
-                        fontWeight: FontWeight.w500,
+                        fontSize: pathS / 5,
+                        fontWeight: FontWeight.w300,
                         fontFamily: 'Roboto',
                       ),
                     ),
                     SizedBox(height: pathS/3),
-                    Row(
-                      mainAxisAlignment: MainAxisAlignment.center,
-                      children: [
-                        Text(
-                          'post'.tr(),
-                          style: TextStyle(
-                            color: isDarkMode ? whiteColor : greyColor6,
-                            fontSize: pathS / 5.5,
-                            fontWeight: FontWeight.w500,
-                            fontFamily: 'Roboto',
-                          ),
-                        ),
-                        Container(
-                          width: pathL/1.4,
-                          child: Text(
-                            widget.post,
-                            style: TextStyle(
-                              color: isDarkMode ? whiteColor : greyColor6,
-                              fontSize: pathS / 5,
-                              fontWeight: FontWeight.bold,
-                              fontFamily: 'Roboto',
-                            ),
-                            textAlign: TextAlign.left,
-                          ),
-                        ),
+                    Padding(
+                      padding:  EdgeInsets.only(left: pathS/5,right: pathS/5),
+                      child: Column(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        crossAxisAlignment: CrossAxisAlignment.center,
+                        children: [
 
-                        Text(
-                          'post_rank'.tr(),
-                          style: TextStyle(
-                            color: isDarkMode ? whiteColor : greyColor6,
-                            fontSize: pathS / 5.5,
-                            fontWeight: FontWeight.w500,
-                            fontFamily: 'Roboto',
+                          Row(
+                            mainAxisAlignment: MainAxisAlignment.center,
+                            crossAxisAlignment: CrossAxisAlignment.center,
+                            children: [
+                              Text(
+                                'post'.tr(),
+                                style: TextStyle(
+                                  color: isDarkMode ? whiteColor : greyColor6,
+                                  fontSize: pathS / 5.5,
+                                  fontWeight: FontWeight.w300,
+                                  fontFamily: 'Roboto',
+                                ),
+                              ),
+                              SizedBox(width: 2),
+                              Text(
+                                widget.unitDutyPost.address,
+                                style: TextStyle(
+                                  color: isDarkMode ? whiteColor : greyColor6,
+                                  fontSize: pathS / 5,
+                                  fontWeight: FontWeight.bold,
+                                  fontFamily: 'Roboto',
+                                ),
+                                textAlign: TextAlign.left,
+                              ),
+                            ],
                           ),
-                        ),
-                        SizedBox(width: 2),
-                        Container(
-                          width: pathS,
-                          child: Text(
-                            widget.postRank,
-                            style: TextStyle(
-                              color: isDarkMode ? whiteColor : greyColor6,
-                              fontSize: pathS / 5.5,
-                              fontWeight: FontWeight.bold,
-                              fontFamily: 'Roboto',
-                            ),
+
+                          Row(
+                            mainAxisAlignment: MainAxisAlignment.center,
+                            crossAxisAlignment: CrossAxisAlignment.center,
+                            children: [
+                              Text(
+                                'post_rank'.tr(),
+                                style: TextStyle(
+                                  color: isDarkMode ? whiteColor : greyColor6,
+                                  fontSize: pathS / 5.5,
+                                  fontWeight: FontWeight.w300,
+                                  fontFamily: 'Roboto',
+                                ),
+                              ),
+                              SizedBox(width: 2),
+                              Text(
+                                widget.unitDutyPost.postName,
+                                style: TextStyle(
+                                  color: isDarkMode ? whiteColor : greyColor6,
+                                  fontSize: pathS / 5.5,
+                                  fontWeight: FontWeight.bold,
+                                  fontFamily: 'Roboto',
+                                ),
+                              ),
+                            ],
                           ),
-                        ),
-                      ],
+
+                        ],
+                      ),
                     ),
 
 
@@ -299,49 +314,60 @@ class ThanksDutyViewState extends State<ThanksDutyView>{
                         Row(
                           mainAxisAlignment: MainAxisAlignment.center,
                           children: [
-                            Text(
-                              'duty_in'.tr(),
-                              style: TextStyle(
-                                color: isDarkMode ? whiteColor : greyColor6,
-                                fontSize: pathS / 5.5,
-                                fontWeight: FontWeight.w500,
-                                fontFamily: 'Roboto',
-                              ),
-                            ),
-                            SizedBox(width: pathS/15),
-                            Text(
-                              widget.shiftData['shiftTime'],
-                              style: TextStyle(
-                                color: isDarkMode ? whiteColor : greyColor6,
-                                fontSize: pathS / 5.5,
-                                fontWeight: FontWeight.w500,
-                                fontFamily: 'Roboto',
-                              ),
-                              textAlign: TextAlign.left,
-                            ),
-                            SizedBox(width: pathS/5),
 
-                            Text(
-                              'duty_out'.tr(),
-                              style: TextStyle(
-                                color: isDarkMode ? whiteColor : greyColor6,
-                                fontSize: pathS / 5.5,
-                                fontWeight: FontWeight.w500,
-                                fontFamily: 'Roboto',
-                              ),
+                            Row(
+                              children: [
+                                Text(
+                                  'duty_in'.tr(),
+                                  style: TextStyle(
+                                    color: isDarkMode ? whiteColor : greyColor6,
+                                    fontSize: pathS / 5.5,
+                                    fontWeight: FontWeight.w500,
+                                    fontFamily: 'Roboto',
+                                  ),
+                                ),
+                                SizedBox(width: pathS/15),
+                                Text(
+                                  '${DateFormat('h:mm').format(widget.userAttendance.actStartTime) } ${DateFormat('a').format(widget.userAttendance.actStartTime).toUpperCase()}',
+                                  style: TextStyle(
+                                    color: isDarkMode ? whiteColor : greyColor6,
+                                    fontSize: pathS / 5.5,
+                                    fontWeight: FontWeight.w500,
+                                    fontFamily: 'Roboto',
+                                  ),
+                                  textAlign: TextAlign.left,
+                                ),
+                              ],
                             ),
-                            SizedBox(width: pathS/15),
-                            Text(
-                              widget.shiftData['shiftTime'],
-                              style: TextStyle(
-                                color: isDarkMode ? whiteColor : greyColor6,
-                                fontSize: pathS / 5.5,
-                                fontWeight: FontWeight.w500,
-                                fontFamily: 'Roboto',
-                              ),
+
+                            if(widget.userAttendance.actEndTime != null)Row(
+                              children: [
+                                SizedBox(width: pathS/8),
+                                Text(
+                                  'duty_out'.tr(),
+                                  style: TextStyle(
+                                    color: isDarkMode ? whiteColor : greyColor6,
+                                    fontSize: pathS / 5.5,
+                                    fontWeight: FontWeight.w500,
+                                    fontFamily: 'Roboto',
+                                  ),
+                                ),
+                                SizedBox(width: pathS/15),
+                                Text(
+                                  '${DateFormat('h:mm').format(widget.userAttendance.actEndTime!) } ${DateFormat('a').format(widget.userAttendance.actEndTime!).toUpperCase()}',
+                                  style: TextStyle(
+                                    color: isDarkMode ? whiteColor : greyColor6,
+                                    fontSize: pathS / 5.5,
+                                    fontWeight: FontWeight.w500,
+                                    fontFamily: 'Roboto',
+                                  ),
+                                ),
+                              ],
                             ),
+
                           ],
                         ),
+
                         SizedBox(height: pathS/12),
 
                         Row(
@@ -358,7 +384,7 @@ class ThanksDutyViewState extends State<ThanksDutyView>{
                             ),
                             SizedBox(width: pathS/20),
                             Text(
-                              '40.7543, 67.76777',
+                              '$lat,$lng',
                               style: TextStyle(
                                 color: isDarkMode ? whiteColor : greyColor6,
                                 fontSize: pathS / 5.5,
@@ -367,8 +393,6 @@ class ThanksDutyViewState extends State<ThanksDutyView>{
                               ),
                               textAlign: TextAlign.left,
                             ),
-
-
 
                           ],
                         ),
@@ -390,15 +414,6 @@ class ThanksDutyViewState extends State<ThanksDutyView>{
     );
   }
 
-  void onLoadUpdateUI(){
-
-    imagePath = widget.userProfile.profileImageUrl;
-    name = widget.userProfile.empName;
-    position = widget.userProfile.serviceName;
-    positionSymbol = widget.userProfile.symbol;
-
-
-  }
   void showToastView(String message) {
     setState(() {
       showToastMessageView = true;

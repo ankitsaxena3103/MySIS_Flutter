@@ -341,7 +341,7 @@ class LeaveAppliedViewHelpState extends State<LeaveAppliedViewHelp> {
 
 
 
-    Navigator.push(
+    Navigator.pushReplacement(
       context,
       MaterialPageRoute(
         builder: (context) => MyTabBarView(),

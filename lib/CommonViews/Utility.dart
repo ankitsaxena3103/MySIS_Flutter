@@ -19,6 +19,9 @@ const String tokenApi = '/api/guardApp/Auth/GenerateToken';
 const String userPostingApi = '/api/guardApp/Auth/UserPosting';
 const String contactSISApi = '/api/guardApp/Auth/ContactSIS';
 const String userRosterApi = '/api/guardApp/Auth/UserRoster';
+const String userNotificationApi = '/api/guardApp/Auth/UserNotification';
+const String userAttendanceApi = '/api/guardApp/Auth/UserAttendance';
+const String userAttendancePostApi = '/api/guardApp/Post/PostUserAttendance';
 
 
 const keyTableUserProfile = 'UserProfile';
@@ -27,6 +30,14 @@ const keyTableUnitShiftDetail = 'UnitShiftDetail';
 const keyTableUnitDutyPost = 'UnitDutyPost';
 const keyTableContactSIS = 'ContactSIS';
 const keyTableUserRoster = 'UserRoster';
+const keyTableUserNotification = 'UserNotification';
+const keyTableUserAttendance = 'UserAttendance';
+
+const keyAttendanceModeSelf = 'DEVICE';
+const keyAttendanceModeOther = 'OTHER_DUTY';
+
+const keyAttendanceStatusDutyIn = 'DUTY_IN';
+const keyAttendanceStatusDutyOut = 'DUTY_OUT';
 
 
 String phoneNo = '';
@@ -95,6 +106,8 @@ const keyUserName = "name";
 const keyUserID = "userID";
 
 const keyPIN = 'PIN';
+const keyPwd = 'pwd';
+
 
 
 List<TextStyle> PINTextStyle(Color color, int fieldCount) {
@@ -191,7 +204,7 @@ String formatTime(String timeString, String format) {
 
 }
 
-String formatInHrs(String timeString, String format) {
+String getFormattedTime(String timeString, String format) {
   String  convertedTime = timeString;
   try {
     // Parse the input time string as a time-only format
@@ -211,6 +224,21 @@ String formatInHrs(String timeString, String format) {
 
 
 
+String getFormattedDateTime(String timeString, String inputFormat, String outputFormat) {
+  String convertedTime = timeString;
+  try {
+    // Parse the input time string as a time-only format
+    final DateFormat inputDateFormat = DateFormat(inputFormat);
+    final DateTime parsedTime = inputDateFormat.parse(timeString);
+
+    // Format it into "HH:mm"
+    final DateFormat outputDateFormat = DateFormat(outputFormat);
+    return outputDateFormat.format(parsedTime);
+  } catch (e) {
+    // Return the original time if parsing fails
+    return convertedTime;
+  }
+}
 
 
 

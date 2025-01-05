@@ -185,60 +185,65 @@ class EnterPINViewState extends State<EnterPINView> {
                                       ),
                                     ),
                                     SizedBox(height: pathS / 12),
-                                    OTPTextField(
-                                      length: 4,
-                                      width: pathL * 1.2,
-                                      fieldWidth: pathS / 2.2,
-                                      obscureText: true,
-
-                                      keyboardType: TextInputType.number,
-                                      style: TextStyle(
-                                        color: isDarkMode ? whiteColor : greyColor6,
-                                        fontSize: pathS / 5,
-                                        fontFamily: 'Roboto',
-                                      ),
-                                      textFieldAlignment: MainAxisAlignment.spaceAround,
-                                      fieldStyle: FieldStyle.underline,
-
-                                      onChanged: (pin) {
-                                        print(" Entered PIN : " + pin);
-                                        txtEnterPIN.text = pin;
-                                        onPINChange(pin);
-                                      },
-                                      onCompleted: (pin) {
-                                        print("OTP completed: " + pin);
-
-                                        // txtUserPIN.text = pin;
-                                        // onUserIdChange(pin);
-                                      },
-                                    ),
-
-                                    // OtpTextField(
-                                    //   numberOfFields: 4,
+                                    // OTPTextField(
+                                    //   length: 4,
+                                    //   width: pathL * 1.2,
+                                    //   fieldWidth: pathS / 2.2,
                                     //   obscureText: true,
+                                    //
                                     //   keyboardType: TextInputType.number,
-                                    //   borderColor: isDarkMode ? whiteColor : greyColor6,
-                                    //   focusedBorderColor: Colors.blue,
-                                    //   styles: PINTextStyle(
-                                    //     isDarkMode ? whiteColor : greyColor6,
-                                    //     4,
+                                    //   style: TextStyle(
+                                    //     color: isDarkMode ? whiteColor : greyColor6,
+                                    //     fontSize: pathS / 5,
+                                    //     fontFamily: 'Roboto',
                                     //   ),
-                                    //   showFieldAsBox: false,
-                                    //   borderWidth: 2.0,
-                                    //   fieldWidth: pathS/2.5,
-                                    //   //runs when a code is typed in
-                                    //   onCodeChanged: (String pin) {
+                                    //   textFieldAlignment: MainAxisAlignment.spaceAround,
+                                    //   fieldStyle: FieldStyle.underline,
                                     //
-                                    //
-                                    //   },
-                                    //   //runs when every textfield is filled
-                                    //   onSubmit: (String pin) {
+                                    //   onChanged: (pin) {
+                                    //     print(" Entered PIN : " + pin);
                                     //     txtEnterPIN.text = pin;
-                                    //     onUserIdChange(pin);
+                                    //     onPINChange(pin);
+                                    //   },
+                                    //   onCompleted: (pin) {
                                     //     print("OTP completed: " + pin);
                                     //
+                                    //     // txtUserPIN.text = pin;
+                                    //     // onUserIdChange(pin);
                                     //   },
                                     // ),
+
+                                    OtpTextField(
+                                      numberOfFields: 4,
+                                      obscureText: true,
+                                      // keyboardType: TextInputType.number,
+                                      borderColor: isDarkMode ? whiteColor : greyColor6,
+                                      focusedBorderColor: Colors.blue,
+                                      styles: PINTextStyle(
+                                        isDarkMode ? whiteColor : greyColor6,
+                                        4,
+                                      ),
+                                      showFieldAsBox: false,
+                                      borderWidth: 2.0,
+                                      fieldWidth: pathS/2.2,
+                                      //runs when a code is typed in
+                                      onCodeChanged: (String pin) {
+                                        printInDebug(" Entered PIN : $pin");
+                                            txtEnterPIN.text = pin;
+                                            onPINChange(pin);
+
+                                      },
+
+                                      onSubmit: (String pin) {
+                                        txtEnterPIN.text = pin;
+                                        onPINChange(pin);
+                                        printInDebug("OTP completed: $pin");
+
+                                      },
+                                      keyboardType: TextInputType.number,
+
+
+                                    ),
                                   ],
                                 ),
                               ),
@@ -351,7 +356,11 @@ class EnterPINViewState extends State<EnterPINView> {
 
   }
 
-  void initialSetup() {}
+  void initialSetup() {
+    setState(() {
+      lblErrorMsg = ''.tr();
+    });
+  }
 
   Future<void> onPINChange(String enteredPIN) async {
 
@@ -396,16 +405,13 @@ class EnterPINViewState extends State<EnterPINView> {
 
     String? currentPIN = await Preferences.getUserPreference(keyPIN);
 
-
       if(currentPIN != txtEnterPIN.text){
         showToastView('repeat_not_match'.tr());
         return;
 
       }
 
-
-
-    Navigator.push(
+    Navigator.pushReplacement(
       context,
       MaterialPageRoute(
         builder: (context) => MyTabBarView(),

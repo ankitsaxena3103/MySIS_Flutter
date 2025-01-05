@@ -252,7 +252,7 @@ class LoginViewErrorState extends State<LoginViewError> {
         Preferences.saveUserPreference(keyUserName, userName);
         Preferences.saveUserPreference(keyUserID, '$userId');
 
-        Navigator.push(
+        Navigator.pushReplacement(
           context,
           MaterialPageRoute(
             builder: (context) => MyTabBarView(),

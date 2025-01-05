@@ -1,25 +1,55 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_barcode_scanner/flutter_barcode_scanner.dart';
+import 'package:mobile_scanner/mobile_scanner.dart';
 import 'package:mysis/CommonViews/Utility.dart';
 import 'package:easy_localization/easy_localization.dart';
 import 'package:mysis/HomeView/EnterManuallyView.dart';
 
+import '../Profile/UnitDutyPost.dart';
+import '../Profile/UnitShiftDetail.dart';
+import '../Profile/UserPosting.dart';
+import '../Profile/UserProfile.dart';
+import 'ConfirmProfileView.dart';
+
 class ScanCardView extends StatefulWidget {
+  final UserProfile userProfile;
+  final String attendanceMode;
+  final List<UnitDutyPost> unitDutyPosts;
+  final List<UnitShiftDetail> unitShiftDetails;
+  final List<UserPosting> userPostings;
+  final String attendanceStatus;
+
+
+  const ScanCardView({
+    super.key,
+    required this.userProfile,
+    required this.attendanceMode,
+    required this.unitDutyPosts,
+    required this.unitShiftDetails,
+    required this.userPostings,
+    required this.attendanceStatus
+  });
+
   @override
   ScanCardViewState createState() => ScanCardViewState();
 }
 
 class ScanCardViewState extends State<ScanCardView>{
 
+  Key scannerKey = UniqueKey();
   bool noData = true;
+
+  late  MobileScannerController mobileNoScannerController;
+
   @override
   void initState() {
+    mobileNoScannerController = MobileScannerController();
     super.initState();
 
   }
 
   @override
   void dispose() {
+    mobileNoScannerController.dispose();
     super.dispose();
   }
 
@@ -122,19 +152,33 @@ class ScanCardViewState extends State<ScanCardView>{
                       ),
                     ],
                   ),
-                  child:GestureDetector(
-                    onTap: (){
-                      scanBarcode();
-                    },
-                    child: Container(
-                      width: pathS/2,
-                      height: pathS/1.5,
+                  child:MobileScanner(
+                    key: scannerKey, // Assign the unique key
+                    controller: mobileNoScannerController,
+                    onDetect: (barcodeCapture) {
+                      for (final barcode in barcodeCapture.barcodes) {
+                        debugPrint('Barcode found: ${barcode.rawValue}');
+                        if(widget.userProfile.mobile == barcode.rawValue || widget.userProfile.regNo == barcode.rawValue) {
+                          onUserScannedId(barcode.rawValue!);
+                        }
+                        else{
+                          onUserScannedData(barcode.rawValue!);
+                        }
 
-                        child: Icon(
-                            Icons.camera_alt_outlined,
-                          color:  isDarkMode ? greyColor1:greyColor6,
-                        ),
-                    ),
+
+                      }
+                    },
+                    fit: BoxFit.cover, // Ensure the scanner fills the container
+                    placeholderBuilder: (context, constraints) {
+                      return Center(
+                        child: Text('Initializing camera...'),
+                      );
+                    },
+                    errorBuilder: (context, error, child) {
+                      return Center(
+                        child: Text('Error: ${error.errorCode}'),
+                      );
+                    },
                   ),
                 ),
 
@@ -225,20 +269,62 @@ class ScanCardViewState extends State<ScanCardView>{
   }
 
 
-  Future<void> scanBarcode() async {
-    String barcodeScanRes = await FlutterBarcodeScanner.scanBarcode(
-      '#ff6666', // Color for the scan button
-      'Cancel', // Text for the cancel button
-      true, // Wait for the result before returning
-      ScanMode.BARCODE, // Specify the type of scan (BARCODE or QR)
-    );
+  void onUserScannedId(String myId){
+    printInDebug(myId);
+    if(widget.userProfile.mobile == myId || widget.userProfile.regNo == myId) {
+      loadConfirmScreen();
+    }else{
+
+    }
+  }
+
+  void onUserScannedData(String scannedData){
+    //dispose once done scanning
+    // mobileNoScannerController.dispose();
+    printInDebug(scannedData);
+
+  }
+
+  void loadConfirmScreen(){
+    mobileNoScannerController.dispose();
+    Navigator.push(
+      context,
+      MaterialPageRoute(
+        builder: (context) => ConfirmProfileView(
+          userProfile: widget.userProfile,
+          attendanceMode: widget.attendanceMode,
+          unitDutyPosts: widget.unitDutyPosts,
+          unitShiftDetails: widget.unitShiftDetails,
+          userPostings: widget.userPostings,
+          attendanceStatus: widget.attendanceStatus,
+        ),
+      ),
+    )
+        .then((val) {
+        printInDebug('back from confirm profile');
+        setState(() {
+          mobileNoScannerController = MobileScannerController(
+            detectionSpeed: DetectionSpeed.noDuplicates,
+            facing: CameraFacing.back,
+          );
+        });
+        scannerKey = UniqueKey(); // Force widget to reload
+    });
   }
 
   void onLoadManualEntry(){
     Navigator.push(
       context,
       MaterialPageRoute(
-        builder: (context) => EnterManuallyView(),
+        builder: (context) => EnterManuallyView(
+          userProfile: widget.userProfile,
+          attendanceMode: widget.attendanceMode,
+          unitDutyPosts: widget.unitDutyPosts,
+          unitShiftDetails: widget.unitShiftDetails,
+          userPostings: widget.userPostings,
+          attendanceStatus: widget.attendanceStatus,
+
+        ),
       ),
     );
   }

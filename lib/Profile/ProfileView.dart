@@ -17,6 +17,8 @@ import 'UnitShiftDetail.dart';
 import 'UserProfile.dart';
 
 class ProfileView extends StatefulWidget {
+  const ProfileView({super.key});
+
   @override
   ProfileViewState createState() => ProfileViewState();
 }
@@ -26,35 +28,35 @@ class ProfileViewState extends State<ProfileView>{
   String assetsImagePath = "assets/images/dashboard-icons/profile-icon.png";
   String imagePath = '';
 
-  String userName = 'Priya';
-  String degination = 'ASSISTANT ASSESSMENT MANAGER | ABC124563';
-  String description = '10 Years with SIS';
+  String userName = '';
+  String degination = '';
+  String description = '';
 
-  String age = '40 years';
-  String qualification = 'Graduate';
-  String height = '176 cm';
-  String weight = '65 KG';
-  String branchName = 'Corporate Office';
-  String ta = 'TA';
+  String age = '';
+  String qualification = '';
+  String height = '';
+  String weight = '';
+  String branchName = '';
+  String ta = '';
 
-  String companyName = 'IL & FS Environmental Infrastructure & Services Limited';
-  String unit = 'DLE UNT 12345';
-  String department = 'Maingate SS';
-  String contactNum = '+91-9876543210';
+  String companyName = '';
+  String unit = '';
+  String department = '';
+  String contactNum = '';
 
   String bankLogoPath = "assets/images/profile/bank.png";
 
   String bankLogoUrl = '';
-  String bankName = 'HDFC Bank';
-  String accountHolderName = 'Rajkumar Singh';
-  String accountN = 'A/c 2134387493';
-  String addres = 'Branch Nehru Place, New Delhi';
-  String ifscCode = 'IFSC Code HDFCOOO1006';
+  String bankName = '';
+  String accountHolderName = '';
+  String accountN = '';
+  String addres = '';
+  String ifscCode = '';
 
 
-  String aAdhar = 'xxxx-xxxx-1234';
-  String esic= 'xxxxxxx0001';
-  String pf = 'xxxxxxxxx0000123';
+  String aAdhar = '';
+  String esic= '';
+  String pf = '';
 
   String aAdharLogoUrl = '';
   String esicLogoUrl = '';
@@ -1196,23 +1198,20 @@ class ProfileViewState extends State<ProfileView>{
 
           Visibility(
             visible: showUserShiftDetail,
-              child: UserShiftDetailView(unitDutyPosts: unitDutyPosts, unitShiftDetails: unitShiftDetails, userPosting: userPostings.first, callBack: (value) {
-                if (value == 0){
-                  setState(() {
-                    showUserShiftDetail  = false;
-                  });
-                }
-
-                if (value == 1){
-                  setState(() {
-                    showUserShiftDetail  = false;
-                  });
-
-
-
-                }
+            child: userPostings.isNotEmpty
+                ? UserShiftDetailView(
+              unitDutyPosts: unitDutyPosts,
+              unitShiftDetails: unitShiftDetails,
+              userPosting: userPostings.first, // Safe because we checked isNotEmpty
+              callBack: (value) {
+                setState(() {
+                  showUserShiftDetail = false;
+                });
               },
-              ),
+            )
+                : Center(
+              child: Text("No user postings available."),
+            ),
           ),
 
         ],
@@ -1365,7 +1364,7 @@ class ProfileViewState extends State<ProfileView>{
     );
   }
 
-Future<void> getProfileTableData() async {
+  Future<void> getProfileTableData() async {
   final userProfiles = await DatabaseHelper.instance.getAllRecords<UserProfile>(
     keyTableUserProfile,
         (map) => UserProfile.fromMap(map),
@@ -1471,9 +1470,8 @@ Future<void> getProfileTableData() async {
       // setState(() {
       //   showLoaderView = false;
       // });
+
       if(data.isNotEmpty){
-
-
         print(data);
         List<UserProfile> userProfiles = data.map((json) => UserProfile.fromJson(json)).toList();
         userProfiles.forEach((profile) {
@@ -1572,44 +1570,6 @@ Future<void> getProfileTableData() async {
 
     return;
 
-    for (var unitShiftDetail in unitShiftDetails) {
-      if (unitShiftDetail.deleted == 1) {
-        // If the record is marked as deleted, delete it
-        final result = await DatabaseHelper.instance.deleteTableData(
-          keyTableUnitShiftDetail,
-          'id',
-          unitShiftDetail.id,
-        );
-        print('deleted = $result');
-      }
-      else {
-        // Check if the record already exists
-        final existingRecords = await DatabaseHelper.instance.getSingleRow(
-          keyTableUnitShiftDetail,
-          'id',
-          unitShiftDetail.id,
-        );
-
-        if (existingRecords!.isEmpty) {
-          // If the record does not exist, insert it
-          final result = await DatabaseHelper.instance.insertRecord<UnitShiftDetail>(
-            keyTableUnitShiftDetail,
-            unitShiftDetail,
-                (unitShiftDetail) => unitShiftDetail.toMap(),
-          );
-          print('inserted = $result');
-        } else {
-          // If the record exists, update it
-          final result = await DatabaseHelper.instance.updateTableData(
-            keyTableUnitShiftDetail,
-            unitShiftDetail.toMap(),
-            unitShiftDetail.id,
-
-          );
-          print('updated = $result');
-        }
-      }
-    }
   }
   Future<void> syncUnitDutyPostData() async {
     await DatabaseHelper.instance.replaceTableData<UnitDutyPost>(keyTableUnitDutyPost, unitDutyPosts, (unitDutyPosts) =>
@@ -1621,7 +1581,5 @@ Future<void> getProfileTableData() async {
         userPosting.toMap());
 
   }
-
-
 
 }

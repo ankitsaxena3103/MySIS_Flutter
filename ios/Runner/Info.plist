@@ -26,8 +26,6 @@
 	<string>$(FLUTTER_BUILD_NUMBER)</string>
 	<key>LSRequiresIPhoneOS</key>
 	<true/>
-	<key>NSCameraUsageDescription</key>
-	<string>Camera permission is required for barcode scanning.</string>
 	<key>NSPhotoLibraryUsageDescription</key>
 	<string>Photo library access is required to select photos from your device.</string>
 	<key>UIApplicationSupportsIndirectInputEvents</key>
@@ -41,5 +39,13 @@
 		<string>UIInterfaceOrientationPortrait</string>
 		<string>UIInterfaceOrientationPortraitUpsideDown</string>
 	</array>
+	<key>NSLocationWhenInUseUsageDescription</key>
+    <string>Allow MySIS to use the location information of this device.</string>
+    <key>NSLocationAlwaysUsageDescription</key>
+    <string>Allow MySIS to use the location information of this device.</string>
+    <key>NSContactsUsageDescription</key>
+    <string>MySIS requires permission to access your phone contacts to allow phone calls to be made through the links provided in the application.</string>
+    <key>NSCameraUsageDescription</key>
+    <string>MySIS requires permission to access your phone camera to take pictures while marking attendance and Changing Profile Image.</string>
 </dict>
 </plist>

@@ -1,7 +1,6 @@
 import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter_otp_text_field/flutter_otp_text_field.dart';
 import 'package:mysis/CommonViews/AlertView.dart';
 import 'package:mysis/CommonViews/CustomAlertView.dart';
 import 'package:mysis/CommonViews/LoaderView.dart';
@@ -9,8 +8,6 @@ import 'package:mysis/CommonViews/ToastMessageView.dart';
 import 'package:mysis/CommonViews/Utility.dart';
 import 'package:mysis/SharedClasses/LanguageProvider.dart';
 import 'package:mysis/UserAuthViews/VerifyOTPView.dart';
-import 'package:otp_text_field/otp_field.dart';
-import 'package:otp_text_field/style.dart';
 import 'package:provider/provider.dart';
 
 import '../SharedClasses/APIHelper.dart';
@@ -19,7 +16,6 @@ import '../SharedClasses/ThemeProvider.dart';
 import 'EnterPINView.dart';
 import 'SetPINView.dart';
 import 'package:flutter/services.dart';
-import 'package:otp_text_field/otp_text_field.dart';
 
 
 class LoginView extends StatefulWidget {
@@ -30,7 +26,7 @@ class LoginView extends StatefulWidget {
 }
 
 class LoginViewState extends State<LoginView> {
-  TextEditingController txtUserId = TextEditingController(text: "9015235213");
+  TextEditingController txtUserId = TextEditingController(text: "");
   TextEditingController txtPassword = TextEditingController(text: "");
   bool showPassword = false;
   bool rememberMe = false;
@@ -59,6 +55,8 @@ class LoginViewState extends State<LoginView> {
 
   String btnNext = 'next'.tr();
   late LanguageProvider languageProvider;
+  bool isTapEnabled = false;
+
 
   @override
   void initState() {
@@ -340,7 +338,7 @@ class LoginViewState extends State<LoginView> {
                           ),
                         ),
                         SizedBox(height: pathS/5),
-                        Container(
+                        SizedBox(
                           width: screenWidth-4*marginValue,
                           child:Text(
                             lblErrorMsg,
@@ -365,10 +363,7 @@ class LoginViewState extends State<LoginView> {
                       bottom: paddingBottom+pathS/2,
 
                       child: GestureDetector(
-                        onTap: (){
-                          onTapLogin();
-
-                        },
+                        onTap: isTapEnabled ? onTapLogin : null, // Disable tap if isTapEnabled is false
                         child: Container(
                           width: pathL,
                           height: pathS / 1.5,
@@ -430,30 +425,29 @@ class LoginViewState extends State<LoginView> {
 
   void initialSetup() {}
 
-  void onUserIdChange(String userid){
+  void onUserIdChange(String userid) {
 
-    if(userid.length ==  10 || userid.length ==  9){
+    if (userid.length == 10 || userid.length == 9) {
       setState(() {
         nextBgColor = Color.fromRGBO(195, 50, 30, 1);
         nextFontColor = Colors.white;
         nextShadowColor = Colors.black.withOpacity(0.2);
         lineBorderColor = Color.fromRGBO(51, 51, 51, 0.5);
         lblErrorMsg = '';
+        isTapEnabled = true; // Enable tap
       });
-
-    }else{
+    } else {
       setState(() {
         nextBgColor = Color.fromRGBO(51, 51, 51, 0.2);
         nextFontColor = Color.fromRGBO(51, 51, 51, 0.6);
         nextShadowColor = Colors.transparent;
         lineBorderColor = Color.fromRGBO(255, 0, 0, 1);
         lblErrorMsg = 'enter_10_digit_number'.tr();
-
+        isTapEnabled = false; // Disable tap
       });
-
     }
-
   }
+
 
 
   void onTapLogin() {
@@ -494,7 +488,9 @@ class LoginViewState extends State<LoginView> {
 
 
           Preferences.saveUserPreference(keyUserName, userName);
-          Preferences.saveUserPreference(keyUserID, '$userId');
+          Preferences.saveUserPreference(keyUserID, userId);
+          Preferences.saveUserPreference(keyPwd, pwd);
+
 
           updateLanguage(languageCode);
 
@@ -528,7 +524,7 @@ void getToken(String userId, String pwd){
     if(data.isNotEmpty){
 
       token = data['token'] ?? '';
-      Preferences.saveUserPreference(keyUserToken, '$token');
+      Preferences.saveUserPreference(keyUserToken, token);
 
 
     }
@@ -537,8 +533,7 @@ void getToken(String userId, String pwd){
    if (kDebugMode) {
      print(error);
    }
-  }
-  );
+  });
 }
   void loadNextScreen(int isOTPRequired, String otp,int timerVal, String pin) {
     if(isOTPRequired == 0 && otp.isNotEmpty){
@@ -628,6 +623,7 @@ class SimpleOTPTextField extends StatelessWidget {
   final bool isDarkMode;
 
   const SimpleOTPTextField({
+    super.key,
     required this.txtUserId,
     required this.onUserIdChange,
     required this.isDarkMode,
@@ -637,7 +633,7 @@ class SimpleOTPTextField extends StatelessWidget {
   Widget build(BuildContext context) {
     return TextField(
       controller: txtUserId,
-      keyboardType: TextInputType.number,
+      // keyboardType: TextInputType.number,
       inputFormatters: [
         LengthLimitingTextInputFormatter(10), // Limit to 10 characters
         // FilteringTextInputFormatter., // Allow digits only

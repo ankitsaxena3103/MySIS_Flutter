@@ -397,7 +397,7 @@ class UserShiftDetailViewState extends State<UserShiftDetailView> {
                       ),
                       SizedBox(width: pathS / 15),
                       Text(
-                        '${formatInHrs(shift.dutyHrs, 'HH')} ${'hours'.tr()}',
+                        '${getFormattedTime(shift.dutyHrs, 'HH')} ${'hours'.tr()}',
                         style: TextStyle(
                           color: isDarkMode ? whiteColor : greyColor7,
                           fontSize: pathS / 6,

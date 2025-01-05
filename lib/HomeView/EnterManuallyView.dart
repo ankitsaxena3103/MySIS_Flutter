@@ -1,18 +1,34 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_otp_text_field/flutter_otp_text_field.dart';
 import 'package:mysis/CommonViews/Utility.dart';
 import 'package:easy_localization/easy_localization.dart';
 import 'package:mysis/HomeView/ConfirmProfileView.dart';
 import 'package:mysis/HomeView/ScanCardView.dart';
-import 'package:sqflite/sqflite.dart';
 
+import '../Profile/UnitDutyPost.dart';
+import '../Profile/UnitShiftDetail.dart';
+import '../Profile/UserPosting.dart';
 import '../Profile/UserProfile.dart';
-import '../SharedClasses/DatabaseHelper.dart';
-import 'ScanUnitShiftView.dart';
 
 
 class EnterManuallyView extends StatefulWidget {
-  const EnterManuallyView({super.key});
+  final UserProfile userProfile;
+  final String attendanceMode;
+  final List<UnitDutyPost> unitDutyPosts;
+  final List<UnitShiftDetail> unitShiftDetails;
+  final List<UserPosting> userPostings;
+  final String attendanceStatus;
+
+
+  const EnterManuallyView({
+    super.key,
+    required this.userProfile,
+    required this.attendanceMode,
+    required this.unitDutyPosts,
+    required this.unitShiftDetails,
+    required this.userPostings,
+    required this.attendanceStatus,
+
+  });
 
   @override
   EnterManuallyViewState createState() => EnterManuallyViewState();
@@ -39,14 +55,10 @@ class EnterManuallyViewState extends State<EnterManuallyView>{
 
   String btnNext = 'next'.tr();
 
-  List<UserProfile> userProfile = [];
-
 
   @override
   void initState() {
-    getProfileTableData();
     super.initState();
-
   }
 
   @override
@@ -261,12 +273,12 @@ class EnterManuallyViewState extends State<EnterManuallyView>{
                 ),
 
                 Positioned(
-                  bottom: paddingBottom+pathS,
+                  bottom: MediaQuery.of(context).padding.bottom+pathS,
 
                   child: GestureDetector(
                     onTap: (){
                       // Navigator.pop(context);
-                      onLoadConfirmProfile();
+                      onTapNext();
                     },
                     child: Container(
                       width: pathL,
@@ -303,7 +315,6 @@ class EnterManuallyViewState extends State<EnterManuallyView>{
                   child: GestureDetector(
                     onTap: (){
 
-
                     },
                     child: Container(
                       width: screenWidth,
@@ -339,9 +350,16 @@ class EnterManuallyViewState extends State<EnterManuallyView>{
                       height: pathS / 1.4,
                       alignment: Alignment.center,
                       decoration: BoxDecoration(
-                        color: isDarkMode ? greyColor8:whiteColor,                          // border: Border.all(color: Colors.yellow, width: pathS/18),
-                        // borderRadius: BorderRadius.circular(pathS/3),
+                        color: isDarkMode?greyColor8:greyColor,
 
+                        boxShadow: [
+                          BoxShadow(
+                            color: shadowColor, // Shadow color
+                            blurRadius: pathS/15, // Spread of the shadow
+                            // spreadRadius: pathS/15, // How far the shadow extends
+                            offset:  Offset(-pathS/15, -pathS/15),
+                          ),
+                        ],
                       ),
                       child: Text(
                         'scan_qr_code'.tr(),
@@ -422,40 +440,44 @@ class EnterManuallyViewState extends State<EnterManuallyView>{
     Navigator.push(
       context,
       MaterialPageRoute(
-        builder: (context) => ScanCardView(),
+        builder: (context) => ScanCardView(
+            userProfile: widget.userProfile,
+            attendanceMode: widget.attendanceMode,
+          unitDutyPosts: widget.unitDutyPosts,
+          unitShiftDetails: widget.unitShiftDetails,
+          userPostings: widget.userPostings,
+          attendanceStatus: widget.attendanceStatus,
+
+        ),
       ),
     );
   }
 
-  void onLoadConfirmProfile(){
+  void onTapNext(){
     printInDebug(txtUserId.text);
-    if(userProfile.first.mobile == txtUserId.text) {
-      Navigator.push(
-        context,
-        MaterialPageRoute(
-          builder: (context) => ConfirmProfileView(userProfile: userProfile.first,),
-        ),
-      );
+    if(widget.userProfile.mobile == txtUserId.text) {
+    loadConfirmScreen();
     }else{
      // call API to show data
+
     }
   }
 
-  Future<void> getProfileTableData() async {
-    final userProfiles = await DatabaseHelper.instance.getAllRecords<UserProfile>(
-      keyTableUserProfile,
-          (map) => UserProfile.fromMap(map),
-    );
+void loadConfirmScreen(){
+  Navigator.push(
+    context,
+    MaterialPageRoute(
+      builder: (context) => ConfirmProfileView(
+        userProfile:widget.userProfile,
+        attendanceMode: widget.attendanceMode,
+        unitDutyPosts: widget.unitDutyPosts,
+        unitShiftDetails: widget.unitShiftDetails,
+        userPostings: widget.userPostings,
+        attendanceStatus: widget.attendanceStatus,
 
-    userProfiles.forEach((profile) {
-      printInDebug('profile ID: ${profile.id}');
-      printInDebug('profile emp name: ${profile.empName}');
-    });
-
-    userProfile = userProfiles;
-
-
-  }
-
+      ),
+    ),
+  );
+}
 
 }

@@ -1,11 +1,10 @@
 import 'package:flutter/material.dart';
-import 'package:mysis/CommonViews/CustomAlertView.dart';
-import 'package:mysis/CommonViews/LoaderView.dart';
-import 'package:mysis/CommonViews/ToastMessageView.dart';
+import 'package:geolocator/geolocator.dart';
 import 'package:mysis/CommonViews/Utility.dart';
 import 'package:mysis/PreAuthViews/OnboardingPaginationView.dart';
 import 'package:easy_localization/easy_localization.dart';
 
+import 'package:permission_handler/permission_handler.dart';
 
 class PrivacyPolicyView extends StatefulWidget {
   const PrivacyPolicyView({super.key});
@@ -333,6 +332,8 @@ class PrivacyPolicyViewState extends State<PrivacyPolicyView> {
                   ],
                 ),
 
+
+
               ],
             ),
           ),
@@ -343,17 +344,155 @@ class PrivacyPolicyViewState extends State<PrivacyPolicyView> {
 
   void initialSetup() {}
 
-  void onTapNext() {
 
 
-    Navigator.push(
-          context,
-          MaterialPageRoute(
-            builder: (context) => OnboardingPaginationView(),
-          ),
-        );
+  void onTapNext() async {
+    bool isAllPermissionsGranted = await _requestAllPermissions();
 
+    if (isAllPermissionsGranted) {
+      // Navigate to the next screen
+      Navigator.push(
+        context,
+        MaterialPageRoute(
+          builder: (context) => OnboardingPaginationView(),
+        ),
+      );
+    } else {
+      // Show dialog if any permission is denied
+      _showPermissionDeniedDialog();
+    }
   }
+
+  Future<bool> _requestAllPermissions() async {
+    // 1. Request Contact Permission
+    if (!await _requestContactPermission()) {
+      // return false;
+    }
+
+    // 2. Request Camera Permission
+    if (!await _requestCameraPermission()) {
+      // return false;
+    }
+
+    // 3. Request Location Permission
+    //     if (!await _requestLocationPermission() || !await _requestContactPermission() || !await _requestContactPermission()) {
+     if (!await _requestLocationPermission()) {//this is temp
+
+      return false;
+    }
+
+    // All permissions granted
+    return true;
+  }
+
+
+  Future<bool> _requestContactPermission() async {
+    PermissionStatus status = await Permission.contacts.status;
+    print(status);
+
+    if (status.isDenied) {
+      // Request permission if denied
+      print(status);
+      status = await Permission.contacts.request();
+      print(status);
+
+      if (status.isDenied) {
+        return false; // Permission denied temporarily
+      }
+    }
+
+    if (status.isPermanentlyDenied) {
+      status = await Permission.contacts.request();
+      // Handle permanently denied permission
+      if (status.isPermanentlyDenied) {
+        return false; // Permission denied permanently
+      }
+    }
+
+    // Permission granted
+    return true;
+  }
+
+  Future<bool> _requestCameraPermission() async {
+    // Check the current status of the camera permission
+    PermissionStatus status = await Permission.camera.status;
+
+    if (status.isGranted) {
+      print("Camera permission already granted.");
+      return true; // Permission already granted
+    }
+
+    if (status.isDenied) {
+      // Request permission if previously denied
+      print("Requesting camera permission...");
+      status = await Permission.camera.request();
+      if (status.isGranted) {
+        return true; // Permission granted
+      }
+    }
+
+    if (status.isPermanentlyDenied) {
+      // If permanently denied, redirect the user to app settings
+      print("Camera permission permanently denied.");
+      return false;
+    }
+
+    return false; // Permission not granted
+  }
+  Future<bool> _requestLocationPermission() async {
+
+    LocationPermission permission = await Geolocator.checkPermission();
+    if (permission == LocationPermission.denied) {
+      permission = await Geolocator.requestPermission();
+      if (permission == LocationPermission.denied) {
+        return false; // Permission denied temporarily
+      }
+    }
+
+    if (permission == LocationPermission.deniedForever) {
+      // Permission permanently denied
+      return false;
+    }
+
+    if (permission == LocationPermission.whileInUse) {
+      // Show a prompt to recommend "Always Allow"
+      return true;
+    }
+
+    // Permission granted
+    return true;
+  }
+
+  void _showPermissionDeniedDialog() {
+    showDialog(
+      context: context,
+      builder: (context) => AlertDialog(
+        title: Text('permission_title'.tr()),
+        content: Text(
+          'Permission_message'.tr(),
+        ),
+        actions: [
+          // TextButton(
+          //   onPressed: () => Navigator.of(context).pop(), // Close dialog
+          //   child: Text('Cancel'),
+          // ),
+          TextButton(
+            onPressed: () {
+              Navigator.of(context).pop(); // Close dialog
+              openAppSettings(); // Open app settings
+            },
+            child: Text('permission_ensure'.tr()),
+          ),
+        ],
+      ),
+    );
+  }
+
+
+  void _openAppSettings() async {
+    await Geolocator.openAppSettings();
+  }
+
 
   void showToastView(String message) {
     setState(() {

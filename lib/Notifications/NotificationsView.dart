@@ -3,6 +3,10 @@ import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
 import 'package:mysis/CommonViews/Utility.dart';
 import 'package:easy_localization/easy_localization.dart';
+import 'package:mysis/Notifications/UserNotification.dart';
+
+import '../SharedClasses/APIHelper.dart';
+import '../SharedClasses/DatabaseHelper.dart';
 
 class NotificationsView extends StatefulWidget {
   const NotificationsView({super.key});
@@ -34,8 +38,14 @@ List <Map> notificationData = [
     'dateTime' : 'Dec 16, 2020'
   },
 ];
+
+List<UserNotification> userNotifications = [];
   @override
   void initState() {
+
+    getTableData();
+    onLoadData();
+
     super.initState();
 
   }
@@ -48,7 +58,7 @@ List <Map> notificationData = [
 
   @override
   Widget build(BuildContext context) {
-    isNoData = notificationData.length > 0 ? false : true;
+    isNoData = userNotifications.isNotEmpty ? false : true;
 
     return Scaffold(
       body: Stack(
@@ -133,7 +143,7 @@ List <Map> notificationData = [
                 Padding(
                   padding: EdgeInsets.only(top: MediaQuery.of(context).padding.top+pathS/1.5),
                   child: ListView.builder(
-                    itemCount: notificationData.length, // Change this to the number of times you want to repeat the top column
+                    itemCount: userNotifications.length, // Change this to the number of times you want to repeat the top column
                     itemBuilder: (context, index) {
                       return Padding(
                         padding:  EdgeInsets.only(bottom: pathS/5),
@@ -175,13 +185,13 @@ List <Map> notificationData = [
                                                     width: pathS /3,
                                                     imageUrl: '',
                                                     placeholder: (context, url) =>  Image.asset(
-                                                      notificationData[index]['assetsPath'],
+                                                      iconPathClock,
                                                       fit: BoxFit.contain,
                                                       color: isDarkMode ? whiteColor : greyColor6,
 
                                                     ),
                                                     errorWidget: (context, url, error) => Image.asset(
-                                                      notificationData[index]['assetsPath'],
+                                                      iconPathClock,
                                                       color: isDarkMode ? whiteColor : greyColor6,
                                                       fit: BoxFit.contain,
 
@@ -195,7 +205,7 @@ List <Map> notificationData = [
                                                   ),
                                                   SizedBox(width: pathS/5),
                                                   Text(
-                                                    notificationData[index]['notification'],
+                                                    userNotifications[index].title,
                                                     style: TextStyle(
                                                       color: isDarkMode ?  whiteColor:greyColor7,
                                                       fontSize: pathS / 5,
@@ -216,7 +226,7 @@ List <Map> notificationData = [
                                                 crossAxisAlignment: CrossAxisAlignment.start,
                                                 children: [
                                                   Text(
-                                                    notificationData[index]['data'],
+                                                    userNotifications[index].message,
                                                     style: TextStyle(
                                                       color: isDarkMode ?  whiteColor:greyColor7,
                                                       fontSize: pathS / 6.5,
@@ -227,7 +237,7 @@ List <Map> notificationData = [
                                                   ),
                                                   SizedBox(height: pathS/5),
                                                   Text(
-                                                    notificationData[index]['dateTime'],
+                                                    '',
                                                     style: TextStyle(
                                                       color: isDarkMode ?  whiteColor:greyColor7,
                                                       fontSize: pathS / 7,
@@ -262,5 +272,69 @@ List <Map> notificationData = [
     );
   }
 
+Future<void> getTableData() async {
+  List<UserNotification> datas = await DatabaseHelper.instance.getAllRecords<UserNotification>(
+    keyTableUserNotification,
+        (map) => UserNotification.fromMap(map),
+  );
 
+  
+
+  datas.forEach((data) {
+    printInDebug(' ID: ${data.id}');
+    printInDebug('title name: ${data.title}');
+  });
+
+  setState(() {
+    userNotifications = datas;
+  });
+
+
+}
+
+void onLoadData() {
+
+
+  // setState(() {
+  //   showLoaderView = true;
+  // });
+  Map <String,String> inputData = {
+
+  };
+
+  APIHelper.instance.getData(userNotificationApi,inputData, (data) {
+
+    // setState(() {
+    //   showLoaderView = false;
+    // });
+
+    if(data.isNotEmpty){
+      print(data);
+      List<UserNotification> datas = data.map((json) => UserNotification.fromJson(json)).toList();
+      datas.forEach((data) {
+        printInDebug(' ID: ${data.id}');
+        printInDebug('title name: ${data.title}');
+      });
+
+
+      userNotifications = datas;
+
+      syncData();
+
+    }
+
+  },(error){
+    // setState(() {
+    //   showLoaderView = false;
+    // });
+
+  }
+  );
+
+}
+Future<void> syncData() async {
+  await DatabaseHelper.instance.replaceTableData<UserNotification>(keyTableUserNotification, userNotifications, (userNotification) =>
+      userNotification.toMap());
+
+}
 }

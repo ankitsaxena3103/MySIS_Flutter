@@ -67,6 +67,20 @@ class UnitDutyPost {
   'deleted': 'INTEGER NOT NULL',
   'dateModified': 'TEXT NOT NULL',
   };
+  factory UnitDutyPost.fromMap(Map<String, dynamic> map) {
+    return UnitDutyPost(
+      id: map['id'] as String,
+      postName: map['postName'] as String,
+      address: map['address'] as String,
+      geoLocation: map['geoLocation'] as String,
+      qrId: map['qrId'] as String,
+      unitCode: map['unitCode'] as String,
+      isGeoFenceAllow: map['isGeoFenceAllow'] as int,
+      allowDistance: map['allowDistance'] as int,
+      deleted: map['deleted'] as int,
+      dateModified: DateTime.parse(map['dateModified'] as String),
+    );
+  }
 
   Map<String, dynamic> toMap() {
     return {
