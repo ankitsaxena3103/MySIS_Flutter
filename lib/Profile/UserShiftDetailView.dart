@@ -58,399 +58,298 @@ class UserShiftDetailViewState extends State<UserShiftDetailView> {
 
   @override
   Widget build(BuildContext context) {
+    calculateSizes(context);
 
-    return Container(
-      width: logicalWidth,
-      height: logicalHeight,
-      color: Colors.black.withOpacity(0.8),
-
-      child: Stack(
+    return Scaffold(
+      body: Stack(
+        alignment: Alignment.center,
         children: [
+        Container(
+          width: logicalWidth,
+          height: logicalHeight,
+          color: greyColor6,
 
-          Positioned(
-            top: MediaQuery.of(context).padding.top+pathS/12,
-            right: paddingRight +pathS/3,
-            child: GestureDetector(
-              onTap: (){
-                widget.callBack(0);
-              },
-              child: Row(
-                children: [
-                  Container(
-                    width: pathS/3,
-                    height: pathS/3,
-                    child: Image.asset(
-                      'assets/images/home/cross.png',
-                      color: isDarkMode ?  whiteColor:whiteColor,
+            child: Stack(
+          children: [
+
+                  Positioned(
+              top: MediaQuery.of(context).padding.top+pathS/12,
+              right: paddingRight +pathS/3,
+              child: GestureDetector(
+                onTap: (){
+                  // widget.callBack(0);
+                  Navigator.pop(context);
+                },
+                child: Row(
+                  children: [
+                    Container(
+                      width: pathS/3,
+                      height: pathS/3,
+                      child: Image.asset(
+                        'assets/images/home/cross.png',
+                        color: isDarkMode ?  whiteColor:whiteColor,
+
+                      ),
 
                     ),
 
-                  ),
-
-                ],
+                  ],
+                ),
               ),
             ),
-          ),
 
-          Column(
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: [
-              SizedBox(
-                width: screenWidth,
-                height: pathS/2,
-              ),//fake container for width only
-
-              Container(
-                width: screenWidth-2*pathS/3,
-                height: screenHeight-1.5*pathS,
-                decoration:  BoxDecoration(
-                  shape: BoxShape.rectangle,
-                  borderRadius: BorderRadius.circular(pathS/8),
-                  color: isDarkMode?greyColor7:whiteColor,
-                  boxShadow: [
-                    BoxShadow(
-                      color: Colors.black.withOpacity(0.1), // Shadow color
-                      blurRadius: pathS/10, // Spread of the shadow
-                      // spreadRadius: pathS/15, // How far the shadow extends
-                      offset:  Offset(-pathS/12, pathS/12),
-                    ),
-                  ],
-                ),
-
-                child: Stack(
+                  Column(
+                  mainAxisAlignment: MainAxisAlignment.center,
                   children: [
+                    SizedBox(
+                      width: screenWidth,
+                      height: pathS/2,
+                    ),//fake container for width only
 
-                    Column(
-                      mainAxisAlignment: MainAxisAlignment.start,
-                      crossAxisAlignment: CrossAxisAlignment.start,
+                    Container(
+                      width: screenWidth-2*marginValue,
+                      height: screenHeight-1.5*pathS,
+                      decoration:  BoxDecoration(
+                        shape: BoxShape.rectangle,
+                        borderRadius: BorderRadius.circular(pathS/8),
+                        color: isDarkMode?greyColorDark:whiteColor,
+                        boxShadow: [
+                          BoxShadow(
+                            color: Colors.black.withOpacity(0.1), // Shadow color
+                            blurRadius: pathS/10, // Spread of the shadow
+                            // spreadRadius: pathS/15, // How far the shadow extends
+                            offset:  Offset(-pathS/12, pathS/12),
+                          ),
+                        ],
+                      ),
 
-                      children: [
-                        Container(
-                          width: screenWidth - 2 * pathS / 3,
-                          height: pathS * 1.2,
-                          decoration: BoxDecoration(
-                            color: isDarkMode ? greyColor8 : greyColor,
-                            shape: BoxShape.rectangle,
-                            borderRadius: BorderRadius.only(
-                              topLeft: Radius.circular(pathS / 8),
-                              topRight: Radius.circular(pathS / 8),
-                            ),
-                            border: Border(
-                              bottom: BorderSide(
-                                color: isDarkMode?greyColorDark:greyColor1,
-                                width: 1.0, // Set the width of the bottom border
+                      child: Stack(
+                        children: [
+
+                          Column(
+                            mainAxisAlignment: MainAxisAlignment.start,
+                            crossAxisAlignment: CrossAxisAlignment.start,
+
+                            children: [
+                              Container(
+                                width: screenWidth - 2 * pathS / 3,
+                                height: pathS * 1.2,
+                                decoration: BoxDecoration(
+                                  color: isDarkMode?greyColorDark:whiteColor,
+
+                                  shape: BoxShape.rectangle,
+                                  borderRadius: BorderRadius.only(
+                                    topLeft: Radius.circular(pathS / 8),
+                                    topRight: Radius.circular(pathS / 8),
+                                  ),
+                                  border: Border(
+                                    bottom: BorderSide(
+                                      color: isDarkMode?greyColorDark:greyColor1,
+                                      width: 1.0, // Set the width of the bottom border
+                                    ),
+                                  ),
+                                ),
+                                child: Padding(
+                                  padding: EdgeInsets.only(left: pathS / 5), // Add some padding for alignment
+                                  child: Column(
+                                    mainAxisAlignment: MainAxisAlignment.center, // Center vertically
+                                    crossAxisAlignment: CrossAxisAlignment.start, // Align text to the left
+                                    children: [
+                                      Text(
+                                        widget.userPosting.siteName,
+                                        style: TextStyle(
+                                          color: isDarkMode ? whiteColor : greyColor7,
+                                          fontSize: pathS / 5,
+                                          fontWeight: FontWeight.w500,
+                                          fontFamily: 'Roboto',
+                                        ),
+                                        textAlign: TextAlign.start,
+                                      ),
+                                      SizedBox(height: pathS/12),
+                                      Text(
+                                        widget.userPosting.unitCode,
+                                        style: TextStyle(
+                                          color: isDarkMode ? whiteColor : greyColor7,
+                                          fontSize: pathS / 5,
+                                          fontWeight: FontWeight.w500,
+                                          fontFamily: 'Roboto',
+                                        ),
+                                        textAlign: TextAlign.start,
+                                      ),
+                                    ],
+                                  ),
+                                ),
                               ),
-                            ),
+
+                              SizedBox(
+                                height: screenHeight - 1.5*pathL,
+                                child: SingleChildScrollView(
+                                    child: Column(
+                                      crossAxisAlignment: CrossAxisAlignment.start,
+                                      children: [
+                                        SizedBox(height: pathS/4),
+                                        Padding(
+                                          padding: EdgeInsets.only(left: pathS / 5), // Add some padding for alignment
+                                          child: Text(
+                                            'active_shifts'.tr(),
+                                            style: TextStyle(
+                                              color: isDarkMode ? whiteColor : greyColor7,
+                                              fontSize: pathS / 5,
+                                              fontWeight: FontWeight.w700,
+                                              fontFamily: 'Roboto',
+                                            ),
+                                            textAlign: TextAlign.start,
+                                          ),
+                                        ),
+
+                                        SizedBox(height: pathS/8),
+                                        Column(
+                                          crossAxisAlignment: CrossAxisAlignment.start,
+                                          children: widget.unitShiftDetails.map((unitShiftDetails) {
+                                            return buildUserShiftDetailContainer(
+                                              unitShiftDetails,
+                                            );
+                                          }).toList(),
+                                        ),
+
+
+                                        SizedBox(height: pathS/4),
+                                        Padding(
+                                          padding: EdgeInsets.only(left: pathS / 5), // Add some padding for alignment
+                                          child: Text(
+                                            'active_posts'.tr(),
+                                            style: TextStyle(
+                                              color: isDarkMode ? whiteColor : greyColor7,
+                                              fontSize: pathS / 5,
+                                              fontWeight: FontWeight.w700,
+                                              fontFamily: 'Roboto',
+                                            ),
+                                            textAlign: TextAlign.start,
+                                          ),
+                                        ),
+                                        SizedBox(height: pathS/8),
+
+                                        Column(
+                                          crossAxisAlignment: CrossAxisAlignment.start,
+                                          children: widget.unitDutyPosts.asMap().entries.map((entry) {
+                                            int index = entry.key; // Get the index
+                                            var unitDutyPost = entry.value; // Get the unitDutyPost
+
+                                            return buildUserShiftPostContainer(
+                                              unitDutyPost,
+                                              index+1, // Pass the index as well
+                                            );
+                                          }).toList(),                                  ),
+
+                                      ],
+                                    )),
+                              ),
+
+
+
+
+
+
+                            ],
                           ),
-                          child: Padding(
-                            padding: EdgeInsets.only(left: pathS / 5), // Add some padding for alignment
-                            child: Column(
-                              mainAxisAlignment: MainAxisAlignment.center, // Center vertically
-                              crossAxisAlignment: CrossAxisAlignment.start, // Align text to the left
-                              children: [
-                                Text(
-                                  widget.userPosting.siteName,
-                                  style: TextStyle(
-                                    color: isDarkMode ? whiteColor : greyColor7,
-                                    fontSize: pathS / 5,
-                                    fontWeight: FontWeight.w500,
-                                    fontFamily: 'Roboto',
-                                  ),
-                                  textAlign: TextAlign.start,
-                                ),
-                                SizedBox(height: pathS/12),
-                                Text(
-                                  widget.userPosting.unitCode,
-                                  style: TextStyle(
-                                    color: isDarkMode ? whiteColor : greyColor7,
-                                    fontSize: pathS / 5,
-                                    fontWeight: FontWeight.w500,
-                                    fontFamily: 'Roboto',
-                                  ),
-                                  textAlign: TextAlign.start,
-                                ),
-                              ],
-                            ),
-                          ),
-                        ),
 
 
 
-
-                        SizedBox(
-                          height: screenHeight - 1.5*pathL,
-                          child: SingleChildScrollView(
-                              child: Column(
-                                crossAxisAlignment: CrossAxisAlignment.start,
-                                children: [
-                                  SizedBox(height: pathS/4),
-                                  Padding(
-                                    padding: EdgeInsets.only(left: pathS / 5), // Add some padding for alignment
-                                    child: Text(
-                                      'active_shifts'.tr(),
-                                      style: TextStyle(
-                                        color: isDarkMode ? whiteColor : greyColor7,
-                                        fontSize: pathS / 5,
-                                        fontWeight: FontWeight.w700,
-                                        fontFamily: 'Roboto',
-                                      ),
-                                      textAlign: TextAlign.start,
-                                    ),
-                                  ),
-
-                                  SizedBox(height: pathS/8),
-                                  Column(
-                                    crossAxisAlignment: CrossAxisAlignment.start,
-                                    children: widget.unitShiftDetails.map((unitShiftDetails) {
-                                      return buildUserShiftDetailContainer(
-                                        unitShiftDetails,
-                                      );
-                                    }).toList(),
-                                  ),
-
-
-                                  SizedBox(height: pathS/4),
-                                  Padding(
-                                    padding: EdgeInsets.only(left: pathS / 5), // Add some padding for alignment
-                                    child: Text(
-                                      'active_posts'.tr(),
-                                      style: TextStyle(
-                                        color: isDarkMode ? whiteColor : greyColor7,
-                                        fontSize: pathS / 5,
-                                        fontWeight: FontWeight.w700,
-                                        fontFamily: 'Roboto',
-                                      ),
-                                      textAlign: TextAlign.start,
-                                    ),
-                                  ),
-                                  SizedBox(height: pathS/8),
-
-                                  Column(
-                                    crossAxisAlignment: CrossAxisAlignment.start,
-                                    children: widget.unitDutyPosts.asMap().entries.map((entry) {
-                                      int index = entry.key; // Get the index
-                                      var unitDutyPost = entry.value; // Get the unitDutyPost
-
-                                      return buildUserShiftPostContainer(
-                                        unitDutyPost,
-                                        index+1, // Pass the index as well
-                                      );
-                                    }).toList(),                                  ),
-
-                                ],
-                              )),
-                        ),
-
-
-
-
-
-
-                      ],
+                        ],
+                      ),
                     ),
-
 
 
                   ],
                 ),
-              ),
 
 
-            ],
-          ),
-
-
-          LoaderView(isVisible: showLoaderView, message: 'Loading...'),
-          Visibility(
-            visible: isAlertVisible,
-            child: CustomAlertView(
-                callBack: (int val) {
-                  if (val == 0) {
-                    setState(() {
-                      isAlertVisible = false;
-                    });
-                  } else {
-                    makePhoneCall(phoneNo);
-                  }
-                },
-                header: alertHeader,
-                message: alertMessage,
-                cancelButtonTitle: 'OK',
-                okButtonTitle: ''),
-          ),
-          ToastMessageView(isVisible: showToastMessageView, message: toastMessage),
+                  LoaderView(isVisible: showLoaderView, message: 'Loading...'),
+                  Visibility(
+                    visible: isAlertVisible,
+                    child: CustomAlertView(
+                        callBack: (int val) {
+                          if (val == 0) {
+                            setState(() {
+                              isAlertVisible = false;
+                            });
+                          } else {
+                            makePhoneCall(phoneNo);
+                          }
+                        },
+                        header: alertHeader,
+                        message: alertMessage,
+                        cancelButtonTitle: 'OK',
+                        okButtonTitle: ''),
+                  ),
+                  ToastMessageView(isVisible: showToastMessageView, message: toastMessage),
+          ],
+        ),
+         ),
         ],
       ),
     );
+
 
   }
 
   Widget buildUserShiftDetailContainer(UnitShiftDetail shift){
    return Padding(
       padding: EdgeInsets.only(left: pathS / 5, right: pathS / 5), // Add some padding for alignment
-      child: Container(
-        width: screenWidth - 2 * pathS / 3,
-        decoration: BoxDecoration(
-          color: isDarkMode ? greyColor8 : greyColor,
-          shape: BoxShape.rectangle,
-          borderRadius: BorderRadius.circular(pathS / 8),
-          border: Border.all(
-            color: isDarkMode ? greyColorDark : greyColor1,
-            width: 1.0,
-          ),
-        ),
-        child: Padding(
-          padding: EdgeInsets.all(pathS / 5),
-          child: Column(
-            children: [
-              Row(
-                children: [
-                  // SizedBox(
-                  //   width: pathL,
-                  //   child: Text(
-                  //     shift.unitCode,
-                  //     style: TextStyle(
-                  //       color: isDarkMode ? whiteColor : greyColor7,
-                  //       fontSize: pathS / 5,
-                  //       fontWeight: FontWeight.w500,
-                  //       fontFamily: 'Roboto',
-                  //     ),
-                  //     textAlign: TextAlign.start,
-                  //   ),
-                  // ),
-                   Spacer(),
-                  Container(
-                    decoration: BoxDecoration(
-                      shape: BoxShape.rectangle,
-                      borderRadius: BorderRadius.only(
-                        topLeft: Radius.circular(pathS / 15),
-                        bottomLeft: Radius.circular(pathS / 15),
-                      ),
-                      color: isDarkMode ? yellowColor1 : yellowColor1,
-                    ),
-                    child: Padding(
-                      padding: EdgeInsets.only(
-                        left: pathS / 5,
-                        top: pathS / 10,
-                        right: pathS / 8,
-                        bottom: pathS / 10,
-                      ),
-                      child: Text(
-                        shift.shiftName,
-                        style: TextStyle(
-                          color: isDarkMode ? greyColorDark : greyColor7,
-                          fontSize: pathS / 5,
-                          fontWeight: FontWeight.bold,
-                          fontFamily: 'Roboto',
-                        ),
-                        textAlign: TextAlign.center,
-                      ),
-                    ),
-                  ),
-                ],
+      child: Column(
+        children: [
+          Container(
+            width: screenWidth - 2 * marginValue,
+            decoration: BoxDecoration(
+              color: isDarkMode ? greyColor8 : whiteColor,
+              shape: BoxShape.rectangle,
+              borderRadius: BorderRadius.circular(pathS / 8),
+              border: Border.all(
+                color: isDarkMode ? greyColorDark : greyColor1,
+                width: 1.5,
               ),
-              SizedBox(height: pathS / 3),
-              Row(
+            ),
+            child: Padding(
+              padding: EdgeInsets.all(pathS / 5),
+              child: Column(
                 children: [
-                  Text(
-                    'start_time'.tr(),
-                    style: TextStyle(
-                      color: isDarkMode ? whiteColor : greyColor7,
-                      fontSize: pathS / 5.5,
-                      fontWeight: FontWeight.w500,
-                      fontFamily: 'Roboto',
-                    ),
-                    textAlign: TextAlign.start,
-                  ),
-                  Spacer(),
-                  Text(
-                    'end_time'.tr(),
-                    style: TextStyle(
-                      color: isDarkMode ? whiteColor : greyColor7,
-                      fontSize: pathS / 5.5,
-                      fontWeight: FontWeight.w500,
-                      fontFamily: 'Roboto',
-                    ),
-                    textAlign: TextAlign.start,
-                  ),
-                ],
-              ),
-              Row(
-                children: [
-                  Text(
-                    formatTime(shift.startTime, 'HH:mm'),
-                    style: TextStyle(
-                      color: isDarkMode ? whiteColor : greyColor7,
-                      fontSize: pathS / 4,
-                      fontWeight: FontWeight.w600,
-                      fontFamily: 'Roboto',
-                    ),
-                    textAlign: TextAlign.start,
-                  ),
-                  Spacer(),
                   Row(
                     children: [
+                      // SizedBox(
+                      //   width: pathL,
+                      //   child: Text(
+                      //     shift.unitCode,
+                      //     style: TextStyle(
+                      //       color: isDarkMode ? whiteColor : greyColor7,
+                      //       fontSize: pathS / 5,
+                      //       fontWeight: FontWeight.w500,
+                      //       fontFamily: 'Roboto',
+                      //     ),
+                      //     textAlign: TextAlign.start,
+                      //   ),
+                      // ),
+                       Spacer(),
                       Container(
-                        height: 2.0,
-                        width: pathS / 3,
-                        color: isDarkMode ? greyColorDark : greyColor7,
-                      ),
-                      SizedBox(width: pathS / 15),
-                      Text(
-                        '${getFormattedTime(shift.dutyHrs, 'HH')} ${'hours'.tr()}',
-                        style: TextStyle(
-                          color: isDarkMode ? whiteColor : greyColor7,
-                          fontSize: pathS / 6,
-                          fontWeight: FontWeight.w600,
-                          fontFamily: 'Roboto',
-                        ),
-                        textAlign: TextAlign.start,
-                      ),
-                      SizedBox(width: pathS / 15),
-                      Container(
-                        height: 2.0,
-                        width: pathS / 3,
-                        color: isDarkMode ? greyColorDark : greyColor7,
-                      ),
-                    ],
-                  ),
-                  Spacer(),
-                  Text(
-                    formatTime(shift.endTime, 'HH:mm'),
-                    style: TextStyle(
-                      color: isDarkMode ? whiteColor : greyColor7,
-                      fontSize: pathS / 3.5,
-                      fontWeight: FontWeight.w600,
-                      fontFamily: 'Roboto',
-                    ),
-                    textAlign: TextAlign.start,
-                  ),
-                ],
-              ),
-              SizedBox(height: pathS / 5),
-              Row(
-                mainAxisAlignment: MainAxisAlignment.spaceAround,
-                children: [
-                  for (String day in ['M', 'T', 'W', 'T', 'F', 'S', 'S'])
-                    Padding(
-                      padding: EdgeInsets.symmetric(horizontal: pathS / 10),
-                      child: Container(
                         decoration: BoxDecoration(
-                          shape: BoxShape.circle,
-                          border: Border.all(
-                            color: isDarkMode ? greyColorDark : greyColor1,
-                            width: 1.5,
+                          shape: BoxShape.rectangle,
+                          borderRadius: BorderRadius.only(
+                            topLeft: Radius.circular(pathS / 15),
+                            bottomLeft: Radius.circular(pathS / 15),
                           ),
+                          color: isDarkMode ? yellowColor1 : yellowColor,
                         ),
                         child: Padding(
-                          padding: EdgeInsets.all(pathS / 10),
+                          padding: EdgeInsets.only(
+                            left: pathS / 5,
+                            top: pathS / 10,
+                            right: pathS / 8,
+                            bottom: pathS / 10,
+                          ),
                           child: Text(
-                            day,
+                            shift.shiftName,
                             style: TextStyle(
-                              color: isDayActive(day, shift.activeDays)
-                                  ? (isDarkMode ? greenColor5 : greenColor6)
-                                  : (isDarkMode ? greyColorDark : greyColor1),
-                              fontSize: pathS / 6.5,
+                              color: isDarkMode ? greyColorDark : greyColor7,
+                              fontSize: pathS / 5,
                               fontWeight: FontWeight.bold,
                               fontFamily: 'Roboto',
                             ),
@@ -458,12 +357,199 @@ class UserShiftDetailViewState extends State<UserShiftDetailView> {
                           ),
                         ),
                       ),
-                    ),
+                    ],
+                  ),
+                  SizedBox(height: pathS / 3),
+
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+
+                    children: [
+                      Column(
+                        mainAxisAlignment: MainAxisAlignment.start,
+                        crossAxisAlignment: CrossAxisAlignment.start,
+
+                        children: [
+                          Text(
+                            'start_time'.tr(),
+                            style: TextStyle(
+                              color: isDarkMode ? whiteColor : greyColor6,
+                              fontSize: pathS / 5.5,
+                              fontWeight: FontWeight.w500,
+                              fontFamily: 'Roboto',
+                            ),
+                            textAlign: TextAlign.start,
+                          ),
+
+                          Row(
+                            mainAxisAlignment: MainAxisAlignment.center,
+                            crossAxisAlignment: CrossAxisAlignment.center,
+
+                            children: [
+                              Text(
+                                formatTime(shift.startTime, 'HH:mm'),
+                                style: TextStyle(
+                                  color: isDarkMode ? whiteColor : greyColor6,
+                                  fontSize: pathS / 4,
+                                  fontWeight: FontWeight.w500,
+                                  fontFamily: 'Roboto',
+                                ),
+                                textAlign: TextAlign.start,
+                              ),
+                              SizedBox(width: pathS/12),
+                              Padding(
+                                padding:  EdgeInsets.only(top: pathS/25),
+                                child: Text(
+                                  formatTime(shift.startTime, 'a').toUpperCase(),
+                                  style: TextStyle(
+                                    color: isDarkMode ? whiteColor : greyColor4,
+                                    fontSize: pathS / 6,
+                                    fontWeight: FontWeight.w500,
+                                    fontFamily: 'Roboto',
+                                  ),
+                                  textAlign: TextAlign.start,
+                                ),
+                              ),
+                            ],
+                          ),
+                        ],
+                      ),
+
+                      Column(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        children: [
+                          Text(
+                            ''.tr(),
+                            style: TextStyle(
+                              color: isDarkMode ? whiteColor : greyColor6,
+                              fontSize: pathS / 5.5,
+                              fontWeight: FontWeight.w500,
+                              fontFamily: 'Roboto',
+                            ),
+                            textAlign: TextAlign.start,
+                          ),
+                          // Spacer(),
+                          Row(
+                            children: [
+                              Container(
+                                height: 1.5,
+                                width: pathS / 3,
+                                color: isDarkMode ? greyColorDark : greyColor6,
+                              ),
+                              SizedBox(width: pathS / 15),
+                              Text(
+                                '${getFormattedTime(shift.dutyHrs, 'HH')} ${'hours'.tr()}',
+                                style: TextStyle(
+                                  color: isDarkMode ? whiteColor : greyColor6,
+                                  fontSize: pathS / 6,
+                                  fontWeight: FontWeight.w600,
+                                  fontFamily: 'Roboto',
+                                ),
+                                textAlign: TextAlign.start,
+                              ),
+                              SizedBox(width: pathS / 15),
+                              Container(
+                                height: 1.5,
+                                width: pathS / 3,
+                                color: isDarkMode ? greyColorDark : greyColor6,
+                              ),
+                            ],
+                          ),
+                          // Spacer(),
+
+                        ],
+                      ),
+
+                      Column(
+                        mainAxisAlignment: MainAxisAlignment.start,
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Text(
+                            'end_time'.tr(),
+                            style: TextStyle(
+                              color: isDarkMode ? whiteColor : greyColor6,
+                              fontSize: pathS / 5.5,
+                              fontWeight: FontWeight.w500,
+                              fontFamily: 'Roboto',
+                            ),
+                            textAlign: TextAlign.start,
+                          ),
+                          Row(
+                            mainAxisAlignment: MainAxisAlignment.center,
+                            crossAxisAlignment: CrossAxisAlignment.center,
+                            children: [
+                              Text(
+                                formatTime(shift.endTime, 'HH:mm'),
+                                style: TextStyle(
+                                  color: isDarkMode ? whiteColor : greyColor6,
+                                  fontSize: pathS / 4,
+                                  fontWeight: FontWeight.w500,
+                                  fontFamily: 'Roboto',
+                                ),
+                                textAlign: TextAlign.start,
+                              ),
+                              SizedBox(width: pathS/12),
+                              Padding(
+                                padding:  EdgeInsets.only(top: pathS/25),
+                                child: Text(
+                                  formatTime(shift.endTime, 'a').toUpperCase(),
+                                  style: TextStyle(
+                                    color: isDarkMode ? whiteColor : greyColor4,
+                                    fontSize: pathS / 6,
+                                    fontWeight: FontWeight.w500,
+                                    fontFamily: 'Roboto',
+                                  ),
+                                  textAlign: TextAlign.start,
+                                ),
+                              ),
+                            ],
+                          ),
+                        ],
+                      ),
+                    ],
+                  ),
+
+
+                  SizedBox(height: pathS / 5),
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceAround,
+                    children: [
+                      for (String day in ['M', 'T', 'W', 'T', 'F', 'S', 'S'])
+                        Padding(
+                          padding: EdgeInsets.symmetric(horizontal: pathS / 10),
+                          child: Container(
+                            decoration: BoxDecoration(
+                              shape: BoxShape.circle,
+                              border: Border.all(
+                                color: isDarkMode ? greyColorDark : greyColor1,
+                                width: 1.5,
+                              ),
+                            ),
+                            child: Padding(
+                              padding: EdgeInsets.all(pathS / 10),
+                              child: Text(
+                                day,
+                                style: TextStyle(
+                                  color: isDayActive(day, shift.activeDays)
+                                      ? (isDarkMode ? greenColor5 : greenColor6)
+                                      : (isDarkMode ? greyColorDark : greyColor1),
+                                  fontSize: pathS / 6.5,
+                                  fontWeight: FontWeight.w900,
+                                  fontFamily: 'Roboto',
+                                ),
+                                textAlign: TextAlign.center,
+                              ),
+                            ),
+                          ),
+                        ),
+                    ],
+                  )
                 ],
-              )
-            ],
+              ),
+            ),
           ),
-        ),
+          SizedBox(height: pathS/5),
+        ],
       ),
     );
   }
@@ -473,12 +559,12 @@ class UserShiftDetailViewState extends State<UserShiftDetailView> {
       child: Container(
         width: screenWidth - 2 * pathS / 3,
         decoration: BoxDecoration(
-          color: isDarkMode ? greyColor8 : greyColor,
+          color: isDarkMode ? greyColor8 : whiteColor,
           shape: BoxShape.rectangle,
           borderRadius: BorderRadius.circular(pathS / 8),
           border: Border.all(
             color: isDarkMode ? greyColorDark : greyColor1,
-            width: 1.0,
+            width: 1.5,
           ),
         ),
         child: Column(
@@ -510,7 +596,7 @@ class UserShiftDetailViewState extends State<UserShiftDetailView> {
                             topLeft: Radius.circular(pathS / 15),
                             bottomLeft: Radius.circular(pathS / 15),
                           ),
-                          color: isDarkMode ? yellowColor1 : yellowColor1,
+                          color: isDarkMode ? yellowColor1 : yellowColor,
                         ),
                         child: Padding(
                           padding: EdgeInsets.only(
@@ -536,15 +622,18 @@ class UserShiftDetailViewState extends State<UserShiftDetailView> {
                   // SizedBox(height: pathS / 8),
                   Row(
                     children: [
-                      Text(
-                        post.address,
-                        style: TextStyle(
-                          color: isDarkMode ? whiteColor : greyColor7,
-                          fontSize: pathS / 4,
-                          fontWeight: FontWeight.w500,
-                          fontFamily: 'Roboto',
+                      SizedBox(
+                        width: 2*pathL,
+                        child: Text(
+                          post.address,
+                          style: TextStyle(
+                            color: isDarkMode ? whiteColor : greyColor6,
+                            fontSize: pathS / 4,
+                            fontWeight: FontWeight.w500,
+                            fontFamily: 'Roboto',
+                          ),
+                          textAlign: TextAlign.start,
                         ),
-                        textAlign: TextAlign.start,
                       ),
 
                     ],
@@ -554,7 +643,7 @@ class UserShiftDetailViewState extends State<UserShiftDetailView> {
                       Text(
                         post.postName,
                         style: TextStyle(
-                          color: isDarkMode ? whiteColor : greyColor7,
+                          color: isDarkMode ? whiteColor : greyColor6,
                           fontSize: pathS / 5.5,
                           fontWeight: FontWeight.w600,
                           fontFamily: 'Roboto',

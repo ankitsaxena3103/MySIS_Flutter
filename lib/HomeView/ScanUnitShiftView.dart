@@ -8,10 +8,12 @@ import 'package:mobile_scanner/mobile_scanner.dart';
 import 'package:mysis/CommonViews/Utility.dart';
 import 'package:easy_localization/easy_localization.dart';
 import 'package:mysis/HomeView/SelectShiftView.dart';
+import 'package:mysis/HomeView/UserAttendance.dart';
 import 'package:mysis/Profile/UnitDutyPost.dart';
 import 'package:mysis/Profile/UserPosting.dart';
 import 'package:mysis/Profile/UserProfile.dart';
 
+import '../CommonViews/AlertPopupView.dart';
 import '../Profile/UnitShiftDetail.dart';
 
 class ScanUnitShiftView extends StatefulWidget {
@@ -22,6 +24,7 @@ class ScanUnitShiftView extends StatefulWidget {
   final List<UnitShiftDetail> unitShiftDetails;
   final List<UserPosting> userPostings;
   final String attendanceStatus;
+  final UserAttendance? userAttendance;
 
   const ScanUnitShiftView(
       {
@@ -32,6 +35,7 @@ class ScanUnitShiftView extends StatefulWidget {
         required this.unitShiftDetails,
         required this.userPostings,
         required this.attendanceStatus,
+         this.userAttendance,
 
 
       });
@@ -59,6 +63,11 @@ class ScanUnitShiftViewState extends State<ScanUnitShiftView>{
   // late List<UserPosting> userPostings;
 
   late  MobileScannerController locationScannerController;
+
+
+  bool showAlert = false;
+  String alertHeader = '';
+  String alertMessage = '';
 
   @override
   void initState() {
@@ -223,8 +232,6 @@ class ScanUnitShiftViewState extends State<ScanUnitShiftView>{
                   ),
 
                 ),
-
-
                 Column(
                   mainAxisAlignment: MainAxisAlignment.center,
                   children: [
@@ -276,6 +283,20 @@ class ScanUnitShiftViewState extends State<ScanUnitShiftView>{
                   ],
                 ),
 
+                Visibility(
+                  visible: showAlert,
+                  child: AlertPopupView(
+                      header: alertHeader,
+                      message: alertMessage,
+                      cancelBtn: '',
+                      okBtn: 'ok'.tr(),
+                      callBack: (value){
+                        setState(() {
+                          showAlert = false;
+                        });
+                      }
+                  ),
+                )
               ],
             ),
           ),
@@ -318,12 +339,6 @@ class ScanUnitShiftViewState extends State<ScanUnitShiftView>{
   }
 
   Future<void> getUnitPostData(String qrId) async {
-    // Fetch all UnitDutyPost records
-    // final unitDutyPosts = await DatabaseHelper.instance.getAllRecords<UnitDutyPost>(
-    //   keyTableUnitDutyPost,
-    //       (map) => UnitDutyPost.fromMap(map),
-    // );
-    //
     // // Filter the records based on the provided qrId
     for (var data in widget.unitDutyPosts) {
       printInDebug('widget ID: ${data.id}');
@@ -379,6 +394,13 @@ class ScanUnitShiftViewState extends State<ScanUnitShiftView>{
     // Check the results
     if (matchingShiftDetails.isEmpty) {
       printInDebug('No shifts found for UNIT_CODE: $unitCode and current time: $currentTime');
+
+      setState(() {
+        alertHeader = 'alert'.tr();
+        alertMessage = 'other_mark_shift_not_allowed1'.tr();
+        showAlert = true;
+      });
+
     } else {
       onLoadSelectShift();
       for (var shift in matchingShiftDetails) {
@@ -456,10 +478,7 @@ class ScanUnitShiftViewState extends State<ScanUnitShiftView>{
 
   void onLoadSelectShift(){
 
-
     printInDebug('load shift');
-
-
 
     locationScannerController.dispose();
     Navigator.push(
@@ -474,6 +493,7 @@ class ScanUnitShiftViewState extends State<ScanUnitShiftView>{
           attendanceStatus: widget.attendanceStatus,
           latLong: latLong,
           dutyDateTime:  dutyDateTime.toIso8601String(),
+          userAttendance: widget.userAttendance,
         ),
       ),
     )

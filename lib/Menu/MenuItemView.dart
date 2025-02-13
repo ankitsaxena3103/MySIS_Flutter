@@ -19,9 +19,10 @@ import '../AKR/AKRView.dart';
 import '../ERC/ERCView.dart';
 import '../EscortDuty/EscortDutyView.dart';
 import '../G2G/G2GView.dart';
+import '../GeneralQuestions/GenerealQuestionsView.dart';
 import '../GeneralRules/GeneralRulesView.dart';
-import '../GenerealQuestions/GenerealQuestionsView.dart';
 import '../Salary/SalaryView.dart';
+import '../SulabhLoan/SarvamLoanView.dart';
 import '../SulabhLoan/SulabhLoanView.dart';
 
 class MenuItemView extends StatefulWidget {
@@ -88,7 +89,6 @@ class MenuItemViewState extends State<MenuItemView> {
 
                             Row(
                               mainAxisAlignment: MainAxisAlignment.center,
-
                               children: [
                                 GestureDetector(
                                   onTap: (){
@@ -97,7 +97,7 @@ class MenuItemViewState extends State<MenuItemView> {
                                   },
                                   child:  Column(
                                     children: [
-                                      Container(
+                                      SizedBox(
                                         width: iconSize,
                                         height: iconSize,
 
@@ -107,7 +107,7 @@ class MenuItemViewState extends State<MenuItemView> {
                                         ),
                                       ),
                                       SizedBox(height: iconTextGap),
-                                      Container(
+                                      SizedBox(
                                         width: screenWidth/3,
                                         child:Text(
                                           'home'.tr(),
@@ -123,28 +123,24 @@ class MenuItemViewState extends State<MenuItemView> {
                                     ],
                                   ),//home
                                 ),
-
                                 SizedBox(width: horizontalGap),
                                 GestureDetector(
                                     onTap: (){
                                       widget.onCloseBottomSheet();
                                       widget.onTabSelected(1);
-
                                     },
                                     child:Column(
                                       children: [
-                                        Container(
+                                        SizedBox(
                                           width: iconSize,
                                           height: iconSize,
-
                                           child: Image.asset(
                                             'assets/images/dashboard-icons/duty.png',
                                             color: isDarkMode ? whiteColor:greyColor6,
-
                                           ),
                                         ),
                                         SizedBox(height: iconTextGap),
-                                        Container(
+                                        SizedBox(
                                           width: screenWidth/3,
                                           child:Text(
                                             'txt_duty'.tr(),
@@ -156,46 +152,41 @@ class MenuItemViewState extends State<MenuItemView> {
                                             textAlign: TextAlign.center,
                                           ),
                                         ),
-
                                       ],
                                     ),
                                 ),
-
                                 SizedBox(width: horizontalGap),
                                 GestureDetector(
                                     onTap: (){
                                       widget.onCloseBottomSheet();
-
                                       onLoadProfileView();
-
                                     },
-                                    child:Column(
-                                      children: [
-                                        Container(
-                                          width: iconSize,
-                                          height: iconSize,
-
-                                          child: Image.asset(
-                                            'assets/images/dashboard-icons/user.png',
-                                            color: isDarkMode ? whiteColor:greyColor6,
-
-                                          ),
-                                        ),
-                                        SizedBox(height: iconTextGap),
-                                        Container(
-                                          width: screenWidth/3,
-                                          child:Text(
-                                            'profile'.tr(),
-                                            style: TextStyle(
+                                    child:SizedBox(
+                                      child: Column(
+                                        children: [
+                                          SizedBox(
+                                            width: iconSize,
+                                            height: iconSize,
+                                            child: Image.asset(
+                                              'assets/images/dashboard-icons/user.png',
                                               color: isDarkMode ? whiteColor:greyColor6,
-                                              fontSize: pathS / 5,
-                                              fontWeight: FontWeight.w700,
                                             ),
-                                            textAlign: TextAlign.center,
                                           ),
-                                        ),
-
-                                      ],
+                                          SizedBox(height: iconTextGap),
+                                          SizedBox(
+                                            width: screenWidth/3,
+                                            child:Text(
+                                              'profile'.tr(),
+                                              style: TextStyle(
+                                                color: isDarkMode ? whiteColor:greyColor6,
+                                                fontSize: pathS / 5,
+                                                fontWeight: FontWeight.w700,
+                                              ),
+                                              textAlign: TextAlign.center,
+                                            ),
+                                          ),
+                                        ],
+                                      ),
                                     ),
                                 ),
 
@@ -225,7 +216,7 @@ class MenuItemViewState extends State<MenuItemView> {
                                           ),
                                         ),
                                         SizedBox(height: iconTextGap),
-                                        Container(
+                                        SizedBox(
                                           width: screenWidth/3,
                                           child: Text(
                                             'notification'.tr(),
@@ -365,11 +356,10 @@ class MenuItemViewState extends State<MenuItemView> {
                                     onTap: (){
                                       widget.onCloseBottomSheet();
                                       onLoadERCView();
-
                                     },
                                     child:Column(
                                       children: [
-                                        Container(
+                                        SizedBox(
                                           width: iconSize,
                                           height: iconSize,
 
@@ -380,7 +370,7 @@ class MenuItemViewState extends State<MenuItemView> {
                                           ),
                                         ),
                                         SizedBox(height: iconTextGap),
-                                        Container(
+                                        SizedBox(
                                           width: screenWidth/3,
                                           child:Text(
                                             'erc'.tr(),
@@ -602,7 +592,7 @@ class MenuItemViewState extends State<MenuItemView> {
                                 GestureDetector(
                                     onTap: (){
                                       widget.onCloseBottomSheet();
-                                      onLoadSulabhLoanView();
+                                      onLoadSarvamLoanView();
 
                                     },
                                     child:Column(
@@ -621,7 +611,7 @@ class MenuItemViewState extends State<MenuItemView> {
                                         Container(
                                           width: screenWidth/3,
                                           child: Text(
-                                            'sulabh_loan'.tr(),
+                                            'loan_by_sarvam'.tr(),
                                             style: TextStyle(
                                               color: isDarkMode ? whiteColor:greyColor6,
                                               fontSize: pathS / 5,
@@ -812,7 +802,7 @@ class MenuItemViewState extends State<MenuItemView> {
     Navigator.push(
       context,
       MaterialPageRoute(
-        builder: (context) => LeaveViewHelp(),
+        builder: (context) => LeaveView(),
       ),
     );
   }
@@ -820,7 +810,7 @@ class MenuItemViewState extends State<MenuItemView> {
     Navigator.push(
       context,
       MaterialPageRoute(
-        builder: (context) => SyncDataViewHelp(),
+        builder: (context) => SyncDataView(),
       ),
     );
   }
@@ -828,7 +818,7 @@ class MenuItemViewState extends State<MenuItemView> {
     Navigator.push(
       context,
       MaterialPageRoute(
-        builder: (context) => GenerealQuestionsView(),
+        builder: (context) => GeneralQuestionsView(),
       ),
     );
   }
@@ -880,11 +870,12 @@ class MenuItemViewState extends State<MenuItemView> {
       ),
     );
   }
-  void onLoadSulabhLoanView(){
+
+  void onLoadSarvamLoanView(){
     Navigator.push(
       context,
       MaterialPageRoute(
-        builder: (context) => SulabhLoanView(),
+        builder: (context) => SarvamLoanView(),
       ),
     );
   }

@@ -1,9 +1,13 @@
 
 import 'package:cached_network_image/cached_network_image.dart';
+import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_html/flutter_html.dart';
+import 'package:flutter_inappwebview/flutter_inappwebview.dart';
 import 'package:mysis/CommonViews/Utility.dart';
 import 'package:easy_localization/easy_localization.dart';
 import 'package:mysis/Notifications/UserNotification.dart';
+import 'package:url_launcher/url_launcher.dart';
 
 import '../SharedClasses/APIHelper.dart';
 import '../SharedClasses/DatabaseHelper.dart';
@@ -22,28 +26,12 @@ bool isNoData = true;
 String iconPath = "assets/images/notifications/notification_L.png";
 String iconPathClock= "assets/images/notifications/notification_clock.png";
 
-List <Map> notificationData = [
-  {
-    'imageUrl' : '',
-    'assetsPath' : "assets/images/notifications/notification_L.png",
-    'notification' : 'Leave Request Accepted',
-    'data' : 'Leave requested for 4 Mar 20 for bank work is accepted by Area manager',
-    'dateTime' : 'Dec 16, 2020'
-  },
-  {
-    'imageUrl' : '',
-    'assetsPath' : "assets/images/notifications/notification_clock.png",
-    'notification' : 'New Duty Added',
-    'data' : 'You have assigned a new duty on 22 Dec 20, Wednesday at DLF center, CP. Start Time 8 AM, Shift B',
-    'dateTime' : 'Dec 16, 2020'
-  },
-];
 
 List<UserNotification> userNotifications = [];
   @override
   void initState() {
 
-    getTableData();
+    // getTableData();
     onLoadData();
 
     super.initState();
@@ -84,7 +72,7 @@ List<UserNotification> userNotifications = [];
                     },
                     child: Row(
                       children: [
-                        Container(
+                        SizedBox(
                           width: pathS/5,
                           height: pathS/2,
                           child: Image.asset(
@@ -124,7 +112,7 @@ List<UserNotification> userNotifications = [];
                           fontFamily: 'Roboto',
                         ),
                       ),
-                      Container(
+                      SizedBox(
                         width: 1.7*pathL,
                         child: Text(
                           'no_notifications_available'.tr(),
@@ -225,7 +213,9 @@ List<UserNotification> userNotifications = [];
                                               child: Column(
                                                 crossAxisAlignment: CrossAxisAlignment.start,
                                                 children: [
-                                                  Text(
+
+
+                                                  if(userNotifications[index].messageType == 1 && !userNotifications[index].isHtmlPage && !userNotifications[index].isHtmlBody && !userNotifications[index].isImageUrl )Text(
                                                     userNotifications[index].message,
                                                     style: TextStyle(
                                                       color: isDarkMode ?  whiteColor:greyColor7,
@@ -235,6 +225,10 @@ List<UserNotification> userNotifications = [];
                                                     ),
                                                     textAlign: TextAlign.start,
                                                   ),
+                                                  if(userNotifications[index].isHtmlPage)_buildTappableLink(userNotifications[index].message),
+                                                  if( userNotifications[index].isImageUrl)_buildImage(userNotifications[index].message),
+                                                  if( userNotifications[index].isHtmlBody)_buildHtmlWeb(userNotifications[index].message, userNotifications[index].actionUrl ),
+
                                                   SizedBox(height: pathS/5),
                                                   Text(
                                                     '',
@@ -272,29 +266,91 @@ List<UserNotification> userNotifications = [];
     );
   }
 
+
+Widget _buildTappableLink(String url) {
+  return RichText(
+    text: TextSpan(
+      text: url,
+      style: TextStyle(
+        color: Colors.blue,
+        decoration: TextDecoration.underline,
+        fontSize: 16,
+        fontWeight: FontWeight.w500,
+        fontFamily: 'Roboto',
+      ),
+      recognizer: TapGestureRecognizer()..onTap = () async {
+        loadMyUrl(url);
+      },
+    ),
+  );
+}
+
+Widget _buildImage(String imageUrl) {
+  return Image.network(
+    imageUrl,
+    width: pathL * 1.7,
+    // height: pathL*1.5,
+    fit: BoxFit.cover,
+  );
+}
+
+late InAppWebViewController webViewController;
+
+Widget _buildHtmlWeb(String htmlBody, String actionUrl) {
+  return GestureDetector(
+    onTap: () async {
+      if (actionUrl.isNotEmpty) {
+        final Uri url = Uri.parse(actionUrl);
+        if (await canLaunchUrl(url)) {
+          await launchUrl(url, mode: LaunchMode.externalApplication);
+        }
+      }
+    },
+    child: Html(
+      data: htmlBody, // Pass cleaned HTML
+      style: {
+        "h1": Style(
+            color:  isDarkMode ? redColor1 : redColor3,
+        ),
+        "h2": Style(
+          // color:  isDarkMode ? redColor1 : redColor3,
+        ),
+        "p": Style(
+          color: isDarkMode ? whiteColor : greyColor7,
+          // fontSize: FontSize(16),
+          // fontWeight: FontWeight.w500,
+          // fontFamily: 'Roboto',
+        ),
+      },
+    ),
+  );
+}
 Future<void> getTableData() async {
   List<UserNotification> datas = await DatabaseHelper.instance.getAllRecords<UserNotification>(
     keyTableUserNotification,
         (map) => UserNotification.fromMap(map),
   );
 
-  
 
-  datas.forEach((data) {
+  for (var data in datas) {
     printInDebug(' ID: ${data.id}');
     printInDebug('title name: ${data.title}');
-  });
+  }
+
+  DateTime dateTimeNow = DateTime.now();
+  final notification = datas
+      .where((data) =>
+  (data.expiryDate.year >= dateTimeNow.year && data.expiryDate.month >= dateTimeNow.month && data.expiryDate.day >= dateTimeNow.day))
+      .toList();
 
   setState(() {
-    userNotifications = datas;
+    userNotifications = notification;
   });
 
 
 }
 
 void onLoadData() {
-
-
   // setState(() {
   //   showLoaderView = true;
   // });
@@ -309,17 +365,25 @@ void onLoadData() {
     // });
 
     if(data.isNotEmpty){
-      print(data);
       List<UserNotification> datas = data.map((json) => UserNotification.fromJson(json)).toList();
-      datas.forEach((data) {
+
+      for (var data in datas) {
         printInDebug(' ID: ${data.id}');
         printInDebug('title name: ${data.title}');
+      }
+
+      DateTime dateTimeNow = DateTime.now();
+     final notification = datas
+          .where((data) =>
+      (data.expiryDate.year >= dateTimeNow.year && data.expiryDate.month >= dateTimeNow.month && data.expiryDate.day >= dateTimeNow.day))
+          .toList();
+
+      setState(() {
+        userNotifications = datas;
       });
 
 
-      userNotifications = datas;
-
-      syncData();
+      syncData(datas);
 
     }
 
@@ -332,9 +396,10 @@ void onLoadData() {
   );
 
 }
-Future<void> syncData() async {
+Future<void> syncData( List<UserNotification> userNotifications) async {
   await DatabaseHelper.instance.replaceTableData<UserNotification>(keyTableUserNotification, userNotifications, (userNotification) =>
       userNotification.toMap());
 
 }
+
 }

@@ -1,5 +1,6 @@
 
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:mysis/CommonViews/Utility.dart';
 import 'package:easy_localization/easy_localization.dart';
 import 'package:mysis/Profile/ChangeMobileOTPView.dart';
@@ -8,19 +9,25 @@ import '../CommonViews/LoaderView.dart';
 import '../CommonViews/ToastMessageView.dart';
 
 class ChangeMobileView extends StatefulWidget {
+  final String currentMobile;
+  const ChangeMobileView({
+    super.key,
+    required this.currentMobile
+  });
+
   @override
   ChangeMobileViewState createState() => ChangeMobileViewState();
 }
 
 class ChangeMobileViewState extends State<ChangeMobileView>{
 
-  TextEditingController txtCurrentMobile = TextEditingController(text: "9015235231");
+  TextEditingController txtCurrentMobile = TextEditingController(text: "");
   TextEditingController txtNewMobile = TextEditingController(text: "");
   TextEditingController txtConfirmMobile = TextEditingController(text: "");
 
   bool isAlertVisible = false;
-  String alertHeader = 'Error!';
-  String alertMessage = 'There is an  internal error.';
+  String alertHeader = '';
+  String alertMessage = '';
 
   bool showToastMessageView = false;
   String toastMessage = '';
@@ -28,6 +35,7 @@ class ChangeMobileViewState extends State<ChangeMobileView>{
 
   @override
   void initState() {
+    txtCurrentMobile.text = widget.currentMobile;
     super.initState();
   }
 
@@ -35,7 +43,6 @@ class ChangeMobileViewState extends State<ChangeMobileView>{
   void dispose() {
     super.dispose();
   }
-
 
   @override
   Widget build(BuildContext context) {
@@ -64,17 +71,19 @@ class ChangeMobileViewState extends State<ChangeMobileView>{
                       left: paddingLeft +pathS/3,
                       child: GestureDetector(
                         onTap: (){
-                          Navigator.pop(context);
+                          FocusScope.of(context).unfocus();
+                          Future.delayed(Duration(milliseconds: 400),(){
+                            Navigator.pop(context);
+                          });
                         },
                         child: Row(
                           children: [
-                            Container(
+                            SizedBox(
                               width: pathS/5,
                               height: pathS/2,
                               child: Image.asset(
                                 'assets/images/dashboard-icons/left-arrow.png',
                                 color: isDarkMode ?  whiteColor:greyColor6,
-
                               ),
 
                             ),
@@ -98,8 +107,8 @@ class ChangeMobileViewState extends State<ChangeMobileView>{
                     Column(
                       mainAxisAlignment: MainAxisAlignment.start,
                       children: [
-                        SizedBox(height: paddingTop+pathS),
-                        Container(
+                        SizedBox(height: MediaQuery.of(context).padding.top+pathS),
+                        SizedBox(
                           width: screenWidth - 2* marginValue,
                           child: Text(
                             'your_registered_mobile_number'.tr(),
@@ -157,7 +166,7 @@ class ChangeMobileViewState extends State<ChangeMobileView>{
 
                         SizedBox(height: pathS/3),
 
-                        Container(
+                        SizedBox(
                           width: screenWidth - 2* marginValue,
                           child: Text(
                             'enter_new_mobile_number'.tr(),
@@ -189,8 +198,14 @@ class ChangeMobileViewState extends State<ChangeMobileView>{
                             padding: EdgeInsets.only(left: pathS / 4, top: pathS / 45, bottom: pathS / 45,right: pathS/5),
                             child: TextField(
                               onChanged: (value) {
+                                if(value.length == 10) {
+                                  FocusScope.of(context).unfocus();
+                                }
                               },
                               controller: txtNewMobile,
+                              inputFormatters: [
+                                LengthLimitingTextInputFormatter(10), // Limit to 10 characters
+                              ],
                               keyboardType: TextInputType.number,
                               decoration:  InputDecoration(
                                 // hintText: '${'name'.tr()}*', // Placeholder text
@@ -214,7 +229,7 @@ class ChangeMobileViewState extends State<ChangeMobileView>{
 
                         SizedBox(height: pathS/3),
 
-                        Container(
+                        SizedBox(
                           width: screenWidth - 2* marginValue,
                           child: Text(
                             'repeat_new_mobile_number'.tr(),
@@ -246,8 +261,16 @@ class ChangeMobileViewState extends State<ChangeMobileView>{
                             padding: EdgeInsets.only(left: pathS / 4, top: pathS / 45, bottom: pathS / 45,right: pathS/5),
                             child: TextField(
                               onChanged: (value) {
+                                printInDebug(value);
+                                if(value.length == 10) {
+                                  FocusScope.of(context).unfocus();
+                                }
+
                               },
                               controller: txtConfirmMobile,
+                              inputFormatters: [
+                                LengthLimitingTextInputFormatter(10), // Limit to 10 characters
+                              ],
                               keyboardType: TextInputType.number,
                               decoration:  InputDecoration(
                                 // hintText: '${'name'.tr()}*', // Placeholder text
@@ -278,7 +301,7 @@ class ChangeMobileViewState extends State<ChangeMobileView>{
 
 
                     Positioned(
-                      bottom: paddingBottom+pathS/12,
+                      bottom: MediaQuery.of(context).padding.bottom+pathS/5,
                         child:  GestureDetector(
                           onTap: (){
                             onLoadOTP();
@@ -331,7 +354,9 @@ class ChangeMobileViewState extends State<ChangeMobileView>{
 
   void onLoadOTP() {
 
-    if(txtNewMobile.text.length != 10){
+    final mobileNoRegExp = RegExp(r'^\d{10}$'); // 10-digit mobile number
+
+    if(txtNewMobile.text.length != 10 || !mobileNoRegExp.hasMatch(txtNewMobile.text)){
       showToastView('enter_10_digit_number'.tr());
       return;
     }
@@ -341,8 +366,13 @@ class ChangeMobileViewState extends State<ChangeMobileView>{
       return;
     }
 
+    if(txtCurrentMobile.text == txtConfirmMobile.text){
+      showToastView('existing_mobile'.tr());
+      return;
+    }
+
     Navigator.of(context).push(MaterialPageRoute(builder: (_) =>   ChangeMobileOTPView(
-          mobileNo:txtNewMobile.text,
+          mobileNo:txtNewMobile.text, otp: '1234',
          ),
        ),
       ).then((val) {

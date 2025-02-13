@@ -576,7 +576,7 @@
   "hold_mob_front_of_qr_code": "मोबाइल को क्यूआर कोड के सामने रखें स्कैन करें",
   "close": "बंद",
   "app_feature": "विशेषता",
-  "ex_mobile": "(उदाहरण: 9876543210 / PAT 561202)",
+  "ex_mobile": "(उदाहरण: 9876543210 / PAT561202)",
   "enter_mobile_regno_no": "मोबाइल / पंजीकरण नंबर दर्ज करें",
   "onProfile_register_contact_number": "प्रोफ़ाइल पृष्ठ पर, पंजीकृत संपर्क नंबर के खिलाफ 'बदलें' पर क्लिक करें ",
   "esi_No": "ESI नंबर",
@@ -592,6 +592,9 @@
   "transfer_by_ao": "AO स्थानांतरण करें एक अन्य इकाई में",
   "transfer_by_bh": "BH स्थानांतरण करें एक अन्य AO में",
   "bh_transfer_other_unit": "BH स्थानांतरण करें एक अन्य इकाई में",
-  "transfer_shift": "स्थानांतरण करें"
+  "transfer_shift": "स्थानांतरण करें",
+
+  "pin_txt": "PIN"
+
 
 }

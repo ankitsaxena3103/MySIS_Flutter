@@ -438,6 +438,8 @@ class SubmitDutyViewState extends State<SubmitDutyView>{
                   child: AlertPopupView(
                       header: alertHeader,
                       message: alertMessage,
+                      cancelBtn: '',
+                      okBtn: 'ok'.tr(),
                       callBack:(val){
                         setState(() {
                           showAlert = false;
@@ -510,16 +512,37 @@ class SubmitDutyViewState extends State<SubmitDutyView>{
     return;
   }
 
-
-
-
   createAttendance();
 
   }
 
   void createAttendance(){
 
-    // Generate a new UUID
+    Map <String, dynamic> dutyAttendance = widget.attendanceStatus == keyAttendanceStatusDutyIn ? getDutyInAttendance() : getDutyOutAttendance();
+
+    // Convert JSON to UserAttendance object
+    UserAttendance userAttendance = UserAttendance.fromJson(dutyAttendance);
+
+    // Create a list of UserAttendance objects
+    List<UserAttendance> attendanceData = [userAttendance];
+
+    // Call the sync function
+     syncUserAttendanceData(
+        attendanceData,
+        widget.attendanceStatus,
+        'id',
+      );
+
+    loadThanksScreen(userAttendance);
+    List<dynamic> attendanceList = [dutyAttendance];
+
+    uploadAttendance(attendanceList);
+
+  }
+
+  Map <String, dynamic> getDutyInAttendance(){
+
+
     String newUuid = Uuid().v4();
 
     List<String> parts = widget.unitShiftDetail.dutyHrs.split(":");
@@ -528,69 +551,101 @@ class SubmitDutyViewState extends State<SubmitDutyView>{
     String dutyDate = DateFormat('yyyy-MM-dd').format(DateTime.parse(widget.dutyDateTime));
 
     Map <String, dynamic> attendance = {
-  "ID": newUuid,
-  "REGNO": widget.attendanceStatus == keyAttendanceStatusDutyIn ? widget.userProfile.regNo : widget.userAttendance!.id,
-  "UNIT_CODE": widget.unitDutyPost.unitCode,
-  "SITE_NAME": widget.userPosting.siteName,
-  "DUTY_POST_ID": widget.unitDutyPost.id,
-  "DUTY_POST_NAME": widget.unitDutyPost.postName,
-  "SHIFT_ID": widget.unitShiftDetail.id,
-  "SHIFT_NAME": widget.unitShiftDetail.shiftName,
-  "SHIFT_START_DATE": createDutyDate(widget.unitShiftDetail,DateTime.parse(widget.dutyDateTime)),
-  "SHIFT_START_TIME": DateTime.parse("$dutyDate ${widget.unitShiftDetail.startTime}").toIso8601String(),
-  "SHIFT_END_TIME": DateTime.parse("$dutyDate ${widget.unitShiftDetail.endTime}").toIso8601String(),
-  "ACT_START_TIME": widget.dutyDateTime,
-  "ACT_END_TIME": widget.attendanceStatus == keyAttendanceStatusDutyOut ? widget.dutyDateTime : null,
-  "FINAl_START_TIME": DateTime.parse(widget.dutyDateTime).isAfter(DateTime.parse("$dutyDate ${widget.unitShiftDetail.startTime}"))
+      "ID": newUuid,
+      "REGNO":  widget.userProfile.regNo ,
+      "UNIT_CODE": widget.unitDutyPost.unitCode,
+      "SITE_NAME": widget.userPosting.siteName,
+      "DUTY_POST_ID": widget.unitDutyPost.id,
+      "DUTY_POST_NAME": widget.unitDutyPost.postName,
+      "SHIFT_ID": widget.unitShiftDetail.id,
+      "SHIFT_NAME": widget.unitShiftDetail.shiftName,
+      "SHIFT_START_DATE": createDutyDate(widget.unitShiftDetail,DateTime.parse(widget.dutyDateTime)),
+      "SHIFT_START_TIME": DateTime.parse("$dutyDate ${widget.unitShiftDetail.startTime}").toIso8601String(),
+      "SHIFT_END_TIME": DateTime.parse("$dutyDate ${widget.unitShiftDetail.endTime}").toIso8601String(),
+      "ACT_START_TIME": widget.dutyDateTime,
+      "ACT_END_TIME":  null,
+      "FINAl_START_TIME": DateTime.parse(widget.dutyDateTime).isAfter(DateTime.parse("$dutyDate ${widget.unitShiftDetail.startTime}"))
           ? widget.dutyDateTime
           : DateTime.parse("$dutyDate ${widget.unitShiftDetail.startTime}").toIso8601String(),
-      "FINAL_END_TIME": widget.attendanceStatus == keyAttendanceStatusDutyOut ? DateTime.parse(widget.dutyDateTime).isAfter(DateTime.parse("$dutyDate ${widget.unitShiftDetail.startTime}"))
-          ?  DateTime.parse("$dutyDate ${widget.unitShiftDetail.startTime}").toIso8601String() : widget.dutyDateTime : null,
-  "APPROVED_HR": 0,
-  "REJECTED_HR": 0,
-  "DUTY_COUNT": 0.0,
-  "DUTY_IN_LAT_LNG": widget.attendanceStatus == keyAttendanceStatusDutyIn ? widget.userAttendance : widget.userAttendance!.dutyInLatLng,
-  "DUTY_OUT_LAT_LNG": widget.attendanceStatus == keyAttendanceStatusDutyOut ? widget.latLong : "",
-  "DELETED": 0,
-  "IS_ABSENT": false,
-  "IS_APPROVED": 0,
-  "ATTENDANCE_MODE": widget.attendanceMode,
-  "DUTY_RANK": widget.userPosting.dutyRank,
-  "DUTY_STATUS": widget.attendanceStatus,
-  "CREATED_ON": DateTime.now().toIso8601String(),
-  "EMP_RANK": widget.userProfile.rank,
-  "DUTY_RANK_NAME": widget.userPosting.dutyRankName,
-  "SHIFT_HRS": widget.unitShiftDetail.dutyHrs,
-  "SHIFT_MIN": shiftMin,
-  "DIRTY_FLAG": 1
-};
+      "FINAL_END_TIME": null,
+      "APPROVED_HR": 0,
+      "REJECTED_HR": 0,
+      "DUTY_COUNT": 0.0,
+      "DUTY_IN_LAT_LNG": widget.latLong,
+      "DUTY_OUT_LAT_LNG":  "",
+      "DELETED": 0,
+      "IS_ABSENT": false,
+      "IS_APPROVED": 0,
+      "ATTENDANCE_MODE": widget.attendanceMode,
+      "DUTY_RANK": widget.userPosting.dutyRank,
+      "DUTY_STATUS": widget.attendanceStatus,
+      "CREATED_ON": DateTime.now().toIso8601String(),
+      "EMP_RANK": widget.userProfile.rank,
+      "DUTY_RANK_NAME": widget.userPosting.dutyRankName,
+      "SHIFT_HRS": widget.unitShiftDetail.dutyHrs,
+      "SHIFT_MIN": shiftMin,
+      "DIRTY_FLAG": 1
+    };
 
     printInDebug('Attendance Data');
     attendance.forEach((key, value) {
       printInDebug('$key : $value');
     });
 
-    // Convert JSON to UserAttendance object
-    UserAttendance userAttendance = UserAttendance.fromJson(attendance);
-
-// Create a list of UserAttendance objects
-    List<UserAttendance> attendanceData = [userAttendance];
-
-// Call the sync function
-     syncUserAttendanceData(
-        attendanceData,
-        widget.attendanceStatus,
-        'id',
-      );
-
-
-    loadThanksScreen(userAttendance);
-    List<dynamic> attendanceList = [attendance];
-
-    uploadAttendance(attendanceList);
+    return attendance;
 
   }
 
+  Map <String, dynamic> getDutyOutAttendance(){
+
+    UserAttendance dutyInAttendance = widget.userAttendance!;
+
+    String dutyDate = DateFormat('yyyy-MM-dd').format(DateTime.parse(widget.dutyDateTime));
+
+    Map <String, dynamic> attendance = {
+      "ID": dutyInAttendance.id,
+      "REGNO": dutyInAttendance.regNo,
+      "UNIT_CODE": dutyInAttendance.unitCode,
+      "SITE_NAME": dutyInAttendance.siteName,
+      "DUTY_POST_ID": dutyInAttendance.dutyPostId,
+      "DUTY_POST_NAME": dutyInAttendance.dutyPostName,
+      "SHIFT_ID": dutyInAttendance.shiftId,
+      "SHIFT_NAME":dutyInAttendance.shiftName,
+      "SHIFT_START_DATE": dutyInAttendance.shiftStartDate,
+      "SHIFT_START_TIME": dutyInAttendance.shiftStartTime.toIso8601String(),
+      "SHIFT_END_TIME": dutyInAttendance.shiftEndTime.toIso8601String(),
+      "ACT_START_TIME": dutyInAttendance.actStartTime.toIso8601String(),
+      "ACT_END_TIME":  widget.dutyDateTime,
+      "FINAl_START_TIME": dutyInAttendance.finalStartTime.toIso8601String(),
+      "FINAL_END_TIME":  DateTime.parse(widget.dutyDateTime).isAfter(DateTime.parse("$dutyDate ${widget.unitShiftDetail.endTime}"))
+          ?  DateTime.parse("$dutyDate ${widget.unitShiftDetail.endTime}").toIso8601String() : widget.dutyDateTime,
+      "APPROVED_HR": 0,
+      "REJECTED_HR": 0,
+      "DUTY_COUNT": 0.0,
+      "DUTY_IN_LAT_LNG": dutyInAttendance.dutyInLatLng,
+      "DUTY_OUT_LAT_LNG":  widget.latLong ,
+      "DELETED": 0,
+      "IS_ABSENT": false,
+      "IS_APPROVED": 0,
+      "ATTENDANCE_MODE": widget.attendanceMode,
+      "DUTY_RANK": dutyInAttendance.dutyRank,
+      "DUTY_STATUS": widget.attendanceStatus,
+      "CREATED_ON": DateTime.now().toIso8601String(),
+      "EMP_RANK": dutyInAttendance.empRank,
+      "DUTY_RANK_NAME": dutyInAttendance.dutyRankName,
+      "SHIFT_HRS": dutyInAttendance.shiftHrs,
+      "SHIFT_MIN": dutyInAttendance.shiftMin,
+      "DIRTY_FLAG": 1
+    };
+
+    printInDebug('Attendance Data');
+    attendance.forEach((key, value) {
+      printInDebug('$key : $value');
+    });
+
+    return attendance;
+
+  }
 
 
   Future<void> uploadAttendance(dynamic attendance) async {
@@ -605,7 +660,7 @@ class SubmitDutyViewState extends State<SubmitDutyView>{
               "id": attendanceRecord['ID'] ?? '',
               "dirtyFlag": 0,
             };
-            updateUserAttendanceData(attendance);
+            updateUserAttendanceTable(attendance);
           }
         } else {
           // Handle empty response
@@ -619,7 +674,7 @@ class SubmitDutyViewState extends State<SubmitDutyView>{
     );
   }
 
-  Future<void> updateUserAttendanceData(Map <String,dynamic> attendance) async{
+  Future<void> updateUserAttendanceTable(Map <String,dynamic> attendance) async{
   await DatabaseHelper.instance.updateTableColumns(
       keyTableUserAttendance,
       attendance,
@@ -748,7 +803,6 @@ class SubmitDutyViewState extends State<SubmitDutyView>{
     final parts = durationString.split(':').map(int.parse).toList();
     return Duration(hours: parts[0], minutes: parts[1], seconds: parts[2]);
   }
-
 
 
 }

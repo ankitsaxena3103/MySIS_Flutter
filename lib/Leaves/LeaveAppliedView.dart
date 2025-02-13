@@ -12,9 +12,12 @@ import 'package:provider/provider.dart';
 class LeaveAppliedView extends StatefulWidget {
   final  int leaveDays ;
   final List<DateTime> appliedLeave;
-  final reason;
+  final String reason;
   const LeaveAppliedView({
-    super.key, required this.leaveDays, required this.appliedLeave, this.reason,
+    super.key,
+    required this.leaveDays,
+    required this.appliedLeave,
+    required this.reason,
   });
 
   @override
@@ -75,7 +78,7 @@ class LeaveAppliedViewState extends State<LeaveAppliedView> {
                       right: paddingRight +pathS/3,
                       child: GestureDetector(
                         onTap: (){
-                          Navigator.pop(context);
+                          Navigator.of(context).popUntil((route) => route.isFirst);
                         },
                         child: Row(
                           children: [
@@ -188,7 +191,7 @@ class LeaveAppliedViewState extends State<LeaveAppliedView> {
 
                                       SizedBox(height: pathS/1.5),
                                       Text(
-                                        widget.leaveDays == 1 ? '${getDateTime(widget.appliedLeave.first)}' :
+                                        widget.leaveDays == 1 ? getDateTime(widget.appliedLeave.first) :
                                         '${getDateTime(widget.appliedLeave.first)} - ${getDateTime(widget.appliedLeave.last)}',
                                         style: TextStyle(
                                           color: isDarkMode ?  whiteColor:greyColor6,
@@ -201,8 +204,7 @@ class LeaveAppliedViewState extends State<LeaveAppliedView> {
                                       SizedBox(height: pathS/3),
                                       GestureDetector(
                                         onTap: (){
-
-
+                                          Navigator.of(context).popUntil((route) => route.isFirst);
                                         },
                                         child: Container(
                                           width: pathL,

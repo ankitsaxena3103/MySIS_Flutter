@@ -1,41 +1,43 @@
 
-// import 'dart:html';
-
 import 'package:flutter/cupertino.dart';
-import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:mysis/CommonViews/LoaderView.dart';
 import 'package:mysis/CommonViews/Utility.dart';
 import 'package:easy_localization/easy_localization.dart';
+import 'package:mysis/Profile/UnitDutyPost.dart';
+import 'package:mysis/Profile/UserPosting.dart';
 import 'package:mysis/SharedClasses/ThemeProvider.dart';
 import 'package:provider/provider.dart';
 import 'package:table_calendar/table_calendar.dart';
-
+import 'package:uuid/uuid.dart';
 import '../CommonViews/AlertPopupView.dart';
 import '../CommonViews/ToastMessageView.dart';
 import '../SharedClasses/APIHelper.dart';
 import '../SharedClasses/DatabaseHelper.dart';
 import '../SharedClasses/LanguageProvider.dart';
-import 'LeaveType.dart';
-import 'SelectLeaveReasonView.dart';
-import 'UserLeaves.dart';
+import 'EscortDuty.dart';
+import 'EscortDutyAppliedView.dart';
 
 
-class ApplyLeaveView extends StatefulWidget {
+class ApplyEscortDutyView extends StatefulWidget {
 
-  final List<UserLeaves> userLeaves;
-  const ApplyLeaveView(
+  final UnitDutyPost unitDutyPost;
+  final UserPosting userPosting;
+
+
+  const ApplyEscortDutyView(
       {
         super.key,
-        required this.userLeaves,
+        required this.unitDutyPost,
+        required this.userPosting,
       });
 
 
   @override
-  ApplyLeaveViewState createState() => ApplyLeaveViewState();
+  ApplyEscortDutyViewState createState() => ApplyEscortDutyViewState();
 }
 
-class ApplyLeaveViewState extends State<ApplyLeaveView> {
+class ApplyEscortDutyViewState extends State<ApplyEscortDutyView> {
 
 
   bool showLoaderView = false;
@@ -60,28 +62,24 @@ class ApplyLeaveViewState extends State<ApplyLeaveView> {
   BoxShape calendarBoxShape = BoxShape.circle;
 
 
-  List<DateTime> leaveApplied = [];
+  List<DateTime> dutyAppliedDates = [];
 
-String leaveFrom = 'DD/MM/YYYY';
-String leaveTo = 'DD/MM/YYYY';
+  String dutyFrom = 'DD/MM/YYYY';
+  String dutyTo = 'DD/MM/YYYY';
 
 
-  List<String> daysItems = ['single_day'.tr(), 'multiple_day'.tr()];
-  int selectedIndex = 0;
+  int selectedIndex = 1;
   bool showToastMessageView = false;
   String toastMessage = '';
-  int numberOfLeavesApplied = 0;
+  int numberOfDutiesApplied = 0;
 
   Color unSyncedDataColor = yellowColor1;
 
-  Color approvedLeaveColor = greenColor6;
-  Color appliedLeaveColor = greyColor1;
 
   Color fixedDutyOffColor = Color(0xFFCAF5DD);
   Color shortDutyColor = Color(0xFFCAF5DD);
 
-   List<UserLeaves> userLeaves = [];
-  List<LeaveType> leavesType = [];
+  List<EscortDuty> escortDuties = [];
 
 
   @override
@@ -110,45 +108,129 @@ String leaveTo = 'DD/MM/YYYY';
                 child: Stack(
                   alignment: Alignment.center,
                   children: [
+
+                    Positioned(
+                      top: 0,
+                      child: Container(
+                        width: screenWidth,
+                        height: pathS / 1.1,
+                        alignment: Alignment.center,
+                        color: isDarkMode ? greyColor6:whiteColor,
+
+                      ),
+                    ),
+
                     Positioned(
                       top: MediaQuery.of(context).padding.top+pathS/12,
-                      left: paddingLeft +pathS/3,
-                      child: GestureDetector(
-                        onTap: (){
-                          Navigator.pop(context);
-                        },
-                        child: Row(
-                          children: [
-                            Container(
-                              width: pathS/5,
-                              height: pathS/2,
-                              child: Image.asset(
-                                'assets/images/dashboard-icons/left-arrow.png',
-                                color: isDarkMode ?  whiteColor:greyColor6,
+                      // left: paddingLeft +pathS/3,
+                      child: Column(
+                        mainAxisAlignment: MainAxisAlignment.start,
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Container(
+                            width: screenWidth,
+                            height: pathS / 1.4,
+                            color: isDarkMode ? greyColor6:whiteColor,
 
+                            child: GestureDetector(
+                              onTap: (){
+                                Navigator.pop(context);
+                              },
+                              child: Padding(
+                                padding:  EdgeInsets.only(left:pathS/4),
+                                child: Row(
+                                  children: [
+                                    SizedBox(
+                                      width: pathS/5,
+                                      height: pathS/2,
+                                      child: Image.asset(
+                                        'assets/images/dashboard-icons/left-arrow.png',
+                                        color: isDarkMode ?  whiteColor:greyColor6,
+
+                                      ),
+
+                                    ),
+                                    SizedBox(width: pathS/8),
+                                    Text(
+                                      'New_Escort_Duty'.tr(),
+                                      style: TextStyle(
+                                        color: isDarkMode ?  whiteColor:greyColor6,
+                                        fontSize: pathS / 5.5,
+                                        fontWeight: FontWeight.w500,
+                                        fontFamily: 'Roboto',
+                                      ),
+                                      textAlign: TextAlign.center,
+                                    ),
+
+                                  ],
+                                ),
                               ),
-
                             ),
-                            SizedBox(width: pathS/8),
-                            Text(
-                              'apply_for_leave'.tr(),
-                              style: TextStyle(
-                                color: isDarkMode ?  whiteColor:greyColor6,
-                                fontSize: pathS / 5.5,
-                                fontWeight: FontWeight.w500,
-                                fontFamily: 'Roboto',
+                          ),
+                          Container(
+
+                            width: MediaQuery.of(context).size.width,
+                            color: isDarkMode?greyColor6:whiteColor,
+
+                            child:  Padding(
+                              padding:  EdgeInsets.only(left:pathS/1.8,top: pathS/4,bottom: pathS/4),
+                              child: Column(
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                children: [
+                                  SizedBox(
+                                    width: 2*pathL,
+                                    child: Text(
+                                      widget.userPosting.siteName,
+                                      style: TextStyle(
+                                        color: isDarkMode ? whiteColor:greyColor6,
+                                        fontSize: pathS/5,
+                                        fontWeight: FontWeight.w600,
+                                        fontFamily: 'Roboto',
+                                      ),
+                                      textAlign: TextAlign.left,
+                                    ),
+                                  ),
+                                  SizedBox(height: pathS/25),
+                                  SizedBox(
+                                    width: 2*pathL,
+                                    child: Text(
+                                      widget.unitDutyPost.address,
+                                      style: TextStyle(
+                                        color: isDarkMode ? whiteColor:greyColor6,
+                                        fontSize: pathS/6.5,
+                                        fontWeight: FontWeight.w500,
+                                        fontFamily: 'Roboto',
+                                      ),
+                                      textAlign: TextAlign.left,
+                                    ),
+                                  ),
+                                  SizedBox(height: pathS/8),
+                                  SizedBox(
+                                    width: 2*pathL,
+                                    child: Text(
+                                      widget.unitDutyPost.unitCode,
+                                      style: TextStyle(
+                                        color: isDarkMode ? whiteColor:greyColor6,
+                                        fontSize: pathS/5,
+                                        fontWeight: FontWeight.w500,
+                                        fontFamily: 'Roboto',
+                                      ),
+                                      textAlign: TextAlign.left,
+                                    ),
+                                  ),
+
+                                ],
                               ),
-                              textAlign: TextAlign.center,
                             ),
-
-                          ],
-                        ),
+                          ),
+                        ],
                       ),
                     ),
 
 
+
                     Padding(
-                      padding: EdgeInsets.only(left: 0, top: MediaQuery.of(context).padding.top +pathS), // Adjust top and left as needed
+                      padding: EdgeInsets.only(left: 0, top: MediaQuery.of(context).padding.top +pathL*1.35), // Adjust top and left as needed
 
                       child: Column(
                         mainAxisAlignment: MainAxisAlignment.start,
@@ -156,6 +238,7 @@ String leaveTo = 'DD/MM/YYYY';
 
                           SizedBox(
                             width: screenWidth,
+
 
                           ),
 
@@ -165,26 +248,6 @@ String leaveTo = 'DD/MM/YYYY';
                               scrollDirection: Axis.vertical,
                               child: Column(
                                 children: [
-
-                                  Padding(
-                                    padding:  EdgeInsets.only(left: paddingLeft+pathS/5,bottom: pathS/3),
-                                    child:  RadioButtonGroup(
-                                      items: daysItems,
-                                      selectedId: selectedIndex,
-                                      callback: (int index) {
-                                        setState(() {
-                                          selectedIndex = index;
-                                          leaveFrom = 'DD/MM/YYYY';
-                                          leaveTo = 'DD/MM/YYYY';
-                                          leaveApplied = [];
-                                          numberOfLeavesApplied = 0;
-
-                                        });
-
-                                      },
-                                    ),
-
-                                  ),
 
                                   Padding(
                                     padding:  EdgeInsets.only(left: paddingLeft+pathS/4.5,right: paddingRight+pathS/4.5),
@@ -223,11 +286,11 @@ String leaveTo = 'DD/MM/YYYY';
                                                 ],
                                               ),
                                               child: Text(
-                                                leaveFrom,
+                                                dutyFrom,
                                                 style: TextStyle(
                                                   color: isDarkMode ?  whiteColor:greyColor4,
-                                                  fontSize: pathS /5.5,
-                                                  fontWeight: FontWeight.w500,
+                                                  fontSize: pathS /6,
+                                                  fontWeight: FontWeight.normal,
                                                   fontFamily: 'Roboto',
                                                 ),
                                                 textAlign: TextAlign.center,
@@ -272,11 +335,11 @@ String leaveTo = 'DD/MM/YYYY';
                                                 ],
                                               ),
                                               child: Text(
-                                                leaveTo,
+                                                dutyTo,
                                                 style: TextStyle(
                                                   color: isDarkMode ?  whiteColor:greyColor4,
-                                                  fontSize: pathS /5.5,
-                                                  fontWeight: FontWeight.w500,
+                                                  fontSize: pathS /6,
+                                                  fontWeight: FontWeight.normal,
                                                   fontFamily: 'Roboto',
                                                 ),
                                                 textAlign: TextAlign.center,
@@ -435,43 +498,44 @@ String leaveTo = 'DD/MM/YYYY';
                                                       return; // Do nothing if focusedDay is before or equal to current date
                                                     }
 
-                                                   else  if(getLeaveForDate(focusedDay).isNotEmpty ){
-                                                     setState(() {
-                                                       alertHeader = 'alert'.tr();
-                                                       alertMessage = 'leave_assign_for_day'.tr();
-                                                       showAlert = true;
+                                                    else  if(getDutyForDate(focusedDay).isNotEmpty ){
+                                                      setState(() {
+                                                        alertHeader = 'alert'.tr();
+                                                        alertMessage = 'duty_assign_for_day'.tr();
+                                                        showAlert = true;
 
-                                                     });
+                                                      });
 
                                                     }else{
                                                       if (selectedIndex == 0) {
                                                         // Single Day selection
-                                                        leaveFrom = getDateTime(focusedDay);
-                                                        leaveTo = leaveFrom;
-                                                        leaveApplied = [focusedDay];
-                                                        numberOfLeavesApplied = 1;
+                                                        dutyFrom = getDateTime(focusedDay);
+                                                        dutyTo = dutyFrom;
+                                                        dutyAppliedDates = [focusedDay];
+                                                        numberOfDutiesApplied = 1;
                                                       }
                                                       else {
                                                         // Multiple Day selection
-                                                        if (leaveApplied.isEmpty || leaveApplied.length == 2) {
+                                                        if (dutyAppliedDates.isEmpty || dutyAppliedDates.length == 2) {
                                                           // Start a new selection
-                                                          leaveFrom = getDateTime(focusedDay);
-                                                          leaveTo = 'DD/MM/YYYY'; // Placeholder for the leaveTo date
-                                                          leaveApplied = [focusedDay];
-                                                          numberOfLeavesApplied = 0;
+                                                          dutyFrom = getDateTime(focusedDay);
+                                                          dutyTo = 'DD/MM/YYYY';
+                                                          dutyAppliedDates = [focusedDay];
+                                                          numberOfDutiesApplied = 0;
                                                         }
-                                                        else if (leaveApplied.length == 1) {
+                                                        else if (dutyAppliedDates.length == 1) {
                                                           // Complete the selection
 
-                                                          if(leaveApplied.first.isBefore(focusedDay)){
-                                                            leaveTo = getDateTime(focusedDay);
-                                                            leaveApplied.add(focusedDay);
+                                                          if(dutyAppliedDates.first.isBefore(focusedDay)){
+                                                            dutyTo = getDateTime(focusedDay);
+                                                            dutyAppliedDates.add(focusedDay);
                                                           }else{
-                                                            leaveTo = leaveFrom;
-                                                            leaveFrom = getDateTime(focusedDay);
-                                                            leaveApplied.insert(0, focusedDay);
+                                                            dutyTo = dutyFrom;
+                                                            dutyFrom = getDateTime(focusedDay);
+                                                            dutyAppliedDates.insert(0, focusedDay);
                                                           }
-                                                          numberOfLeavesApplied = leaveApplied.last.difference(leaveApplied.first).inDays + 1;
+
+                                                          numberOfDutiesApplied = dutyAppliedDates.last.difference(dutyAppliedDates.first).inDays + 1;
 
                                                         }
                                                       }
@@ -509,38 +573,131 @@ String leaveTo = 'DD/MM/YYYY';
                     ),
 
                     Positioned(
-                      bottom: paddingBottom+pathS/12,
-                        child:GestureDetector(
-                          onTap: (){
-                            onTapRaiseRequest();
+                      bottom: 0,
 
-                          },
-                          child: Container(
-                            width: pathL*1.2,
-                            height: pathS / 1.7,
-                            alignment: Alignment.center,
-                            decoration: BoxDecoration(
-                              color:  isDarkMode ? redColor3:redColor3,                          // border: Border.all(color: Colors.yellow, width: pathS/18),
-                              borderRadius: BorderRadius.circular(pathS/3),
-                              boxShadow: [
-                                BoxShadow(
-                                  color:  shadowColor,
-                                  blurRadius: pathS/10, // Spread of the shadow
-                                  // spreadRadius: pathS/15, // How far the shadow extends
-                                  offset:  Offset(-pathS/12, pathS/12),
-                                ),
-                              ],
-                            ),
-                            child: Text(
-                              'raise_request'.tr(),
-                              style: TextStyle(
-                                color: isDarkMode ? whiteColor:whiteColor,
-                                fontSize: pathS / 4.5,
-                                fontWeight: FontWeight.bold,
+                      child: GestureDetector(
+                        onTap: (){
+
+
+                        },
+                        child: Container(
+                          width: screenWidth,
+                          height: pathS / 1.5,
+                          alignment: Alignment.center,
+                          decoration: BoxDecoration(
+                            color: isDarkMode ? greyColor6:whiteColor,
+                            boxShadow: [
+                              BoxShadow(
+                                color: Colors.transparent, // Shadow color
+                                blurRadius: pathS/10, // Spread of the shadow
+                                // spreadRadius: pathS/15, // How far the shadow extends
+                                offset:  Offset(-pathS/12, pathS/12),
                               ),
+                            ],
+                          ),
+
+                        ),
+                      ),
+                    ),
+                    Positioned(
+                      bottom: MediaQuery.of(context).padding.bottom,
+
+                      child: Container(
+                        width: screenWidth,
+                        height: pathS / 1.4,
+                        alignment: Alignment.center,
+                        decoration: BoxDecoration(
+                          color: isDarkMode ? greyColor6:whiteColor,
+                          // border: Border.all(color: Colors.yellow, width: pathS/18),
+                          // borderRadius: BorderRadius.circular(pathS/3),
+                          boxShadow: [
+                            BoxShadow(
+                              color: shadowColor, // Shadow color
+                              blurRadius: pathS/15, // Spread of the shadow
+                              // spreadRadius: pathS/15, // How far the shadow extends
+                              offset:  Offset(-1, -pathS/15),
                             ),
+                          ],
+                        ),
+                        child: Padding(
+                          padding:  EdgeInsets.only(left: pathS/4,right: pathS/4),
+                          child: Row(
+                            children: [
+                              GestureDetector(
+                                onTap: (){
+                                  Navigator.pop(context);
+                                },
+                                child: Row(
+                                  children: [
+                                    SizedBox(
+                                      width: pathS/5,
+                                      height: pathS/2,
+                                      child: Image.asset(
+                                        'assets/images/dashboard-icons/left-arrow.png',
+                                        color: isDarkMode ?  whiteColor:greyColor3,
+
+                                      ),
+
+                                    ),
+                                    SizedBox(width: pathS/12),
+                                    Text(
+                                      'back'.tr().toUpperCase(),
+                                      style: TextStyle(
+                                        color: isDarkMode ?  redColor1:redColor3,
+                                        fontSize: pathS / 5.5,
+                                        fontWeight: FontWeight.bold,
+                                        fontFamily: 'Roboto',
+                                      ),
+                                      textAlign: TextAlign.center,
+                                    ),
+
+                                  ],
+                                ),
+                              ),
+                              Spacer(),
+                              Row(
+                                children: [
+                                  Container(
+                                    decoration:  BoxDecoration(
+                                      shape: BoxShape.rectangle,
+                                      borderRadius: BorderRadius.circular(pathS/4),
+                                      color: isDarkMode ?  redColor1:redColor3,
+                                      boxShadow: [
+                                        BoxShadow(
+                                          color: Colors.black.withOpacity(0.25), // Shadow color
+                                          blurRadius: pathS/25, // Spread of the shadow
+                                          // spreadRadius: pathS/15, // How far the shadow extends
+                                          offset:  Offset(-pathS/48, pathS/18),
+                                        ),
+                                      ],
+                                    ),
+
+                                    child: GestureDetector(
+                                      onTap: (){
+                                        onTapSubmit();
+                                      },
+                                      child: Padding(
+                                        padding:  EdgeInsets.only(left:pathS/4,right: pathS/4,top: pathS/12,bottom: pathS/15),
+                                        child: Text(
+                                          'submit'.tr().toUpperCase(),
+                                          style: TextStyle(
+                                            color: isDarkMode ?  whiteColor:whiteColor,
+                                            fontSize: pathS / 5.5,
+                                            fontWeight: FontWeight.w600,
+                                            fontFamily: 'Roboto',
+                                          ),
+                                          textAlign: TextAlign.center,
+                                        ),
+                                      ),
+                                    ),
+                                  ),
+
+                                ],
+                              ),
+                            ],
                           ),
                         ),
+                      ),
                     ),
 
                     LoaderView(isVisible: showLoaderView, message: 'Loading...'),
@@ -552,11 +709,11 @@ String leaveTo = 'DD/MM/YYYY';
                           message: alertMessage,
                           cancelBtn: '',
                           okBtn: 'ok'.tr(),
-                        callBack: (value){
+                          callBack: (value){
                             setState(() {
                               showAlert = false;
                             });
-                          },
+                          }
                       ),
                     )
 
@@ -570,53 +727,9 @@ String leaveTo = 'DD/MM/YYYY';
   }
 
   void initialSetup() {
-    getLeaveTypeTableData();
-   getUserLeaveTableData();
-  }
-
-  Future<void> getLeaveTypeTableData() async {
-    final leaveTypes = await DatabaseHelper.instance.getAllRecords<LeaveType>(
-      keyTableLeaveType,
-          (map) => LeaveType.fromMap(map)
-    );
-
-    if(leaveTypes.isNotEmpty){
-     leavesType = leaveTypes;
-    }
 
   }
 
-  Future<void> getUserLeaveTableData() async {
-
-    final leaves = await DatabaseHelper.instance.getAllRecords<UserLeaves>(
-      keyTableUserLeave,
-          (map) => UserLeaves.fromMap(map),
-    );
-
-    for (var data in leaves) {
-      printInDebug('leaves Data');
-      data.toMap().forEach((i, j) {
-        printInDebug('$i : $j');
-      });
-    }
-
-    if(leaves.isNotEmpty) {
-      // Filter roster data for today
-      final leaveData = leaves
-          .where((leave) =>
-          leave.deleted == 0 && leave.canceled == 0) // Not deleted
-          .toList();
-
-      if(leaveData.isNotEmpty){
-        setState(() {
-          userLeaves = leaveData;
-        });
-      }
-    }
-
-
-
-  }
 
 
   String getDateTime(DateTime focusedDay) {
@@ -635,84 +748,31 @@ String leaveTo = 'DD/MM/YYYY';
     });
   }
 
-  onTapRaiseRequest(){
-
-    if(selectedIndex == 0 && leaveApplied.length != 1){
-      showToastView('select_your_date_for_leave'.tr());
-      return;
-    }
-    if(selectedIndex == 1 && leaveApplied.length != 2){
-      showToastView('select_your_date_for_leave'.tr());
-      return;
-    }
-    if(numberOfLeavesApplied >7){
-      showToastView('leave_count_valid'.tr());
-      return;
-    }
-
-    Navigator.push(
-      context,
-      MaterialPageRoute(
-        builder: (context) => SelectLeaveReason(noOfLeaveApplied: numberOfLeavesApplied, appliedLeavesDate: leaveApplied,),
-      ),
-    );
-  }
 
   Color getBackgroundColor(DateTime date) {
     printInDebug('calender $date');
     calendarDaysTextColor = isDarkMode ? whiteColor : greyColor6;
     calendarBoxShape = BoxShape.circle;
 
-    List<UserLeaves> selectedDateLeave = userLeaves.isNotEmpty ?  getLeaveForDate(date) : [];
+    List<EscortDuty> selectedDateDuty = escortDuties.isNotEmpty ?  getDutyForDate(date) : [];
 
-    LeaveType? selectedLeaveType = selectedDateLeave.isNotEmpty ? getLeaveTypeById(selectedDateLeave.first.leaveId): null;
-    // List<UserLeaves> selectedDateUnSyncedLeave = selectedDateLeave.isNotEmpty ? getUnSyncedLeaveOnDate(selectedDateLeave):[];
-    // List<UserLeaves> selectedDateAppliedLeave = selectedDateLeave.isNotEmpty ? getAppliedLeaveOnDate(selectedDateLeave) : [];
-    // List<UserLeaves> selectedDateApprovedLeave = selectedDateLeave.isNotEmpty ? getApprovedLeaveOnDate(selectedDateLeave) : [];
-    // List<UserLeaves> selectedDateWeeklyOffLeave = selectedDateLeave.isNotEmpty ? getWeeklyOffLeaveOnDate(selectedDateLeave) : [];
-    //
-    //  if ( selectedDateUnSyncedLeave.isNotEmpty) {
-    // // Return red for days 1, 2, 3, 4
-    //    calendarDaysColor  = brownColor;
-    // return unSyncedDataColor;
-    // }
-    // else if (selectedDateApprovedLeave.isNotEmpty) {
-    //   // Return red for days 1, 2, 3, 4
-    //   calendarBoxShape = BoxShape.circle;
-    //   calendarDaysColor  = whiteColor;
-    //   return approvedLeaveColor;
-    // }
-    // else if (selectedDateAppliedLeave.isNotEmpty ) {
-    //   // Return red for days 1, 2, 3, 4
-    //   calendarBoxShape = BoxShape.circle;
-    //   calendarDaysColor  = greyColor6;
-    //   return appliedLeaveColor;
-    // }
-    // else if (selectedDateWeeklyOffLeave.isNotEmpty ) {
-    //   // Return red for days 1, 2, 3, 4
-    //   // calendarBoxShape = BoxShape.rectangle;
-    //    calendarDaysColor  = Colors.white;
-    //   return fixedDutyOffColor;
-    // }
+    if(selectedDateDuty.isNotEmpty){
 
-    if(selectedDateLeave.isNotEmpty){
-
-      Color bgColor = selectedLeaveType!= null ?  getColorFromHex(selectedLeaveType!.colorCode) : greyColor6;
-      calendarDaysTextColor =  selectedLeaveType?.leaveId == 6 ? Colors.white:Colors.black;
+      Color bgColor =  greyColor6;
+      calendarDaysTextColor = Colors.black;
       calendarBoxShape = BoxShape.circle;
       return bgColor;
     }
 
-    else  if (leaveApplied.isNotEmpty &&
-         (leaveApplied.first.isBefore(date) || leaveApplied.first.isAtSameMomentAs(date))
-         && (leaveApplied.last.isAfter(date) || leaveApplied.last.isAtSameMomentAs(date))) {
-       // Return red for days within the leaveApplied range
-       calendarBoxShape = BoxShape.circle;
-       calendarDaysTextColor = whiteColor;
-       return redColor3;
-     }
+    else  if (dutyAppliedDates.isNotEmpty &&
+        (dutyAppliedDates.first.isBefore(date) || dutyAppliedDates.first.isAtSameMomentAs(date))
+        && (dutyAppliedDates.last.isAfter(date) || dutyAppliedDates.last.isAtSameMomentAs(date))) {
+      calendarBoxShape = BoxShape.circle;
+      calendarDaysTextColor = whiteColor;
+      return redColor3;
+    }
 
-     else {
+    else {
       // Return default color for other days
       calendarBoxShape = BoxShape.circle;
       return Colors.transparent;
@@ -729,71 +789,171 @@ String leaveTo = 'DD/MM/YYYY';
     return Color(int.parse('FF$hexColor', radix: 16));
   }
 
-  List<UserLeaves> getLeaveForDate(DateTime selectedDate) {
-    final calendarDateData = userLeaves.where((data) {
-      // Compare only the date part (year, month, day) of the selectedDate and leave dates
-      return (data.leaveStartDate.year < selectedDate.year ||
-          (data.leaveStartDate.year == selectedDate.year &&
-              data.leaveStartDate.month < selectedDate.month) ||
-          (data.leaveStartDate.year == selectedDate.year &&
-              data.leaveStartDate.month == selectedDate.month &&
-              data.leaveStartDate.day <= selectedDate.day)) &&
-          (data.leaveEndDate.year > selectedDate.year ||
-              (data.leaveEndDate.year == selectedDate.year &&
-                  data.leaveEndDate.month > selectedDate.month) ||
-              (data.leaveEndDate.year == selectedDate.year &&
-                  data.leaveEndDate.month == selectedDate.month &&
-                  data.leaveEndDate.day >= selectedDate.day));
+  List<EscortDuty> getDutyForDate(DateTime selectedDate) {
+    final calendarDateData = escortDuties.where((data) {
+      return (data.startDate.year < selectedDate.year ||
+          (data.startDate.year == selectedDate.year &&
+              data.startDate.month < selectedDate.month) ||
+          (data.startDate.year == selectedDate.year &&
+              data.startDate.month == selectedDate.month &&
+              data.startDate.day <= selectedDate.day)) &&
+          (data.endDate.year > selectedDate.year ||
+              (data.endDate.year == selectedDate.year &&
+                  data.endDate.month > selectedDate.month) ||
+              (data.endDate.year == selectedDate.year &&
+                  data.endDate.month == selectedDate.month &&
+                  data.endDate.day >= selectedDate.day));
     }).toList();
 
     return calendarDateData;
   }
-  List<UserLeaves> getUnSyncedLeaveOnDate(List<UserLeaves> leave){
+  List<EscortDuty> getUnSyncedDutyOnDate(List<EscortDuty> duty){
 
-    final calenderDateData = leave
+    final calenderDateData = duty
         .where((data) =>
     data.dirtyFlag == 1)
         .toList();
 
     return calenderDateData;
   }
-  List<UserLeaves> getAppliedLeaveOnDate(List<UserLeaves> leave){
 
-    final calenderDateData = leave
-        .where((data) =>
-    data.leaveStatus == keyPendingLeave && data.dirtyFlag == 0)
-        .toList();
 
-    return calenderDateData;
-  }
-  List<UserLeaves> getApprovedLeaveOnDate(List<UserLeaves> leave){
+  void onTapSubmit(){
+printInDebug('msg');
+    if(dutyAppliedDates.length != 2){
+      showToastView('duty_dates'.tr());
 
-    final calenderDateData = leave
-        .where((data) =>
-    data.leaveStatus == keyApprovedLeave)
-        .toList();
-
-    return calenderDateData;
-  }
-  List<UserLeaves> getWeeklyOffLeaveOnDate(List<UserLeaves> leave){
-
-    final calenderDateData = leave
-        .where((data) =>
-    data.leaveId == 6 )
-        .toList();
-
-    return calenderDateData;
-  }
-
-  LeaveType? getLeaveTypeById(int userLeaveId) {
-    for (var data in leavesType) {
-      if (data.leaveId == userLeaveId) {
-        return data; // Return the matching LeaveType
-      }
+      return;
     }
-    return null; // Return null if no matching LeaveType is found
+
+    createDuty();
   }
 
+  void createDuty(){
+
+    Map <String, dynamic> duty = createDutiesData();
+
+    // Convert JSON to UserAttendance object
+    EscortDuty appliedDuty = EscortDuty.fromJson(duty);
+
+    // Create a list of UserAttendance objects
+    List<EscortDuty> appliedDuties = [appliedDuty];
+
+    // Call the sync function
+    syncEscortDutyData(
+      appliedDuties,
+      'id',
+    );
+
+    Navigator.of(context).popUntil((route) => route.isFirst);
+    Future.delayed(Duration(milliseconds: 3),(){
+      loadThanks();
+    });
+
+    List<dynamic> data = appliedDuties;
+
+    uploadDuty(data);
+
+  }
+  Map <String, dynamic> createDutiesData(){
+
+    String newUuid = Uuid().v4();
+
+    String startDate = DateFormat('yyyy-MM-dd').format(dutyAppliedDates.first);
+    String endDate = DateFormat('yyyy-MM-dd').format(dutyAppliedDates.last);
+
+    Map <String, dynamic> duty = {
+      "ID": newUuid,
+      'UNIT_CODE': widget.userPosting.unitCode,
+      'START_DATE': startDate,
+      'END_DATE': endDate,
+      'STATUS': 0,
+      'REGNO': regNo,
+      'CREATED_ON': DateTime.now().toIso8601String(),
+      'DATE_MODIFIED': DateTime.now().toIso8601String(),
+      'DELETED': 0,
+      'DIRTY_FLAG': 1,
+      'UPDATED_AT':DateTime.now().toIso8601String(),
+
+    };
+
+    printInDebug('Duty Data');
+    duty.forEach((key, value) {
+      printInDebug('$key : $value');
+    });
+
+    return duty;
+
+  }
+
+  Future<void> syncEscortDutyData(
+      List<EscortDuty> escortDuties,
+      String field,
+      ) async {
+    await DatabaseHelper.instance.insertTableData<EscortDuty>(
+      keyTableEscortDuty,
+      escortDuties,
+          (data) => data.toMap(),
+    );
+    for (var data in escortDuties) {
+      printInDebug('EscortDuty Data');
+      data.toMap().forEach((i, j) {
+        printInDebug('$i : $j');
+      });
+      printInDebug('Inserted ${escortDuties.length} records into $keyTableEscortDuty');
+
+    }
+  }
+
+  Future<void> uploadDuty(dynamic data) async {
+    APIHelper.instance.postAllData(escortDutyPostApi, data, (responseData) {
+      if (responseData.isNotEmpty) {
+        // Parse the response list directly
+        List<dynamic> list = responseData;
+
+        for (var data in list) {
+          // Parse each attendance record
+          Map<String, dynamic> duties = {
+            "id": data['ID'] ?? '',
+            "dirtyFlag": 0,
+          };
+          updateEscortDutyTable(duties);
+        }
+      } else {
+        // Handle empty response
+        printInDebug('Response data is empty.');
+      }
+    },
+          (error) {
+        // Handle error
+        printInDebug('Error: $error');
+      },
+    );
+  }
+  Future<void> updateEscortDutyTable(Map <String,dynamic> duties) async{
+    await DatabaseHelper.instance.updateTableColumns(
+        keyTableEscortDuty,
+        duties,
+        'id'
+    );
+
+  }
+
+
+
+  void loadThanks(){
+    Navigator.push(
+      context,
+      MaterialPageRoute(
+        builder: (context) => EscortDutyAppliedView(
+          escortDutyDays: numberOfDutiesApplied,
+          appliedDutyDates: dutyAppliedDates,
+          userPosting: widget.userPosting,
+          unitDutyPost: widget.unitDutyPost,
+        ),
+      ),
+    );
+  }
 
 
 }

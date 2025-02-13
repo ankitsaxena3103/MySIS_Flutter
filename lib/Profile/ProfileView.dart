@@ -7,10 +7,10 @@ import 'package:easy_localization/easy_localization.dart';
 import 'package:mysis/Profile/UserPosting.dart';
 import 'package:mysis/Profile/UserShiftDetailView.dart';
 import 'package:mysis/SharedClasses/DatabaseHelper.dart';
+import 'package:mysis/UserAuthViews/EnterPINView.dart';
 
 import '../CommonViews/LoaderView.dart';
 import '../SharedClasses/APIHelper.dart';
-import '../UserAuthViews/SetPINView.dart';
 import 'EditProfileImageView.dart';
 import 'UnitDutyPost.dart';
 import 'UnitShiftDetail.dart';
@@ -153,7 +153,7 @@ class ProfileViewState extends State<ProfileView>{
             ),
           ),
 
-          Container(
+          SizedBox(
             height: screenHeight,
 
             child: Padding(
@@ -403,13 +403,20 @@ class ProfileViewState extends State<ProfileView>{
 
                       Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
-                        children: userPostings.map((posting) {
-                          return buildUserPostingContainer(
-                            posting,
-                            isDarkMode,
-                            screenWidth,
-                            marginValue,
-                            pathS,
+                        children: userPostings.asMap().entries.map((entry) {
+                          final int index = entry.key; // Extract the index
+                          final posting = entry.value; // Extract the posting
+                          return Column(
+                            children: [
+                              buildUserPostingContainer(posting,index, userProfile.length),
+                              if(index == 0)SizedBox(height: pathS/8),
+                              Container(
+                                color: isDarkMode ? greyColorDark:greyColor1,
+                                height: (index > 0 && index < userPostings.length-1) ? 0.5 : 0,
+                                width: screenWidth - 2.5*marginValue,
+                              ),
+
+                            ],
                           );
                         }).toList(),
                       ),
@@ -477,12 +484,7 @@ class ProfileViewState extends State<ProfileView>{
                                       Spacer(),
                                       GestureDetector(
                                         onTap: (){
-                                          Navigator.push(
-                                            context,
-                                            MaterialPageRoute(
-                                              builder: (context) => ChangeMobileView(),
-                                            ),
-                                          );
+                                          onTapChangeMobile();
                                         },
                                         child: Container(
 
@@ -500,9 +502,9 @@ class ProfileViewState extends State<ProfileView>{
                                             ],
                                           ),
                                           child: Padding(
-                                            padding:  EdgeInsets.only(left: pathS/5,right: pathS/5,top: pathS/10,bottom: pathS/11),
+                                            padding:  EdgeInsets.only(left: pathS/4,right: pathS/4,top: pathS/10,bottom: pathS/11),
                                             child: Text(
-                                              'change'.tr(),
+                                              'change'.tr().toUpperCase(),
                                               style: TextStyle(
                                                 color: whiteColor,
                                                 fontSize: pathS / 5.5,
@@ -564,7 +566,7 @@ class ProfileViewState extends State<ProfileView>{
 
                                   child: Row(
                                     children: [
-                                      Container(
+                                      SizedBox(
                                         width: pathS/3,
                                         height: pathS/3,
                                         child: Image.asset(
@@ -608,10 +610,10 @@ class ProfileViewState extends State<ProfileView>{
                                             ],
                                           ),
                                           child: Padding(
-                                            padding:  EdgeInsets.only(left: pathS/5,right: pathS/5,top: pathS/10,bottom: pathS/10),
+                                            padding:  EdgeInsets.only(left: pathS/4,right: pathS/4,top: pathS/10,bottom: pathS/10),
 
                                             child: Text(
-                                              'change'.tr(),
+                                              'change'.tr().toUpperCase(),
                                               style: TextStyle(
                                                 color: whiteColor,
                                                 fontSize: pathS / 5.5,
@@ -1196,37 +1198,49 @@ class ProfileViewState extends State<ProfileView>{
 
           LoaderView(isVisible: showLoaderView, message: 'checking'.tr()),
 
-          Visibility(
-            visible: showUserShiftDetail,
-            child: userPostings.isNotEmpty
-                ? UserShiftDetailView(
-              unitDutyPosts: unitDutyPosts,
-              unitShiftDetails: unitShiftDetails,
-              userPosting: userPostings.first, // Safe because we checked isNotEmpty
-              callBack: (value) {
-                setState(() {
-                  showUserShiftDetail = false;
-                });
-              },
-            )
-                : Center(
-              child: Text("No user postings available."),
-            ),
-          ),
-
         ],
       ),
     );
   }
 
-  Widget buildUserPostingContainer(UserPosting userPosting, bool isDarkMode, double screenWidth, double marginValue, double pathS) {
+
+  Widget buildUserPostingContainer(UserPosting userPosting, int index, int totalItems) {
+    double borderRadius = pathS / 8;
+
+    // Determine border radius based on the index
+    BorderRadiusGeometry borderRadiusGeometry;
+    if (index == 0) {
+      // All corners rounded for the first item
+      borderRadiusGeometry = BorderRadius.circular(borderRadius);
+    } else if (index == totalItems - 1) {
+      // Bottom corners rounded for the last item
+      borderRadiusGeometry = BorderRadius.only(
+        bottomLeft: Radius.circular(borderRadius),
+        bottomRight: Radius.circular(borderRadius),
+      );
+    } else if (index == 1) {
+      // Top corners rounded for the second item
+      borderRadiusGeometry = BorderRadius.only(
+        topLeft: Radius.circular(borderRadius),
+        topRight: Radius.circular(borderRadius),
+      );
+    } else {
+      // No border radius for other items
+      borderRadiusGeometry = BorderRadius.zero;
+    }
+
     return Container(
       width: screenWidth - 2.5 * marginValue,
       decoration: BoxDecoration(
         shape: BoxShape.rectangle,
-        borderRadius: BorderRadius.circular(pathS / 8),
-
-        color: isDarkMode ? userPosting.isPrimary == 1 ? yellowColor : greyColor8 : userPosting.isPrimary == 1 ? yellowColor : Colors.white,
+        borderRadius: borderRadiusGeometry,
+        color: isDarkMode
+            ? userPosting.isPrimary == 1
+            ? yellowColor
+            : greyColor8
+            : userPosting.isPrimary == 1
+            ? yellowColor
+            : Colors.white,
         boxShadow: [
           BoxShadow(
             color: Colors.black.withOpacity(0.1),
@@ -1242,38 +1256,39 @@ class ProfileViewState extends State<ProfileView>{
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              Text(
-                userPosting.isPrimary == 1 ? 'txt_base_unit'.tr() : 'AdditionalUnits'.tr(),
-                style: TextStyle(
-                  color: isDarkMode ? greyColorDark : greyColor7,
-                  fontSize: pathS / 5,
-                  fontWeight: FontWeight.w800,
-                  fontFamily: 'Roboto',
-                ),
-                textAlign: TextAlign.start,
-              ),
-              SizedBox(height: pathS / 5),
-              Padding(
-                padding: EdgeInsets.only(right: pathS),
+              Visibility(
+                visible: index < 2 ? true:false,
                 child: Text(
-                  userPosting.siteName,
+                  userPosting.isPrimary == 1 ? 'txt_base_unit'.tr() : 'AdditionalUnits'.tr(),
                   style: TextStyle(
-                    color: isDarkMode ? greyColorDark : greyColor7,
+                    color: isDarkMode ? (userPosting.isPrimary == 1 ? greyColorDark : whiteColor): greyColor7,
                     fontSize: pathS / 5,
-                    fontWeight: FontWeight.w500,
+                    fontWeight: FontWeight.w800,
                     fontFamily: 'Roboto',
                   ),
                   textAlign: TextAlign.start,
                 ),
               ),
+              if(index < 2)SizedBox(height: pathS / 5),
+              Text(
+                userPosting.siteName,
+                style: TextStyle(
+                  color: isDarkMode ? (userPosting.isPrimary == 1 ? greyColorDark : whiteColor) : greyColor6,
+                  fontSize: pathS / 5,
+                  fontWeight: FontWeight.w500,
+                  fontFamily: 'Roboto',
+                ),
+                textAlign: TextAlign.start,
+              ),
+              SizedBox(height: pathS/8),
               Row(
                 children: [
                   Text(
                     userPosting.unitCode,
                     style: TextStyle(
-                      color: isDarkMode ? greyColorDark : greyColor7,
+                      color: isDarkMode ? (userPosting.isPrimary == 1 ? greyColorDark : whiteColor) : greyColor7,
                       fontSize: pathS / 5,
-                      fontWeight: FontWeight.w500,
+                      fontWeight: FontWeight.w300,
                       fontFamily: 'Roboto',
                     ),
                     textAlign: TextAlign.start,
@@ -1282,9 +1297,7 @@ class ProfileViewState extends State<ProfileView>{
                   GestureDetector(
                     onTap: (){
 
-                      setState(() {
-                        showUserShiftDetail = true;
-                      });
+                      onTapShowDetails(userPosting.unitCode);
 
                     },
                     child: Container(
@@ -1303,12 +1316,12 @@ class ProfileViewState extends State<ProfileView>{
                         ],
                       ),
                       child: Padding(
-                        padding:  EdgeInsets.only(left: pathS/5,right: pathS/5,top: pathS/10,bottom: pathS/11),
+                        padding:  EdgeInsets.only(left: pathS/3,right: pathS/3,top: pathS/8,bottom: pathS/8),
                         child: Text(
-                          '  ${'View'.tr()}  ',
+                          'View'.tr().toUpperCase(),
                           style: TextStyle(
                             color: whiteColor,
-                            fontSize: pathS / 5.5,
+                            fontSize: pathS / 6,
                             fontWeight: FontWeight.w400,
                             fontFamily: 'Roboto',
                           ),
@@ -1327,6 +1340,9 @@ class ProfileViewState extends State<ProfileView>{
 
 
   void onTapEditProfile() {
+    if(userProfile.isEmpty){
+      return;
+    }
     showModalBottomSheet(
       context: context,
       isScrollControlled: true,
@@ -1348,7 +1364,7 @@ class ProfileViewState extends State<ProfileView>{
               },
               onTabSelected: (val , name, designation) {
                 
-              }, name: userName, designation: degination,
+              }, name: userName, designation: degination, profileId: userProfile.first.id,
             ),
           ),
         );
@@ -1357,23 +1373,63 @@ class ProfileViewState extends State<ProfileView>{
   }
   void onLoadNewPIN(){
 
+
     Navigator.push(
       context,
-      MaterialPageRoute(builder: (context) => SetPINView(),
+      MaterialPageRoute(builder: (context) => EnterPINView(
+          calledValue: 2,
+        currentPIN: currentPin,
+      ),
       ),
     );
   }
 
+  void onTapShowDetails(String unitCode){
+
+    final selectedUnitDutyPosts = unitDutyPosts
+        .where((data) => data.unitCode == unitCode && data.deleted == 0
+    )
+        .toList();
+
+    final selectedUnitShiftDetails = unitShiftDetails
+        .where((data) => data.unitCode == unitCode && data.deleted == 0
+    )
+        .toList();
+
+    final selectedUserPostings = userPostings
+        .where((data) => data.unitCode == unitCode && data.deleted == 0
+    )
+        .toList();
+
+    onLoadUserShiftDetailView(selectedUnitDutyPosts,selectedUnitShiftDetails,selectedUserPostings);
+
+
+  }
+  void onLoadUserShiftDetailView(List<UnitDutyPost> unitDutyPosts, List<UnitShiftDetail> unitShiftDetails, List<UserPosting> userPostings ){
+
+    Navigator.push(
+      context,
+      MaterialPageRoute(builder: (context) => UserShiftDetailView(
+        unitDutyPosts: unitDutyPosts,
+        unitShiftDetails: unitShiftDetails,
+        userPosting: userPostings.first, // Safe because we checked isNotEmpty
+        callBack: (value) {
+
+        },
+      ),
+      ),
+    );
+  }
   Future<void> getProfileTableData() async {
   final userProfiles = await DatabaseHelper.instance.getAllRecords<UserProfile>(
     keyTableUserProfile,
         (map) => UserProfile.fromMap(map),
   );
 
-  userProfiles.forEach((profile) {
+  for (var profile in userProfiles) {
     printInDebug('profile ID: ${profile.id}');
     printInDebug('profile emp name: ${profile.empName}');
-  });
+  }
 
   showDataOnUI(userProfiles.first);
 
@@ -1444,10 +1500,10 @@ class ProfileViewState extends State<ProfileView>{
           (map) => UserPosting.fromMap(map),
     );
 
-    userPosting.forEach((profile) {
-      printInDebug('profile ID: ${profile.id}');
-      printInDebug('profile emp name: ${profile.siteName}');
-    });
+    for (var profile in userPosting) {
+      printInDebug('posting ID: ${profile.id}');
+      printInDebug('site name: ${profile.siteName}');
+    }
 
     setState(() {
       userPostings = userPosting;
@@ -1496,7 +1552,6 @@ class ProfileViewState extends State<ProfileView>{
     );
 
   }
-
   void onLoadUserPostingData() {
     // setState(() {
     //   showLoaderView = true;
@@ -1559,7 +1614,6 @@ class ProfileViewState extends State<ProfileView>{
       });
     });
   }
-
   Future<void> syncUserProfileData() async {
     await DatabaseHelper.instance.replaceTableData<UserProfile>(keyTableUserProfile, userProfile, (userProfile) =>
         userProfile.toMap());
@@ -1580,6 +1634,19 @@ class ProfileViewState extends State<ProfileView>{
     await DatabaseHelper.instance.replaceTableData<UserPosting>(keyTableUserPosting, userPostings, (userPosting) =>
         userPosting.toMap());
 
+  }
+  void onTapChangeMobile(){
+    if(userProfile.isEmpty){
+      return;
+    }
+    Navigator.push(
+      context,
+      MaterialPageRoute(
+        builder: (context) => ChangeMobileView(
+          currentMobile: userProfile.first.mobile,
+        ),
+      ),
+    );
   }
 
 }

@@ -8,9 +8,18 @@ import 'package:mysis/CommonViews/Utility.dart';
 import 'package:otp_text_field/otp_field.dart';
 import 'package:otp_text_field/style.dart';
 
+import '../CommonViews/AlertPopupView.dart';
+import '../CommonViews/CustomNumericKeypad.dart';
+import '../MyTabBarView.dart';
+import '../SharedClasses/APIHelper.dart';
+
 class ChangeMobileOTPView extends StatefulWidget {
-  final mobileNo;
-  const ChangeMobileOTPView({super.key, this.mobileNo});
+  final String mobileNo;
+  final String otp;
+  const ChangeMobileOTPView({
+    super.key,
+    required this.mobileNo, required this.otp
+  });
 
   @override
   ChangeMobileOTPViewState createState() => ChangeMobileOTPViewState();
@@ -18,6 +27,7 @@ class ChangeMobileOTPView extends StatefulWidget {
 
 class ChangeMobileOTPViewState extends State<ChangeMobileOTPView> {
 
+  late String otp;
   TextEditingController txtUserOTP= TextEditingController(text: "");
   TextEditingController txtNewMobile = TextEditingController(text: "");
   bool showPassword = false;
@@ -25,8 +35,7 @@ class ChangeMobileOTPViewState extends State<ChangeMobileOTPView> {
   bool showLoaderView = false;
 
   bool isAlertVisible = false;
-  String alertHeader = 'Error!';
-  String alertMessage = 'There is an  internal error.';
+
 
   bool showToastMessageView = false;
   String toastMessage = '';
@@ -46,10 +55,18 @@ class ChangeMobileOTPViewState extends State<ChangeMobileOTPView> {
 
   String btnNext = 'next'.tr();
 
+  bool showKeypad = false;
+  List<String> otpList = []; // List of 4 empty strings
+  Color otpContainerColor = isDarkMode ? greyColorDark : greyColor5;
+
+  bool showAlert = false;
+  String alertHeader = '';
+  String alertMessage = '';
 
   @override
   void initState() {
     txtNewMobile.text = widget.mobileNo;
+    otp = widget.otp;
     initialSetup();
     super.initState();
   }
@@ -223,33 +240,46 @@ class ChangeMobileOTPViewState extends State<ChangeMobileOTPView> {
                                 ),
                                 SizedBox(height: pathS / 12),
 
-                                OtpTextField(
-                                  numberOfFields: 4,
-                                  obscureText: true,
-                                  keyboardType: TextInputType.number,
-                                  borderColor: isDarkMode ? whiteColor : greyColor6,
-                                  focusedBorderColor: Colors.blue,
-                                  styles: PINTextStyle(
-                                    isDarkMode ? whiteColor : greyColor6,
-                                    4,
+                                GestureDetector(
+                                  onTap: () {
+                                    setState(() {
+                                      showKeypad = true;
+                                    });
+                                  },
+                                  child: Row(
+                                    mainAxisAlignment: MainAxisAlignment.center,
+                                    children: List.generate(4, (index) {
+                                      return Container(
+                                        margin: const EdgeInsets.symmetric(horizontal: 5.0),
+                                        width: pathS/2.2,
+                                        height: 50,
+                                        color: isDarkMode?greyColor8:Colors.white,
+                                        child: Column(
+                                          mainAxisAlignment: MainAxisAlignment.center,
+                                          children: [
+                                            // Simple Text
+                                            Text(
+                                              index < otpList.length ? '*' : '', // Show the value if present, else blank
+                                              style: TextStyle(
+                                                  color: isDarkMode ? whiteColor:greyColor6,
+                                                  fontSize: pathS / 3,
+                                                  fontWeight: FontWeight.w500,
+                                                  fontFamily: 'Roboto'
+                                              ),
+                                              textAlign: TextAlign.center,                                                ),
+                                            // Underline design
+                                            Container(
+                                              margin: const EdgeInsets.only(top: 4.0), // Space between text and underline
+                                              height: 1.5, // Height of the underline
+                                              color: otpContainerColor,
+                                              // Underline color (can be customized)
+                                            ),
+                                          ],
+                                        ),
+                                      );
+                                    }),
                                   ),
-                                  showFieldAsBox: false,
-                                  borderWidth: 2.0,
-                                  fieldWidth: pathS/2.5,
-                                  //runs when a code is typed in
-                                  onCodeChanged: (String pin) {
-
-                                    txtUserOTP.text = pin;
-                                    onUserIdChange(pin);
-                                  },
-                                  //runs when every textfield is filled
-                                  onSubmit: (String pin) {
-                                    txtUserOTP.text = pin;
-                                    onUserIdChange(pin);
-                                    print("OTP completed: " + pin);
-
-                                  },
-                                ),
+                                )
                               ],
                             ),
                           ),
@@ -312,9 +342,8 @@ class ChangeMobileOTPViewState extends State<ChangeMobileOTPView> {
                         SizedBox(width: pathS/3),
                         GestureDetector(
                           onTap: (){
-                            setState(() {
-                              isAlertVisible = true;
-                            });
+                            onTapConfirm();
+
                           },
                           child: Container(
                             width: pathL,
@@ -351,7 +380,7 @@ class ChangeMobileOTPViewState extends State<ChangeMobileOTPView> {
 
 
 
-                LoaderView(isVisible: showLoaderView, message: 'Loading...'),
+                LoaderView(isVisible: showLoaderView, message: ''),
                 Visibility(
                   visible: isAlertVisible,
                   child: SuccessAlertView(callBack: (int ) {
@@ -366,6 +395,36 @@ class ChangeMobileOTPViewState extends State<ChangeMobileOTPView> {
                   ),
                 ),
                 ToastMessageView(isVisible: showToastMessageView, message: toastMessage),
+                Visibility(
+                  visible: showAlert,
+                  child: AlertPopupView(
+                    header: alertHeader,
+                    message: alertMessage,
+                    cancelBtn: 'ok'.tr(),
+                    okBtn: '',
+                    callBack:(val){
+                      setState(() {
+                        showAlert = false;
+                      });
+                      onMobileNumberChanged();
+                    },
+                  ),
+                ),
+                Visibility(
+                  visible: showKeypad,
+                  child: CustomNumericKeypad(
+                      keypadNumber: (value){
+                        if(value == -1){
+                          setState(() {
+                            showKeypad = false;
+                          });
+                        }
+                        else if(value >= 0 && value <= 10){
+                          updateOTPList(value);
+                        }
+                      }
+                  ),
+                ),
               ],
             ),
           ),
@@ -376,9 +435,9 @@ class ChangeMobileOTPViewState extends State<ChangeMobileOTPView> {
 
   void initialSetup() {}
 
-  void onUserIdChange(String otp){
+  void onUserIdChange(String otpEntered){
 
-    if(otp.length == 4){
+    if(otpEntered.length == 4 && otpEntered == otp ){
       setState(() {
 
         nextBgColor = isDarkMode ? redColor1 : redColor3;
@@ -403,14 +462,94 @@ class ChangeMobileOTPViewState extends State<ChangeMobileOTPView> {
 
   }
 
+  void updateOTPList(int value) {
 
-  void onTapVerfyOTP() {
-    if (txtUserOTP.text.isEmpty) {
+    setState(() {
+      if (value == 10) {
+        // Handle delete action
+        if (otpList.isNotEmpty) {
+          otpList.removeLast();
+        }
+      }
+      else if (value >= 0 && value < 10) {
+        // Handle number input
+        if (otpList.length < 4) {
+          otpList.add(value.toString()); // Add the value to the list
+          if(otpList.length == 4){
+            showKeypad = false;
+          }
+        }
+      }
+    });
+
+    String pin = otpList.join();
+    txtUserOTP.text = pin;
+    onUserIdChange(pin);
+  }
+
+
+  void onTapConfirm() {
+    if (txtUserOTP.text.isEmpty || txtUserOTP.text != otp) {
       showToastView("valid_OTP".tr());
       return;
     }
 
+    changeMobileApiCall();
+  }
 
+  Future<void> changeMobileApiCall() async {
+    setState(() {
+      showLoaderView = true;
+    });
+
+    Map <String,String> inputData = {
+      "Phone": widget.mobileNo
+    };
+
+    APIHelper.instance.patchData(updateProfileApi, inputData, (responseData) {
+      if (responseData.isNotEmpty) {
+        // Parse the response list directly
+        Map<String, dynamic> data = responseData.first as Map<String, dynamic>;
+
+        final String message = data['Message'] ?? '';
+
+        setState(() {
+          alertHeader = '';
+          alertMessage =message.isNotEmpty ? message: 'request_sent_successfully'.tr();
+          showAlert = true;
+        });
+
+
+
+      }
+      else {
+        // Handle empty response
+        printInDebug('Response data is empty.');
+      }
+
+
+      setState(() {showLoaderView = false;});
+
+    },
+          (error) {
+        // Handle error
+        setState(() {
+          showLoaderView = false;
+        });
+        printInDebug('Error: $error');
+      },
+    );
+  }
+
+  void onMobileNumberChanged(){
+
+    Navigator.pushAndRemoveUntil(
+      context,
+      MaterialPageRoute(
+        builder: (context) => MyTabBarView(),
+      ),
+          (route) => false, // This removes all previous routes
+    );
   }
 
   void showToastView(String message) {

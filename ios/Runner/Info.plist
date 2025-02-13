@@ -47,5 +47,20 @@
     <string>MySIS requires permission to access your phone contacts to allow phone calls to be made through the links provided in the application.</string>
     <key>NSCameraUsageDescription</key>
     <string>MySIS requires permission to access your phone camera to take pictures while marking attendance and Changing Profile Image.</string>
+    <key>LSApplicationQueriesSchemes</key>
+    <array>
+        <string>App-Prefs</string>
+        <string>prefs</string>
+    </array>
+    <key>NSPhotoLibraryUsageDescription</key>
+    <string>MySIS need access to your photo library to save the downloaded PDF.</string>
+    <key>NSPhotoLibraryAddUsageDescription</key>
+    <string>MySIS need permission to save files to your device.</string>
+    <key>UIBackgroundModes</key>
+    <array>
+        <string>fetch</string>
+        <string>processing</string>
+    </array>
+
 </dict>
 </plist>

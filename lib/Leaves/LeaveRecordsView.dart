@@ -4,17 +4,34 @@ import 'package:flutter/material.dart';
 import 'package:mysis/CommonViews/Utility.dart';
 import 'package:easy_localization/easy_localization.dart';
 import 'package:mysis/Leaves/ApplyLeaveView.dart';
+import 'package:mysis/Leaves/CancelRequestView.dart';
+import 'package:mysis/Leaves/UserLeaves.dart';
+
+import '../CommonViews/SuccessAlertView.dart';
+import '../SharedClasses/DatabaseHelper.dart';
 
 class LeaveRecordsView extends StatefulWidget {
+  const LeaveRecordsView({super.key});
+
   @override
   LeaveRecordsViewState createState() => LeaveRecordsViewState();
 }
 
 class LeaveRecordsViewState extends State<LeaveRecordsView>{
 
-  bool noData = false;
+  bool isNoData = false;
+  bool isUnSyncedData = true;
+
+  bool isSucces  = false;
+  bool isCancel = false;
+  String leaveReason = '';
+  String leaveDate = '';
+
+  List<UserLeaves> userLeaves = [];
+
   @override
   void initState() {
+    getUserLeaveTableData();
     super.initState();
 
   }
@@ -27,6 +44,8 @@ class LeaveRecordsViewState extends State<LeaveRecordsView>{
 
   @override
   Widget build(BuildContext context) {
+    isNoData = userLeaves.isNotEmpty ? false : true;
+
     return Scaffold(
       body: Stack(
         alignment: Alignment.center,
@@ -51,7 +70,7 @@ class LeaveRecordsViewState extends State<LeaveRecordsView>{
                     },
                     child: Row(
                       children: [
-                        Container(
+                        SizedBox(
                           width: pathS/5,
                           height: pathS/2,
                           child: Image.asset(
@@ -63,116 +82,193 @@ class LeaveRecordsViewState extends State<LeaveRecordsView>{
                         ),
                         SizedBox(width: pathS/8),
                         Text(
-                          'leave_records'.tr(),
+                          'leave_application_status'.tr(),
                           style: TextStyle(
                             color: isDarkMode ?  whiteColor:greyColor6,
-                            fontSize: pathS / 5.5,
-                            fontWeight: FontWeight.normal,
+                            fontSize: pathS / 5,
+                            fontWeight: FontWeight.w500,
                             fontFamily: 'Roboto',
                           ),
-                          textAlign: TextAlign.center,
+                          textAlign: TextAlign.left,
                         ),
 
                       ],
                     ),
                   ),
                 ),
-
-
-                Padding(
-                  padding: EdgeInsets.only(top: MediaQuery.of(context).padding.top+pathS/1.5),
-                  child: ListView.builder(
-                    itemCount: 3, // Change this to the number of times you want to repeat the top column
-                    itemBuilder: (context, index) {
-                      return Padding(
-                        padding:  EdgeInsets.only(bottom: pathS/5),
-                        child: Column(
-                          crossAxisAlignment: CrossAxisAlignment.center,
-                          mainAxisAlignment: MainAxisAlignment.center,
-                          children: [
-                            Container(
-                              alignment: Alignment.center,
-                              width: screenWidth - 2.5*marginValue,
-                              // height: pathS/1.2,
-                              decoration:  BoxDecoration(
-                                shape: BoxShape.rectangle,
-                                borderRadius: BorderRadius.circular(pathS/8),
-                                color: isDarkMode?greyColor8:Colors.white,
-                                boxShadow: [
-                                  BoxShadow(
-                                    color: Colors.black.withOpacity(0.1), // Shadow color
-                                    blurRadius: pathS/10, // Spread of the shadow
-                                    // spreadRadius: pathS/15, // How far the shadow extends
-                                    offset:  Offset(-pathS/12, pathS/12),
-                                  ),
-                                ],
-                              ),
-                              child: Padding(
-                                padding:  EdgeInsets.only(bottom: pathS/4,top: pathS/4),
-                                child: Column(
-                                  crossAxisAlignment: CrossAxisAlignment.start,
-                                  children: [
-
-                                    Padding(
-                                      padding:  EdgeInsets.only(left: pathS/4,right: pathS/4),
-                                      child: Column(
-                                        crossAxisAlignment: CrossAxisAlignment.start,
-                                        children: [
-                                          Row(
-                                            children: [
-                                              Text(
-                                                'Reason',
-                                                style: TextStyle(
-                                                  color: isDarkMode ?  whiteColor:greyColor6,
-                                                  fontSize: pathS /5.5,
-                                                  fontWeight: FontWeight.normal,
-                                                  fontFamily: 'Roboto',
-                                                ),
-                                                textAlign: TextAlign.left,
-                                              ),
-                                              SizedBox(width: pathS/8),
-                                              Text(
-                                                '2' +' '+ 'day'.tr() ,
-                                                style: TextStyle(
-                                                  color: isDarkMode ?  whiteColor:greyColor6,
-                                                  fontSize: pathS /6.5,
-                                                  fontWeight: FontWeight.normal,
-                                                  fontFamily: 'Roboto',
-                                                ),
-                                                textAlign: TextAlign.left,
-                                              ),
-                                              Spacer(),
-
-                                            ],
-                                          ),
-                                          SizedBox(height: pathS/8),
-                                          Text(
-                                            '25 Feb - 25 Mar',
-                                            style: TextStyle(
-                                              color: isDarkMode ?  whiteColor:greyColor6,
-                                              fontSize: pathS /3.5,
-                                              fontWeight: FontWeight.w600,
-                                              fontFamily: 'Roboto',
-                                            ),
-                                            textAlign: TextAlign.left,
-                                          ),
-                                        ],
-                                      ),
-                                    ),
-
-
-                                  ],
-                                ),
-                              ),
-                            ),
-
-                          ],
+                Visibility(
+                  visible: isNoData,
+                  child: Padding(
+                    padding:  EdgeInsets.all(pathS/2),
+                    child: Column(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: [
+                        Text(
+                          'no_leave_status'.tr(),
+                          style: TextStyle(
+                            color: isDarkMode ? whiteColor : greyColor6,
+                            fontSize: pathS / 4,
+                            fontWeight: FontWeight.bold,
+                            fontFamily: 'Roboto',
+                          ),
+                          textAlign: TextAlign.left,
                         ),
-                      );
-                    },
+                        SizedBox(height: pathS/12),
+                        Text(
+                          'no_leave_available'.tr(),
+                          style: TextStyle(
+                            color: isDarkMode ? whiteColor : greyColor3,
+                            fontSize: pathS / 5,
+                            fontWeight: FontWeight.w500,
+                            fontFamily: 'Roboto',
+                          ),
+                          textAlign: TextAlign.center,
+                        ),
+                      ],
+                    ),
                   ),
                 ),
 
+                Column(
+                  children: [
+                    SizedBox(height: pathL),
+                    SizedBox(
+                      height: screenHeight -pathL,
+                      child: SingleChildScrollView(
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: userLeaves.map((leave) {
+                            return   Column(
+                              children: [
+                                Container(
+                                  alignment: Alignment.center,
+                                  width: screenWidth - 2*marginValue,
+                                  decoration:  BoxDecoration(
+                                    shape: BoxShape.rectangle,
+                                    borderRadius: BorderRadius.circular(pathS/8),
+                                    color: isDarkMode?greyColor8:Colors.white,
+                                    boxShadow: [
+                                      BoxShadow(
+                                        color: Colors.black.withOpacity(0.1), // Shadow color
+                                        blurRadius: pathS/10, // Spread of the shadow
+                                        // spreadRadius: pathS/15, // How far the shadow extends
+                                        offset:  Offset(-pathS/12, pathS/12),
+                                      ),
+                                    ],
+                                  ),
+                                  child: Padding(
+                                    padding:  EdgeInsets.only(bottom: pathS/4),
+                                    child: Column(
+                                      crossAxisAlignment: CrossAxisAlignment.start,
+                                      children: [
+                                        SizedBox(height: pathS/5),
+
+                                        Padding(
+                                          padding:  EdgeInsets.only(left: pathS/4),
+                                          child: Column(
+                                            crossAxisAlignment: CrossAxisAlignment.start,
+                                            children: [
+                                              Padding(
+                                                padding:  EdgeInsets.only(right: pathS/4),
+                                                child: Row(
+                                                  mainAxisAlignment: MainAxisAlignment.center,
+                                                  children: [
+                                                    Container(
+                                                      alignment: Alignment.centerLeft,
+                                                      width: pathL,
+                                                      child: Text(
+                                                        '${leave.leaveTypeName} ${leave.leaveCount} ${'day'.tr()}',
+                                                        style: TextStyle(
+                                                          color: isDarkMode ?  whiteColor:greyColor6,
+                                                          fontSize: pathS /6.5,
+                                                          fontWeight: FontWeight.w500,
+                                                          fontFamily: 'Roboto',
+                                                        ),
+                                                        textAlign: TextAlign.left,
+                                                      ),
+                                                    ),
+                                                    // SizedBox(width: pathS/8),
+                                                    // Text(
+                                                    //   '2' +' '+ 'day'.tr() ,
+                                                    //   style: TextStyle(
+                                                    //     color: isDarkMode ?  whiteColor:greyColor6,
+                                                    //     fontSize: pathS /6.5,
+                                                    //     fontWeight: FontWeight.normal,
+                                                    //     fontFamily: 'Roboto',
+                                                    //   ),
+                                                    //   textAlign: TextAlign.left,
+                                                    // ),
+                                                    Spacer(),
+
+                                                  ],
+                                                ),
+                                              ),
+                                              SizedBox(height: pathS/8),
+                                              Text(
+                                                leave.formattedLeaves,
+                                                style: TextStyle(
+                                                  color: isDarkMode ?  whiteColor:greyColor6,
+                                                  fontSize: pathS /3.5,
+                                                  fontWeight: FontWeight.w600,
+                                                  fontFamily: 'Roboto',
+                                                ),
+                                                textAlign: TextAlign.left,
+                                              ),
+                                            ],
+                                          ),
+                                        ),
+
+
+                                      ],
+                                    ),
+                                  ),
+                                ),
+                                SizedBox(height: pathS/5),
+
+                              ],
+                            );
+                          }).toList(),
+                        ),
+                      ),
+
+                    ),
+                  ],
+                ),
+
+
+                Visibility(
+                  visible: isCancel,
+                  child: CancelRequestView(
+                    callBack: (int val){
+                      setState(() {
+                        isCancel = false;
+                      });
+
+                      if(val == 1){
+                        setState(() {
+                          isSucces = true;
+                        });
+
+                      }
+
+                    },
+                    reason: leaveReason,
+                    date: leaveDate,
+
+                  ),
+                ),
+                Visibility(
+                  visible: isSucces,
+                  child: SuccessAlertView(
+                    callBack: (int val) {
+                      setState(() {
+                        isSucces = false;
+
+                      });
+                    },
+
+                    message: 'leave_cancellation_request_sent'.tr(),),
+                ),
               ],
             ),
           ),
@@ -184,34 +280,60 @@ class LeaveRecordsViewState extends State<LeaveRecordsView>{
     );
   }
 
-  String getAssetImage(String status){
-    if(status == 'Approved') {
-      return 'assets/images/icons/status-done.png';
+
+  Future<void> getUserLeaveTableData() async {
+
+    final leaves = await DatabaseHelper.instance.getAllRecords<UserLeaves>(
+      keyTableUserLeave,
+          (map) => UserLeaves.fromMap(map),
+    );
+
+    for (var data in leaves) {
+      printInDebug('leaves Data');
+      data.toMap().forEach((i, j) {
+        printInDebug('$i : $j');
+      });
     }
-    if(status == 'Rejected') {
-      return 'assets/images/icons/status-rejected.png';
+
+    final filteredLeave = leaves.where((leave) =>
+        leave.canceled == 0 && leave.deleted == 0
+    ).toList();
+
+    filteredLeave.sort((a, b) => a.leaveStartDate.compareTo(b.leaveStartDate));
+
+    if(filteredLeave.isNotEmpty) {
+      setState(() {
+        userLeaves = filteredLeave;
+      });
+
+
     }
-    else{
-      return 'assets/images/icons/status-pending.png';
-    }
+
+
+
   }
 
-  Color getStatusColor(String status){
-    if(status == 'Approved') {
-      return greenColor6;
+
+  String getAssetImage(int status){
+
+    if(status == 0){
+      return 'assets/images/icons/status-pending.png';
     }
-    if(status == 'Rejected') {
-      return redColor2;
+    if(status == 1) {
+      return 'assets/images/icons/status-done.png';
     }
-    else{
-      return orangeColor1;
+    if(status == 2) {
+      return 'assets/images/icons/status-rejected.png';
     }
+
+    return 'assets/images/icons/status-pending.png';
   }
+
   void onLoadApplyLeave(){
     Navigator.push(
       context,
       MaterialPageRoute(
-        builder: (context) => ApplyLeaveView(),
+        builder: (context) => ApplyLeaveView(userLeaves: userLeaves,),
       ),
     );
   }
@@ -219,7 +341,7 @@ class LeaveRecordsViewState extends State<LeaveRecordsView>{
     Navigator.push(
       context,
       MaterialPageRoute(
-        builder: (context) => ApplyLeaveView(),
+        builder: (context) => ApplyLeaveView(userLeaves: userLeaves,),
       ),
     );
   }
@@ -227,9 +349,46 @@ class LeaveRecordsViewState extends State<LeaveRecordsView>{
     Navigator.push(
       context,
       MaterialPageRoute(
-        builder: (context) => ApplyLeaveView(),
+        builder: (context) => ApplyLeaveView(userLeaves: userLeaves,),
       ),
     );
   }
+
+  Color getStatusColor(int status){
+    Color statusColor = greyColor6;
+
+    if(status == 0){
+      statusColor = isDarkMode ? orangeColor:orangeColor1;
+    }
+
+    if(status == 1){
+      statusColor = isDarkMode ? greenColor5:greenColor6;
+    }
+
+    if(status == 2){
+      statusColor = isDarkMode ? redColor1:redColor3;
+    }
+
+    return statusColor;
+  }
+
+  String getStatusMessage(int status){
+    String statusMessage = '';
+
+    if(status == 0){
+      statusMessage = 'pending'.tr();
+    }
+
+    if(status == 1){
+      statusMessage = 'approved'.tr();
+    }
+
+    if(status == 2){
+      statusMessage = 'rejected'.tr();
+    }
+
+    return statusMessage;
+  }
+
 
 }

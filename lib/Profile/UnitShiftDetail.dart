@@ -1,6 +1,7 @@
 
 class UnitShiftDetail {
   final String id;
+  final String shiftId;
   final String postId;
   final String shiftName;
   final String unitCode;
@@ -15,9 +16,11 @@ class UnitShiftDetail {
   final String shiftStartBefore;
   final String dutyInBefore;
   final String shiftEndAfter;
+  final DateTime updatedAt;
 
   UnitShiftDetail({
     required this.id,
+    required this.shiftId,
     required this.postId,
     required this.shiftName,
     required this.unitCode,
@@ -32,12 +35,15 @@ class UnitShiftDetail {
     required this.shiftStartBefore,
     required this.shiftEndAfter,
     required this.dutyInBefore,
+    required this.updatedAt,
+
   });
 
   // Convert JSON into a UnitShiftDetail object
   factory UnitShiftDetail.fromJson(Map<String, dynamic> json) {
     return UnitShiftDetail(
       id: json['ID'],
+      shiftId: json['SHIFT_ID'],
       postId: json['POST_ID'],
       shiftName: json['SHIFT_NAME'],
       unitCode: json['UNIT_CODE'],
@@ -52,11 +58,14 @@ class UnitShiftDetail {
       shiftStartBefore: json['SHIFT_START_BEFORE'],
       shiftEndAfter: json['SHIFT_END_AFTER'],
       dutyInBefore:json['DUTY_IN_BEFORE'],
+      updatedAt:DateTime.now(),
+
     );
   }
 
   static const fields = {
     'id': 'TEXT PRIMARY KEY',
+    'shiftId': 'TEXT NOT NULL',
     'postId': 'TEXT NOT NULL',
     'shiftName': 'TEXT NOT NULL',
     'unitCode': 'TEXT NOT NULL',
@@ -71,25 +80,37 @@ class UnitShiftDetail {
     'shiftStartBefore': 'TEXT NOT NULL',
     'dutyInBefore': 'TEXT NOT NULL',
     'shiftEndAfter': 'TEXT NOT NULL',
+    'updatedAt':'TEXT NOT NULL',
+
   };
 
   factory UnitShiftDetail.fromMap(Map<String, dynamic> map) {
     return UnitShiftDetail(
-      id: map['id'] as String,
-      postId: map['postId'] as String,
-      shiftName: map['shiftName'] as String,
-      unitCode: map['unitCode'] as String,
-      startTime: map['startTime'] as String,
-      endTime: map['endTime'] as String,
-      dutyHrs: map['dutyHrs'] as String,
-      startDate: DateTime.parse(map['startDate'] as String),
-      endDate: DateTime.parse(map['endDate'] as String),
-      activeDays: map['activeDays'] as String,
-      deleted: map['deleted'] as int,
-      dateModified: DateTime.parse(map['dateModified'] as String),
-      shiftStartBefore: map['shiftStartBefore'] as String,
-      dutyInBefore: map['dutyInBefore'] as String,
-      shiftEndAfter: map['shiftEndAfter'] as String,
+      id: map['id'] ?? '',
+      shiftId: map['shiftId'] ?? '',
+      postId: map['postId'] ?? '',
+      shiftName: map['shiftName'] ?? '',
+      unitCode: map['unitCode'] ?? '',
+      startTime: map['startTime'] ?? '',
+      endTime: map['endTime'] ?? '',
+      dutyHrs: map['dutyHrs'] ?? '',
+      startDate: map['startDate'] != null
+          ? DateTime.parse(map['startDate'])
+          : DateTime.now(), // Fallback to current DateTime if null.
+      endDate: map['endDate'] != null
+          ? DateTime.parse(map['endDate'])
+          : DateTime.now(), // Fallback to current DateTime if null.
+      activeDays: map['activeDays'] ?? '',
+      deleted: map['deleted'] ?? 0,
+      dateModified: map['dateModified'] != null
+          ? DateTime.parse(map['dateModified'])
+          : DateTime.now(), // Fallback to current DateTime if null.
+      shiftStartBefore: map['shiftStartBefore'] ?? '',
+      dutyInBefore: map['dutyInBefore'] ?? '',
+      shiftEndAfter: map['shiftEndAfter'] ?? '',
+      updatedAt: map['updatedAt'] != null
+          ? DateTime.parse(map['updatedAt'])
+          : DateTime.now(), // Fallback to current DateTime if null.
     );
   }
 
@@ -97,6 +118,7 @@ class UnitShiftDetail {
   Map<String, dynamic> toMap() {
     return {
       'id': id,
+      'shiftId':shiftId,
       'postId': postId,
       'shiftName': shiftName,
       'unitCode': unitCode,
@@ -111,6 +133,7 @@ class UnitShiftDetail {
       'shiftStartBefore': shiftStartBefore,
       'dutyInBefore':dutyInBefore,
       'shiftEndAfter': shiftEndAfter,
+      'updatedAt':updatedAt.toIso8601String(),
     };
   }
 

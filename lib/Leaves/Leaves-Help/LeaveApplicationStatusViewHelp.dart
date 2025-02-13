@@ -400,30 +400,6 @@ class LeaveApplicationStatusViewState extends State<LeaveApplicationStatusViewHe
     }
   }
 
-  void onLoadApplyLeave(){
-    Navigator.push(
-      context,
-      MaterialPageRoute(
-        builder: (context) => ApplyLeaveView(),
-      ),
-    );
-  }
-  void onLoadLeaveStatus(){
-    Navigator.push(
-      context,
-      MaterialPageRoute(
-        builder: (context) => ApplyLeaveView(),
-      ),
-    );
-  }
-  void onLoadLeaveHistory(){
-    Navigator.push(
-      context,
-      MaterialPageRoute(
-        builder: (context) => ApplyLeaveView(),
-      ),
-    );
-  }
 
   Color getStatusColor(String status){
     Color statusColor = greyColor6;

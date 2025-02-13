@@ -269,9 +269,6 @@ bool noData = false;
             ),
           ),
 
-
-
-
         ],
       ),
     );
@@ -282,7 +279,7 @@ bool noData = false;
     Navigator.push(
       context,
       MaterialPageRoute(
-        builder: (context) => ApplyLeaveView(),
+        builder: (context) => ApplyLeaveView(userLeaves: [],),
       ),
     );
   }

@@ -244,11 +244,15 @@ class ConfirmProfileViewState extends State<ConfirmProfileView>{
 
                 Visibility(
                   visible: showAlert,
-                  child: AlertPopupView
-                    (header: alertHeader,
+                  child: AlertPopupView(
+                      header: alertHeader,
                       message: alertMessage,
+                      cancelBtn: '',
+                      okBtn: 'ok'.tr(),
                       callBack: (value){
-                        showAlert = false;
+                       setState(() {
+                         showAlert = false;
+                       });
                       }
                   ),
                 )
@@ -282,19 +286,30 @@ class ConfirmProfileViewState extends State<ConfirmProfileView>{
         keyTableUserAttendance,
             (map) => UserAttendance.fromMap(map),
       );
+
       List<UserAttendance> todayAttendance = [];
-          DateTime latestDutyInDate = attendance
-          .where((data) => data.dutyStatus == keyAttendanceStatusDutyIn && data.deleted == 0)
-          .map((data) => data.shiftStartDate)
-          .reduce((a, b) => a.isAfter(b) ? a : b); // Find the latest date
-      todayAttendance = attendance
-          .where((data) =>
-      data.shiftStartDate.isAtSameMomentAs(latestDutyInDate) &&
-          data.deleted == 0)
-          .toList();
+
+// Filter for entries with dutyStatus == keyAttendanceStatusDutyIn and deleted == 0
+      final dutyInRecords = attendance.where(
+            (data) => data.dutyStatus == keyAttendanceStatusDutyIn && data.deleted == 0,
+      );
+
+// Check if there are any valid records
+      if (dutyInRecords.isNotEmpty) {
+        // Find the latest shiftStartDate among the filtered records
+        DateTime latestDutyInDate = dutyInRecords
+            .map((data) => data.shiftStartDate)
+            .reduce((a, b) => a.isAfter(b) ? a : b);
+
+        // Get the records that match the latest shiftStartDate
+        todayAttendance = dutyInRecords
+            .where((data) => data.shiftStartDate.isAtSameMomentAs(latestDutyInDate))
+            .toList();
+      }
+
 
       if (todayAttendance.isNotEmpty) {
-
+        onLoadScanUnitShift(todayAttendance.first);
       }
       else {
       //show error that no duty marked
@@ -305,14 +320,14 @@ class ConfirmProfileViewState extends State<ConfirmProfileView>{
         });
       }
     }else{
-      onLoadScanUnitShift();
+      onLoadScanUnitShift(null);
     }
 
 
 
 
   }
-  void onLoadScanUnitShift(){
+  void onLoadScanUnitShift(UserAttendance? userAttendance){
     Navigator.push(
       context,
       MaterialPageRoute(
@@ -323,6 +338,8 @@ class ConfirmProfileViewState extends State<ConfirmProfileView>{
           unitShiftDetails: widget.unitShiftDetails,
           userPostings: widget.userPostings,
           attendanceStatus: widget.attendanceStatus,
+          userAttendance: userAttendance,
+
         ),
       ),
     );

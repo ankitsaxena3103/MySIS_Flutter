@@ -2,6 +2,7 @@
 
 import 'dart:io';
 import 'package:flutter/material.dart';
+import 'package:mysis/SharedClasses/APIHelper.dart';
 import 'package:mysis/SharedClasses/LanguageProvider.dart';
 import 'package:mysis/SharedClasses/Preferences.dart';
 import 'package:mysis/Language/SelectLanguageView.dart';
@@ -50,6 +51,8 @@ class MyApp extends StatelessWidget {
 
 
 class MyHomePage extends StatelessWidget {
+  const MyHomePage({super.key});
+
 
   @override
 Widget build(BuildContext context) {
@@ -69,7 +72,9 @@ Widget build(BuildContext context) {
               return Text('Error: ${snapshot.error}');
             }
             else if (isLoggedIn) {
-              return EnterPINView();
+              return EnterPINView(
+                calledValue:1,
+                currentPIN: currentPin,);
             }
             else {
               return const SelectLanguageView(isFirstScreen: true);
@@ -95,16 +100,16 @@ Future<bool> futureBuilderData() async {
 
   bool isLoggedIn = false;
   initPackageInfo();
- String currentPIN = await Preferences.getUserPreference(keyPIN) ?? '';
+  currentPin = await Preferences.getUserPreference(keyPIN) ?? '';
   token = await Preferences.getUserPreference(keyUserToken) ?? '';
   userName = await Preferences.getUserPreference(keyUserName) ?? '';
-  userId = await Preferences.getUserPreference(keyUserID) ?? '0';
-  // userName = await Preferences.getUserPreference(keyUserName) ?? '';
-  // String userIdString = await Preferences.getUserPreference(keyUserID) ?? '0';
-  // userId = int.tryParse(userIdString) ?? 0;
+  regNo = await Preferences.getUserPreference(keyUserID) ?? '';
+  phoneNo = await Preferences.getUserPreference(keyMobile) ?? '';
 
-  if (currentPIN.isNotEmpty && currentPIN != null && currentPIN.length == 4) {
+
+  if (currentPin.isNotEmpty && currentPin != null ) {
     isLoggedIn = true;
+    // APIHelper.instance.checkForTokenExpiry();
   }
 
 

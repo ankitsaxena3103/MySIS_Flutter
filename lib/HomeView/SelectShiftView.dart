@@ -1,9 +1,5 @@
-import 'dart:convert';
-
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter_barcode_scanner/flutter_barcode_scanner.dart';
-import 'package:image_picker/image_picker.dart';
 import 'package:mysis/CommonViews/Utility.dart';
 import 'package:easy_localization/easy_localization.dart';
 import 'package:mysis/HomeView/SubmitDutyView.dart';
@@ -12,8 +8,8 @@ import 'package:mysis/Profile/UnitShiftDetail.dart';
 import 'package:mysis/Profile/UserProfile.dart';
 
 import '../CommonViews/ToastMessageView.dart';
-import '../Profile/UnitShiftDetail.dart';
 import '../Profile/UserPosting.dart';
+import 'UserAttendance.dart';
 
 class SelectShiftView extends StatefulWidget {
 
@@ -26,6 +22,7 @@ class SelectShiftView extends StatefulWidget {
 
   final String latLong;
   final String dutyDateTime;
+  final UserAttendance? userAttendance;
 
   const SelectShiftView(
       {
@@ -37,7 +34,8 @@ class SelectShiftView extends StatefulWidget {
         required this.attendanceMode,
         required this.attendanceStatus,
         required this.latLong,
-        required this.dutyDateTime
+        required this.dutyDateTime,
+        this.userAttendance
       });
   @override
   SelectShiftViewState createState() => SelectShiftViewState();
@@ -202,14 +200,12 @@ class SelectShiftViewState extends State<SelectShiftView>{
                                   crossAxisAlignment: CrossAxisAlignment.center,
 
                                   children: [
-                                    Container(
-                                      child: Image.asset(
-                                        'assets/images/icons/location.png',
-                                        height: pathS/3,
-                                        width: pathS/3,
-                                        color: isDarkMode ? redColor1 :redColor3,
+                                    Image.asset(
+                                      'assets/images/icons/location.png',
+                                      height: pathS/3,
+                                      width: pathS/3,
+                                      color: isDarkMode ? redColor1 :redColor3,
 
-                                      ),
                                     ),
                                     SizedBox(width: pathS/5),
                                     Flexible(
@@ -452,6 +448,7 @@ void initialSetup(){
           attendanceStatus: widget.attendanceStatus,
           latLong: widget.latLong,
           dutyDateTime: widget.dutyDateTime,
+          userAttendance: widget.userAttendance,
 
         ),
       ),

@@ -1,22 +1,30 @@
+import 'package:bcrypt/bcrypt.dart';
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter_otp_text_field/flutter_otp_text_field.dart';
 import 'package:mysis/CommonViews/CustomAlertView.dart';
+import 'package:mysis/CommonViews/CustomNumericKeypad.dart';
 import 'package:mysis/MyTabBarView.dart';
 import 'package:mysis/CommonViews/LoaderView.dart';
-import 'package:mysis/SharedClasses/Preferences.dart';
 import 'package:mysis/CommonViews/ToastMessageView.dart';
 import 'package:mysis/CommonViews/Utility.dart';
+import 'package:mysis/UserAuthViews/LoginView.dart';
 import 'package:mysis/UserAuthViews/SetPINView.dart';
 import 'package:easy_localization/easy_localization.dart';
 import 'package:mysis/SharedClasses/ThemeProvider.dart';
-import 'package:otp_text_field/otp_field.dart';
-import 'package:otp_text_field/style.dart';
 import 'package:provider/provider.dart';
 
+import '../CommonViews/AlertPopupView.dart';
+import '../SharedClasses/APIHelper.dart';
+import '../SharedClasses/Preferences.dart';
+
 class EnterPINView extends StatefulWidget {
+  final String  currentPIN;
+  final  int calledValue;
 
   const EnterPINView({
     super.key,
+      this.calledValue = 0,
+    required this.currentPIN,
   });
 
   @override
@@ -30,9 +38,9 @@ class EnterPINViewState extends State<EnterPINView> {
   bool rememberMe = false;
   bool showLoaderView = false;
 
-  bool isAlertVisible = false;
-  String alertHeader = 'Error!';
-  String alertMessage = 'There is an  internal error.';
+  bool showAlert = false;
+  String alertHeader = '';
+  String alertMessage = '';
 
   bool showToastMessageView = false;
   String toastMessage = '';
@@ -43,10 +51,15 @@ class EnterPINViewState extends State<EnterPINView> {
 
   String lblErrorMsg = '';
 
+  bool showKeypad = false;
+
+  List<String> otpList = []; // List of 4 empty strings
+ Color otpContainerColor = isDarkMode ? greyColorDark : greyColor5;
 
 
   @override
   void initState() {
+
     initialSetup();
     super.initState();
   }
@@ -71,7 +84,7 @@ class EnterPINViewState extends State<EnterPINView> {
                   alignment: Alignment.center,
                   children: [
 
-                    Positioned(
+                    if(widget.calledValue <= 1)Positioned(
                       top: paddingTop,
                       child: Container(
                       width: logicalWidth,
@@ -110,6 +123,42 @@ class EnterPINViewState extends State<EnterPINView> {
                       ),
                     ),
                     ),
+                    if(widget.calledValue == 2)Positioned(
+                      top: MediaQuery.of(context).padding.top+pathS/12,
+                      left: paddingLeft +pathS/3,
+                      child: GestureDetector(
+                        onTap: (){
+                          Navigator.pop(context);
+                        },
+                        child: Row(
+                          children: [
+                            SizedBox(
+                              width: pathS/5,
+                              height: pathS/2,
+                              child: Image.asset(
+                                'assets/images/dashboard-icons/left-arrow.png',
+                                color: isDarkMode ? whiteColor:greyColor5,
+
+                              ),
+
+                            ),
+                            SizedBox(width: pathS/8),
+                            Text(
+                              'PIN'.tr(),
+                              style: TextStyle(
+                                color: isDarkMode ?  whiteColor:greyColor5,
+                                fontSize: pathS / 5,
+                                fontWeight: FontWeight.w500,
+                                fontFamily: 'Roboto',
+                              ),
+                              textAlign: TextAlign.center,
+                            ),
+
+                          ],
+                        ),
+                      ),
+                    ),
+
 
                     Column(
                       mainAxisAlignment: MainAxisAlignment.center,
@@ -171,7 +220,7 @@ class EnterPINViewState extends State<EnterPINView> {
                                   mainAxisAlignment: MainAxisAlignment.center,
 
                                   children: [
-                                    Container(
+                                    SizedBox(
                                       width: screenWidth - 5*marginValue,
                                       child: Text(
                                         'enter_current_pin'.tr(),
@@ -185,65 +234,51 @@ class EnterPINViewState extends State<EnterPINView> {
                                       ),
                                     ),
                                     SizedBox(height: pathS / 12),
-                                    // OTPTextField(
-                                    //   length: 4,
-                                    //   width: pathL * 1.2,
-                                    //   fieldWidth: pathS / 2.2,
-                                    //   obscureText: true,
-                                    //
-                                    //   keyboardType: TextInputType.number,
-                                    //   style: TextStyle(
-                                    //     color: isDarkMode ? whiteColor : greyColor6,
-                                    //     fontSize: pathS / 5,
-                                    //     fontFamily: 'Roboto',
-                                    //   ),
-                                    //   textFieldAlignment: MainAxisAlignment.spaceAround,
-                                    //   fieldStyle: FieldStyle.underline,
-                                    //
-                                    //   onChanged: (pin) {
-                                    //     print(" Entered PIN : " + pin);
-                                    //     txtEnterPIN.text = pin;
-                                    //     onPINChange(pin);
-                                    //   },
-                                    //   onCompleted: (pin) {
-                                    //     print("OTP completed: " + pin);
-                                    //
-                                    //     // txtUserPIN.text = pin;
-                                    //     // onUserIdChange(pin);
-                                    //   },
-                                    // ),
 
-                                    OtpTextField(
-                                      numberOfFields: 4,
-                                      obscureText: true,
-                                      // keyboardType: TextInputType.number,
-                                      borderColor: isDarkMode ? whiteColor : greyColor6,
-                                      focusedBorderColor: Colors.blue,
-                                      styles: PINTextStyle(
-                                        isDarkMode ? whiteColor : greyColor6,
-                                        4,
+                                    GestureDetector(
+                                      onTap: () {
+                                        setState(() {
+                                          showKeypad = true;
+                                        });
+                                      },
+                                      child: Row(
+                                        mainAxisAlignment: MainAxisAlignment.center,
+                                        children: List.generate(4, (index) {
+                                          return Container(
+                                            margin: const EdgeInsets.symmetric(horizontal: 5.0),
+                                            width: pathS/2.2,
+                                            height: 50,
+                                            color: isDarkMode?greyColor8:Colors.white,
+                                            child: Column(
+                                              mainAxisAlignment: MainAxisAlignment.center,
+                                              children: [
+                                                // Simple Text
+                                                Text(
+                                                  index < otpList.length ? '*' : '', // Show the value if present, else blank
+                                                  style: TextStyle(
+                                                      color: isDarkMode ? whiteColor:greyColor6,
+                                                      fontSize: pathS / 3,
+                                                      fontWeight: FontWeight.w500,
+                                                      fontFamily: 'Roboto'
+                                                  ),
+                                                  textAlign: TextAlign.center,                                                ),
+                                                // Underline design
+                                                Container(
+                                                  margin: const EdgeInsets.only(top: 4.0), // Space between text and underline
+                                                  height: 1.5, // Height of the underline
+                                                  color:  otpContainerColor,
+                                                  // Underline color (can be customized)
+                                                ),
+                                              ],
+                                            ),
+                                          );
+                                        }),
                                       ),
-                                      showFieldAsBox: false,
-                                      borderWidth: 2.0,
-                                      fieldWidth: pathS/2.2,
-                                      //runs when a code is typed in
-                                      onCodeChanged: (String pin) {
-                                        printInDebug(" Entered PIN : $pin");
-                                            txtEnterPIN.text = pin;
-                                            onPINChange(pin);
-
-                                      },
-
-                                      onSubmit: (String pin) {
-                                        txtEnterPIN.text = pin;
-                                        onPINChange(pin);
-                                        printInDebug("OTP completed: $pin");
-
-                                      },
-                                      keyboardType: TextInputType.number,
+                                    )
 
 
-                                    ),
+
+
                                   ],
                                 ),
                               ),
@@ -251,7 +286,7 @@ class EnterPINViewState extends State<EnterPINView> {
                           ),
                         ),
                         SizedBox(height: pathS/5),
-                        Container(
+                        SizedBox(
                           width: screenWidth-4*marginValue,
                           child:Text(
                             lblErrorMsg,
@@ -327,24 +362,40 @@ class EnterPINViewState extends State<EnterPINView> {
 
 
                     LoaderView(isVisible: showLoaderView, message: 'Loading...'),
-                    Visibility(
-                      visible: isAlertVisible,
-                      child: CustomAlertView(
-                          callBack: (int val) {
-                            if (val == 0) {
-                              setState(() {
-                                isAlertVisible = false;
-                              });
-                            } else {
-                              makePhoneCall(phoneNo);
-                            }
-                          },
-                          header: alertHeader,
-                          message: alertMessage,
-                          cancelButtonTitle: 'OK',
-                          okButtonTitle: ''),
-                    ),
+
                     ToastMessageView(isVisible: showToastMessageView, message: toastMessage),
+                    Visibility(
+                      visible: showKeypad,
+                      child: CustomNumericKeypad(
+                          keypadNumber: (value){
+                            if(value == -1){
+                             setState(() {
+                               showKeypad = false;
+                             });
+                            }
+                            else if(value >= 0 && value <= 10){
+                              updateOTPList(value);
+                            }
+
+                          }
+                      ),
+                    ),
+
+                    Visibility(
+                      visible: showAlert,
+                      child: AlertPopupView(
+                        header: alertHeader,
+                        message: alertMessage,
+                        cancelBtn: 'ok'.tr(),
+                        okBtn: '',
+                        callBack:(val){
+                          setState(() {
+                            showAlert = false;
+                          });
+                          onLogoutLoadLoginScreen();
+                        },
+                      ),
+                    ),
                   ],
                 ),
               ),
@@ -356,31 +407,114 @@ class EnterPINViewState extends State<EnterPINView> {
 
   }
 
+  void updateOTPList(int value) {
+
+    setState(() {
+      if (value == 10) {
+        // Handle delete action
+        if (otpList.isNotEmpty) {
+          otpList.removeLast();
+        }
+      }
+      else if (value >= 0 && value < 10) {
+        // Handle number input
+        if (otpList.length < 4) {
+          otpList.add(value.toString()); // Add the value to the list
+          if(otpList.length == 4){
+            showKeypad = false;
+          }
+        }
+      }
+    });
+
+    String pin = otpList.join();
+    txtEnterPIN.text = pin;
+    onPINChange(pin);
+  }
+
   void initialSetup() {
+
+    recallGetToken();
     setState(() {
       lblErrorMsg = ''.tr();
     });
   }
 
+  Future<void> recallGetToken() async {
+
+    bool tokenExpired = await APIHelper.instance.checkForTokenExpiry();
+    bool forceLogout = await Preferences.getUserPreferenceBool(keyIsForcedLogOut) ?? false;
+
+    if(forceLogout){
+      setState(() {
+        alertHeader = '';
+        alertMessage = 'logout_message'.tr();
+        showAlert = true;
+      });
+      return;
+    }
+
+
+    if(tokenExpired){
+
+      String userIdOrMobile = regNo.isNotEmpty ? await Preferences.getUserPreference(keyUserID) ?? '' : '';
+      String pwd = await Preferences.getUserPreference(keyPwd) ?? '';
+      if(userIdOrMobile != '' && pwd != '') {
+        getToken(userIdOrMobile, pwd);
+      }
+    }
+
+  }
+
+  void getToken(String userId, String pwd){
+    Map <String,String> inputData = {
+      "Username": userId,
+      "Password": pwd,
+    };
+    APIHelper.instance.postData(tokenApi,inputData, (data) {
+
+      if(data.isNotEmpty){
+
+        token = data['token'] ?? '';
+        String expiryTime = data['expirytime'] ?? '';
+        Preferences.saveUserPreference(keyUserToken, token);
+        Preferences.saveUserPreference(keyTokenExpiryTime, expiryTime);
+        Preferences.saveUserPreferenceBool(keyIsForcedLogOut, false);
+
+      }
+
+    },(error){
+      if (kDebugMode) {
+        print('token error = $error');
+        bool isForceLogout = (error['ForceLogout'] ?? 0) == 1;
+        if(isForceLogout){
+          setState(() {
+            alertHeader = '';
+            alertMessage = 'logout_message'.tr();
+            showAlert = true;
+          });
+        }
+      }
+    });
+  }
+
   Future<void> onPINChange(String enteredPIN) async {
 
-    String? currentPIN = await Preferences.getUserPreference(keyPIN);
+    final bool checkPassword = BCrypt.checkpw(
+      enteredPIN,
+      widget.currentPIN,
+    );
 
-    if(enteredPIN.length == 4){
+    if(checkPassword){
       setState(() {
-        if(currentPIN != enteredPIN){
-          lblErrorMsg = 'repeat_not_match'.tr();
-          return;
 
-        }else{
           nextBgColor = isDarkMode ? redColor1 : redColor3;
           nextFontColor = isDarkMode ? whiteColor : whiteColor;
           nextShadowColor = shadowColor;
           lblErrorMsg = '';
-        }
+          otpContainerColor = isDarkMode ? greyColorDark : greyColor5;
 
       });
-
 
     }
     else{
@@ -388,7 +522,8 @@ class EnterPINViewState extends State<EnterPINView> {
         nextBgColor = isDarkMode ? greyColor8 : greyColor2;
         nextFontColor = isDarkMode ? greyColor7 : greyColor3;
         nextShadowColor = Colors.transparent;
-        lblErrorMsg = 'repeat_not_match'.tr();
+        lblErrorMsg = ''.tr();
+        otpContainerColor = isDarkMode ? greyColorDark : greyColor5;
 
       });
 
@@ -398,28 +533,48 @@ class EnterPINViewState extends State<EnterPINView> {
 
 
   Future<void> onTapNext() async {
+
     if (txtEnterPIN.text.isEmpty || txtEnterPIN.text.length != 4) {
+      showToastView('repeat_not_match1'.tr());
+      return;
+    }
+
+
+    String hashedPinEntered = BCrypt.hashpw(txtEnterPIN.text, BCrypt.gensalt());  // Hash the PIN
+
+    printInDebug('entered PIN = ${txtEnterPIN.text}');
+    printInDebug('entered hashedPIN = $hashedPinEntered');
+    printInDebug('saved hashPIN = ${widget.currentPIN}');
+
+    final bool checkPassword = BCrypt.checkpw(
+      txtEnterPIN.text,
+      widget.currentPIN,
+    );
+
+    if(!checkPassword){
       showToastView('repeat_not_match'.tr());
       return;
     }
 
-    String? currentPIN = await Preferences.getUserPreference(keyPIN);
+    if(widget.calledValue <= 1 ){
+      loadHomeScreen();
+    }
 
-      if(currentPIN != txtEnterPIN.text){
-        showToastView('repeat_not_match'.tr());
-        return;
+    if(widget.calledValue == 2 ){
+      onLoadNewPIN();
+    }
 
-      }
+  }
 
-    Navigator.pushReplacement(
+  void loadHomeScreen(){
+    Navigator.pushAndRemoveUntil(
       context,
       MaterialPageRoute(
         builder: (context) => MyTabBarView(),
       ),
+          (route) => false, // This removes all previous routes
     );
-
   }
-
   void showToastView(String message) {
     setState(() {
       showToastMessageView = true;
@@ -437,11 +592,28 @@ class EnterPINViewState extends State<EnterPINView> {
 
     Navigator.push(
         context,
-        MaterialPageRoute(builder: (context) => SetPINView(),
+        MaterialPageRoute(builder: (context) => SetPINView(
+          calledValue: widget.calledValue,
+          mobile: phoneNo,
+          regNo: regNo,
+
+        ),
         ),
     );
 }
 
+  void onLogoutLoadLoginScreen(){
+    Navigator.pushAndRemoveUntil(
+      context,
+      MaterialPageRoute(
+        builder: (context) => LoginView(),
+      ),
+          (route) => false, // This removes all previous routes
+    );
+  }
 
 
 }
+
+
+

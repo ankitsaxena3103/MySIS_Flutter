@@ -1,12 +1,10 @@
 
 import 'dart:core';
 
+import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/material.dart';
-import 'dart:ui';
-import 'package:flutter/cupertino.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter_phone_direct_caller/flutter_phone_direct_caller.dart';
-import 'package:intl/intl.dart';
 import 'package:package_info_plus/package_info_plus.dart';
 import 'package:social_share/social_share.dart';
 import 'package:url_launcher/url_launcher.dart';
@@ -21,9 +19,23 @@ const String contactSISApi = '/api/guardApp/Auth/ContactSIS';
 const String userRosterApi = '/api/guardApp/Auth/UserRoster';
 const String userNotificationApi = '/api/guardApp/Auth/UserNotification';
 const String userAttendanceApi = '/api/guardApp/Auth/UserAttendance';
+const String userLeavesApi = '/api/guardApp/Auth/UserLeaves';
+const String leaveTypeMasterApi = '/api/guardApp/Auth/LeaveTypeMaster';
+const String helpMasterApi = '/api/guardApp/Auth/HelpMaster';
+const String applyLoanApi = '/api/guardApp/Auth/LoanApplication';
+const String requestLoginApi = '/api/guardApp/Auth/RequestLogin';
+const String validateOTPApi =  '/api/guardApp/Auth/ValidateOTP';
+const String escortDutyApi =  '/api/guardApp/Auth/EscortDuty';
+
+
+const String uploadImageApi = '/api/guardApp/FileUpload/upload';
+const String updateProfileApi = '/api/guardApp/Post/UpdateProfile';
 const String userAttendancePostApi = '/api/guardApp/Post/PostUserAttendance';
+const String userLeavesPostApi = '/api/guardApp/Post/PostUserLeaves';
+const String escortDutyPostApi = '/api/guardApp/Post/PostEscortDuty';
 
 
+const keyDataBaseName = 'mysis_database.db';
 const keyTableUserProfile = 'UserProfile';
 const keyTableUserPosting = 'UserPosting';
 const keyTableUnitShiftDetail = 'UnitShiftDetail';
@@ -32,6 +44,11 @@ const keyTableContactSIS = 'ContactSIS';
 const keyTableUserRoster = 'UserRoster';
 const keyTableUserNotification = 'UserNotification';
 const keyTableUserAttendance = 'UserAttendance';
+const String keyTableUserLeave = 'UserLeaves';
+const String keyTableLeaveType = 'LeaveType';
+const String keyTableHelpMaster = 'HelpMaster';
+const String keyTableEscortDuty = 'EscortDuty';
+
 
 const keyAttendanceModeSelf = 'DEVICE';
 const keyAttendanceModeOther = 'OTHER_DUTY';
@@ -39,11 +56,19 @@ const keyAttendanceModeOther = 'OTHER_DUTY';
 const keyAttendanceStatusDutyIn = 'DUTY_IN';
 const keyAttendanceStatusDutyOut = 'DUTY_OUT';
 
+const keyPendingAttendance = 0;
+const keyApprovedAttendance = 1;
+const keyNotApprovedAttendance = 2;
+
+const keyPendingLeave = 0;
+const keyApprovedLeave = 1;
+const keyRejectedLeave = 2;
+
 
 String phoneNo = '';
 String token = '';
-String userId = '';
-
+String regNo = '';
+String currentPin = '';
 String userName = '';
 String designation = '';
 
@@ -52,6 +77,11 @@ int selectedServiceId = 0;
 bool isDarkMode = false;
 String selectedLocale = 'en-US';
 String selectedLanguageCode = 'en';
+
+bool isMobileInternetOn = false;
+bool isMobileCarrierDetected = false;
+bool isGPSEnabled = false;
+
 
 late Size physicalScreenSize ;
 
@@ -107,6 +137,10 @@ const keyUserID = "userID";
 
 const keyPIN = 'PIN';
 const keyPwd = 'pwd';
+const keyMobile = 'mobile';
+
+const keyTokenExpiryTime = "expiryTime";
+const keyIsForcedLogOut = "forceLogout";
 
 
 
@@ -137,6 +171,27 @@ void makePhoneCall(String phoneNumber) async {
   printInDebug('$res');
 
 }
+
+Future<void> sendSMS(String phoneNumber, String message) async {
+  final Uri smsUri = Uri(
+    scheme: 'sms',
+    path: phoneNumber,
+    queryParameters: {
+      'body': message,
+    },
+  );
+
+  try {
+    if (await canLaunchUrl(smsUri)) {
+      await launchUrl(smsUri);
+    } else {
+      printInDebug('No SMS app is available to handle the request.');
+    }
+  } catch (e) {
+    printInDebug('Error launching SMS app: $e');
+  }
+}
+
 
 void shareOnWhatsApp(String appLink) async {
   String content = 'MySIS App:';
@@ -267,6 +322,10 @@ void launchGoogleMap(double lat, double lng){
   launchUrl(web);
 }
 
+void loadMyUrl(String urlString){
+  Uri web = Uri.parse(urlString);
+  launchUrl(web);
+}
 
 const Color redColor1 = Color.fromRGBO(235, 74, 77, 1);
 const Color redColor2 = Color.fromRGBO(255, 0, 4, 1);
@@ -274,7 +333,7 @@ const Color redColor3 = Color.fromRGBO(195, 50, 53, 1);
 
 const Color pinkColor = Color.fromRGBO(255, 235, 235, 1);
 
-const Color yellowColor = Color.fromRGBO(252, 244, 200, 1);
+const Color yellowColor = Color.fromRGBO(252, 250, 195, 1);
 const Color yellowColor1 = Color.fromRGBO(246, 242, 126, 1);
 const Color yellowColor2 = Color.fromRGBO(255, 214, 0, 1);
 

@@ -155,32 +155,14 @@ class SelectLanguageViewState extends State<SelectLanguageView> {
                     ),
                     Positioned(
                       bottom: 0,
-
-                      child: GestureDetector(
-                        onTap: (){
-
-
-                        },
-                        child: Container(
-                          width: screenWidth,
-                          height: pathS / 1.5,
-                          alignment: Alignment.center,
-                          decoration: BoxDecoration(
-                            color: isDarkMode ? greyColor6:whiteColor,
-
-                            // border: Border.all(color: Colors.yellow, width: pathS/18),
-                            // borderRadius: BorderRadius.circular(pathS/3),
-                            boxShadow: [
-                              BoxShadow(
-                                color: nextShadowColor, // Shadow color
-                                blurRadius: pathS/10, // Spread of the shadow
-                                // spreadRadius: pathS/15, // How far the shadow extends
-                                offset:  Offset(-pathS/12, pathS/12),
-                              ),
-                            ],
-                          ),
-
+                      child: Container(
+                        width: screenWidth,
+                        height: pathS / 1.5,
+                        alignment: Alignment.center,
+                        decoration: BoxDecoration(
+                          color: isDarkMode ? greyColor6:whiteColor,
                         ),
+
                       ),
                     ),
                     Positioned(
@@ -209,11 +191,11 @@ class SelectLanguageViewState extends State<SelectLanguageView> {
                             ],
                           ),
                           child: Text(
-                            'confirm'.tr(),
+                            'confirm'.tr().toUpperCase(),
                             style: TextStyle(
                               color: isDarkMode ? redColor1:redColor3,
-                              fontSize: pathS / 4,
-                              fontWeight: FontWeight.bold,
+                              fontSize: pathS / 5,
+                              fontWeight: FontWeight.w700,
                               fontFamily: 'Roboto'
                             ),
                           ),

@@ -1,6 +1,11 @@
+import 'package:flutter/foundation.dart';
 import 'package:mysis/CommonViews/Utility.dart';
+import 'package:mysis/EscortDuty/EscortDuty.dart';
+import 'package:mysis/GeneralQuestions/HelpMaster.dart';
 import 'package:mysis/HomeView/UserAttendance.dart';
 import 'package:mysis/HomeView/UserRoaster.dart';
+import 'package:mysis/Leaves/LeaveType.dart';
+import 'package:mysis/Leaves/UserLeaves.dart';
 import 'package:mysis/Notifications/UserNotification.dart';
 import 'package:mysis/Profile/ContactSIS.dart';
 import 'package:mysis/Profile/UserPosting.dart';
@@ -29,7 +34,7 @@ class DatabaseHelper {
   Future<Database> get database async {
     if (_database != null) return _database!;
 
-    _database = await _initDB('mysis_database.db');
+    _database = await _initDB(keyDataBaseName);
     return _database!;
   }
 
@@ -41,7 +46,6 @@ class DatabaseHelper {
   }
 
 
-
   void _createDB(Database db, int version) async {
     await db.execute(generateCreateTableSQL(keyTableUserProfile, UserProfile.fields));
     await db.execute(generateCreateTableSQL(keyTableUnitDutyPost, UnitDutyPost.fields));
@@ -51,6 +55,10 @@ class DatabaseHelper {
     await db.execute(generateCreateTableSQL(keyTableUserRoster, UserRoaster.fields));
     await db.execute(generateCreateTableSQL(keyTableUserNotification, UserNotification.fields));
     await db.execute(generateCreateTableSQL(keyTableUserAttendance, UserAttendance.fields));
+    await db.execute(generateCreateTableSQL(keyTableLeaveType, LeaveType.fields));
+    await db.execute(generateCreateTableSQL(keyTableUserLeave, UserLeaves.fields));
+    await db.execute(generateCreateTableSQL(keyTableHelpMaster, HelpMaster.fields));
+    await db.execute(generateCreateTableSQL(keyTableEscortDuty, EscortDuty.fields));
 
   }
 
@@ -180,26 +188,44 @@ class DatabaseHelper {
         // Extract the ID value using the idField
         final id = row[idField];
 
-        // Check if the item has a 'deleted' field and if it's set to 1
+        // Check if the item already exists in the table
+        final existingRecords = await txn.query(
+          tableName,
+          where: '$idField = ?',
+          whereArgs: [id],
+        );
+
         if (row['deleted'] == 1) {
-          // If 'deleted' is 1, delete the row
-          await txn.delete(
-            tableName,
-            where: '$idField = ?',
-            whereArgs: [id],
-          );
+          if (existingRecords.isNotEmpty) {
+            // If 'deleted' is 1 and the record exists, delete it
+            await txn.delete(
+              tableName,
+              where: '$idField = ?',
+              whereArgs: [id],
+            );
+          }
+          else {
+            // Log or handle the case where the record doesn't exist
+            printInDebug('Record with ID $id marked as deleted but does not exist.');
+          }
         } else {
-          // Otherwise, perform the update query
-          await txn.update(
-            tableName,
-            row,
-            where: '$idField = ?',
-            whereArgs: [id],
-          );
+          if (existingRecords.isNotEmpty) {
+            // If the record exists, update it
+            await txn.update(
+              tableName,
+              row,
+              where: '$idField = ?',
+              whereArgs: [id],
+            );
+          } else {
+            // If the record doesn't exist, insert it
+            await txn.insert(tableName, row);
+          }
         }
       }
     });
   }
+
 
 
 
@@ -268,8 +294,10 @@ class DatabaseHelper {
 
     // Query all rows from the given table
     final List<Map<String, dynamic>> maps = await db.query(tableName);
-    print('User data retrieved:');
-    print(maps);
+    printInDebug('$tableName retrieved:');
+    if (kDebugMode) {
+      print(maps);
+    }
 
     // Use the generic fromMapList method to convert the maps to a list of type T
     List<T> data = maps.map((map) => fromMap(map)).toList();
@@ -286,6 +314,94 @@ class DatabaseHelper {
       where: '$idField = ?',
       whereArgs: [idValue],
     );
+  }
+
+
+
+  Future<List<Map<String, dynamic>>> getTableRecords() async {
+    // Fetch all table names
+    final db = await instance.database;
+
+    final List<Map<String, dynamic>> tables = await db.rawQuery(
+        "SELECT name FROM sqlite_master WHERE type='table' AND name NOT LIKE 'sqlite_%'");
+
+    List<Map<String, dynamic>> tableRecords = [];
+
+    for (var table in tables) {
+      String tableName = table['name'];
+
+      // Get total record count
+      int totalRecords = Sqflite.firstIntValue(
+          await db.rawQuery("SELECT COUNT(*) FROM $tableName")) ?? 0;
+
+      // Check if the table has a `dirtyFlag` column
+      bool hasDirtyFlag = (await db.rawQuery("PRAGMA table_info($tableName)"))
+          .any((column) => column['name'] == 'dirtyFlag');
+
+      int unSyncedRecords = 0;
+      if (hasDirtyFlag) {
+        // Get unSynced record count
+        unSyncedRecords = Sqflite.firstIntValue(await db.rawQuery(
+            "SELECT COUNT(*) FROM $tableName WHERE dirtyFlag = 1")) ?? 0;
+      }
+
+      // Check if the table has an `updated_at` column
+      bool hasUpdatedAt = (await db.rawQuery("PRAGMA table_info($tableName)"))
+          .any((column) => column['name'] == 'updatedAt');
+
+      String? latestUpdateTime;
+      if (hasUpdatedAt) {
+        // Get the latest `updated_at` datetime
+        final result = await db.rawQuery(
+            "SELECT MAX(updatedAt) as latestUpdateTime FROM $tableName");
+        latestUpdateTime = result.isNotEmpty && result[0]['latestUpdateTime'] != null
+            ? result[0]['latestUpdateTime'].toString()
+            : null;
+      }
+
+      // Add table data to the list
+      tableRecords.add({
+        'tableName': tableName,
+        'totalRecords': totalRecords,
+        'unsyncedRecords': hasDirtyFlag ? unSyncedRecords : null,
+        'latestUpdateTime': hasUpdatedAt ? latestUpdateTime : null,
+      });
+    }
+
+    return tableRecords;
+  }
+
+
+  Future<void> clearAllTables1(List<Map<String, dynamic>> tables) async {
+    final db = await instance.database;
+
+    for (var table in tables) {
+      String tableName = table['tableName'];
+      // Clear all data from the table
+      await db.rawQuery("DELETE FROM $tableName");
+    }
+  }
+
+  Future<bool> clearAllTables(List<Map<String, dynamic>> tables) async {
+    final db = await instance.database;
+
+    try {
+      // Create a list of futures for clearing tables
+      List<Future<void>> clearTableFutures = tables.map((table) async {
+        String tableName = table['tableName'];
+        await db.rawQuery("DELETE FROM $tableName");
+      }).toList();
+
+      // Wait for all the delete operations to complete
+      await Future.wait(clearTableFutures);
+
+      // Return true when all tables are cleared
+      return true;
+    } catch (e) {
+      // Handle any errors and return false
+      printInDebug("Error clearing tables: $e");
+      return false;
+    }
   }
 
 

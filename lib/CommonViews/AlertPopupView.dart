@@ -8,6 +8,8 @@ class AlertPopupView extends StatefulWidget {
 
   final String header ;
   final String message;
+  final String  cancelBtn;
+  final String  okBtn;
 
   final void Function(int) callBack;
 
@@ -16,6 +18,8 @@ class AlertPopupView extends StatefulWidget {
     required this.header,
     required this.message,
     required this.callBack,
+    required this.cancelBtn,
+    required this.okBtn,
   });
 
   @override
@@ -57,99 +61,131 @@ class AlertPopupViewState extends State<AlertPopupView>  {
         height: logicalHeight,
         color: Colors.black.withOpacity(0.5),
         child: Center(
-          child: Container(
-            width: screenWidth-2.5*marginValue,
-            decoration:  BoxDecoration(
-              shape: BoxShape.rectangle,
-              borderRadius: BorderRadius.circular(pathS/8),
-              color: isDarkMode?greyColor8:Colors.white,
-              boxShadow: [
-                BoxShadow(
-                  color: Colors.black.withOpacity(0.1), // Shadow color
-                  blurRadius: pathS/10, // Spread of the shadow
-                  // spreadRadius: pathS/15, // How far the shadow extends
-                  offset:  Offset(-pathS/12, pathS/12),
-                ),
-              ],
-            ),
-            child: Stack(
-              alignment: Alignment.center,
-              children: [
-                Align(
-                  alignment: Alignment.center,
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.center,
-                    mainAxisAlignment: MainAxisAlignment.center,
-
-                    children: [
-
-                      Padding(
-                        padding:  EdgeInsets.only(left: pathS/5,right: pathS/5),
-                        child: Text(
-                          widget.header,
-                          style: TextStyle(
-                              color: isDarkMode ? whiteColor:greyColor6,
-                              fontSize: pathS / 4,
-                              fontWeight: FontWeight.w500,
-                              fontFamily: 'Roboto'
-                          ),
-                          textAlign: TextAlign.center,
-                        ),
+          child: FittedBox(
+            child: Container(
+              width: screenWidth - 2.5 * marginValue,
+              decoration: BoxDecoration(
+                shape: BoxShape.rectangle,
+                borderRadius: BorderRadius.circular(pathS / 8),
+                color: isDarkMode ? greyColor8 : Colors.white,
+                boxShadow: [
+                  BoxShadow(
+                    color: Colors.black.withOpacity(0.1), // Shadow color
+                    blurRadius: pathS / 10, // Spread of the shadow
+                    offset: Offset(-pathS / 12, pathS / 12),
+                  ),
+                ],
+              ),
+              child: Padding(
+                padding:  EdgeInsets.all(pathS/3),
+                child: Column(
+                  mainAxisSize: MainAxisSize.min, // Adjust height based on content
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      widget.header,
+                      style: TextStyle(
+                        color: isDarkMode ? whiteColor : greyColor6,
+                        fontSize: pathS / 4,
+                        fontWeight: FontWeight.w600,
+                        fontFamily: 'Roboto',
                       ),
-                      SizedBox(height: pathS/3),
-                      Padding(
-                        padding:  EdgeInsets.only(left: pathS/5,right: pathS/5),
-                        child: Text(
-                          widget.message,
-                          style: TextStyle(
-                              color: isDarkMode ? whiteColor:greyColor6,
-                              fontSize: pathS / 5,
-                              fontWeight: FontWeight.w500,
-                              fontFamily: 'Roboto'
-                          ),
-                          textAlign: TextAlign.center,
-                        ),
+                      textAlign: TextAlign.center,
+                    ),
+                    SizedBox(height: pathS / 5),
+                    Text(
+                      widget.message,
+                      style: TextStyle(
+                        color: isDarkMode ? whiteColor : greyColor6,
+                        fontSize: pathS / 5,
+                        fontWeight: FontWeight.w500,
+                        fontFamily: 'Roboto',
                       ),
-                      SizedBox(height: pathS/5),
-                      GestureDetector(
-                        onTap: (){
-                          widget.callBack(-1);
-                        },
-                        child: Container(
-                          width: pathL,
-                          height: pathS / 1.5,
-                          alignment: Alignment.center,
-                          decoration: BoxDecoration(
-                            color:  isDarkMode ? redColor1 : redColor3,
-                            borderRadius: BorderRadius.circular(pathS/3),
-                            boxShadow: [
-                              BoxShadow(
-                                color: shadowColor, // Shadow color
-                                blurRadius: pathS/10, // Spread of the shadow
-                                offset:  Offset(-pathS/12, pathS/12),
+                      textAlign: TextAlign.center,
+                    ),
+                    SizedBox(height: pathS / 3),
+                    Row(
+                      mainAxisAlignment: MainAxisAlignment.end,
+                      crossAxisAlignment: CrossAxisAlignment.end,
+                      children: [
+                        if(widget.cancelBtn.isNotEmpty)GestureDetector(
+                          onTap: () {
+                            widget.callBack(0);
+                          },
+                          child: Container(
+                            // width: pathS*1.5,
+                            height: pathS / 2,
+                            alignment: Alignment.center,
+                            decoration: BoxDecoration(
+                              color: isDarkMode ? redColor1 : redColor3,
+                              borderRadius: BorderRadius.circular(pathS / 3),
+                              boxShadow: [
+                                BoxShadow(
+                                  color: shadowColor, // Shadow color
+                                  blurRadius: pathS / 10, // Spread of the shadow
+                                  offset: Offset(-pathS / 12, pathS / 12),
+                                ),
+                              ],
+                            ),
+                            child: Padding(
+                              padding:  EdgeInsets.only(left: pathS/3,right: pathS/3),
+                              child: Text(
+                                widget.cancelBtn,
+                                style: TextStyle(
+                                  color: isDarkMode ? whiteColor : whiteColor,
+                                  fontSize: pathS / 5,
+                                  fontWeight: FontWeight.w700,
+                                  fontFamily: 'Roboto',
+                                ),
                               ),
-                            ],
-                          ),
-                          child: Text(
-                            'ok'.tr(),
-                            style: TextStyle(
-                              color: isDarkMode ? whiteColor : whiteColor,
-                              fontSize: pathS / 4.5,
-                              fontWeight: FontWeight.w700,
-                              fontFamily: 'Roboto',
                             ),
                           ),
                         ),
-                      ),
+                        SizedBox(width: pathS/4),
+                        if(widget.okBtn.isNotEmpty)GestureDetector(
+                          onTap: () {
+                            widget.callBack(1);
+                          },
+                          child: Container(
+                            // width: pathS*1.5,
+                            height: pathS / 2,
+                            alignment: Alignment.center,
+                            decoration: BoxDecoration(
+                              color: isDarkMode ? redColor1 : redColor3,
+                              borderRadius: BorderRadius.circular(pathS / 3),
+                              boxShadow: [
+                                BoxShadow(
+                                  color: shadowColor, // Shadow color
+                                  blurRadius: pathS / 10, // Spread of the shadow
+                                  offset: Offset(-pathS / 12, pathS / 12),
+                                ),
+                              ],
+                            ),
+                            child: Padding(
+                              padding:  EdgeInsets.only(left: pathS/3,right: pathS/3),
+                              child: Text(
+                                widget.okBtn,
+                                style: TextStyle(
+                                  color: isDarkMode ? whiteColor : whiteColor,
+                                  fontSize: pathS / 5,
+                                  fontWeight: FontWeight.w700,
+                                  fontFamily: 'Roboto',
+                                ),
+                              ),
+                            ),
+                          ),
+                        ),
 
-                    ],
-                  ),
+                      ],
+                    ),
+                  ],
                 ),
-              ],
+              ),
             ),
           ),
         ),
       ),
+
 
     );
   }

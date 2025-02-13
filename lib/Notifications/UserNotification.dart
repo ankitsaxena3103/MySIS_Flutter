@@ -14,8 +14,10 @@ class UserNotification {
   final int? parentType;
   final bool readStatus;
   final bool popupAlert;
-  final bool deleted;
+  final int deleted;
   final DateTime dateModified;
+  final DateTime updatedAt;
+
 
   UserNotification({
     required this.id,
@@ -35,12 +37,14 @@ class UserNotification {
     required this.popupAlert,
     required this.deleted,
     required this.dateModified,
+    required this.updatedAt,
+
   });
 
   factory UserNotification.fromJson(Map<String, dynamic> json) {
     return UserNotification(
-      id: json['ID'] ?? 0, // Defaulting to 0 if null
-      regNo: json['REGNO'] ?? '',
+      id: json['id'] ?? 0, // Defaulting to 0 if null
+      regNo: json['RegNo'] ?? '',
       messageType: json['MESSAGE_TYPE'] ?? 0,
       isHtmlBody: (json['IS_HTML_BODY'] ?? 0) == 1,
       isHtmlPage: (json['IS_HTML_PAGE'] ?? 0) == 1,
@@ -56,10 +60,12 @@ class UserNotification {
       parentType: json['PARENT_TYPE'],
       readStatus: (json['READ_STATUS'] ?? 0) == 1,
       popupAlert: (json['POPUP_ALERT'] ?? 0) == 1,
-      deleted: (json['DELETED'] ?? 0) == 1,
+      deleted: (json['DELETED'] ?? 0),
       dateModified: json['DATE_MODIFIED'] != null
           ? DateTime.parse(json['DATE_MODIFIED'])
           : DateTime.now(), // Fallback to current date if null
+      updatedAt: DateTime.now(), // Default value if not in the JSON
+
     );
   }
 
@@ -81,7 +87,7 @@ class UserNotification {
       'PARENT_TYPE': parentType,
       'READ_STATUS': readStatus ? 1 : 0,
       'POPUP_ALERT': popupAlert ? 1 : 0,
-      'DELETED': deleted ? 1 : 0,
+      'DELETED': deleted,
       'DATE_MODIFIED': dateModified.toIso8601String(),
     };
   }
@@ -89,22 +95,29 @@ class UserNotification {
   factory UserNotification.fromMap(Map<String, dynamic> map) {
     return UserNotification(
       id: map['id'],
-      regNo: map['RegNo'],
-      messageType: map['MESSAGE_TYPE'],
-      isHtmlBody: map['IS_HTML_BODY'] == 1,
-      isHtmlPage: map['IS_HTML_PAGE'] == 1,
-      isImageUrl: map['IS_IMAGE_URL'] == 1,
-      title: map['TITLE'],
-      message: map['MESSAGE'],
-      actionUrl: map['ACTION_URL'],
-      expiryDate: DateTime.parse(map['EXPIRY_DATE']),
-      entityId: map['ENTITY_ID'],
-      parentId: map['PARENT_ID'],
-      parentType: map['PARENT_TYPE'],
-      readStatus: map['READ_STATUS'] == 1,
-      popupAlert: map['POPUP_ALERT'] == 1,
-      deleted: map['DELETED'] == 1,
-      dateModified: DateTime.parse(map['DATE_MODIFIED']),
+      regNo: map['regNo'],
+      messageType: map['messageType'],
+      isHtmlBody: map['isHtmlBody'] == 1,
+      isHtmlPage: map['isHtmlPage'] == 1,
+      isImageUrl: map['isImageUrl'] == 1,
+      title: map['title'],
+      message: map['message'],
+      actionUrl: map['actionUrl'],
+      expiryDate: map['expiryDate'] != null
+          ? DateTime.parse(map['expiryDate'])
+          : DateTime.now(), // Handle nullable DateTime
+      entityId: map['entityId'],
+      parentId: map['parentId'],
+      parentType: map['parentType'],
+      readStatus: map['readStatus'] == 1,
+      popupAlert: map['popupAlert'] == 1,
+      deleted: map['deleted'] ,
+      dateModified: map['dateModified'] != null
+          ? DateTime.parse(map['dateModified'])
+          : DateTime.now(), // Default to current time
+      updatedAt: map['updatedAt'] != null
+          ? DateTime.parse(map['updatedAt'])
+          : DateTime.now(), // Default to current time
     );
   }
 
@@ -125,8 +138,9 @@ class UserNotification {
       'parentType': parentType,
       'readStatus': readStatus ? 1 : 0, // Convert bool to int
       'popupAlert': popupAlert ? 1 : 0,
-      'deleted': deleted ? 1 : 0,
+      'deleted': deleted ,
       'dateModified': dateModified.toIso8601String(), // Convert DateTime to ISO8601 string
+      'updatedAt':updatedAt.toIso8601String(),
     };
   }
 
@@ -148,6 +162,7 @@ class UserNotification {
     'popupAlert': 'INTEGER NOT NULL', // 0 = Disabled, 1 = Enabled
     'deleted': 'INTEGER NOT NULL', // 0 = Active, 1 = Deleted
     'dateModified': 'TEXT NOT NULL', // ISO8601 string format
+    'updatedAt':'TEXT NOT NULL',
   };
 
 }

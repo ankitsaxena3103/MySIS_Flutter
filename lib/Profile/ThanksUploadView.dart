@@ -5,20 +5,22 @@ import 'package:flutter/material.dart';
 import 'package:mysis/CommonViews/Utility.dart';
 import 'package:easy_localization/easy_localization.dart';
 import '../CommonViews/ToastMessageView.dart';
+import '../MyTabBarView.dart';
 
 class ThanksUploadView extends StatefulWidget {
 
-  final name;
-  final designation;
- final imageData;
+ final String name;
+ final String designation;
+ final String imageData;
+ final  String message;
 
-
-  ThanksUploadView(
+  const ThanksUploadView(
       {
         super.key,
         required this.name,
         required this.designation,
         required this.imageData,
+        required this.message,
 
 
       });
@@ -74,9 +76,9 @@ class ThanksUploadViewState extends State<ThanksUploadView>{
                   right: paddingRight+pathS/3,
                   child: GestureDetector(
                     onTap: () {
-                      Navigator.pop(context);
+                       onTapClose();
                     },
-                    child: Container(
+                    child: SizedBox(
                       width: pathS / 3,
                       height: pathS / 3,
                       child: Image.asset(
@@ -101,8 +103,9 @@ class ThanksUploadViewState extends State<ThanksUploadView>{
                         fontFamily: 'Roboto',
                       ),
                     ),
+                    SizedBox(height: pathS/5),
                     Text(
-                      'photo_update_requested_successfully'.tr(),
+                      widget.message,
                       style: TextStyle(
                         color: isDarkMode ? greenColor5 : greenColor6,
                         fontSize: pathS / 4,
@@ -110,16 +113,16 @@ class ThanksUploadViewState extends State<ThanksUploadView>{
                         fontFamily: 'Roboto',
                       ),
                     ),
-                    SizedBox(height: pathS/12),
-                    Text(
-                      'photo_update_requested_successfully'.tr(),
-                      style: TextStyle(
-                        color: isDarkMode ? whiteColor : greyColor6,
-                        fontSize: pathS / 6.5,
-                        fontWeight: FontWeight.w500,
-                        fontFamily: 'Roboto',
-                      ),
-                    ),
+                    // SizedBox(height: pathS/12),
+                    // Text(
+                    //   'photo_update_requested_successfully'.tr(),
+                    //   style: TextStyle(
+                    //     color: isDarkMode ? whiteColor : greyColor6,
+                    //     fontSize: pathS / 6.5,
+                    //     fontWeight: FontWeight.w500,
+                    //     fontFamily: 'Roboto',
+                    //   ),
+                    // ),
                     SizedBox(height: pathS),
                     Container(
                       alignment: Alignment.center,
@@ -152,7 +155,7 @@ class ThanksUploadViewState extends State<ThanksUploadView>{
                               ),
                       ),
                     ),
-                    SizedBox(height: pathS/5),
+                    SizedBox(height: pathS/4),
                     Text(
                       widget.name,
                       style: TextStyle(
@@ -171,12 +174,8 @@ class ThanksUploadViewState extends State<ThanksUploadView>{
                           fontFamily: 'Roboto'
                       ),
                     ),
-
-
                   ],
                 ),
-
-
 
                 ToastMessageView(isVisible: showToastMessageView, message: toastMessage),
 
@@ -191,7 +190,16 @@ class ThanksUploadViewState extends State<ThanksUploadView>{
     );
   }
 
+  void onTapClose(){
 
+    Navigator.pushAndRemoveUntil(
+      context,
+      MaterialPageRoute(
+        builder: (context) => MyTabBarView(),
+      ),
+          (route) => false, // This removes all previous routes
+    );
+  }
   void showToastView(String message) {
     setState(() {
       showToastMessageView = true;

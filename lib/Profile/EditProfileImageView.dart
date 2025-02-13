@@ -3,7 +3,6 @@
 
 import 'dart:convert';
 
-import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:mysis/CommonViews/Utility.dart';
@@ -17,19 +16,21 @@ import 'package:provider/provider.dart';
 
 class EditProfileImageView extends StatefulWidget {
 
-  final name;
-  final designation;
+  final String profileId;
+  final String name;
+  final String designation;
   final VoidCallback onCloseBottomSheet; // Callback function
   final Function(int,String, String) onTabSelected;
   // Callback function
 
-  EditProfileImageView(
+  const EditProfileImageView(
       {
         super.key,
         required this.onCloseBottomSheet,
         required this.onTabSelected,
         required this.name,
         required this.designation,
+        required this.profileId,
       });
 
 
@@ -141,6 +142,7 @@ class EditProfileImageViewState extends State<EditProfileImageView> {
       setState(() {
         base64Image = base64Encode(imageBytes);
       });
+      onLoadUploadPhoto(base64Image);
     }
   }
   
@@ -152,6 +154,8 @@ class EditProfileImageViewState extends State<EditProfileImageView> {
     final picker = ImagePicker();
     final pickedFile = await picker.pickImage(source: ImageSource.gallery);
     imagePath = (pickedFile?.path)!;
+    printInDebug(imagePath);
+
     if (pickedFile != null) {
       List<int> imageBytes = await pickedFile.readAsBytes();
 
@@ -164,9 +168,15 @@ class EditProfileImageViewState extends State<EditProfileImageView> {
 
   void onLoadUploadPhoto(String imageData){
     
-    Navigator.push(
+    Navigator.pushReplacement(
       context, 
-      MaterialPageRoute(builder: (context) => UploadPhotoView(name: widget.name, desination: widget.designation , imageData: base64Image)),
+      MaterialPageRoute(builder: (context) => UploadPhotoView(
+        name: widget.name,
+        designation: widget.designation ,
+        imageData: base64Image,
+        filePath: imagePath,
+        profileId: widget.profileId,
+      )),
       
     );
     

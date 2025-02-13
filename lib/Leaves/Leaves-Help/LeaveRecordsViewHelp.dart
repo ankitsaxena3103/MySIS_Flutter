@@ -6,6 +6,8 @@ import 'package:easy_localization/easy_localization.dart';
 import 'package:mysis/Leaves/ApplyLeaveView.dart';
 
 class LeaveRecordsView extends StatefulWidget {
+  const LeaveRecordsView({super.key});
+
   @override
   LeaveRecordsViewState createState() => LeaveRecordsViewState();
 }
@@ -207,29 +209,6 @@ class LeaveRecordsViewState extends State<LeaveRecordsView>{
       return orangeColor1;
     }
   }
-  void onLoadApplyLeave(){
-    Navigator.push(
-      context,
-      MaterialPageRoute(
-        builder: (context) => ApplyLeaveView(),
-      ),
-    );
-  }
-  void onLoadLeaveStatus(){
-    Navigator.push(
-      context,
-      MaterialPageRoute(
-        builder: (context) => ApplyLeaveView(),
-      ),
-    );
-  }
-  void onLoadLeaveHistory(){
-    Navigator.push(
-      context,
-      MaterialPageRoute(
-        builder: (context) => ApplyLeaveView(),
-      ),
-    );
-  }
+
 
 }

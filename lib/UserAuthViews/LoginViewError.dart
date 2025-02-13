@@ -247,10 +247,10 @@ class LoginViewErrorState extends State<LoginViewError> {
       if (userData.isNotEmpty) {
         token = userData['jwtToken'] ?? '';
         userName = userData['agentName'] ?? 'Agent';
-        userId = userData['id'] ?? 0;
+        regNo = userData['id'] ?? 0;
         Preferences.saveUserPreference(keyUserToken, token);
         Preferences.saveUserPreference(keyUserName, userName);
-        Preferences.saveUserPreference(keyUserID, '$userId');
+        Preferences.saveUserPreference(keyUserID, '$regNo');
 
         Navigator.pushReplacement(
           context,

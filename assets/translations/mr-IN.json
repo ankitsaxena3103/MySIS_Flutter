@@ -578,7 +578,7 @@
   "hold_mob_front_of_qr_code": "QR कोडच्या सामन्यात मोबाइल ठेवा स्कॅन करण्यासाठी",
   "close": "बंद करा",
   "app_feature": "वैशिष्ट्ये",
-  "ex_mobile": "(उदा.9876543210 / PAT 561202)",
+  "ex_mobile": "(उदा.9876543210 / PAT561202)",
   "enter_mobile_regno_no": "मोबाइल / नोंदणी क्रमांक प्रविष्ट करा",
   "onProfile_register_contact_number": "प्रोफाइल पृष्ठावर, नोंदणीकृत संपर्क नंबर विरुद्ध 'बदला' वर क्लिक करा",
   "esi_No": "ESI नंबर",
@@ -594,5 +594,8 @@
   "transfer_by_ao": "AO प्रमाणांतर इतर युनिटला",
   "transfer_by_bh": "भी प्रमाणांतर इतर AO येथे",
   "bh_transfer_other_unit": "भी प्रमाणांतर इतर युनिटला",
-  "transfer_shift": "स्थानांतर करा"
+  "transfer_shift": "स्थानांतर करा",
+
+  "pin_txt": "PIN"
+
 }

@@ -20,6 +20,7 @@ class MyTabBarViewState extends State<MyTabBarView> {
   int tabSelectedIndex = 0;
   late List<Widget> tabs;
   // late PersistentBottomSheetController bottomSheetController; // Declare a controller variable
+  DateTime? lastBackPressTime;
 
   @override
   void initState() {
@@ -94,80 +95,100 @@ class MyTabBarViewState extends State<MyTabBarView> {
   Widget build(BuildContext context) {
     calculateSizes(context);
 
-    return Consumer2<LanguageProvider, ThemeProvider>(
-      builder: (context, languageProvider, themeProvider, child) {
-        return Scaffold(
-          body: tabs[tabSelectedIndex],
-          bottomNavigationBar: BottomNavigationBar(
-            backgroundColor: Color.fromRGBO(195, 50, 53, 1).withOpacity(1),
+    return WillPopScope(
+      onWillPop: () async {
+        DateTime now = DateTime.now();
 
-            fixedColor: Colors.white,
-            unselectedItemColor: Colors.white70,
-            currentIndex: tabSelectedIndex,
-            items:  <BottomNavigationBarItem>[
-              BottomNavigationBarItem(
-                icon: Icon(Icons.home),
-                label: 'home'.tr(),
-              ),
-              BottomNavigationBarItem(
-                icon: Icon(Icons.calendar_month),
-                label: 'duty_txt'.tr(),
+        if (lastBackPressTime == null ||
+            now.difference(lastBackPressTime!) > Duration(seconds: 3)) {
+          lastBackPressTime = now;
 
-              ),
-              BottomNavigationBarItem(
-                icon: Icon(Icons.menu),
-                label: 'menu_txt'.tr(),
-              ),
-            ],
-            onTap: (index) {
+          // Show a toast message
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(content: Text("again_press".tr())),
+          );
 
-              if (index == 0) {
-                setState(() {
-                  tabSelectedIndex = index;
-                });
-                // Handle tapping on the HOME tab
-              } else if (index == 1) {
-                setState(() {
-                  tabSelectedIndex = index;
-                });
-                // Handle tapping on the DUTY tab
-              }
-              else if (index == 2) {
-                // Open bottom sheet for MENU tab
-                showModalBottomSheet(
-                  context: context,
-                  isScrollControlled: true, // Set to true to occupy full screen height
-                  builder: (BuildContext context) {
-                    return SizedBox(
-                      height: pathL*4.1, // Adjust height factor as needed
-                      child: MenuItemView(
-                        onCloseBottomSheet: () {
-                          Navigator.pop(context); // Close the bottom sheet
-                        }, onTabSelected: (val ) {
-                        setState(() {
-                          tabSelectedIndex = val;
-                        });
-                      },
-                      ),
-                    );
-                  },
-                );
-              }
+          return false; // Prevent exit on first tap
+        }
 
-            },
-            selectedLabelStyle: TextStyle( // Define the font style for labels
-              fontSize: pathS/5.5,
-              fontWeight: FontWeight.w500,
-              fontFamily: 'Roboto',
-            ),
-            unselectedLabelStyle: TextStyle( // Define the font style for labels
-              fontSize: pathS/5.5,
-              fontWeight: FontWeight.w500,
-              fontFamily: 'Roboto',
-            ),
-          ),
-        );
+        return true; // Exit on second tap within 2 seconds
       },
+      child: Consumer2<LanguageProvider, ThemeProvider>(
+        builder: (context, languageProvider, themeProvider, child) {
+          return Scaffold(
+            body: tabs[tabSelectedIndex],
+            bottomNavigationBar: BottomNavigationBar(
+              backgroundColor: redColor3,
+
+              fixedColor: Colors.white,
+              unselectedItemColor: Colors.white70,
+              currentIndex: tabSelectedIndex,
+              items:  <BottomNavigationBarItem>[
+                BottomNavigationBarItem(
+                  icon: Icon(Icons.home),
+                  label: 'home'.tr(),
+                ),
+                BottomNavigationBarItem(
+                  icon: Icon(Icons.calendar_month),
+                  label: 'duty_txt'.tr(),
+
+                ),
+                BottomNavigationBarItem(
+                  icon: Icon(Icons.menu),
+                  label: 'menu_txt'.tr(),
+                ),
+              ],
+              onTap: (index) {
+
+                if (index == 0) {
+                  setState(() {
+                    tabSelectedIndex = index;
+                  });
+                  // Handle tapping on the HOME tab
+                } else if (index == 1) {
+                  setState(() {
+                    tabSelectedIndex = index;
+                  });
+                  // Handle tapping on the DUTY tab
+                }
+                else if (index == 2) {
+                  // Open bottom sheet for MENU tab
+                  showModalBottomSheet(
+                    context: context,
+                    isScrollControlled: true, // Set to true to occupy full screen height
+                    builder: (BuildContext context) {
+                      return SizedBox(
+                        height: pathL*4.1, // Adjust height factor as needed
+                        child: MenuItemView(
+                          onCloseBottomSheet: () {
+                            Navigator.pop(context); // Close the bottom sheet
+                          }, onTabSelected: (val ) {
+                          setState(() {
+                            tabSelectedIndex = val;
+                          });
+                        },
+                        ),
+                      );
+                    },
+                  );
+                }
+
+              },
+              selectedLabelStyle: TextStyle( // Define the font style for labels
+                fontSize: pathS/5.5,
+                fontWeight: FontWeight.w500,
+                fontFamily: 'Roboto',
+              ),
+              unselectedLabelStyle: TextStyle( // Define the font style for labels
+                fontSize: pathS/5.5,
+                fontWeight: FontWeight.w500,
+                fontFamily: 'Roboto',
+              ),
+            ),
+          );
+        },
+      ),
+
     );
 
   }

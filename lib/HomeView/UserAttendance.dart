@@ -31,6 +31,8 @@ class UserAttendance {
   final String shiftHrs;
   final int shiftMin;
   final int dirtyFlag;
+  final DateTime dateModified;
+  final DateTime updatedAt;
 
   UserAttendance({
     required this.id,
@@ -65,11 +67,22 @@ class UserAttendance {
     required this.shiftHrs,
     required this.shiftMin,
     required this.dirtyFlag,
-
+    required this.dateModified,
+    required this.updatedAt,
   });
 
   /// Factory constructor for creating an instance from JSON
   factory UserAttendance.fromJson(Map<String, dynamic> json) {
+    DateTime? safeParseDate(String? date) {
+      if (date == null || date.isEmpty) {
+        return null;
+      }
+      try {
+        return DateTime.parse(date);
+      } catch (e) {
+        return null;
+      }
+    }
     return UserAttendance(
       id: json['ID'] ?? '',
       regNo: json['REGNO'] ?? '',
@@ -108,7 +121,9 @@ class UserAttendance {
       dutyRankName: json['DUTY_RANK_NAME'] ?? '',
       shiftHrs: json['SHIFT_HRS'] ?? '',
       shiftMin: json['SHIFT_MIN'] ?? 0,
-      dirtyFlag: json['dirtyFlag'] ?? 1,
+      dirtyFlag: json['DIRTY_FLAG'] ?? 0,
+      dateModified: safeParseDate(json['DATE_MODIFIED']) ?? DateTime.now(), // Handle null or invalid
+      updatedAt: DateTime.now(), // Default value if not in the JSON
 
     );
   }
@@ -146,6 +161,8 @@ class UserAttendance {
     'shiftHrs': 'TEXT',
     'shiftMin': 'INTEGER',
     'dirtyFlag': 'INTEGER',
+    'dateModified':'TEXT NOT NULL',
+    'updatedAt':'TEXT NOT NULL',
   };
 
   /// Method to convert the object to JSON
@@ -182,7 +199,7 @@ class UserAttendance {
       'DUTY_RANK_NAME': dutyRankName,
       'SHIFT_HRS': shiftHrs,
       'SHIFT_MIN': shiftMin,
-      'dirtyFlag' : dirtyFlag,
+      'DIRTY_FLAG' : dirtyFlag,
     };
   }
 
@@ -224,10 +241,14 @@ class UserAttendance {
       shiftHrs: map['shiftHrs'] ?? '',
       shiftMin: map['shiftMin'] ?? 0,
       dirtyFlag: map['dirtyFlag'] ?? 1,
+      dateModified: map['dateModified'] != null
+          ? DateTime.parse(map['dateModified']) // Convert ISO string to DateTime
+          : DateTime.now(),
+      updatedAt: map['updatedAt'] != null
+          ? DateTime.parse(map['updatedAt']) // Convert ISO string to DateTime
+          : DateTime.now(),
     );
   }
-
-
 
   /// Converts a UserAttendance object to a database map
   Map<String, dynamic> toMap() {
@@ -264,6 +285,8 @@ class UserAttendance {
       'shiftHrs': shiftHrs,
       'shiftMin': shiftMin,
       'dirtyFlag': dirtyFlag,
+      'dateModified':dateModified.toIso8601String(),
+      'updatedAt':updatedAt.toIso8601String(),
     };
   }
 }

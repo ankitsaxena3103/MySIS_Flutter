@@ -11,6 +11,9 @@ class UserPosting {
   final String workingHours;
   final int deleted;
   final DateTime dateModified;
+  final DateTime updatedAt;
+  final int escortDutyAllowed;
+
 
   UserPosting({
     required this.id,
@@ -25,6 +28,8 @@ class UserPosting {
     required this.workingHours,
     required this.deleted,
     required this.dateModified,
+    required this.updatedAt,
+    required this.escortDutyAllowed,
   });
 
   // Factory method to create an object from JSON
@@ -42,6 +47,9 @@ class UserPosting {
       workingHours: json['WORKING_HRS'] ?? '',
       deleted: json['DELETED'] ?? 0,
       dateModified: DateTime.parse(json['DATE_MODIFIED']),
+      updatedAt:DateTime.now(),
+      escortDutyAllowed: json['ESCORT_DUTY_ALLOWED'] ?? 0,
+
     );
   }
 
@@ -60,6 +68,7 @@ class UserPosting {
       'WORKING_HRS': workingHours,
       'DELETED': deleted,
       'DATE_MODIFIED': dateModified.toIso8601String(),
+      'ESCORT_DUTY_ALLOWED' : escortDutyAllowed,
     };
   }
 
@@ -79,6 +88,11 @@ class UserPosting {
       dateModified: map['dateModified'] != null
           ? DateTime.parse(map['dateModified']) // Convert ISO string to DateTime
           : DateTime.now(), // Fallback to current DateTime if null.
+      updatedAt: map['updatedAt'] != null
+          ? DateTime.parse(map['updatedAt']) // Convert ISO string to DateTime
+          : DateTime.now(),
+      escortDutyAllowed: map['escortDutyAllowed'] ?? 0,
+
     );
   }
 
@@ -95,6 +109,9 @@ class UserPosting {
   'workingHours': 'TEXT NOT NULL',
   'deleted': 'INTEGER NOT NULL',
   'dateModified': 'TEXT NOT NULL', // Store DateTime as ISO8601 string
+  'updatedAt':'TEXT NOT NULL',
+   'escortDutyAllowed':'INTEGER NOT NULL',
+
   };
 
   Map<String, dynamic> toMap() {
@@ -111,6 +128,8 @@ class UserPosting {
       'workingHours': workingHours,
       'deleted': deleted,
       'dateModified': dateModified.toIso8601String(), // Convert DateTime to ISO format.
+      'updatedAt':updatedAt.toIso8601String(),
+      'escortDutyAllowed' : escortDutyAllowed,
     };
   }
 

@@ -86,7 +86,7 @@ class OnboardingPaginationViewState extends State<OnboardingPaginationView>{
             },
             itemBuilder: (context, index) {
               pageIndex = index;
-              return onboardingPage(pageIndex);
+              return onBoardingPage(pageIndex);
             },
             itemCount: 6,
           ),
@@ -144,7 +144,7 @@ class OnboardingPaginationViewState extends State<OnboardingPaginationView>{
     );
   }
 
-  Widget onboardingPage(int index) {
+  Widget onBoardingPage(int index) {
 
       return Stack(
         alignment: Alignment.center,
@@ -152,7 +152,7 @@ class OnboardingPaginationViewState extends State<OnboardingPaginationView>{
               Column(
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
-                  Container(
+                  SizedBox(
                     width: 2.5*pathL,
                     child: Text(
                       page1Header[index],
@@ -183,7 +183,7 @@ class OnboardingPaginationViewState extends State<OnboardingPaginationView>{
               ),
               Positioned(
                 bottom: paddingBottom+pathL,
-                child: Container(
+                child: SizedBox(
                 width: 2*pathL,
                 child: Text(
                   page1footer[index],

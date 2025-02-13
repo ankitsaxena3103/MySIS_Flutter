@@ -39,6 +39,7 @@ bool isSucces = false;
 
   @override
   Widget build(BuildContext context) {
+    calculateSizes(context);
     return Scaffold(
       body: Stack(
         alignment: Alignment.center,
@@ -79,10 +80,10 @@ bool isSucces = false;
                           style: TextStyle(
                             color: isDarkMode ?  whiteColor:greyColor6,
                             fontSize: pathS / 5.5,
-                            fontWeight: FontWeight.normal,
+                            fontWeight: FontWeight.w500,
                             fontFamily: 'Roboto',
                           ),
-                          textAlign: TextAlign.center,
+                          textAlign: TextAlign.left,
                         ),
 
                       ],
@@ -94,11 +95,11 @@ bool isSucces = false;
                   height: screenHeight - pathS - paddingTop - paddingBottom,
                   child: SingleChildScrollView(
                     child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.center,
-                      mainAxisAlignment: MainAxisAlignment.center,
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      mainAxisAlignment: MainAxisAlignment.start,
                       children: [
 
-                        SizedBox(height: pathS/1.5+paddingTop),
+                        SizedBox(height: pathS/1.5),
 
                         Container(
                           width: screenWidth - 2.5 * marginValue,
@@ -361,8 +362,8 @@ bool isSucces = false;
                         'submit_referral'.tr(),
                         style: TextStyle(
                           color: isDarkMode ? redColor1:redColor3,                          // border: Border.all(color: Colors.yellow, width: pathS/18),
-                          fontSize: pathS / 4.5,
-                          fontWeight: FontWeight.bold,
+                          fontSize: pathS / 5,
+                          fontWeight: FontWeight.w700,
                         ),
                       ),
                     ),

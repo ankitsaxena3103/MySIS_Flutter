@@ -9,6 +9,8 @@ import '../SharedClasses/APIHelper.dart';
 import '../SharedClasses/DatabaseHelper.dart';
 
 class ContactSISView extends StatefulWidget {
+  const ContactSISView({super.key});
+
   @override
   ContactSISViewState createState() => ContactSISViewState();
 }
@@ -21,7 +23,7 @@ class ContactSISViewState extends State<ContactSISView>{
 
   String assetImage = "assets/images/dashboard-icons/profile-icon.png";
 
-  String whatsNumber = '';
+  String whatsAppNumber = '';
   String ercNumber = '';
 
   String ucImage = '';
@@ -42,7 +44,8 @@ class ContactSISViewState extends State<ContactSISView>{
   void initState() {
     super.initState();
 
-    onLoadData();
+
+    getTableData();
 
   }
 
@@ -105,8 +108,8 @@ class ContactSISViewState extends State<ContactSISView>{
                   ),
                 ),
 
-                Container(
-                  height: screenHeight - pathS*1.5,
+                SizedBox(
+                  height: screenHeight - pathL,
                   child: SingleChildScrollView(
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.center,
@@ -165,7 +168,7 @@ class ContactSISViewState extends State<ContactSISView>{
                                       ),
                                       GestureDetector(
                                         onTap: (){
-                                          shareOnWhatsApp(whatsNumber);
+                                          shareOnWhatsApp(whatsAppNumber);
                                         },
                                         child: Image.asset(
                                           'assets/images/dashboard-icons/whatsApp.png',
@@ -205,7 +208,7 @@ class ContactSISViewState extends State<ContactSISView>{
                                       ),
                                       GestureDetector(
                                         onTap: (){
-                                          makePhoneCall('9876543210');
+                                          makePhoneCall(ercNumber);
                                         },
                                         child: Image.asset(
                                             'assets/images/dashboard-icons/call.png',
@@ -228,7 +231,7 @@ class ContactSISViewState extends State<ContactSISView>{
 
                         SizedBox(height: pathS/2),
 
-                        Container(
+                        SizedBox(
                           width: screenWidth - 2.5 * marginValue,
                           child: Text(
                             'talk_to_your_seniors'.tr(),
@@ -307,7 +310,7 @@ class ContactSISViewState extends State<ContactSISView>{
                                             crossAxisAlignment: CrossAxisAlignment.start,
                                             mainAxisAlignment: MainAxisAlignment.start,
                                             children: [
-                                              Container(
+                                              SizedBox(
                                                 width: pathL*1.5,
                                                 child: Text(
                                                   ucName,
@@ -711,14 +714,17 @@ class ContactSISViewState extends State<ContactSISView>{
           print(data);
         }
         contactSIS = data.map((json) => ContactSIS.fromJson(json)).toList();
-        contactSIS.forEach((profile) {
-          printInDebug('contact SIS ID: ${profile.id}');
-          printInDebug('contact SIS name: ${profile.ucName}');
-        });
+        for (var contact in contactSIS) {
+          printInDebug('contact  ID : ${contact.id}');
+          printInDebug('contact unit cmd name: ${contact.ucName}');
+        }
 
-        showDataOnUI(contactSIS.first);
+        if(contactSIS.isNotEmpty) {
+          showDataOnUI(contactSIS.first);
+          syncTableData();
+        }
 
-        syncTableData();
+
 
       }
 
@@ -734,16 +740,21 @@ class ContactSISViewState extends State<ContactSISView>{
 
   Future<void> getTableData() async {
     contactSIS = await DatabaseHelper.instance.getAllRecords<ContactSIS>(
-      keyTableUserProfile,
+      keyTableContactSIS,
           (map) => ContactSIS.fromMap(map),
     );
 
-    contactSIS.forEach((profile) {
-      printInDebug('profile ID: ${profile.id}');
-      printInDebug('profile emp name: ${profile.ucName}');
-    });
+    for (var contact in contactSIS) {
+      printInDebug('table contact ID: ${contact.id}');
+      printInDebug('table contact unit cmd name: ${contact.ucName}');
+    }
 
-    showDataOnUI(contactSIS.first);
+    if(contactSIS.isNotEmpty) {
+      showDataOnUI(contactSIS.first);
+    }else{
+      onLoadData();
+    }
+
 
   }
 
@@ -755,6 +766,9 @@ class ContactSISViewState extends State<ContactSISView>{
   void showDataOnUI(ContactSIS contact){
 
     setState(() {
+
+      whatsAppNumber = contact.whatsappNumber;
+      ercNumber = contact.ercNumber;
 
       ucImage = contact.ucImage;
       aoImage = contact.aoImage;

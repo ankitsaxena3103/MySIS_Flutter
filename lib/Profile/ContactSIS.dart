@@ -16,6 +16,9 @@ class ContactSIS {
   final String oldIssueUrl;
   final String newIssueUrl;
   final DateTime dateModified;
+  final DateTime updatedAt;
+
+
 
   ContactSIS({
     required this.id,
@@ -33,68 +36,59 @@ class ContactSIS {
     required this.oldIssueUrl,
     required this.newIssueUrl,
     required this.dateModified,
+    required this.updatedAt,
+
   });
 
   // Factory method to create ContactSIS from JSON
   factory ContactSIS.fromJson(Map<String, dynamic> json) {
     return ContactSIS(
-      id: json['ID'] as int,
-      whatsappNumber: json['WhatsAppNumber'] as String,
-      ercNumber: json['ERC_Number'] as String,
-      ucName: json['UC_Name'] as String,
-      ucNumber: json['UC_Number'] as String,
-      ucImage: json['UC_Image'] as String,
-      aoName: json['AO_Name'] as String,
-      aoNumber: json['AO_Number'] as String,
-      aoImage: json['AO_Image'] as String,
-      bhName: json['BH_Name'] as String,
-      bhNumber: json['BH_Number'] as String,
-      bhImage: json['BH_Image'] as String,
-      oldIssueUrl: json['OldIssueUrl'] as String,
-      newIssueUrl: json['NewIssueUrl'] as String,
-      dateModified: DateTime.parse(json['DATE_MODIFIED']),
-    );
-  }
+      id: json['ID'] ?? 0, // Default to 0 if 'ID' is null or missing
+      whatsappNumber: json['WhatsAppNumber'] ?? '', // Default to empty string
+      ercNumber: json['ERC_Number'] ?? '',
+      ucName: json['UC_Name'] ?? '',
+      ucNumber: json['UC_Number'] ?? '',
+      ucImage: json['UC_Image'] ?? '',
+      aoName: json['AO_Name'] ?? '',
+      aoNumber: json['AO_Number'] ?? '',
+      aoImage: json['AO_Image'] ?? '',
+      bhName: json['BH_Name'] ?? '',
+      bhNumber: json['BH_Number'] ?? '',
+      bhImage: json['BH_Image'] ?? '',
+      oldIssueUrl: json['OldIssueUrl'] ?? '',
+      newIssueUrl: json['NewIssueUrl'] ?? '',
+      dateModified: json['DATE_MODIFIED'] != null
+          ? DateTime.parse(json['DATE_MODIFIED'])
+          : DateTime.now(), // Default to current date-time if null or missing
+      updatedAt: DateTime.now(), // Default value if not in the JSON
 
-  // Method to convert ContactSIS to JSON
-  Map<String, dynamic> toJson() {
-    return {
-      'ID': id,
-      'WhatsAppNumber': whatsappNumber,
-      'ERC_Number': ercNumber,
-      'UC_Name': ucName,
-      'UC_Number': ucNumber,
-      'UC_Image': ucImage,
-      'AO_Name': aoName,
-      'AO_Number': aoNumber,
-      'AO_Image': aoImage,
-      'BH_Name': bhName,
-      'BH_Number': bhNumber,
-      'BH_Image': bhImage,
-      'OldIssueUrl': oldIssueUrl,
-      'NewIssueUrl': newIssueUrl,
-      'DATE_MODIFIED': dateModified.toIso8601String(),
-    };
+    );
+
   }
 
   // Factory method to create ContactSIS from a Map
   factory ContactSIS.fromMap(Map<String, dynamic> map) {
     return ContactSIS(
-      id: map['ID'] as int,
-      whatsappNumber: map['WhatsAppNumber'] as String,
-      ercNumber: map['ERC_Number'] as String,
-      ucName: map['UC_Name'] as String,
-      ucNumber: map['UC_Number'] as String,
-      ucImage: map['UC_Image'] as String,
-      aoName: map['AO_Name'] as String,
-      aoNumber: map['AO_Number'] as String,
-      aoImage: map['AO_Image'] as String,
-      bhName: map['BH_Name'] as String,
-      bhNumber: map['BH_Number'] as String,
-      bhImage: map['BH_Image'] as String,
-      oldIssueUrl: map['OldIssueUrl'] as String,
-      newIssueUrl: map['NewIssueUrl'] as String,
-      dateModified: DateTime.parse(map['DATE_MODIFIED'] as String),
+      id: map['id'] ?? 0, // Default to 0 if 'id' is null or missing
+      whatsappNumber: map['whatsappNumber'] ?? '', // Default to empty string
+      ercNumber: map['ercNumber'] ?? '',
+      ucName: map['ucName'] ?? '',
+      ucNumber: map['ucNumber'] ?? '',
+      ucImage: map['ucImage'] ?? '',
+      aoName: map['aoName'] ?? '',
+      aoNumber: map['aoNumber'] ?? '',
+      aoImage: map['aoImage'] ?? '',
+      bhName: map['bhName'] ?? '',
+      bhNumber: map['bhNumber'] ?? '',
+      bhImage: map['bhImage'] ?? '',
+      oldIssueUrl: map['oldIssueUrl'] ?? '',
+      newIssueUrl: map['newIssueUrl'] ?? '',
+      dateModified: map['dateModified'] != null
+          ? DateTime.parse(map['dateModified'])
+          : DateTime.now(), // Default to current date-time if null or missing
+      updatedAt: map['updatedAt'] != null
+          ? DateTime.parse(map['updatedAt']) // Convert ISO string to DateTime
+          : DateTime.now(),
     );
   }
 
@@ -102,19 +96,20 @@ class ContactSIS {
     return {
       'ID': id,
       'WhatsAppNumber': whatsappNumber,
-      'ERC_Number': ercNumber,
-      'UC_Name': ucName,
-      'UC_Number': ucNumber,
-      'UC_Image': ucImage,
-      'AO_Name': aoName,
-      'AO_Number': aoNumber,
-      'AO_Image': aoImage,
-      'BH_Name': bhName,
-      'BH_Number': bhNumber,
-      'BH_Image': bhImage,
-      'OldIssueUrl': oldIssueUrl,
-      'NewIssueUrl': newIssueUrl,
-      'DATE_MODIFIED': dateModified.toIso8601String(),
+      'ercNumber': ercNumber,
+      'ucName': ucName,
+      'ucNumber': ucNumber,
+      'ucImage': ucImage,
+      'aoName': aoName,
+      'aoNumber': aoNumber,
+      'aoImage': aoImage,
+      'bhName': bhName,
+      'bhNumber': bhNumber,
+      'bhImage': bhImage,
+      'oldIssueUrl': oldIssueUrl,
+      'newIssueUrl': newIssueUrl,
+      'dateModified': dateModified.toIso8601String(),
+      'updatedAt':updatedAt.toIso8601String(),
     };
 
   }
@@ -135,6 +130,7 @@ class ContactSIS {
     'oldIssueUrl': 'TEXT NOT NULL',
     'newIssueUrl': 'TEXT NOT NULL',
     'dateModified': 'TEXT NOT NULL', // Store DateTime as ISO8601 string
+    'updatedAt':'TEXT NOT NULL',
   };
 
 

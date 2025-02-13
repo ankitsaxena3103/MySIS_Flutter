@@ -24,7 +24,7 @@ class ThanksDutyView extends StatefulWidget {
   final String latLong;
 
 
-  ThanksDutyView(
+  const ThanksDutyView(
       {
         super.key,
         required this.imageData,
@@ -63,6 +63,7 @@ class ThanksDutyViewState extends State<ThanksDutyView>{
 
   @override
   Widget build(BuildContext context) {
+
     List<String> activeDayList = widget.latLong.split(',').map((e) => e.trim()).toList();
 
     double lat = double.parse(activeDayList[1]); // Latitude

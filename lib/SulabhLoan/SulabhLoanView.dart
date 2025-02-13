@@ -3,6 +3,8 @@ import 'package:mysis/CommonViews/Utility.dart';
 import 'package:easy_localization/easy_localization.dart';
 
 class SulabhLoanView extends StatefulWidget {
+  const SulabhLoanView({super.key});
+
   @override
   SulabhLoanViewState createState() => SulabhLoanViewState();
 }
@@ -13,7 +15,6 @@ bool noData = true;
   @override
   void initState() {
     super.initState();
-
   }
 
   @override
@@ -21,9 +22,9 @@ bool noData = true;
     super.dispose();
   }
 
-
   @override
   Widget build(BuildContext context) {
+    calculateSizes(context);
     return Scaffold(
       body: Stack(
         alignment: Alignment.center,
@@ -54,13 +55,12 @@ bool noData = true;
                           child: Image.asset(
                             'assets/images/dashboard-icons/left-arrow.png',
                             color: isDarkMode ? whiteColor:greyColor6,
-
                           ),
 
                         ),
                         SizedBox(width: pathS/8),
                         Text(
-                          'back'.tr(),
+                          'loan_by_sarvam'.tr(),
                           style: TextStyle(
                             color: isDarkMode ?  whiteColor:greyColor6,
                             fontSize: pathS / 5.5,

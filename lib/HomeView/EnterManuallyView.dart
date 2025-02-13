@@ -3,11 +3,15 @@ import 'package:mysis/CommonViews/Utility.dart';
 import 'package:easy_localization/easy_localization.dart';
 import 'package:mysis/HomeView/ConfirmProfileView.dart';
 import 'package:mysis/HomeView/ScanCardView.dart';
+import 'package:mysis/HomeView/UserAttendance.dart';
 
+import '../CommonViews/AlertPopupView.dart';
 import '../Profile/UnitDutyPost.dart';
 import '../Profile/UnitShiftDetail.dart';
 import '../Profile/UserPosting.dart';
 import '../Profile/UserProfile.dart';
+import '../SharedClasses/DatabaseHelper.dart';
+import 'SimpleTextField.dart';
 
 
 class EnterManuallyView extends StatefulWidget {
@@ -48,12 +52,18 @@ class EnterManuallyViewState extends State<EnterManuallyView>{
   Color nextShadowColor = Colors.transparent;
 
   String lblErrorMsg = '';
-
+  bool isTapEnabled = false;
 
   String lblUserIdHintMsg = 'enter_mobile_no'.tr();
   String lblUserIdHintText = 'ex_mobile'.tr();
 
   String btnNext = 'next'.tr();
+
+  bool showAlert = false;
+  String alertHeader = '';
+  String alertMessage = '';
+
+  Color lineBorderColor = isDarkMode ? greyColorDark:greyColor5;
 
 
   @override
@@ -183,59 +193,39 @@ class EnterManuallyViewState extends State<EnterManuallyView>{
                                 textAlign: TextAlign.center,
                               ),
 
-                              // OtpTextField(
-                              //
-                              //   numberOfFields: 10,
-                              //   obscureText: false,
+                              SimpleUnderLineTextField(
+                                isDarkMode: isDarkMode,
+                                txtUserId: txtUserId,
+                                onUserIdChange: (data  ) {
+
+                                  onUserIdChange(data);
+
+                                }, lineBorderColor: lineBorderColor,),
+
+                              // TextField(
+                              //   onChanged: (value) {
+                              //     txtUserId.text = value;
+                              //     onUserIdChange(value);
+                              //   },
+                              //   controller: txtUserId,
                               //   keyboardType: TextInputType.streetAddress,
-                              //   borderColor: isDarkMode ? whiteColor : greyColor6,
-                              //   focusedBorderColor: Colors.blue,
-                              //   styles: PINTextStyle(
-                              //     isDarkMode ? whiteColor : greyColor6,
-                              //     10,
+                              //   decoration:  InputDecoration(
+                              //     // hintText: '${'name'.tr()}*', // Placeholder text
+                              //     contentPadding: EdgeInsets.fromLTRB(0, 0, 8, 0),
+                              //
+                              //     hintStyle: TextStyle(
+                              //       color: isDarkMode ? greyColor1 : greyColor3,
+                              //       fontSize: pathS/4,
+                              //       fontWeight: FontWeight.normal,
+                              //     ),
+                              //     // border: InputBorder.none,
                               //   ),
-                              //   showFieldAsBox: false,
-                              //   borderWidth: 2.0,
-                              //   fieldWidth: pathS/3,
-                              //   //runs when a code is typed in
-                              //   onCodeChanged: (String pin) {
-                              //     txtUserId.text = pin;
-                              //     onUserIdChange(pin);
-                              //
-                              //   },
-                              //   //runs when every textfield is filled
-                              //   onSubmit: (String pin) {
-                              //     txtUserId.text = pin;
-                              //     onUserIdChange(pin);
-                              //     print("OTP completed: " + pin);
-                              //
-                              //   },
+                              //   style: TextStyle(
+                              //     color: isDarkMode ? whiteColor : greyColor4,
+                              //     fontSize: pathS/4,
+                              //     fontWeight: FontWeight.normal,
+                              //   ),
                               // ),
-
-                              TextField(
-                                onChanged: (value) {
-                                  txtUserId.text = value;
-                                  onUserIdChange(value);
-                                },
-                                controller: txtUserId,
-                                keyboardType: TextInputType.streetAddress,
-                                decoration:  InputDecoration(
-                                  // hintText: '${'name'.tr()}*', // Placeholder text
-                                  contentPadding: EdgeInsets.fromLTRB(0, 0, 8, 0),
-
-                                  hintStyle: TextStyle(
-                                    color: isDarkMode ? greyColor1 : greyColor3,
-                                    fontSize: pathS/4,
-                                    fontWeight: FontWeight.normal,
-                                  ),
-                                  // border: InputBorder.none,
-                                ),
-                                style: TextStyle(
-                                  color: isDarkMode ? whiteColor : greyColor4,
-                                  fontSize: pathS/4,
-                                  fontWeight: FontWeight.normal,
-                                ),
-                              ),
                               SizedBox(height: pathS / 8),
                               Text(
                                 lblUserIdHintText,
@@ -277,8 +267,7 @@ class EnterManuallyViewState extends State<EnterManuallyView>{
 
                   child: GestureDetector(
                     onTap: (){
-                      // Navigator.pop(context);
-                      onTapNext();
+                      isTapEnabled ? onTapNext() : null;// Disable tap if isTapEnabled is false
                     },
                     child: Container(
                       width: pathL,
@@ -321,7 +310,7 @@ class EnterManuallyViewState extends State<EnterManuallyView>{
                       height: pathS / 1.5,
                       alignment: Alignment.center,
                       decoration: BoxDecoration(
-                        color: isDarkMode ? greyColor8:whiteColor,                          // border: Border.all(color: Colors.yellow, width: pathS/18),
+                        color: isDarkMode?greyColor8:greyColor,
                         // borderRadius: BorderRadius.circular(pathS/3),
                         boxShadow: [
                           BoxShadow(
@@ -373,6 +362,22 @@ class EnterManuallyViewState extends State<EnterManuallyView>{
                     ),
                   ),
                 ),
+
+                Visibility(
+                  visible: showAlert,
+                  child: AlertPopupView(
+                      header: alertHeader,
+                      message: alertMessage,
+                      cancelBtn: '',
+                      okBtn: 'ok'.tr(),
+                      callBack: (value){
+                        setState(() {
+                          showAlert = false;
+                        });
+                      }
+                  ),
+                )
+
               ],
             ),
           ),
@@ -382,24 +387,62 @@ class EnterManuallyViewState extends State<EnterManuallyView>{
     );
   }
 
+  void onUserIdChange1(String userid) {
+    final mobileNoRegExp = RegExp(r'^\d{10}$'); // 10-digit mobile number
+    final sisIdRegExp = RegExp(r'^SIS\d{7}$'); // SIS followed by exactly 7 numeric characters
+    final otherIdRegExp = RegExp(r'^(?!SIS)[A-Z]{3}\d{6}$'); // Exclude SIS and match 3 uppercase letters followed by 6 digits
+
+    if (mobileNoRegExp.hasMatch(userid) ||
+        sisIdRegExp.hasMatch(userid) ||
+        otherIdRegExp.hasMatch(userid)) {
+      setState(() {
+        nextBgColor = Color.fromRGBO(195, 50, 30, 1);
+        nextFontColor = Colors.white;
+        nextShadowColor = Colors.black.withOpacity(0.2);
+        lineBorderColor = Color.fromRGBO(51, 51, 51, 0.5);
+        lblErrorMsg = '';
+        isTapEnabled = true; // Enable tap
+
+        FocusScope.of(context).unfocus();
+      });
+    }
+    else {
+      setState(() {
+        nextBgColor = Color.fromRGBO(51, 51, 51, 0.2);
+        nextFontColor = Color.fromRGBO(51, 51, 51, 0.6);
+        nextShadowColor = Colors.transparent;
+        lineBorderColor = Color.fromRGBO(255, 0, 0, 1);
+        lblErrorMsg = 'enter_mobile_no'.tr();
+        isTapEnabled = false; // Disable tap
+      });
+    }
+  }
 
   void onUserIdChange(String userid){
+    final mobileNoRegExp = RegExp(r'^\d{10}$'); // 10-digit mobile number
+    final sisIdRegExp = RegExp(r'^SIS\d{7}$'); // SIS followed by exactly 7 numeric characters
+    final otherIdRegExp = RegExp(r'^(?!SIS)[A-Z]{3}\d{6}$'); // Exclude SIS and match 3 uppercase letters followed by 6 digits
 
-    if(userid.length >= 9){
+    if (mobileNoRegExp.hasMatch(userid) ||
+        sisIdRegExp.hasMatch(userid) ||
+        otherIdRegExp.hasMatch(userid)) {
       setState(() {
         nextBgColor = isDarkMode ? redColor1:redColor3;
         nextFontColor = Colors.white;
         nextShadowColor = shadowColor;
         lblErrorMsg = '';
+        lineBorderColor = isDarkMode ? greyColorDark:greyColor5;
+        isTapEnabled = true; // Enable tap
+        FocusScope.of(context).unfocus();
       });
-
 
     }else{
       setState(() {
         nextBgColor =  isDarkMode ? greyColor8:greyColor2;
         nextFontColor = isDarkMode ? greyColor7 : greyColor3;
         nextShadowColor = Colors.transparent;
-        lblErrorMsg = 'enter_10_digit_number'.tr();
+        lblErrorMsg = 'enter_mobile_no'.tr();
+        lineBorderColor = isDarkMode ? redColor3:redColor1;
 
       });
 
@@ -453,14 +496,59 @@ class EnterManuallyViewState extends State<EnterManuallyView>{
     );
   }
 
-  void onTapNext(){
+  Future<void> onTapNext() async {
     printInDebug(txtUserId.text);
-    if(widget.userProfile.mobile == txtUserId.text) {
-    loadConfirmScreen();
+    if(widget.userProfile.mobile == txtUserId.text || widget.userProfile.regNo == txtUserId.text) {
+
+      List<UserAttendance> attendanceList = await attendanceMarkedToday() ;
+      if( attendanceList.isNotEmpty){
+        UserAttendance attendance = attendanceList.first;
+        setState(() {
+          alertHeader = 'duty_mark_in_already'.tr();
+          alertMessage = '${'unit_name'.tr()}  ${attendance.siteName}\n\n${'shift_name'.tr()}  ${attendance.siteName}\n\n${'punch_Time'.tr()}  ${DateFormat('hh:mm:ss').format(attendance.actStartTime)}';
+          showAlert = true;
+
+        });
+      }
+      else{
+        loadConfirmScreen();
+      }
     }else{
      // call API to show data
 
     }
+  }
+
+  Future<List<UserAttendance>> attendanceMarkedToday() async {
+
+    List<UserAttendance> todayAttendance = [];
+
+    final attendance = await DatabaseHelper.instance.getAllRecords<UserAttendance>(
+      keyTableUserAttendance,
+          (map) => UserAttendance.fromMap(map),
+    );
+
+
+// Filter for entries with dutyStatus == keyAttendanceStatusDutyIn and deleted == 0
+    final dutyInRecords = attendance.where(
+          (data) => data.dutyStatus == keyAttendanceStatusDutyIn && data.deleted == 0,
+    );
+
+// Check if there are any valid records
+    if (dutyInRecords.isNotEmpty) {
+      // Find the latest shiftStartDate among the filtered records
+      DateTime latestDutyInDate = dutyInRecords
+          .map((data) => data.shiftStartDate)
+          .reduce((a, b) => a.isAfter(b) ? a : b);
+
+      // Get the records that match the latest shiftStartDate
+      todayAttendance = dutyInRecords
+          .where((data) => data.shiftStartDate.isAtSameMomentAs(latestDutyInDate))
+          .toList();
+    }
+
+   return todayAttendance;
+
   }
 
 void loadConfirmScreen(){

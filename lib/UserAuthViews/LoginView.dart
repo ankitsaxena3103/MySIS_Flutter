@@ -1,3 +1,6 @@
+import 'dart:io';
+
+import 'package:device_info_plus/device_info_plus.dart';
 import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
@@ -8,8 +11,10 @@ import 'package:mysis/CommonViews/ToastMessageView.dart';
 import 'package:mysis/CommonViews/Utility.dart';
 import 'package:mysis/SharedClasses/LanguageProvider.dart';
 import 'package:mysis/UserAuthViews/VerifyOTPView.dart';
+import 'package:package_info_plus/package_info_plus.dart';
 import 'package:provider/provider.dart';
 
+import '../HomeView/SimpleTextField.dart';
 import '../SharedClasses/APIHelper.dart';
 import '../SharedClasses/Preferences.dart';
 import '../SharedClasses/ThemeProvider.dart';
@@ -44,8 +49,10 @@ class LoginViewState extends State<LoginView> {
   Color nextBgColor = Color.fromRGBO(51, 51, 51, 0.2);
   Color nextFontColor = Color.fromRGBO(51, 51, 51, 0.6);
   Color nextShadowColor = Colors.transparent;
+  String btnNext = 'next'.tr();
 
-  Color lineBorderColor = Color.fromRGBO(255, 0, 0, 1);
+  Color lineBorderColor = Color.fromRGBO(51, 51, 51, 0.5);
+
   String lblErrorMsg = '';
 
   String lblCompany = 'company'.tr();
@@ -53,7 +60,6 @@ class LoginViewState extends State<LoginView> {
   String lblUserIdHintMsg = 'enter_mobile_no'.tr();
   String lblUserIdHintText = 'ex_mobile'.tr();
 
-  String btnNext = 'next'.tr();
   late LanguageProvider languageProvider;
   bool isTapEnabled = false;
 
@@ -150,76 +156,76 @@ class LoginViewState extends State<LoginView> {
                         ),
                         SizedBox(height: pathS / 3),
 
-                        Container(
-                          width: screenWidth-2.5*marginValue,
-                          height: pathL/1.5,
-                          decoration:  BoxDecoration(
-                            shape: BoxShape.rectangle,
-                            borderRadius: BorderRadius.circular(pathS/8),
-                            color: Colors.white,
-                            boxShadow: [
-                              BoxShadow(
-                                color: Colors.black.withOpacity(0.1), // Shadow color
-                                blurRadius: pathS/10, // Spread of the shadow
-                                // spreadRadius: pathS/15, // How far the shadow extends
-                                offset:  Offset(-pathS/12, pathS/12),
-                              ),
-                            ],
-                          ),
-                          child: Stack(
-                            alignment: Alignment.topLeft,
-                            children: [
-                              Padding(
-                                padding: EdgeInsets.only(left: pathS/5, top: pathS/6), // Adjust top and left as needed
-                                child: Align(
-                                  alignment: Alignment.topLeft,
-                                  child: Column(
-                                    crossAxisAlignment: CrossAxisAlignment.start,
-                                    children: [
-                                      Text(
-                                        lblCompany,
-                                        style: TextStyle(
-                                          color: Color.fromRGBO(51, 51, 51, 0.7),
-                                          fontSize: pathS / 6.5,
-                                          fontWeight: FontWeight.normal,
-                                        ),
-                                        textAlign: TextAlign.center,
-                                      ),
-                                      SizedBox(height: pathS / 8),
-                                      Row(
-                                        mainAxisAlignment: MainAxisAlignment.start,
-                                        children: [
-                                          Container(
-                                            width: pathS / 1.9,
-                                            height: pathS / 1.9,
-                                            decoration: const BoxDecoration(
-                                              shape: BoxShape.rectangle,
-                                              image: DecorationImage(
-                                                image: AssetImage("assets/images/icons/icon.png"),
-                                                fit: BoxFit.cover,
-                                              ),
-                                            ),
-                                          ),
-                                          SizedBox(width: pathS / 6),
-                                          Text(
-                                            'SIS INDIA',
-                                            style: TextStyle(
-                                              color: Color.fromRGBO(51, 51, 51, 1),
-                                              fontSize: pathS / 5.5,
-                                              fontWeight: FontWeight.bold,
-                                            ),
-                                            textAlign: TextAlign.center,
-                                          ),
-                                        ],
-                                      ),
-                                    ],
-                                  ),
-                                ),
-                              ),
-                            ],
-                          ),
-
-                        ),
+                        // Container(
+                        //   width: screenWidth-2.5*marginValue,
+                        //   height: pathL/1.5,
+                        //   decoration:  BoxDecoration(
+                        //     shape: BoxShape.rectangle,
+                        //     borderRadius: BorderRadius.circular(pathS/8),
+                        //     color: Colors.white,
+                        //     boxShadow: [
+                        //       BoxShadow(
+                        //         color: Colors.black.withOpacity(0.1), // Shadow color
+                        //         blurRadius: pathS/10, // Spread of the shadow
+                        //         // spreadRadius: pathS/15, // How far the shadow extends
+                        //         offset:  Offset(-pathS/12, pathS/12),
+                        //       ),
+                        //     ],
+                        //   ),
+                        //   child: Stack(
+                        //     alignment: Alignment.topLeft,
+                        //     children: [
+                        //       Padding(
+                        //         padding: EdgeInsets.only(left: pathS/5, top: pathS/6), // Adjust top and left as needed
+                        //         child: Align(
+                        //           alignment: Alignment.topLeft,
+                        //           child: Column(
+                        //             crossAxisAlignment: CrossAxisAlignment.start,
+                        //             children: [
+                        //               Text(
+                        //                 lblCompany,
+                        //                 style: TextStyle(
+                        //                   color: Color.fromRGBO(51, 51, 51, 0.7),
+                        //                   fontSize: pathS / 6.5,
+                        //                   fontWeight: FontWeight.normal,
+                        //                 ),
+                        //                 textAlign: TextAlign.center,
+                        //               ),
+                        //               SizedBox(height: pathS / 8),
+                        //               Row(
+                        //                 mainAxisAlignment: MainAxisAlignment.start,
+                        //                 children: [
+                        //                   Container(
+                        //                     width: pathS / 1.9,
+                        //                     height: pathS / 1.9,
+                        //                     decoration: const BoxDecoration(
+                        //                       shape: BoxShape.rectangle,
+                        //                       image: DecorationImage(
+                        //                         image: AssetImage("assets/images/icons/icon.png"),
+                        //                         fit: BoxFit.cover,
+                        //                       ),
+                        //                     ),
+                        //                   ),
+                        //                   SizedBox(width: pathS / 6),
+                        //                   Text(
+                        //                     'SIS INDIA',
+                        //                     style: TextStyle(
+                        //                       color: Color.fromRGBO(51, 51, 51, 1),
+                        //                       fontSize: pathS / 5.5,
+                        //                       fontWeight: FontWeight.bold,
+                        //                     ),
+                        //                     textAlign: TextAlign.center,
+                        //                   ),
+                        //                 ],
+                        //               ),
+                        //             ],
+                        //           ),
+                        //         ),
+                        //       ),
+                        //     ],
+                        //   ),
+                        //
+                        // ),
                         SizedBox(height: pathS / 6),
                         Container(
                           width: screenWidth-2.5*marginValue,
@@ -257,69 +263,14 @@ class LoginViewState extends State<LoginView> {
                                         textAlign: TextAlign.center,
                                       ),
 
-                                      // OtpTextField(
-                                      //
-                                      //   numberOfFields: 10,
-                                      //   obscureText: false,
-                                      //   keyboardType: TextInputType.streetAddress,
-                                      //   borderColor: isDarkMode ? whiteColor : greyColor6,
-                                      //   focusedBorderColor: isDarkMode ? whiteColor : greyColor1,
-                                      //   styles: PINTextStyle(
-                                      //     isDarkMode ? whiteColor : greyColor6,
-                                      //     10,
-                                      //   ),
-                                      //   showFieldAsBox: false,
-                                      //   borderWidth: 2.0,
-                                      //   fieldWidth: pathS/2.4,
-                                      //   margin:EdgeInsets.only(right: 0,left: 1),
-                                      //   //runs when a code is typed in
-                                      //   onCodeChanged: (String pin) {
-                                      //     txtUserId.text = pin;
-                                      //     onUserIdChange(pin);
-                                      //
-                                      //   },
-                                      //   //runs when every textfield is filled
-                                      //   onSubmit: (String pin) {
-                                      //     txtUserId.text = pin;
-                                      //     onUserIdChange(pin);
-                                      //     print("user id completed: " + pin);
-                                      //
-                                      //   },
-                                      // ),
-                                      // OTPTextField(
-                                      //   length: 10,
-                                      //   width: pathL * 2,
-                                      //   fieldWidth: pathS / 2.5,
-                                      //   obscureText: false,
-                                      //
-                                      //   keyboardType: TextInputType.emailAddress,
-                                      //   style: TextStyle(
-                                      //     color: isDarkMode ? whiteColor : greyColor6,
-                                      //     fontSize: pathS / 6,
-                                      //     fontFamily: 'Roboto',
-                                      //   ),
-                                      //   textFieldAlignment: MainAxisAlignment.spaceAround,
-                                      //   fieldStyle: FieldStyle.underline,
-                                      //
-                                      //   onChanged: (pin) {
-                                      //     print("OTP Entered: " + pin);
-                                      //     txtUserId.text = pin;
-                                      //     onUserIdChange(pin);
-                                      //   },
-                                      //   onCompleted: (pin) {
-                                      //     print("OTP completed: " + pin);
-                                      //     txtUserId.text = pin;
-                                      //     onUserIdChange(pin);
-                                      //   },
-                                      // ),
-                                      SimpleOTPTextField(
+                                      SimpleUnderLineTextField(
                                         isDarkMode: isDarkMode,
                                         txtUserId: txtUserId,
                                         onUserIdChange: (data  ) {
 
                                           onUserIdChange(data);
 
-                                      },),
+                                      }, lineBorderColor: lineBorderColor,),
                                       SizedBox(height: pathS / 8),
                                       Text(
                                         lblUserIdHintText,
@@ -393,7 +344,7 @@ class LoginViewState extends State<LoginView> {
                     ),
 
 
-                    LoaderView(isVisible: showLoaderView, message: 'Loading...'),
+                    LoaderView(isVisible: showLoaderView, message: ''),
                     Visibility(
                       visible: isAlertVisible,
                       child: CustomAlertView(
@@ -427,7 +378,13 @@ class LoginViewState extends State<LoginView> {
 
   void onUserIdChange(String userid) {
 
-    if (userid.length == 10 || userid.length == 9) {
+    final mobileNoRegExp = RegExp(r'^\d{10}$'); // 10-digit mobile number
+    final sisIdRegExp = RegExp(r'^SIS\d{7}$'); // SIS followed by exactly 7 numeric characters
+    final otherIdRegExp = RegExp(r'^(?!SIS)[A-Z]{3}\d{6}$'); // Exclude SIS and match 3 uppercase letters followed by 6 digits
+
+    if (mobileNoRegExp.hasMatch(userid) ||
+        sisIdRegExp.hasMatch(userid) ||
+        otherIdRegExp.hasMatch(userid)) {
       setState(() {
         nextBgColor = Color.fromRGBO(195, 50, 30, 1);
         nextFontColor = Colors.white;
@@ -435,6 +392,8 @@ class LoginViewState extends State<LoginView> {
         lineBorderColor = Color.fromRGBO(51, 51, 51, 0.5);
         lblErrorMsg = '';
         isTapEnabled = true; // Enable tap
+
+        FocusScope.of(context).unfocus();
       });
     } else {
       setState(() {
@@ -442,29 +401,59 @@ class LoginViewState extends State<LoginView> {
         nextFontColor = Color.fromRGBO(51, 51, 51, 0.6);
         nextShadowColor = Colors.transparent;
         lineBorderColor = Color.fromRGBO(255, 0, 0, 1);
-        lblErrorMsg = 'enter_10_digit_number'.tr();
+        lblErrorMsg = 'enter_mobile_no'.tr();
         isTapEnabled = false; // Disable tap
       });
     }
   }
 
 
+  Future<String> getAppToken() async {
+    // Get app version
+    PackageInfo packageInfo = await PackageInfo.fromPlatform();
+    String appVersion = packageInfo.version;
 
-  void onTapLogin() {
+    // Get device type and OS version
+    String deviceType = Platform.isAndroid ? "Android" : Platform.isIOS ? "iOS" : "Web";
+    String osVersion = Platform.operatingSystemVersion;
+
+    // Get device ID
+    String deviceId = await getDeviceId();
+
+    return '$deviceType $osVersion (Device ID: $deviceId) - MySIS $appVersion';
+  }
+
+  Future<String> getDeviceId() async {
+    DeviceInfoPlugin deviceInfo = DeviceInfoPlugin();
+
+    if (Platform.isAndroid) {
+      AndroidDeviceInfo androidInfo = await deviceInfo.androidInfo;
+      return androidInfo.id; // Returns a unique device ID for Android
+    } else if (Platform.isIOS) {
+      IosDeviceInfo iosInfo = await deviceInfo.iosInfo;
+      return iosInfo.identifierForVendor ?? ""; // Returns a unique device ID for iOS
+    } else {
+      return ""; // For unsupported platforms like Web
+    }
+  }
+  Future<void> onTapLogin() async {
+    String appTokenString = await getAppToken();
     if (txtUserId.text.isEmpty) {
       showToastView("All fields are required");
       return;
-
     }
-
       setState(() {
         showLoaderView = true;
       });
       Map <String,String> inputData = {
         "UserName": txtUserId.text,
+        "AppToken" : appTokenString,
+        "BypassOTPScreen" : "0",
+        "Enable_OTPEntry" : "1"
+
       };
 
-      APIHelper.instance.getData(authenticateApi,inputData, (data) {
+      APIHelper.instance.getData(requestLoginApi,inputData, (data) {
 
         setState(() {
           showLoaderView = false;
@@ -473,30 +462,37 @@ class LoginViewState extends State<LoginView> {
 
           Map<String, dynamic> userData = data.first as Map<String, dynamic>;
 
+
           userName = userData['Name'] ?? '';
-          userId = userData['RegNo'] ?? 0;
+          regNo = userData['RegNo'] ?? 0;
           designation = userData['Designation'] ?? '';
           phoneNo = userData['MobileNo'] ?? '';
 
-          String otp = userData['OTP'] ?? '';
-          String pin = userData['PIN'] ?? '';
+         String pin = userData['PIN'] ?? '';
           String languageCode = userData['Language'] ?? '';
+
+          String otpId = userData['OtpId'] ?? '';
           int isOTPRequired = userData['BypassOTPScreen'] ?? 0;
-          int OTPTimer = userData['OTP_Validity'] ?? 0;
+          int otpTimer = userData['OTP_Validity'] ?? 0;
+          bool enableOTPEntry = (userData['Enable_OTPEntry'] ?? 0 ) == 1;
 
           String pwd = userData['Password'] ?? '';
 
-
           Preferences.saveUserPreference(keyUserName, userName);
-          Preferences.saveUserPreference(keyUserID, userId);
+          Preferences.saveUserPreference(keyUserID, regNo);
           Preferences.saveUserPreference(keyPwd, pwd);
+          Preferences.saveUserPreference(keyMobile, phoneNo);
+          Preferences.saveUserPreference(keyPIN, pin);
 
 
           updateLanguage(languageCode);
 
-          loadNextScreen(isOTPRequired, otp,OTPTimer,pin);
+          loadNextScreen(enableOTPEntry, otpId,otpTimer,pin,phoneNo,regNo);
 
-          getToken(userId, pwd);
+          if(isOTPRequired ==0 && pwd.isNotEmpty){
+
+          }
+          getToken(regNo, pwd);
 
         }
 
@@ -513,7 +509,7 @@ class LoginViewState extends State<LoginView> {
 
   }
 
-void getToken(String userId, String pwd){
+  void getToken(String userId, String pwd){
   Map <String,String> inputData = {
     "Username": userId,
     "Password": pwd,
@@ -525,6 +521,7 @@ void getToken(String userId, String pwd){
 
       token = data['token'] ?? '';
       Preferences.saveUserPreference(keyUserToken, token);
+      Preferences.saveUserPreferenceBool(keyIsForcedLogOut, false);
 
 
     }
@@ -535,22 +532,32 @@ void getToken(String userId, String pwd){
    }
   });
 }
-  void loadNextScreen(int isOTPRequired, String otp,int timerVal, String pin) {
-    if(isOTPRequired == 0 && otp.isNotEmpty){
+  void loadNextScreen(bool enableOtpEntry, String otpId,int timerVal, String pin, String mobileNo,String regNo) {
+    if(otpId.isNotEmpty){
       Navigator.push(
         context,
         MaterialPageRoute(
-          builder: (context) => VerifyOTPView(otpReceived: otp, otpTimer: timerVal,pinReceived: pin),
+          builder: (context) => VerifyOTPView(
+            otpIdReceived: otpId,
+            otpTimer: timerVal,
+            pinReceived: pin,
+            mobile: mobileNo,
+            regNo: regNo,
+            calledValue: 0,
+            enableOtpEntry: enableOtpEntry,
+          ),
         ),
       );
     }else{
       String? currentPIN = pin;
-      if(currentPIN != null && currentPIN!.isNotEmpty && currentPIN!.length == 4){
+      if(currentPIN != null && currentPIN!.isNotEmpty ){
         Preferences.saveUserPreference(keyPIN, pin);
         Navigator.push(
           context,
           MaterialPageRoute(
-            builder: (context) => EnterPINView(),
+            builder: (context) => EnterPINView(
+              currentPIN: pin
+            ),
           ),
         );
       }
@@ -558,7 +565,12 @@ void getToken(String userId, String pwd){
         Navigator.push(
           context,
           MaterialPageRoute(
-            builder: (context) => SetPINView(),
+            builder: (context) => SetPINView(
+              calledValue: 0,
+              mobile: mobileNo,
+              regNo: regNo,
+
+            ),
           ),
         );
       }
@@ -617,48 +629,3 @@ void getToken(String userId, String pwd){
 }
 
 
-class SimpleOTPTextField extends StatelessWidget {
-  final TextEditingController txtUserId;
-  final Function(String) onUserIdChange;
-  final bool isDarkMode;
-
-  const SimpleOTPTextField({
-    super.key,
-    required this.txtUserId,
-    required this.onUserIdChange,
-    required this.isDarkMode,
-  });
-
-  @override
-  Widget build(BuildContext context) {
-    return TextField(
-      controller: txtUserId,
-      // keyboardType: TextInputType.number,
-      inputFormatters: [
-        LengthLimitingTextInputFormatter(10), // Limit to 10 characters
-        // FilteringTextInputFormatter., // Allow digits only
-      ],
-      style: TextStyle(
-        color: isDarkMode ? whiteColor : greyColor6,
-        fontSize: pathS/5,
-        fontFamily: 'Roboto',
-      ),
-      decoration: InputDecoration(
-        // hintText: 'Enter OTP',
-        hintStyle: TextStyle(
-          color:  isDarkMode ? whiteColor : greyColor6,
-        ),
-        focusedBorder: UnderlineInputBorder(
-          borderSide: BorderSide(color: Colors.grey),
-        ),
-        enabledBorder: UnderlineInputBorder(
-          borderSide: BorderSide(color: Colors.grey),
-        ),
-      ),
-      onChanged: (value) {
-        onUserIdChange(value);
-      },
-      textAlign: TextAlign.start, // Ensures input starts from the left
-    );
-  }
-}

@@ -3,6 +3,8 @@ import 'package:mysis/CommonViews/Utility.dart';
 import 'package:easy_localization/easy_localization.dart';
 
 class AKRView extends StatefulWidget {
+  const AKRView({super.key});
+
   @override
   AKRViewState createState() => AKRViewState();
 }
@@ -23,6 +25,7 @@ class AKRViewState extends State<AKRView> {
 
   @override
   Widget build(BuildContext context) {
+    calculateSizes(context);
     return Scaffold(
       body: Stack(
         alignment: Alignment.center,
@@ -66,7 +69,7 @@ class AKRViewState extends State<AKRView> {
                           style: TextStyle(
                             color: isDarkMode ? whiteColor : greyColor6,
                             fontSize: pathS / 5.5,
-                            fontWeight: FontWeight.normal,
+                            fontWeight: FontWeight.w500,
                             fontFamily: 'Roboto',
                           ),
                           textAlign: TextAlign.center,
@@ -96,9 +99,9 @@ class AKRViewState extends State<AKRView> {
                             child: Text(
                               'item_name'.tr(),
                               style: TextStyle(
-                                color: isDarkMode ? whiteColor : greyColor6,
-                                fontSize: pathS / 6,
-                                fontWeight: FontWeight.normal,
+                                color: isDarkMode ? whiteColor : greyColor3,
+                                fontSize: pathS / 6.5,
+                                fontWeight: FontWeight.w700,
                                 fontFamily: 'Roboto',
                               ),
                               textAlign: TextAlign.left,
@@ -106,11 +109,11 @@ class AKRViewState extends State<AKRView> {
                           ),
                           Expanded(
                             child: Text(
-                              'qty'.tr(),
+                              'qty'.tr().toUpperCase(),
                               style: TextStyle(
-                                color: isDarkMode ? whiteColor : greyColor6,
-                                fontSize: pathS / 6,
-                                fontWeight: FontWeight.normal,
+                                color: isDarkMode ? whiteColor : greyColor3,
+                                fontSize: pathS / 6.5,
+                                fontWeight: FontWeight.w700,
                                 fontFamily: 'Roboto',
                               ),
                               textAlign: TextAlign.center,
@@ -118,11 +121,11 @@ class AKRViewState extends State<AKRView> {
                           ),
                           Expanded(
                             child: Text(
-                              'received_date'.tr(),
+                              'received_date'.tr().toUpperCase(),
                               style: TextStyle(
-                                color: isDarkMode ? whiteColor : greyColor6,
-                                fontSize: pathS / 6,
-                                fontWeight: FontWeight.normal,
+                                color: isDarkMode ? whiteColor : greyColor3,
+                                fontSize: pathS / 6.5,
+                                fontWeight: FontWeight.w700,
                                 fontFamily: 'Roboto',
                               ),
                               textAlign: TextAlign.center,
@@ -130,11 +133,11 @@ class AKRViewState extends State<AKRView> {
                           ),
                           Expanded(
                             child: Text(
-                              'due_date'.tr(),
+                              'due_date'.tr().toUpperCase(),
                               style: TextStyle(
-                                color: isDarkMode ? whiteColor : greyColor6,
-                                fontSize: pathS / 6,
-                                fontWeight: FontWeight.normal,
+                                color: isDarkMode ? whiteColor : greyColor3,
+                                fontSize: pathS / 6.5,
+                                fontWeight: FontWeight.w700,
                                 fontFamily: 'Roboto',
                               ),
                               textAlign: TextAlign.right,
@@ -145,7 +148,7 @@ class AKRViewState extends State<AKRView> {
                     ),
                     // List view
                     Container(
-                      height: screenHeight-pathL,
+                      height: screenHeight-2*pathS/1.2,
                       child: ListView.builder(
                         itemCount: 13, // Change this to your desired itemCount
                         itemBuilder: (context, index) {
@@ -180,7 +183,7 @@ class AKRViewState extends State<AKRView> {
                                             style: TextStyle(
                                               color: isDarkMode ? whiteColor : greyColor6,
                                               fontSize: pathS / 6,
-                                              fontWeight: FontWeight.normal,
+                                              fontWeight: FontWeight.w500,
                                               fontFamily: 'Roboto',
                                             ),
                                             textAlign: TextAlign.left,
@@ -192,7 +195,7 @@ class AKRViewState extends State<AKRView> {
                                             style: TextStyle(
                                               color: isDarkMode ? whiteColor : greyColor6,
                                               fontSize: pathS / 6,
-                                              fontWeight: FontWeight.normal,
+                                              fontWeight: FontWeight.w500,
                                               fontFamily: 'Roboto',
                                             ),
                                             textAlign: TextAlign.center,
@@ -204,7 +207,7 @@ class AKRViewState extends State<AKRView> {
                                             style: TextStyle(
                                               color: isDarkMode ? whiteColor : greyColor6,
                                               fontSize: pathS / 6,
-                                              fontWeight: FontWeight.normal,
+                                              fontWeight: FontWeight.w500,
                                               fontFamily: 'Roboto',
                                             ),
                                             textAlign: TextAlign.center,
@@ -216,7 +219,7 @@ class AKRViewState extends State<AKRView> {
                                             style: TextStyle(
                                               color: isDarkMode ? whiteColor : greyColor6,
                                               fontSize: pathS / 6,
-                                              fontWeight: FontWeight.normal,
+                                              fontWeight: FontWeight.w500,
                                               fontFamily: 'Roboto',
                                             ),
                                             textAlign: TextAlign.right,
@@ -235,15 +238,15 @@ class AKRViewState extends State<AKRView> {
                   ],
                 ),
 
+
                 Positioned(
                   bottom: 0,
                   child: Container(
                     width: screenWidth,
-                    height: pathS / 1.4,
+                    height: pathS / 1.5,
                     alignment: Alignment.center,
                     decoration: BoxDecoration(
                       color: isDarkMode ? greyColor6:whiteColor,
-
                     ),
 
                   ),
@@ -258,7 +261,7 @@ class AKRViewState extends State<AKRView> {
                     },
                     child: Container(
                       width: screenWidth,
-                      height: pathS / 1.5,
+                      height: pathS / 1.4,
                       alignment: Alignment.center,
                       decoration: BoxDecoration(
                         color: isDarkMode ? greyColor6:whiteColor,
@@ -267,19 +270,19 @@ class AKRViewState extends State<AKRView> {
                         boxShadow: [
                           BoxShadow(
                             color: shadowColor, // Shadow color
-                            blurRadius: pathS/10, // Spread of the shadow
+                            blurRadius: pathS/15, // Spread of the shadow
                             // spreadRadius: pathS/15, // How far the shadow extends
-                            offset:  Offset(-pathS/12, pathS/12),
+                            offset:  Offset(-1, -pathS/15),
                           ),
                         ],
                       ),
                       child: Text(
-                        'logo_submission'.tr(),
+                        'logo_submission'.tr().toUpperCase(),
                         style: TextStyle(
-                          color: isDarkMode ? redColor2:redColor3,
-
-                          fontSize: pathS / 4.5,
-                          fontWeight: FontWeight.bold,
+                            color: isDarkMode ? redColor1:redColor3,
+                            fontSize: pathS / 5,
+                            fontWeight: FontWeight.w700,
+                            fontFamily: 'Roboto'
                         ),
                       ),
                     ),
@@ -296,30 +299,6 @@ class AKRViewState extends State<AKRView> {
         ],
       ),
     );
-  }
-
-  String getAssetImage(String status) {
-    if (status == 'Approved') {
-      return 'assets/images/icons/status-done.png';
-    }
-    if (status == 'Rejected') {
-      return 'assets/images/icons/status-rejected.png';
-    }
-    else {
-      return 'assets/images/icons/status-pending.png';
-    }
-  }
-
-  Color getStatusColor(String status) {
-    if (status == 'Approved') {
-      return greenColor6;
-    }
-    if (status == 'Rejected') {
-      return redColor2;
-    }
-    else {
-      return orangeColor1;
-    }
   }
 
 }

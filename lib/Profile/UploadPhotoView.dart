@@ -6,19 +6,28 @@ import 'package:mysis/CommonViews/Utility.dart';
 import 'package:easy_localization/easy_localization.dart';
 import 'package:mysis/Profile/ThanksUploadView.dart';
 
+import '../CommonViews/AlertPopupView.dart';
+import '../CommonViews/LoaderView.dart';
+import '../SharedClasses/APIHelper.dart';
+import 'EditProfileImageView.dart';
+
 class UploadPhotoView extends StatefulWidget {
 
-  final name;
-  final desination;
-  final imageData;
+  final String name;
+  final String designation;
+  final String filePath;
+  final String profileId;
+  final String imageData;
 
 
-  UploadPhotoView(
+  const UploadPhotoView(
       {
         super.key,
         required this.imageData,
-        this.name,
-        this.desination,
+        required this.name,
+        required this.designation,
+        required this.filePath,
+        required this.profileId,
       });
   @override
   UploadPhotoViewState createState() => UploadPhotoViewState();
@@ -26,6 +35,8 @@ class UploadPhotoView extends StatefulWidget {
 }
 
 class UploadPhotoViewState extends State<UploadPhotoView>{
+
+  bool showLoaderView = false;
 
   String assetsImagePath = "assets/images/dashboard-icons/profile-icon.png";
   String imagePath = '';
@@ -37,6 +48,9 @@ class UploadPhotoViewState extends State<UploadPhotoView>{
   String profileImage = 'assets/images/home/profile.png';
   String profileUrl = '';
 
+  bool showAlert = false;
+  String alertHeader = '';
+  String alertMessage = '';
 
   @override
   void initState() {
@@ -136,7 +150,7 @@ class UploadPhotoViewState extends State<UploadPhotoView>{
                       children: [
                         GestureDetector(
                           onTap: (){
-                            capturePhoto();
+                            onTapEditProfile();
                           },
                           child: Container(
                             width: pathL,
@@ -208,9 +222,22 @@ class UploadPhotoViewState extends State<UploadPhotoView>{
                   ],
                 ),
 
+                LoaderView(isVisible: showLoaderView, message: ''),
+                Visibility(
+                  visible: showAlert,
+                  child: AlertPopupView(
+                    header: alertHeader,
+                    message: alertMessage,
+                    cancelBtn: 'ok'.tr(),
+                    okBtn: '',
+                    callBack:(val){
+                      setState(() {
+                        showAlert = false;
+                      });
 
-
-
+                    },
+                  ),
+                ),
 
 
               ],
@@ -244,24 +271,105 @@ class UploadPhotoViewState extends State<UploadPhotoView>{
     final picker = ImagePicker();
     final pickedFile = await picker.pickImage(source: ImageSource.camera);
     imagePath = (pickedFile?.path)!;
+    printInDebug(imagePath);
     if (pickedFile != null) {
       List<int> imageBytes = await pickedFile.readAsBytes();
-
       setState(() {
         imageData = base64Encode(imageBytes);
       });
 
     }
   }
-  void onTapSubmit(){
-    Navigator.push(
-      context,
-      MaterialPageRoute(
-        builder: (context) => ThanksUploadView(name: widget.name, designation: widget.desination, imageData: imageData),
-      ),
+
+  void onTapEditProfile() {
+    showModalBottomSheet(
+      context: context,
+      isScrollControlled: true,
+      builder: (BuildContext context) {
+        return FractionallySizedBox(
+          heightFactor: 0.25,
+          child: Container(
+            decoration: BoxDecoration(
+              color: Colors.white,
+              borderRadius: BorderRadius.only(
+                topLeft: Radius.circular(pathS/8),
+                topRight: Radius.circular(pathS/8),
+              ),
+            ),
+            clipBehavior: Clip.antiAlias, // Add this line
+            child: EditProfileImageView(
+              onCloseBottomSheet: () {
+                Navigator.pop(context);
+              },
+              onTabSelected: (val , name, designation) {
+
+              }, name: userName, designation: widget.designation, profileId: widget.profileId,
+            ),
+          ),
+        );
+      },
     );
   }
 
+
+  void onTapSubmit(){
+
+    uploadProfileImage(widget.filePath);
+
+  }
+
+
+  Future<void> uploadProfileImage(String filePath) async {
+    setState(() {
+      showLoaderView = true;
+    });
+
+    Map <String,String> inputData = {
+      'parentType' : 'ProfilePhoto',
+      'parentID':widget.profileId,
+      'fileDescription':'profile photo change',
+      'file':filePath,
+    };
+
+    APIHelper.instance.postImage(uploadImageApi, inputData, (responseData) {
+      if (responseData.isNotEmpty) {
+        // Parse the response list directly
+
+        Map<String, dynamic> data = responseData;
+
+        final String message = data['message'] ?? '';
+        loadThanks(message);
+
+      }
+      else {
+        // Handle empty response
+        printInDebug('Response data is empty.');
+      }
+      setState(() {showLoaderView = false;});
+    },
+          (error) {
+        // Handle error
+            setState(() {
+              showLoaderView = false;
+            });
+        printInDebug('Error: $error');
+      },
+    );
+  }
+
+  void loadThanks(String message){
+    Navigator.pushReplacement(
+      context,
+      MaterialPageRoute(
+        builder: (context) => ThanksUploadView(
+            name: widget.name,
+            designation: widget.designation,
+            imageData: imageData,
+          message: message,
+        ),
+      ),
+    );
+  }
 
 }
 

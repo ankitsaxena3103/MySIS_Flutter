@@ -1,8 +1,12 @@
 import 'package:flutter/material.dart';
 import 'package:mysis/CommonViews/Utility.dart';
 import 'package:easy_localization/easy_localization.dart';
+import 'package:mysis/EscortDuty/EscortDuty.dart';
 import 'package:mysis/EscortDuty/EscortDutyHistoryView.dart';
 import 'package:mysis/EscortDuty/NewEscortDutyView.dart';
+
+import '../SharedClasses/APIHelper.dart';
+import '../SharedClasses/DatabaseHelper.dart';
 
 class EscortDutyView extends StatefulWidget {
   @override
@@ -13,6 +17,7 @@ class EscortDutyViewState extends State<EscortDutyView>{
 
   @override
   void initState() {
+    onLoadEscortDutyData();
     super.initState();
   }
 
@@ -64,7 +69,7 @@ class EscortDutyViewState extends State<EscortDutyView>{
                           style: TextStyle(
                             color: isDarkMode ?  whiteColor:greyColor6,
                             fontSize: pathS / 5.5,
-                            fontWeight: FontWeight.normal,
+                            fontWeight: FontWeight.w500,
                             fontFamily: 'Roboto',
                           ),
                           textAlign: TextAlign.center,
@@ -154,6 +159,59 @@ class EscortDutyViewState extends State<EscortDutyView>{
         ],
       ),
     );
+  }
+
+  void onLoadEscortDutyData() {
+
+
+    // setState(() {
+    //   showLoaderView = true;
+    // });
+    Map <String,String> inputData = {
+
+    };
+
+    APIHelper.instance.getData(escortDutyApi,inputData, (data) {
+
+      // setState(() {
+      //   showLoaderView = false;
+      // });
+
+      if(data.isNotEmpty){
+
+        List<EscortDuty> escortDutyData = data.map((json) => EscortDuty.fromJson(json)).toList();
+
+        for (var data in escortDutyData) {
+          printInDebug('EscortDuty  Data');
+          data.toMap().forEach((i, j) {
+            printInDebug('$i : $j');
+          });
+        }
+
+        if(escortDutyData.isNotEmpty){
+          saveEscortDutyData(escortDutyData);
+        }
+
+      }
+
+    },(error){
+      // setState(() {
+      //   showLoaderView = false;
+      // });
+
+    }
+    );
+
+  }
+  Future<void> saveEscortDutyData(List<EscortDuty> escortDuty) async {
+
+    await DatabaseHelper.instance.updateOrDeleteTableData<EscortDuty>(
+        keyTableEscortDuty,
+        escortDuty,
+        'id',
+            (escortDuties) => escortDuties.toMap()
+    );
+
   }
 
   void onLoadEscortDutyHistory(){

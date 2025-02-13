@@ -9,6 +9,8 @@ class UnitDutyPost {
   final int allowDistance;
   final int deleted;
   final DateTime dateModified;
+  final DateTime updatedAt;
+
 
   UnitDutyPost({
     required this.id,
@@ -21,6 +23,8 @@ class UnitDutyPost {
     required this.allowDistance,
     required this.deleted,
     required this.dateModified,
+    required this.updatedAt,
+
   });
 
   // Factory method for JSON deserialization
@@ -36,6 +40,8 @@ class UnitDutyPost {
       allowDistance: json['ALLOW_DISTANCE'] as int,
       deleted: json['DELETED'] as int,
       dateModified: DateTime.parse(json['DATE_MODIFIED']),
+      updatedAt:DateTime.now(),
+
     );
   }
 
@@ -66,6 +72,9 @@ class UnitDutyPost {
   'allowDistance': 'INTEGER NOT NULL',
   'deleted': 'INTEGER NOT NULL',
   'dateModified': 'TEXT NOT NULL',
+  'updatedAt':'TEXT NOT NULL',
+
+
   };
   factory UnitDutyPost.fromMap(Map<String, dynamic> map) {
     return UnitDutyPost(
@@ -79,6 +88,9 @@ class UnitDutyPost {
       allowDistance: map['allowDistance'] as int,
       deleted: map['deleted'] as int,
       dateModified: DateTime.parse(map['dateModified'] as String),
+      updatedAt: map['updatedAt'] != null
+          ? DateTime.parse(map['updatedAt']) // Convert ISO string to DateTime
+          : DateTime.now(),
     );
   }
 
@@ -93,7 +105,8 @@ class UnitDutyPost {
       'isGeoFenceAllow': isGeoFenceAllow,
       'allowDistance': allowDistance,
       'deleted': deleted,
-      'dateModified': dateModified.toIso8601String(), // Convert DateTime to ISO string.
+      'dateModified': dateModified.toIso8601String(),
+      'updatedAt':updatedAt.toIso8601String(),
     };
   }
 

@@ -5,12 +5,20 @@ import 'package:mysis/CommonViews/LoaderView.dart';
 import 'package:mysis/CommonViews/ToastMessageView.dart';
 import 'package:mysis/CommonViews/Utility.dart';
 import 'package:mysis/UserAuthViews/ConfirmPINView.dart';
-import 'package:flutter_otp_text_field/flutter_otp_text_field.dart';
-import 'package:otp_text_field/otp_field.dart';
-import 'package:otp_text_field/style.dart';
+import '../CommonViews/CustomNumericKeypad.dart';
 
 class SetPINView extends StatefulWidget {
-  const SetPINView({super.key});
+  final String mobile;
+  final String regNo;
+  final int calledValue;
+
+  const SetPINView({
+    super.key,
+    required this.mobile,
+    required this.regNo,
+    required this.calledValue,
+
+  });
 
   @override
   SetPINViewState createState() => SetPINViewState();
@@ -44,6 +52,9 @@ class SetPINViewState extends State<SetPINView> {
   String lblUserIdHintText = '';
 
   String btnNext = 'confirm'.tr();
+  bool showKeypad = false;
+
+  List<String> otpList = []; // List of 4 empty strings
 
 
   @override
@@ -74,46 +85,82 @@ class SetPINViewState extends State<SetPINView> {
             child: Stack(
               alignment: Alignment.center,
               children: [
-
                 Positioned(
-                  top: paddingTop,
-                  child: Container(
-                    width: logicalWidth,
-                    height: pathS/1.2,
-                    color: isDarkMode?whiteColor:Colors.transparent, // Set white background color here
-                    child: Padding(
-                      padding: EdgeInsets.only(top: 0, bottom: 0,left: pathS/5,right: pathS/5), // Adjust the padding values as needed
-                      child: Row(
-                        mainAxisAlignment: MainAxisAlignment.center,
-                        children: [
-                          Container(
-                            width: pathL,
-                            height: pathS / 1.5,
-                            decoration: const BoxDecoration(
-                              shape: BoxShape.rectangle,
-                              image: DecorationImage(
-                                image: AssetImage("assets/images/icons/logo.png"),
-                                fit: BoxFit.cover,
-                              ),
-                            ),
+                  top: MediaQuery.of(context).padding.top+pathS/12,
+                  left: paddingLeft +pathS/3,
+                  child: GestureDetector(
+                    onTap: (){
+                      Navigator.pop(context);
+                    },
+                    child: Row(
+                      children: [
+                        SizedBox(
+                          width: pathS/5,
+                          height: pathS/2,
+                          child: Image.asset(
+                            'assets/images/dashboard-icons/left-arrow.png',
+                            color: isDarkMode ? whiteColor:greyColor5,
+
                           ),
-                          Spacer(),
-                          Container(
-                            width: pathS / 1.45,
-                            height: pathS / 1.5,
-                            decoration: const BoxDecoration(
-                              shape: BoxShape.rectangle,
-                              image: DecorationImage(
-                                image: AssetImage("assets/images/icons/icon.png"),
-                                fit: BoxFit.cover,
-                              ),
-                            ),
+
+                        ),
+                        SizedBox(width: pathS/8),
+                        Text(
+                          'PIN'.tr(),
+                          style: TextStyle(
+                            color: isDarkMode ?  whiteColor:greyColor5,
+                            fontSize: pathS / 5,
+                            fontWeight: FontWeight.w500,
+                            fontFamily: 'Roboto',
                           ),
-                        ],
-                      ),
+                          textAlign: TextAlign.center,
+                        ),
+
+                      ],
                     ),
                   ),
                 ),
+
+                // Positioned(
+                //   top: paddingTop,
+                //   child: Container(
+                //     width: logicalWidth,
+                //     height: pathS/1.2,
+                //     color: isDarkMode?whiteColor:Colors.transparent, // Set white background color here
+                //     child: Padding(
+                //       padding: EdgeInsets.only(top: 0, bottom: 0,left: pathS/5,right: pathS/5), // Adjust the padding values as needed
+                //       child: Row(
+                //         mainAxisAlignment: MainAxisAlignment.center,
+                //         children: [
+                //           Container(
+                //             width: pathL,
+                //             height: pathS / 1.5,
+                //             decoration: const BoxDecoration(
+                //               shape: BoxShape.rectangle,
+                //               image: DecorationImage(
+                //                 image: AssetImage("assets/images/icons/logo.png"),
+                //                 fit: BoxFit.cover,
+                //               ),
+                //             ),
+                //           ),
+                //           Spacer(),
+                //           Container(
+                //             width: pathS / 1.45,
+                //             height: pathS / 1.5,
+                //             decoration: const BoxDecoration(
+                //               shape: BoxShape.rectangle,
+                //               image: DecorationImage(
+                //                 image: AssetImage("assets/images/icons/icon.png"),
+                //                 fit: BoxFit.cover,
+                //               ),
+                //             ),
+                //           ),
+                //         ],
+                //       ),
+                //     ),
+                //   ),
+                // ),
+
                 Column(
                   mainAxisAlignment: MainAxisAlignment.center,
                   children: [
@@ -185,61 +232,47 @@ class SetPINViewState extends State<SetPINView> {
                                   ),
                                 ),
                                 SizedBox(height: pathS / 12),
-                                OTPTextField(
-                                  length: 4,
-                                  width: pathL * 1.2,
-                                  fieldWidth: pathS / 2.2,
-                                  obscureText: true,
-
-                                  keyboardType: TextInputType.number,
-                                  style: TextStyle(
-                                    color: isDarkMode ? whiteColor : greyColor6,
-                                    fontSize: pathS / 5,
-                                    fontFamily: 'Roboto',
+                                GestureDetector(
+                                  onTap: () {
+                                    setState(() {
+                                      showKeypad = true;
+                                    });
+                                  },
+                                  child: Row(
+                                    mainAxisAlignment: MainAxisAlignment.center,
+                                    children: List.generate(4, (index) {
+                                      return Container(
+                                        margin: const EdgeInsets.symmetric(horizontal: 5.0),
+                                        width: pathS/2.2,
+                                        height: 50,
+                                        color: isDarkMode?greyColor8:Colors.white,
+                                        child: Column(
+                                          mainAxisAlignment: MainAxisAlignment.center,
+                                          children: [
+                                            // Simple Text
+                                            Text(
+                                              index < otpList.length ? '*' : '', // Show the value if present, else blank
+                                              style: TextStyle(
+                                                  color: isDarkMode ? whiteColor:greyColor6,
+                                                  fontSize: pathS / 3,
+                                                  fontWeight: FontWeight.w500,
+                                                  fontFamily: 'Roboto'
+                                              ),
+                                              textAlign: TextAlign.center,                                                ),
+                                            // Underline design
+                                            Container(
+                                              margin: const EdgeInsets.only(top: 4.0), // Space between text and underline
+                                              height: 1.5, // Height of the underline
+                                              color: isDarkMode ? greyColorDark : greyColor5,
+                                              // Underline color (can be customized)
+                                            ),
+                                          ],
+                                        ),
+                                      );
+                                    }),
                                   ),
-                                  textFieldAlignment: MainAxisAlignment.spaceAround,
-                                  fieldStyle: FieldStyle.underline,
+                                )
 
-                                  onChanged: (pin) {
-                                    print("OTP Entered: " + pin);
-                                    txtUserPIN.text = pin;
-                                    onUserIdChange(pin);
-                                  },
-                                  onCompleted: (pin) {
-                                    print("OTP completed: " + pin);
-
-                                    // txtUserPIN.text = pin;
-                                    // onUserIdChange(pin);
-                                  },
-                                ),
-
-                                // OtpTextField(
-                                //   numberOfFields: 4,
-                                //   obscureText: true,
-                                //   keyboardType: TextInputType.number,
-                                //   borderColor: isDarkMode ? whiteColor:greyColor6,
-                                //   focusedBorderColor: Colors.blue,
-                                //   styles: PINTextStyle(
-                                //       isDarkMode ? whiteColor : greyColor6,
-                                //       4,
-                                //   ),
-                                //   showFieldAsBox: false,
-                                //   borderWidth: 2.0,
-                                //   fieldWidth: pathS/2.5,
-                                //   //runs when a code is typed in
-                                //   onCodeChanged: (String code) {
-                                //     print("OTP entered: " + code);
-                                //
-                                //     onUserIdChange(code);
-                                //   },
-                                //   //runs when every textfield is filled
-                                //   onSubmit: (String pin) {
-                                //     txtUserPIN.text = pin;
-                                //     onUserIdChange(pin);
-                                //     print("OTP completed: " + pin);
-                                //
-                                //   },
-                                // ),
 
 
                               ],
@@ -324,6 +357,22 @@ class SetPINViewState extends State<SetPINView> {
                       okButtonTitle: ''),
                 ),
                 ToastMessageView(isVisible: showToastMessageView, message: toastMessage),
+                Visibility(
+                  visible: showKeypad,
+                  child: CustomNumericKeypad(
+                      keypadNumber: (value){
+                        if(value == -1){
+                          setState(() {
+                            showKeypad = false;
+                          });
+                        }
+                        else if(value >= 0 && value <= 10){
+                          updateOTPList(value);
+                        }
+                      }
+                  ),
+                ),
+
               ],
             ),
           ),
@@ -332,9 +381,35 @@ class SetPINViewState extends State<SetPINView> {
     );
   }
 
+  void updateOTPList(int value) {
+
+    setState(() {
+      if (value == 10) {
+        // Handle delete action
+        if (otpList.isNotEmpty) {
+          otpList.removeLast();
+        }
+      }
+      else if (value >=0  && value < 10) {
+        // Handle number input
+        if (otpList.length < 4) {
+          otpList.add(value.toString()); // Add the value to the list
+          if(otpList.length == 4){
+            showKeypad = false;
+          }
+        }
+      }
+    });
+
+    String pin = otpList.join();
+    txtUserPIN.text = pin;
+    onPinChange(pin);
+  }
+
+
   void initialSetup() {}
 
-  void onUserIdChange(String otp){
+  void onPinChange(String otp){
 
     if(otp.length == 4){
       setState(() {
@@ -343,7 +418,6 @@ class SetPINViewState extends State<SetPINView> {
          nextShadowColor = shadowColor;
         lblErrorMsg = '';
       });
-
 
     }else{
       setState(() {
@@ -368,7 +442,13 @@ class SetPINViewState extends State<SetPINView> {
     Navigator.push(
           context,
           MaterialPageRoute(
-            builder: (context) => ConfirmPINView(userPIN:txtUserPIN.text),
+            builder: (context) => ConfirmPINView(
+                userPIN:txtUserPIN.text,
+              calledValue: widget.calledValue,
+              pinEntered: txtUserPIN.text,
+              mobile: widget.mobile,
+              regNo: widget.regNo,
+            ),
           ),
         );
 

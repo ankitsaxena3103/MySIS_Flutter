@@ -26,6 +26,7 @@ class UserRoaster {
   final String geoLocation;
   final String dutyRankCode;
   final String dutyRankName;
+  final DateTime updatedAt;
 
   UserRoaster({
     required this.id,
@@ -55,6 +56,7 @@ class UserRoaster {
     required this.geoLocation,
     required this.dutyRankCode,
     required this.dutyRankName,
+    required this.updatedAt,
   });
 
   factory UserRoaster.fromJson(Map<String, dynamic> json) {
@@ -86,6 +88,7 @@ class UserRoaster {
       geoLocation: json['GEO_LOCATION'],
       dutyRankCode: json['DUTY_RANK_CODE'],
       dutyRankName: json['DUTY_RANK_NAME'],
+      updatedAt: DateTime.now(), // Default value if not in the JSON
     );
   }
 
@@ -152,70 +155,76 @@ class UserRoaster {
       geoLocation: map['GEO_LOCATION'],
       dutyRankCode: map['DUTY_RANK_CODE'],
       dutyRankName: map['DUTY_RANK_NAME'],
+      updatedAt: map['updatedAt'] != null
+          ? DateTime.parse(map['updatedAt']) // Convert ISO string to DateTime
+          : DateTime.now(),
     );
   }
 
-  // Convert a UserRoaster instance into a Map
+// Fields for database
+  static const fields = {
+    'id': 'TEXT PRIMARY KEY', // Unique identifier
+    'rosterId': 'TEXT NOT NULL',
+    'unitCode': 'TEXT NOT NULL',
+    'siteName': 'TEXT NOT NULL',
+    'shiftId': 'TEXT NOT NULL',
+    'shiftName': 'TEXT NOT NULL',
+    'rosterDate': 'TEXT NOT NULL',
+    'startTime': 'TEXT NOT NULL',
+    'endTime': 'TEXT NOT NULL',
+    'dutyHrs': 'TEXT NOT NULL',
+    'shiftStartTime': 'TEXT NOT NULL',
+    'shiftEndTime': 'TEXT NOT NULL',
+    'dutyStartEnableTime': 'TEXT NOT NULL',
+    'dutyStartDisableTime': 'TEXT NOT NULL',
+    'dutyEndDisableTime': 'TEXT NOT NULL',
+    'deleted': 'INTEGER NOT NULL',
+    'dateModified': 'TEXT NOT NULL',
+    'regNo': 'TEXT NOT NULL',
+    'dutyPostId': 'TEXT NOT NULL',
+    'postName': 'TEXT NOT NULL',
+    'qrId': 'TEXT NOT NULL',
+    'dutyPostAddress': 'TEXT NOT NULL',
+    'geoFenceRange': 'INTEGER NOT NULL',
+    'isGeoFenceAllow': 'INTEGER NOT NULL',
+    'geoLocation': 'TEXT NOT NULL',
+    'dutyRankCode': 'TEXT NOT NULL',
+    'dutyRankName': 'TEXT NOT NULL',
+    'updatedAt': 'TEXT NOT NULL',
+  };
+
+// toMap() method
   Map<String, dynamic> toMap() {
     return {
-      'ID': id,
-      'ROSTER_ID': rosterId,
-      'UNIT_CODE': unitCode,
-      'SITE_NAME': siteName,
-      'SHIFT_ID': shiftId,
-      'SHIFT_NAME': shiftName,
-      'ROSTER_DATE': rosterDate,
-      'START_TIME': startTime,
-      'END_TIME': endTime,
-      'DUTY_HRS': dutyHrs,
-      'SHIFT_START_TIME': shiftStartTime.toIso8601String(),
-      'SHIFT_END_TIME': shiftEndTime.toIso8601String(),
-      'DUTY_START_ENABLE_TIME': dutyStartEnableTime.toIso8601String(),
-      'DUTY_START_DISABLE_TIME': dutyStartDisableTime.toIso8601String(),
-      'DUTY_END_DISABLE_TIME': dutyEndDisableTime.toIso8601String(),
-      'DELETED': deleted,
-      'DATE_MODIFIED': dateModified.toIso8601String(),
-      'REGNO': regNo,
-      'DUTY_POST_ID': dutyPostId,
-      'POST_NAME': postName,
-      'QR_ID': qrId,
-      'DUTY_POST_ADDRESS': dutyPostAddress,
-      'GEO_FENCE_RANGE': geoFenceRange,
-      'IS_GEO_FENCE_ALLOW': isGeoFenceAllow,
-      'GEO_LOCATION': geoLocation,
-      'DUTY_RANK_CODE': dutyRankCode,
-      'DUTY_RANK_NAME': dutyRankName,
+      'id': id,
+      'rosterId': rosterId,
+      'unitCode': unitCode,
+      'siteName': siteName,
+      'shiftId': shiftId,
+      'shiftName': shiftName,
+      'rosterDate': rosterDate,
+      'startTime': startTime,
+      'endTime': endTime,
+      'dutyHrs': dutyHrs,
+      'shiftStartTime': shiftStartTime.toIso8601String(),
+      'shiftEndTime': shiftEndTime.toIso8601String(),
+      'dutyStartEnableTime': dutyStartEnableTime.toIso8601String(),
+      'dutyStartDisableTime': dutyStartDisableTime.toIso8601String(),
+      'dutyEndDisableTime': dutyEndDisableTime.toIso8601String(),
+      'deleted': deleted,
+      'dateModified': dateModified.toIso8601String(),
+      'regNo': regNo,
+      'dutyPostId': dutyPostId,
+      'postName': postName,
+      'qrId': qrId,
+      'dutyPostAddress': dutyPostAddress,
+      'geoFenceRange': geoFenceRange,
+      'isGeoFenceAllow': isGeoFenceAllow,
+      'geoLocation': geoLocation,
+      'dutyRankCode': dutyRankCode,
+      'dutyRankName': dutyRankName,
+      'updatedAt': updatedAt.toIso8601String(),
     };
   }
 
-  // Fields for database
-  static const fields = {
-    'ID': 'TEXT PRIMARY KEY',
-    'ROSTER_ID': 'TEXT NOT NULL',
-    'UNIT_CODE': 'TEXT NOT NULL',
-    'SITE_NAME': 'TEXT NOT NULL',
-    'SHIFT_ID': 'TEXT NOT NULL',
-    'SHIFT_NAME': 'TEXT NOT NULL',
-    'ROSTER_DATE': 'TEXT NOT NULL',
-    'START_TIME': 'TEXT NOT NULL',
-    'END_TIME': 'TEXT NOT NULL',
-    'DUTY_HRS': 'TEXT NOT NULL',
-    'SHIFT_START_TIME': 'TEXT NOT NULL',
-    'SHIFT_END_TIME': 'TEXT NOT NULL',
-    'DUTY_START_ENABLE_TIME': 'TEXT NOT NULL',
-    'DUTY_START_DISABLE_TIME': 'TEXT NOT NULL',
-    'DUTY_END_DISABLE_TIME': 'TEXT NOT NULL',
-    'DELETED': 'INTEGER NOT NULL',
-    'DATE_MODIFIED': 'TEXT NOT NULL',
-    'REGNO': 'TEXT NOT NULL',
-    'DUTY_POST_ID': 'TEXT NOT NULL',
-    'POST_NAME': 'TEXT NOT NULL',
-    'QR_ID': 'TEXT NOT NULL',
-    'DUTY_POST_ADDRESS': 'TEXT NOT NULL',
-    'GEO_FENCE_RANGE': 'INTEGER NOT NULL',
-    'IS_GEO_FENCE_ALLOW': 'INTEGER NOT NULL',
-    'GEO_LOCATION': 'TEXT NOT NULL',
-    'DUTY_RANK_CODE': 'TEXT NOT NULL',
-    'DUTY_RANK_NAME': 'TEXT NOT NULL',
-  };
 }

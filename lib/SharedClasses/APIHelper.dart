@@ -2,9 +2,8 @@
 
 
 import 'dart:convert';
-// import 'dart:html';
+import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/foundation.dart';
-import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
 import 'package:mysis/CommonViews/Utility.dart';
 
@@ -20,15 +19,10 @@ class APIHelper {
   static APIHelper get instance => _instance;
 
 
-  void postAllData(
-      String apiName,
-      dynamic data,
-      Function(List<dynamic>) completion,
-      Function(Map<String, dynamic>) error,
-      ) async {
+  void postAllData(String apiName, dynamic data, Function(List<dynamic>) completion, Function(Map<String, dynamic>) error,) async {
+
     List<dynamic> responseDataList = [];
     Map<String, dynamic> responseError = {};
-
     var url = Uri.https(baseUrl, apiName);
     final header = {
       'accept': '*/*',
@@ -68,6 +62,23 @@ class APIHelper {
           error({'ErrorMessage': 'Invalid response format.'});
         }
       }
+      else if(response.statusCode == 401 && apiName != tokenApi){
+
+        final Map<String, dynamic> jsonResponse = jsonDecode(response.body) as Map<String, dynamic>;
+        responseError = jsonResponse.containsKey('data')
+            ? jsonResponse['data'] as Map<String, dynamic>
+            : {'ErrorMessage': 'Unexpected error'};
+
+        bool isForceLogout = (responseError['ForceLogout'] ?? 0) == 1;
+
+        if(isForceLogout){
+          Preferences.saveUserPreferenceBool(keyIsForcedLogOut, true);
+        }else{
+          recallGetToken();
+        }
+
+          error(responseError);
+      }
       else {
         // Handle other response statuses
         printInDebug('Request failed with status: ${response.statusCode}');
@@ -87,7 +98,6 @@ class APIHelper {
     }
   }
 
-
   void postData(String apiName,Map<String, dynamic> data, Function(Map<String, dynamic>) completion,Function(Map<String, dynamic>) error) async {
 
     Map<String, dynamic> responseData = {};
@@ -99,6 +109,7 @@ class APIHelper {
       'Content-Type': 'application/json',
       'Authorization': 'Bearer $token',
     };
+
     final body = data;
 
     final jsonString = jsonEncode(data);
@@ -117,6 +128,21 @@ class APIHelper {
         responseData = jsonDecode(response.body) as Map<String, dynamic>;
         completion(responseData);
 
+      }
+      else if(response.statusCode == 401 && apiName != tokenApi){
+        final Map<String, dynamic> jsonResponse = jsonDecode(response.body) as Map<String, dynamic>;
+        responseError = jsonResponse.containsKey('data')
+            ? jsonResponse['data'] as Map<String, dynamic>
+            : {'ErrorMessage': 'Unexpected error'};
+
+        bool isForceLogout = (responseError['ForceLogout'] ?? 0) == 1;
+
+        if(isForceLogout){
+          Preferences.saveUserPreferenceBool(keyIsForcedLogOut, true);
+        }else{
+          recallGetToken();
+        }
+        error(responseError);
       }
       else {
         printInDebug('Request failed with status: ${response.statusCode}');
@@ -143,17 +169,15 @@ class APIHelper {
 
   }
 
-
-
   void getData( String apiName,Map<String, String> queryParams, Function(List<dynamic>) completion,Function(Map<String, dynamic>) error) async {
     // Map<String, dynamic> responseData = {};
     List<dynamic> responseData = [];
 
     Map<String, dynamic> responseError = {};
 
-      var apiIURL = Uri.https(baseUrl,apiName);
+      var apiUrl = Uri.https(baseUrl,apiName);
 
-    var url = queryParams.isNotEmpty ? Uri.parse('$apiIURL').replace(queryParameters: queryParams) : apiIURL;
+    var url = queryParams.isNotEmpty ? Uri.parse('$apiUrl').replace(queryParameters: queryParams) : apiUrl;
 
     final headers = {
         'accept': '*/*',
@@ -187,11 +211,19 @@ class APIHelper {
           // completion(responseData);
         }
         else if(response.statusCode == 401){
-          String userId = await Preferences.getUserPreference(keyUserID) ?? '';
-          String pwd = await Preferences.getUserPreference(keyUserID) ?? '';
-          if(userId != '' && pwd != '') {
-            getToken(userId, pwd);
+          final Map<String, dynamic> jsonResponse = jsonDecode(response.body) as Map<String, dynamic>;
+          responseError = jsonResponse.containsKey('data')
+              ? jsonResponse['data'] as Map<String, dynamic>
+              : {'ErrorMessage': 'Unexpected error'};
+
+          bool isForceLogout = (responseError['ForceLogout'] ?? 0) == 1;
+
+          if(isForceLogout){
+            Preferences.saveUserPreferenceBool(keyIsForcedLogOut, true);
+          }else{
+            recallGetToken();
           }
+          error(responseError);
         }
         else {
           printInDebug('Request failed with status: ${response.statusCode}');
@@ -252,6 +284,22 @@ class APIHelper {
 
         // completion(responseData);
       }
+      else if(response.statusCode == 401 && apiName != tokenApi){
+        final Map<String, dynamic> jsonResponse = jsonDecode(response.body) as Map<String, dynamic>;
+        responseError = jsonResponse.containsKey('data')
+            ? jsonResponse['data'] as Map<String, dynamic>
+            : {'ErrorMessage': 'Unexpected error'};
+
+        bool isForceLogout = (responseError['ForceLogout'] ?? 0) == 1;
+
+        if(isForceLogout){
+          Preferences.saveUserPreferenceBool(keyIsForcedLogOut, true);
+        }else{
+          recallGetToken();
+        }
+        error(responseError);
+      }
+
       else {
         printInDebug('Request failed with status: ${response.statusCode}');
         printInDebug('error: ${response.body}');
@@ -276,20 +324,156 @@ class APIHelper {
     }
   }
 
+  void postImage(String apiName, Map<String, dynamic> data, Function(Map<String, dynamic>) completion, Function(Map<String, dynamic>) error) async {
+    Map<String, dynamic> responseData = {};
+    Map<String, dynamic> responseError = {};
+
+    try {
+      var apiIURL = Uri.https(baseUrl,apiName);
+
+      var url = data.isNotEmpty ? Uri.parse('$apiIURL').replace(queryParameters: data) : apiIURL;
+
+      // Create a Multipart Request
+      var request = http.MultipartRequest('POST', url);
+
+      // Add Authorization header
+      request.headers.addAll({
+        'accept': '*/*',
+        'Authorization': 'Bearer $token',
+      });
+
+
+      String fileName = data['file'] ?? 'file Not found';
+      printInDebug(fileName);
+      request.files.add(await http.MultipartFile.fromPath(
+          'fileName',fileName
+      ));
+
+      http.StreamedResponse streamedResponse = await request.send();
+      final response = await http.Response.fromStream(streamedResponse);
+
+      if (response.statusCode == 200) {
+        // Successful response
+        printInDebug('Response: ${response.body}');
+        responseData = jsonDecode(response.body) as Map<String, dynamic>;
+        completion(responseData);
+      } else {
+        // Failed response
+        printInDebug('Request failed with status: ${response.statusCode}');
+        printInDebug('Error: ${response.body}');
+
+        final Map<String, dynamic> jsonResponse = jsonDecode(response.body) as Map<String, dynamic>;
+        if (jsonResponse.containsKey('errors')) {
+          responseError = jsonResponse['errors'];
+        } else {
+          responseError = {'ErrorMessage': 'Unexpected error'};
+        }
+
+        error(responseError);
+      }
+    } catch (e) {
+      printInDebug('Error: $e');
+      responseError = {'ErrorMessage': 'Unexpected error: $e'};
+      error(responseError);
+    }
+  }
+
+  void patchData(String apiName,Map<String, dynamic> data, Function(List<dynamic>) completion,Function(Map<String, dynamic>) error) async {
+
+    // Map<String, dynamic> responseData = {};
+    List<dynamic> responseData = [];
+
+    Map<String, dynamic> responseError = {};
+
+    var url = Uri.https(baseUrl,apiName);
+    final header = {
+      'accept': '*/*',
+      'Content-Type': 'application/json',
+      'Authorization': 'Bearer $token',
+    };
+
+    final body = data;
+
+    final jsonString = jsonEncode(data);
+    printInDebug('Request (JSON): $jsonString');
+
+    try {
+      final response = await http.patch(
+        url,
+        headers: header,
+        body: jsonEncode(body),
+      );
+
+      if (response.statusCode == 200) {
+        // Successful request, you can handle the response here
+        printInDebug('Response: ${response.body}');
+        final Map<String, dynamic> jsonResponse =
+        jsonDecode(response.body) as Map<String, dynamic>;
+
+        if (jsonResponse.containsKey('data')) {
+          final List<dynamic> dataList = jsonResponse['data'];
+          responseData = dataList;
+
+          if (dataList.isNotEmpty) {
+            completion(responseData);
+          }
+        }
+
+      }
+      else if(response.statusCode == 401 && apiName != tokenApi){
+
+        final Map<String, dynamic> jsonResponse = jsonDecode(response.body) as Map<String, dynamic>;
+        responseError = jsonResponse.containsKey('data')
+            ? jsonResponse['data'] as Map<String, dynamic>
+            : {'ErrorMessage': 'Unexpected error'};
+
+        bool isForceLogout = (responseError['ForceLogout'] ?? 0) == 1;
+
+        if(isForceLogout){
+          Preferences.saveUserPreferenceBool(keyIsForcedLogOut, true);
+        }else{
+          recallGetToken();
+        }
+        error(responseError);
+      }
+      else {
+        printInDebug('Request failed with status: ${response.statusCode}');
+        printInDebug('error: ${response.body}');
+
+        final Map<String, dynamic> jsonResponse = jsonDecode(response.body) as Map<String, dynamic>;
+
+        if (jsonResponse.containsKey('data')) {
+          final Map<String, dynamic> data = jsonResponse['data'];
+          responseError = data;
+        }
+        else {
+          responseError = {'ErrorMessage': 'Unexpected error'};
+        }
+        error(responseError);
+      }
+    }
+    catch (e) {
+      printInDebug('Error: $e');
+      responseError = {'ErrorMessage': 'Unexpected error'};
+      error(responseError);
+    }
+
+  }
 
   void getToken(String userId, String pwd){
     Map <String,String> inputData = {
       "Username": userId,
       "Password": pwd,
-
     };
     APIHelper.instance.postData(tokenApi,inputData, (data) {
 
       if(data.isNotEmpty){
 
         token = data['token'] ?? '';
+        String expiryTime = data['expirytime'] ?? '';
         Preferences.saveUserPreference(keyUserToken, token);
-
+        Preferences.saveUserPreference(keyTokenExpiryTime, expiryTime);
+        Preferences.saveUserPreferenceBool(keyIsForcedLogOut, false);
 
       }
 
@@ -300,4 +484,55 @@ class APIHelper {
     });
   }
 
+  Future<bool> checkForTokenExpiry() async {
+    bool isTokenExpire = false;
+    DateTime currentDate = DateTime.now();
+
+    String expiryDate = await Preferences.getUserPreference(keyTokenExpiryTime) ?? '';
+    printInDebug("Expiry Date from storage: $expiryDate");
+
+    if (expiryDate.isEmpty) {
+      printInDebug("No expiry date found. Marking token as expired.");
+      return true;
+    }
+
+    try {
+      // Use correct format with locale
+      DateFormat format = DateFormat('M/d/yyyy h:mm:ss a', 'en_US'); // Force US locale
+      DateTime tokenExpiryDateTime = format.parseStrict(expiryDate);
+
+      printInDebug("Parsed Expiry Date: $tokenExpiryDateTime");
+
+      // Check if token is expired
+      bool isTokenAlreadyExpired = tokenExpiryDateTime.isBefore(currentDate);
+      bool isTokenExpireToday = tokenExpiryDateTime.year == currentDate.year &&
+          tokenExpiryDateTime.month == currentDate.month &&
+          tokenExpiryDateTime.day == currentDate.day;
+
+      if (isTokenAlreadyExpired) {
+        printInDebug("Token is already expired.");
+        isTokenExpire = true;
+      } else if (isTokenExpireToday) {
+        printInDebug("Token will expire today.");
+        isTokenExpire = true;
+      } else {
+        printInDebug("Token is still valid.");
+        isTokenExpire = false;
+      }
+    } catch (e) {
+      printInDebug("Error parsing expiry date: $e \nExpiry Date String: '$expiryDate'");
+      isTokenExpire = true; // Assume expired on error
+    }
+
+    return isTokenExpire;
+  }
+  Future<void> recallGetToken() async {
+    String userIdOrMobile = regNo.isNotEmpty ? await Preferences.getUserPreference(keyUserID) ?? '' : '';
+    String pwd = await Preferences.getUserPreference(keyPwd) ?? '';
+    if(userIdOrMobile != '' && pwd != '') {
+    getToken(userIdOrMobile, pwd);
+    }
+  }
+
 }
+
