@@ -151,6 +151,7 @@ class LoginViewState extends State<LoginView> {
                             color: Color.fromRGBO(51, 51, 51, 1),
                             fontSize: pathS / 3.5,
                             fontWeight: FontWeight.normal,
+                            fontFamily: 'Roboto',
                           ),
                           textAlign: TextAlign.center,
                         ),
@@ -259,6 +260,7 @@ class LoginViewState extends State<LoginView> {
                                           color: greyColor6,
                                           fontSize: pathS / 6.5,
                                           fontWeight: FontWeight.w500,
+                                          fontFamily: 'Roboto',
                                         ),
                                         textAlign: TextAlign.center,
                                       ),
@@ -278,6 +280,7 @@ class LoginViewState extends State<LoginView> {
                                           color: Color.fromRGBO(51, 51, 51, 0.7),
                                           fontSize: pathS / 6.5,
                                           fontWeight: FontWeight.w500,
+                                          fontFamily: 'Roboto',
                                         ),
                                         textAlign: TextAlign.center,
                                       ),
@@ -297,6 +300,7 @@ class LoginViewState extends State<LoginView> {
                               color: redColor2,
                               fontSize: pathS / 6,
                               fontWeight: FontWeight.w500,
+                              fontFamily: 'Roboto',
 
                             ),
                             textAlign: TextAlign.left,
@@ -337,6 +341,7 @@ class LoginViewState extends State<LoginView> {
                               color: nextFontColor,
                               fontSize: pathS / 4.5,
                               fontWeight: FontWeight.w600,
+                              fontFamily: 'Roboto',
                             ),
                           ),
                         ),
@@ -439,7 +444,7 @@ class LoginViewState extends State<LoginView> {
   Future<void> onTapLogin() async {
     String appTokenString = await getAppToken();
     if (txtUserId.text.isEmpty) {
-      showToastView("All fields are required");
+      showToastView("enter_mobile_no");
       return;
     }
       setState(() {
@@ -448,8 +453,8 @@ class LoginViewState extends State<LoginView> {
       Map <String,String> inputData = {
         "UserName": txtUserId.text,
         "AppToken" : appTokenString,
-        "BypassOTPScreen" : "0",
-        "Enable_OTPEntry" : "1"
+        "BypassOTPScreen" : "1",
+        "Enable_OTPEntry" : "0"
 
       };
 
@@ -461,7 +466,6 @@ class LoginViewState extends State<LoginView> {
         if(data.isNotEmpty){
 
           Map<String, dynamic> userData = data.first as Map<String, dynamic>;
-
 
           userName = userData['Name'] ?? '';
           regNo = userData['RegNo'] ?? 0;
@@ -489,10 +493,10 @@ class LoginViewState extends State<LoginView> {
 
           loadNextScreen(enableOTPEntry, otpId,otpTimer,pin,phoneNo,regNo);
 
-          if(isOTPRequired ==0 && pwd.isNotEmpty){
-
+          if(otpId.isNotEmpty && pwd.isNotEmpty){
+            getToken(regNo, pwd);
           }
-          getToken(regNo, pwd);
+
 
         }
 

@@ -330,7 +330,7 @@ class EnterManuallyViewState extends State<EnterManuallyView>{
 
                   child: GestureDetector(
                     onTap: (){
-                      Navigator.pop(context);
+                      // Navigator.pop(context);
                       onLoadScanEntry();
 
                     },
@@ -480,7 +480,7 @@ class EnterManuallyViewState extends State<EnterManuallyView>{
   }
 
   void onLoadScanEntry(){
-    Navigator.push(
+    Navigator.pushReplacement(
       context,
       MaterialPageRoute(
         builder: (context) => ScanCardView(
@@ -501,11 +501,11 @@ class EnterManuallyViewState extends State<EnterManuallyView>{
     if(widget.userProfile.mobile == txtUserId.text || widget.userProfile.regNo == txtUserId.text) {
 
       List<UserAttendance> attendanceList = await attendanceMarkedToday() ;
-      if( attendanceList.isNotEmpty){
+      if( attendanceList.isNotEmpty && widget.attendanceStatus == keyAttendanceStatusDutyIn ){
         UserAttendance attendance = attendanceList.first;
         setState(() {
           alertHeader = 'duty_mark_in_already'.tr();
-          alertMessage = '${'unit_name'.tr()}  ${attendance.siteName}\n\n${'shift_name'.tr()}  ${attendance.siteName}\n\n${'punch_Time'.tr()}  ${DateFormat('hh:mm:ss').format(attendance.actStartTime)}';
+          alertMessage = '${'unit_name'.tr()}  ${attendance.siteName}\n\n${'shift_name'.tr()}  ${attendance.shiftName}\n\n${'punch_Time'.tr()}  ${DateFormat('hh:mm:ss').format(attendance.actStartTime)}';
           showAlert = true;
 
         });

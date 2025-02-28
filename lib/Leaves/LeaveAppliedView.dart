@@ -78,8 +78,7 @@ class LeaveAppliedViewState extends State<LeaveAppliedView> {
                       right: paddingRight +pathS/3,
                       child: GestureDetector(
                         onTap: (){
-                          Navigator.of(context).popUntil((route) => route.isFirst);
-                        },
+                          loadHomeView();                        },
                         child: Row(
                           children: [
                             Container(
@@ -204,7 +203,7 @@ class LeaveAppliedViewState extends State<LeaveAppliedView> {
                                       SizedBox(height: pathS/3),
                                       GestureDetector(
                                         onTap: (){
-                                          Navigator.of(context).popUntil((route) => route.isFirst);
+                                          loadHomeView();
                                         },
                                         child: Container(
                                           width: pathL,
@@ -316,31 +315,6 @@ class LeaveAppliedViewState extends State<LeaveAppliedView> {
     }
 
   }
-  Future<void> onTapLogin() async {
-    if (txtEnterPIN.text.isEmpty || txtEnterPIN.text.length != 4) {
-      showToastView('repeat_not_match'.tr());
-      return;
-    }
-
-    String? currentPIN = await Preferences.getUserPreference(keyPIN);
-
-
-    if(currentPIN != txtEnterPIN.text){
-      showToastView('repeat_not_match'.tr());
-      return;
-
-    }
-
-
-
-    Navigator.pushReplacement(
-      context,
-      MaterialPageRoute(
-        builder: (context) => MyTabBarView(),
-      ),
-    );
-
-  }
 
   void showToastView(String message) {
     setState(() {
@@ -353,6 +327,17 @@ class LeaveAppliedViewState extends State<LeaveAppliedView> {
         showToastMessageView = false;
       });
     });
+  }
+
+
+  void loadHomeView(){
+    Navigator.pushAndRemoveUntil(
+      context,
+      MaterialPageRoute(
+        builder: (context) => MyTabBarView(),
+      ),
+          (route) => false, // This removes all previous routes
+    );
   }
 }
 
@@ -398,7 +383,7 @@ class RadioButton extends StatelessWidget {
               color: isDarkMode ? whiteColor:greyColor3,
             ),
             SizedBox(width: pathS/8),
-            Container(
+            SizedBox(
               height: pathS/3,
               child: Text(
                 name,

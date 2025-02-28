@@ -1,12 +1,9 @@
 import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter_otp_text_field/flutter_otp_text_field.dart';
 import 'package:mysis/CommonViews/LoaderView.dart';
 import 'package:mysis/CommonViews/SuccessAlertView.dart';
 import 'package:mysis/CommonViews/ToastMessageView.dart';
 import 'package:mysis/CommonViews/Utility.dart';
-import 'package:otp_text_field/otp_field.dart';
-import 'package:otp_text_field/style.dart';
 
 import '../CommonViews/AlertPopupView.dart';
 import '../CommonViews/CustomNumericKeypad.dart';

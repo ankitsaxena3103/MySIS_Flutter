@@ -700,7 +700,7 @@ class ApplyEscortDutyViewState extends State<ApplyEscortDutyView> {
                       ),
                     ),
 
-                    LoaderView(isVisible: showLoaderView, message: 'Loading...'),
+                    LoaderView(isVisible: showLoaderView, message: ''),
                     ToastMessageView(isVisible: showToastMessageView, message: toastMessage),
                     Visibility(
                       visible: showAlert,
@@ -750,7 +750,6 @@ class ApplyEscortDutyViewState extends State<ApplyEscortDutyView> {
 
 
   Color getBackgroundColor(DateTime date) {
-    printInDebug('calender $date');
     calendarDaysTextColor = isDarkMode ? whiteColor : greyColor6;
     calendarBoxShape = BoxShape.circle;
 
@@ -819,7 +818,7 @@ class ApplyEscortDutyViewState extends State<ApplyEscortDutyView> {
 
 
   void onTapSubmit(){
-printInDebug('msg');
+
     if(dutyAppliedDates.length != 2){
       showToastView('duty_dates'.tr());
 
@@ -833,26 +832,9 @@ printInDebug('msg');
 
     Map <String, dynamic> duty = createDutiesData();
 
-    // Convert JSON to UserAttendance object
-    EscortDuty appliedDuty = EscortDuty.fromJson(duty);
+    List<dynamic> dutyList = [duty];
 
-    // Create a list of UserAttendance objects
-    List<EscortDuty> appliedDuties = [appliedDuty];
-
-    // Call the sync function
-    syncEscortDutyData(
-      appliedDuties,
-      'id',
-    );
-
-    Navigator.of(context).popUntil((route) => route.isFirst);
-    Future.delayed(Duration(milliseconds: 3),(){
-      loadThanks();
-    });
-
-    List<dynamic> data = appliedDuties;
-
-    uploadDuty(data);
+    uploadDuty(dutyList);
 
   }
   Map <String, dynamic> createDutiesData(){
@@ -864,7 +846,7 @@ printInDebug('msg');
 
     Map <String, dynamic> duty = {
       "ID": newUuid,
-      'UNIT_CODE': widget.userPosting.unitCode,
+      'UNIT_CODE': widget.unitDutyPost.unitCode,
       'START_DATE': startDate,
       'END_DATE': endDate,
       'STATUS': 0,
@@ -872,53 +854,30 @@ printInDebug('msg');
       'CREATED_ON': DateTime.now().toIso8601String(),
       'DATE_MODIFIED': DateTime.now().toIso8601String(),
       'DELETED': 0,
-      'DIRTY_FLAG': 1,
+      'DIRTY_FLAG': 0,
       'UPDATED_AT':DateTime.now().toIso8601String(),
-
     };
 
-    printInDebug('Duty Data');
-    duty.forEach((key, value) {
-      printInDebug('$key : $value');
-    });
+    for (var entry in duty.entries) {
+      printInDebug('${entry.key} : ${entry.value}');
+    }
 
     return duty;
 
   }
 
-  Future<void> syncEscortDutyData(
-      List<EscortDuty> escortDuties,
-      String field,
-      ) async {
-    await DatabaseHelper.instance.insertTableData<EscortDuty>(
-      keyTableEscortDuty,
-      escortDuties,
-          (data) => data.toMap(),
-    );
-    for (var data in escortDuties) {
-      printInDebug('EscortDuty Data');
-      data.toMap().forEach((i, j) {
-        printInDebug('$i : $j');
-      });
-      printInDebug('Inserted ${escortDuties.length} records into $keyTableEscortDuty');
-
-    }
-  }
-
   Future<void> uploadDuty(dynamic data) async {
+
+    setState(() {
+      showLoaderView = true;
+    });
+
     APIHelper.instance.postAllData(escortDutyPostApi, data, (responseData) {
       if (responseData.isNotEmpty) {
-        // Parse the response list directly
-        List<dynamic> list = responseData;
-
-        for (var data in list) {
-          // Parse each attendance record
-          Map<String, dynamic> duties = {
-            "id": data['ID'] ?? '',
-            "dirtyFlag": 0,
-          };
-          updateEscortDutyTable(duties);
-        }
+        setState(() {
+          showLoaderView = false;
+        });
+        loadThanks();
       } else {
         // Handle empty response
         printInDebug('Response data is empty.');
@@ -927,6 +886,9 @@ printInDebug('msg');
           (error) {
         // Handle error
         printInDebug('Error: $error');
+        setState(() {
+          showLoaderView = false;
+        });
       },
     );
   }

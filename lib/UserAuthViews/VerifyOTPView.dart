@@ -8,6 +8,7 @@ import 'package:mysis/CommonViews/ToastMessageView.dart';
 import 'package:mysis/CommonViews/Utility.dart';
 import 'package:mysis/UserAuthViews/EnterPINView.dart';
 import 'package:mysis/UserAuthViews/SetPINView.dart';
+import 'package:sms_autofill/sms_autofill.dart';
 
 import '../CommonViews/AlertPopupView.dart';
 import '../CommonViews/AlertView.dart';
@@ -177,122 +178,132 @@ class VerifyOTPViewState extends State<VerifyOTPView> {
                     ),
                     SizedBox(height: pathS / 3),
                     SizedBox(height: pathS / 6),
+
                     Container(
-                      width: screenWidth-2.5*marginValue,
-                      // height: pathL,
-                      decoration:  BoxDecoration(
+                      width: screenWidth - 2.5 * marginValue,
+                      decoration: BoxDecoration(
                         shape: BoxShape.rectangle,
-                        borderRadius: BorderRadius.circular(pathS/8),
+                        borderRadius: BorderRadius.circular(pathS / 8),
                         color: Colors.white,
                         boxShadow: [
                           BoxShadow(
-                            color: Colors.black.withOpacity(0.1), // Shadow color
-                            blurRadius: pathS/10, // Spread of the shadow
-                            // spreadRadius: pathS/15, // How far the shadow extends
-                            offset:  Offset(-pathS/12, pathS/12),
+                            color: Colors.black.withOpacity(0.1),
+                            blurRadius: pathS / 10,
+                            offset: Offset(-pathS / 12, pathS / 12),
                           ),
                         ],
                       ),
-                      child: Stack(
-                        alignment: Alignment.center,
-                        children: [
-                          Align(
-                            alignment: Alignment.center,
-                            child: Padding(
-                              padding:  EdgeInsets.only(top:pathS/3,bottom: pathS/3),
-                              child: Column(
-                                crossAxisAlignment: CrossAxisAlignment.center,
-                                mainAxisAlignment: MainAxisAlignment.center,
-
-                                children: [
-                                  SizedBox(
-                                    width: screenWidth - 5*marginValue,
-                                    child: Text(
-                                      lblUserIdHintMsg,
-                                      style: TextStyle(
-                                        color: Color.fromRGBO(51, 51, 51, 1),
-                                        fontSize: pathS / 6.5,
-                                        fontWeight: FontWeight.w500,
-                                      ),
-                                      textAlign: TextAlign.center,
-                                    ),
-                                  ),
-
-                                  SizedBox(height: pathS / 30),
-                                  SizedBox(
-                                    width: screenWidth - 5*marginValue,
-                                    child: Text(
-                                      '(${maskMobile(widget.mobile)} / ${widget.regNo})',
-                                      style: TextStyle(
-                                        color: Color.fromRGBO(51, 51, 51, 1),
-                                        fontSize: pathS / 6,
-                                        fontWeight: FontWeight.w500,
-                                      ),
-                                      textAlign: TextAlign.center,
-                                    ),
-                                  ),
-                                  SizedBox(height: pathS / 8),
-                                  SizedBox(
-                                    width: screenWidth - 5*marginValue,
-                                    child: Text(
-                                      'warning_message_in_OTP_Screen'.tr(),
-                                      style: TextStyle(
-                                        color: redColor1,
-                                        fontSize: pathS / 6,
-                                        fontWeight: FontWeight.w500,
-                                      ),
-                                      textAlign: TextAlign.center,
-                                    ),
-                                  ),
-
-                                  SizedBox(height: pathS / 12),
-                                  if(widget.enableOtpEntry)GestureDetector(
-                                    onTap: () {
-                                      setState(() {
-                                        showKeypad = widget.enableOtpEntry;
-                                      });
-                                    },
-                                    child: Row(
-                                      mainAxisAlignment: MainAxisAlignment.center,
-                                      children: List.generate(4, (index) {
-                                        return Container(
-                                          margin: const EdgeInsets.symmetric(horizontal: 5.0),
-                                          width: pathS/2.2,
-                                          height: pathS/1.5,
-                                          color: Colors.white,
-                                          child: Column(
-                                            mainAxisAlignment: MainAxisAlignment.center,
-                                            children: [
-                                              // Simple Text
-                                              Text(
-                                                index < otpList.length ? '*' : '', // Show the value if present, else blank
-                                                style: TextStyle(
-                                                    color: isDarkMode ? whiteColor:greyColor6,
-                                                    fontSize: pathS / 3,
-                                                    fontWeight: FontWeight.w500,
-                                                    fontFamily: 'Roboto'
-                                                ),
-                                                textAlign: TextAlign.center,                                                ),
-                                              // Underline design
-                                              Container(
-                                                margin: const EdgeInsets.only(top: 4.0), // Space between text and underline
-                                                height: 1.5, // Height of the underline
-                                                color: otpContainerColor,
-                                                // Underline color (can be customized)
-                                              ),
-                                            ],
-                                          ),
-                                        );
-                                      }),
-                                    ),
-                                  )
-                                ],
+                      child: Padding(
+                        padding: EdgeInsets.symmetric(vertical: pathS / 3),
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.center,
+                          mainAxisAlignment: MainAxisAlignment.center,
+                          children: [
+                            // Hint Message
+                            SizedBox(
+                              width: screenWidth - 5 * marginValue,
+                              child: Text(
+                                lblUserIdHintMsg,
+                                style: TextStyle(
+                                  color: Color.fromRGBO(51, 51, 51, 1),
+                                  fontSize: pathS / 6.5,
+                                  fontWeight: FontWeight.w500,
+                                ),
+                                textAlign: TextAlign.center,
                               ),
                             ),
-                          ),
-                        ],
+
+                            SizedBox(height: pathS / 30),
+
+                            // Masked Mobile and Registration Number
+                            SizedBox(
+                              width: screenWidth - 5 * marginValue,
+                              child: Text(
+                                '(${maskMobile(widget.mobile)} / ${widget.regNo})',
+                                style: TextStyle(
+                                  color: Color.fromRGBO(51, 51, 51, 1),
+                                  fontSize: pathS / 6,
+                                  fontWeight: FontWeight.w500,
+                                ),
+                                textAlign: TextAlign.center,
+                              ),
+                            ),
+
+                            SizedBox(height: pathS / 8),
+
+                            // Warning Message
+                            SizedBox(
+                              width: screenWidth - 5 * marginValue,
+                              child: Text(
+                                'warning_message_in_OTP_Screen'.tr(),
+                                style: TextStyle(
+                                  color: redColor1,
+                                  fontSize: pathS / 6,
+                                  fontWeight: FontWeight.w500,
+                                ),
+                                textAlign: TextAlign.center,
+                              ),
+                            ),
+
+                            SizedBox(height: pathS / 12),
+
+                            // OTP Entry
+                            if (widget.enableOtpEntry)
+                              GestureDetector(
+                                onTap: () {
+                                  setState(() {
+                                    showKeypad = widget.enableOtpEntry;
+                                  });
+                                },
+                                child: Row(
+                                  mainAxisAlignment: MainAxisAlignment.center,
+                                  children: List.generate(
+                                    4,
+                                        (index) => Container(
+                                      margin: const EdgeInsets.symmetric(horizontal: 5.0),
+                                      width: pathS / 2.2,
+                                      height: pathS / 1.5,
+                                      decoration: BoxDecoration(
+                                        color: Colors.white,
+                                        border: Border(
+                                          bottom: BorderSide(
+                                            color: otpContainerColor,
+                                            width: 1.5, // Underline thickness
+                                          ),
+                                        ),
+                                      ),
+                                      child: Center(
+                                        child: Text(
+                                          index < otpList.length ? '*' : '',
+                                          style: TextStyle(
+                                            color: isDarkMode ? whiteColor : greyColor6,
+                                            fontSize: pathS / 3,
+                                            fontWeight: FontWeight.w500,
+                                            fontFamily: 'Roboto',
+                                          ),
+                                          textAlign: TextAlign.center,
+                                        ),
+                                      ),
+                                    ),
+                                  ),
+                                ),
+                              )
+                            else
+                              OtpScreen(onOtpReceived: (otp) {
+                                if(otp.isNotEmpty){
+                                  txtUserOTP.text = otp;
+                                  onOTPEntered(otp);
+                                  verifyOTP();
+                                }
+                              },),
+                          ],
+                        ),
                       ),
                     ),
+//otp box
+
+
+
                     SizedBox(height: pathS/5),
                     SizedBox(
                       width: screenWidth-4*marginValue,
@@ -308,7 +319,6 @@ class VerifyOTPViewState extends State<VerifyOTPView> {
                       ),
                     ),
                     SizedBox(height: pathS/5),
-
                     ResendOTP(timerValue: widget.otpTimer, callBack: (value){
 
                       if(value == 1){
@@ -460,7 +470,7 @@ class VerifyOTPViewState extends State<VerifyOTPView> {
 
   }
 
-  void onVerifyOTP() {
+  void verifyOTP() {
 
     setState(() {
       showLoaderView = true;
@@ -531,7 +541,7 @@ class VerifyOTPViewState extends State<VerifyOTPView> {
     }
 
     if(widget.calledValue == 0){
-      onVerifyOTP();
+      verifyOTP();
     }
 
     if(widget.calledValue == 1){
@@ -739,6 +749,118 @@ class ResendOTPState extends State<ResendOTP> {
     final minutes = (seconds ~/ 60).toString().padLeft(2, '0'); // Get minutes
     final secs = (seconds % 60).toString().padLeft(2, '0'); // Get seconds
     return "$minutes:$secs";
+  }
+
+}
+
+
+
+
+class OtpScreen extends StatefulWidget {
+  final void Function(String) onOtpReceived;
+
+  const OtpScreen({
+    super.key, required this.onOtpReceived,
+
+  });
+
+  @override
+  _OtpScreenState createState() => _OtpScreenState();
+}
+
+class _OtpScreenState extends State<OtpScreen> with CodeAutoFill {
+  String _otpCode = "";
+  bool _isOtpDetected = false;
+  final List<TextEditingController> _controllers =
+  List.generate(4, (index) => TextEditingController());
+
+  @override
+  void initState() {
+    super.initState();
+    generateAppHash();
+    listenForCode(); // Start listening for SMS autofill
+    printInDebug("Listening for OTP...");
+  }
+
+  @override
+  void dispose() {
+    cancel(); // Cancel SMS listener when screen is disposed
+    for (var controller in _controllers) {
+      controller.dispose();
+    }
+    super.dispose();
+  }
+
+
+  @override
+  void codeUpdated() {
+    printInDebug("OTP detected: $code"); // Add debug logs
+    setState(() {
+      _otpCode = code ?? "";
+      _isOtpDetected = _otpCode.isNotEmpty;
+    });
+
+    // Autofill the OTP
+    for (int i = 0; i < _otpCode.length && i < _controllers.length; i++) {
+      _controllers[i].text = _otpCode[i];
+    }
+
+    if(_otpCode.isNotEmpty){
+      widget.onOtpReceived(_otpCode);
+    }
+
+  }
+
+
+  @override
+  Widget build(BuildContext context) {
+
+    return Center(
+      child: Row(
+        mainAxisAlignment: MainAxisAlignment.center,
+        children: List.generate(
+          4,
+              (index) => Container(
+            margin: const EdgeInsets.symmetric(horizontal: 5.0),
+            width: pathS / 2.2, // Adjust width for the container
+            height: pathS / 1.5, // Adjust height for the container
+            decoration: BoxDecoration(
+              color: Colors.white,
+              border: Border(
+                bottom: BorderSide(
+                  color: isDarkMode ? greyColorDark : greyColor5,
+                  width: 1.5, // Underline thickness
+                ),
+              ),
+            ),
+            child: Center(
+              child: TextField(
+                controller: _controllers[index],
+                style: TextStyle(
+                  color: isDarkMode ? whiteColor : greyColor6,
+                  fontSize: pathS / 3,
+                  fontWeight: FontWeight.w500,
+                  fontFamily: 'Roboto',
+                ),
+                textAlign: TextAlign.center,
+                keyboardType: TextInputType.none, // Prevent keyboard popup
+                maxLength: 1, // Ensure only 1 digit can be entered
+                decoration: const InputDecoration(
+                  counterText: "", // Remove the character counter
+                  border: InputBorder.none,
+                ),
+              ),
+            ),
+          ),
+        ),
+      ),
+    );
+  }
+
+
+  void generateAppHash() async {
+    final appSignature = await SmsAutoFill().getAppSignature;
+    printInDebug("App Hash: $appSignature");
   }
 
 }

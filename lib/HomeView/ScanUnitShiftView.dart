@@ -1,4 +1,5 @@
 import 'dart:ffi';
+import 'dart:math';
 
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
@@ -7,6 +8,7 @@ import 'package:geolocator/geolocator.dart';
 import 'package:mobile_scanner/mobile_scanner.dart';
 import 'package:mysis/CommonViews/Utility.dart';
 import 'package:easy_localization/easy_localization.dart';
+import 'package:mysis/EscortDuty/EscortDuty.dart';
 import 'package:mysis/HomeView/SelectShiftView.dart';
 import 'package:mysis/HomeView/UserAttendance.dart';
 import 'package:mysis/Profile/UnitDutyPost.dart';
@@ -14,7 +16,10 @@ import 'package:mysis/Profile/UserPosting.dart';
 import 'package:mysis/Profile/UserProfile.dart';
 
 import '../CommonViews/AlertPopupView.dart';
+import '../CommonViews/LoaderView.dart';
 import '../Profile/UnitShiftDetail.dart';
+import '../SharedClasses/DatabaseHelper.dart';
+import 'SubmitDutyView.dart';
 
 class ScanUnitShiftView extends StatefulWidget {
 
@@ -46,15 +51,25 @@ class ScanUnitShiftView extends StatefulWidget {
 class ScanUnitShiftViewState extends State<ScanUnitShiftView>{
   Key locationScannerKey = UniqueKey();
 
+  String attendanceMode = '';
   String assetsImagePath = "assets/images/dashboard-icons/profile-icon.png";
   String imagePath = '';
   bool noData = true;
+  bool showAlert = false;
+  String alertHeader = '';
+  String alertMessage = '';
+  String cancelBtnTitle = '';
+  String okBtnTitle = 'ok'.tr();
 
   String name  = '';
   String position  = '';
 
+  bool showMarkEscortDuty = false;
+  String escortDutyUnitCode = '';
+
  late UnitDutyPost selectedUnitDutyPost;
   late UserPosting selectedUserPosting;
+  late UnitShiftDetail dutyInShiftDetail;
 
   late List<UnitShiftDetail> matchingShiftDetails;
   String latLong  = '';
@@ -64,16 +79,19 @@ class ScanUnitShiftViewState extends State<ScanUnitShiftView>{
 
   late  MobileScannerController locationScannerController;
 
+  List<EscortDuty> approvedEscortDuty = [];
 
-  bool showAlert = false;
-  String alertHeader = '';
-  String alertMessage = '';
+  bool showLoaderView = false;
+
+  String retryMethod = '';
 
   @override
   void initState() {
 
+    attendanceMode = widget.attendanceMode;
+    updateEscortDutyUI();
     locationScannerController = MobileScannerController();
-    getCurrentLocation();
+    updateLocationData();
     onLoadUpdateUI();
     super.initState();
 
@@ -220,7 +238,39 @@ class ScanUnitShiftViewState extends State<ScanUnitShiftView>{
                                     fontFamily: 'Roboto',
                                   ),
                                   textAlign: TextAlign.left,
-
+                                ),
+                              ),
+                              if(showMarkEscortDuty)GestureDetector(
+                                onTap: (){
+                                  onTapMarkEscortDuty();
+                                },
+                                child: Container(
+                                  height: pathS / 1.8,
+                                  alignment: Alignment.center,
+                                  decoration: BoxDecoration(
+                                    color:   isDarkMode ? redColor1 : redColor3,                          // border: Border.all(color: Colors.yellow, width: pathS/18),
+                                    borderRadius: BorderRadius.circular(pathS/3),
+                                    boxShadow: [
+                                      BoxShadow(
+                                        color: shadowColor, // Shadow color
+                                        blurRadius: pathS/10, // Spread of the shadow
+                                        // spreadRadius: pathS/15, // How far the shadow extends
+                                        offset:  Offset(-pathS/12, pathS/12),
+                                      ),
+                                    ],
+                                  ),
+                                  child: Padding(
+                                    padding:  EdgeInsets.only(left: pathS/5,right: pathS/5),
+                                    child: Text(
+                                      'mark_escort_duty'.tr(),
+                                      style: TextStyle(
+                                        color:  isDarkMode ? whiteColor : whiteColor,
+                                        fontSize: pathS / 5,
+                                        fontWeight: FontWeight.w500,
+                                        fontFamily: 'Roboto',
+                                      ),
+                                    ),
+                                  ),
                                 ),
                               ),
                             ],
@@ -288,15 +338,21 @@ class ScanUnitShiftViewState extends State<ScanUnitShiftView>{
                   child: AlertPopupView(
                       header: alertHeader,
                       message: alertMessage,
-                      cancelBtn: '',
-                      okBtn: 'ok'.tr(),
+                      cancelBtn: cancelBtnTitle,
+                      okBtn: okBtnTitle,
                       callBack: (value){
                         setState(() {
                           showAlert = false;
                         });
+
+                        if(value == 0 && cancelBtnTitle == 'refresh'.tr()){
+                          onTapRefreshAndRetry();
+                        }
                       }
                   ),
-                )
+                ),
+                LoaderView(isVisible: showLoaderView, message: ''),
+
               ],
             ),
           ),
@@ -306,9 +362,53 @@ class ScanUnitShiftViewState extends State<ScanUnitShiftView>{
     );
   }
 
+  Future<void> updateEscortDutyUI() async {
 
 
-  Future<void> getCurrentLocation() async {
+    if(widget.userAttendance != null && widget.attendanceMode == keyAttendanceModeEscortDuty){
+      escortDutyUnitCode = widget.userAttendance!.unitCode;
+      setState(() {
+        showMarkEscortDuty = true;
+      });
+      return;
+    }
+
+    approvedEscortDuty =  await getApprovedEscortDuty(DateTime.now());
+
+    if(approvedEscortDuty.isNotEmpty ) {
+      escortDutyUnitCode = approvedEscortDuty.first.unitCode;
+      if( widget.attendanceMode == keyAttendanceModeOther){
+        setState(() {
+          showMarkEscortDuty = true;
+        });
+      }
+      if(widget.attendanceMode == keyAttendanceModeSelf && widget.unitDutyPosts.isNotEmpty){
+
+        final dutyEscortDuty = approvedEscortDuty.where((data) {
+          return    data.unitCode == widget.unitDutyPosts.first.unitCode;
+        }).toList();
+
+        if(dutyEscortDuty.isNotEmpty){
+          setState(() {
+            showMarkEscortDuty = true;
+          });
+        }
+      }
+    }
+
+  }
+  void onLoadUpdateUI(){
+
+    imagePath = widget.userProfile.profileImageUrl;
+    name = widget.userProfile.empName;
+    position = widget.userProfile.symbol;
+
+  }
+
+  void onTapMarkEscortDuty(){
+    getUnitPostDataByUnit(escortDutyUnitCode);
+  }
+  Future<void> updateLocationData() async {
     try {
       Position position = await Geolocator.getCurrentPosition(
         locationSettings: LocationSettings(
@@ -317,10 +417,10 @@ class ScanUnitShiftViewState extends State<ScanUnitShiftView>{
         ),
       );
 
-      print('Latitude: ${position.latitude}, Longitude: ${position.longitude}');
+      printInDebug('Latitude: ${position.latitude}, Longitude: ${position.longitude}');
       latLong = '${position.latitude},${position.longitude}';
     } catch (e) {
-      print('Error: $e');
+      printInDebug('Error: $e');
     }
   }
 
@@ -335,89 +435,131 @@ class ScanUnitShiftViewState extends State<ScanUnitShiftView>{
 
     getUnitPostData(barcodeScanRes);
 
-
   }
-
   Future<void> getUnitPostData(String qrId) async {
-    // // Filter the records based on the provided qrId
-    for (var data in widget.unitDutyPosts) {
-      printInDebug('widget ID: ${data.id}');
-      printInDebug('widget post name: ${data.postName}');
-    }
+
    final unitDutyPost = widget.unitDutyPosts.where((post) => post.qrId == qrId).toList();
 
     if (unitDutyPost.isEmpty) {
-      printInDebug('No records found for qrId: $qrId');
+      showPopupAlert('alert'.tr(), 'no_data_available'.tr());
     } else {
       selectedUnitDutyPost = unitDutyPost.first;
-
       getUserPosting(unitDutyPost.first.unitCode);
-      for (var data in unitDutyPost) {
-        printInDebug(' ID: ${data.id}');
-        printInDebug(' post name: ${data.postName}');
+
+    }
+  }
+  Future<void> getUnitPostDataByUnit(String unitCode) async {
+
+    attendanceMode = keyAttendanceModeEscortDuty;
+    final unitDutyPost = widget.unitDutyPosts.where((post) => post.unitCode == unitCode).toList();
+
+    if (unitDutyPost.isEmpty) {
+      showPopupAlert('alert'.tr(), 'no_unit_duty_post'.tr());
+    }
+    else {
+      selectedUnitDutyPost = unitDutyPost.first;
+      getUserPosting(unitDutyPost.first.unitCode);
+
+    }
+  }
+  Future<void> getUserPosting(String unitCode) async {
+
+    final userPostings = widget.userPostings.where((userPosting) {
+      return userPosting.unitCode == unitCode ;
+    }).toList();
+
+    if (userPostings.isEmpty) {
+      showPopupAlert('alert'.tr(), 'no_user_post'.tr());
+    }
+    else {
+      selectedUserPosting = userPostings.first;
+      if(widget.attendanceStatus == keyAttendanceStatusDutyIn) {
+        getUnitShiftDetails(userPostings.first.unitCode);
+      }
+
+      if(widget.attendanceStatus == keyAttendanceStatusDutyOut && widget.userAttendance != null) {
+
+        getUnitShiftDetailsById(widget.userAttendance!.shiftId);
+
       }
     }
   }
-
   Future<void> getUnitShiftDetails(String unitCode) async {
-    // Fetch all UnitShiftDetail records
-    // final unitShiftDetails = await DatabaseHelper.instance.getAllRecords<UnitShiftDetail>(
-    //   keyTableUnitShiftDetail,
-    //       (map) => UnitShiftDetail.fromMap(map),
-    // );
 
-    // Get the current time
     DateTime now = DateTime.now();
-
-    // Extract the current time in terms of hours, minutes, and seconds
     TimeOfDay currentTime = TimeOfDay(hour: now.hour, minute: now.minute);
 
-    // Filter the records based on the conditions
     matchingShiftDetails = widget.unitShiftDetails.where((shift) {
-      // Parse start and end times as TimeOfDay
+
       TimeOfDay startTime = _parseTimeOfDay(shift.startTime);
       TimeOfDay endTime = _parseTimeOfDay(shift.endTime);
 
-      // Parse shift start before and end after durations
       Duration shiftStartBeforeDuration = _parseShiftDuration(shift.shiftStartBefore);
       Duration shiftEndAfterDuration = _parseShiftDuration(shift.dutyInBefore);
 
-      // Adjust start and end times
       TimeOfDay adjustedStartTime = _adjustTimeOfDay(startTime, shiftStartBeforeDuration);
       TimeOfDay adjustedEndTime = _adjustTimeOfDay(endTime, shiftEndAfterDuration);
 
-      // Check if current time is within the adjusted time range
       return shift.unitCode == unitCode &&
           _isTimeBetween(currentTime, adjustedStartTime, adjustedEndTime);
     }).toList();
 
-    // Check the results
-    if (matchingShiftDetails.isEmpty) {
-      printInDebug('No shifts found for UNIT_CODE: $unitCode and current time: $currentTime');
 
-      setState(() {
-        alertHeader = 'alert'.tr();
-        alertMessage = 'other_mark_shift_not_allowed1'.tr();
-        showAlert = true;
-      });
-
+      if (matchingShiftDetails.isEmpty && widget.attendanceStatus == keyAttendanceStatusDutyIn) {
+         showPopupAlert('alert'.tr(), 'other_mark_shift_not_allowed1'.tr());
     } else {
-      onLoadSelectShift();
-      for (var shift in matchingShiftDetails) {
-        printInDebug('Shift ID: ${shift.id}');
-        printInDebug('Shift Name: ${shift.shiftName}');
-      }
+      loadSelectShiftView();
     }
   }
+  Future<void> getUnitShiftDetailsById(String shiftId) async {
 
-// Helper function to parse TimeOfDay from "HH:mm:ss" string
+    if (dutyInShiftDetail == null && widget.attendanceStatus == keyAttendanceStatusDutyOut) {
+      showPopupAlert('alert'.tr(), 'other_mark_shift_not_allowed1'.tr());
+    } else {
+      loadSubmitDutyView();
+    }
+
+
+  }
+  Future<List<EscortDuty>> getApprovedEscortDuty(DateTime selectedDate) async {
+
+    List<EscortDuty> escortDutyAllData = await DatabaseHelper.instance.getAllRecords<EscortDuty>(
+      keyTableEscortDuty,
+          (map) => EscortDuty.fromMap(map),
+    );
+
+    final escortDutyApprovedData = escortDutyAllData.where((data) {
+      // Compare only the date part (year, month, day) of the selectedDate and leave dates
+      return    (data.startDate.year < selectedDate.year ||
+          (data.startDate.year == selectedDate.year &&
+              data.startDate.month < selectedDate.month) ||
+          (data.startDate.year == selectedDate.year &&
+              data.startDate.month == selectedDate.month &&
+              data.startDate.day <= selectedDate.day)) &&
+          (data.endDate.year > selectedDate.year ||
+              (data.endDate.year == selectedDate.year &&
+                  data.endDate.month > selectedDate.month) ||
+              (data.endDate.year == selectedDate.year &&
+                  data.endDate.month == selectedDate.month &&
+                  data.endDate.day >= selectedDate.day)) &&
+          data.status == keyApprovedEscortDuty;
+    }).toList();
+
+
+    for (var data in escortDutyApprovedData) {
+      printInDebug('escortDutyApproved Data');
+      data.toMap().forEach((i, j) {
+        printInDebug('$i : $j');
+      });
+
+    }
+
+    return escortDutyApprovedData;
+  }
   TimeOfDay _parseTimeOfDay(String timeString) {
     List<String> parts = timeString.split(':');
     return TimeOfDay(hour: int.parse(parts[0]), minute: int.parse(parts[1]));
   }
-
-// Helper function to adjust TimeOfDay by a Duration
-// Helper function to adjust TimeOfDay by a Duration
   TimeOfDay _adjustTimeOfDay(TimeOfDay time, Duration adjustmentDuration) {
     final adjustmentMinutes = adjustmentDuration.inMinutes; // Convert Duration to int (minutes)
     final totalMinutes = time.hour * 60 + time.minute - adjustmentMinutes;
@@ -425,23 +567,17 @@ class ScanUnitShiftViewState extends State<ScanUnitShiftView>{
     final adjustedMinute = totalMinutes % 60;
     return TimeOfDay(hour: adjustedHour, minute: adjustedMinute);
   }
-
-// Helper function to check if a time is within a range
   bool _isTimeBetween(TimeOfDay current, TimeOfDay start, TimeOfDay end) {
     final currentMinutes = current.hour * 60 + current.minute;
     final startMinutes = start.hour * 60 + start.minute;
     final endMinutes = end.hour * 60 + end.minute;
 
     if (startMinutes <= endMinutes) {
-      // Normal case: Start and end are on the same day
       return currentMinutes >= startMinutes && currentMinutes <= endMinutes;
     } else {
-      // Overnight case: Start is before midnight, end is after midnight
       return currentMinutes >= startMinutes || currentMinutes <= endMinutes;
     }
   }
-
-// Helper function to parse "HH:mm:ss" to Duration
   Duration _parseShiftDuration(String shiftDuration) {
     List<String> parts = shiftDuration.split(':');
     return Duration(
@@ -451,34 +587,89 @@ class ScanUnitShiftViewState extends State<ScanUnitShiftView>{
     );
   }
 
-  Future<void> getUserPosting(String unitCode) async {
-    // Fetch all UnitShiftDetail records
-    // final userPostingData = await DatabaseHelper.instance.getAllRecords<UserPosting>(
-    //   keyTableUserPosting,
-    //       (map) => UserPosting.fromMap(map),
-    // );
+  bool checkDutyLocation(UnitDutyPost dutyPost, String currentLatLng, String retryCall){
 
-    // Filter the records based on the conditions
-   final userPostings = widget.userPostings.where((userPosting) {
-      return userPosting.unitCode == unitCode ;
-    }).toList();
 
-    // Check the results
-    if (userPostings.isEmpty) {
-      printInDebug('No userPostings found for UNIT_CODE: $unitCode ');
-    } else {
-      selectedUserPosting = userPostings.first;
-      getUnitShiftDetails(userPostings.first.unitCode);
-      for (var posting in userPostings) {
-        printInDebug('posting ID: ${posting.id}');
-        printInDebug('posting Name: ${posting.siteName}');
+    bool locationVerified = true;
+
+    List<String> activeDayList = currentLatLng.isNotEmpty ? currentLatLng.split(',').map((e) => e.trim()).toList() : ['0.0','0.0'];
+    double currentLat = double.parse(activeDayList[1]) ; // Latitude
+    double currentLng = double.parse(activeDayList[0]); // Longitude
+
+    if(dutyPost.isGeoFenceAllow == 1){
+      locationVerified = false;
+      if(currentLat > 0.0 && currentLng > 0.0){
+        int currentDistance = getDistanceFromDuty(dutyPost.geoLocation, currentLatLng);
+        if(currentDistance <= dutyPost.allowDistance){
+          locationVerified = true;
+        }
+        else{
+          locationVerified = false;
+          String message = '${'your_location'.tr()}: $currentLatLng\n ${'distance_from_post'.tr()}: $currentDistance ${'meter'.tr()}' ;
+          showPopupAlert(
+              'not_allow_range_location'.tr(),
+              message,
+              cancelText:'refresh'.tr()
+          );
+        }
+
       }
+      else{
+        locationVerified = false;
+        showPopupAlert(
+            'device_location'.tr(),
+            'not_allow_range_location'.tr(),
+            cancelText:'refresh'.tr()
+        );
+      }
+
     }
+    else{
+      locationVerified = true;
+    }
+
+    retryMethod = !locationVerified ? retryCall : '';
+    return locationVerified;
+
+  }
+  Future<void> onTapRefreshAndRetry() async {
+
+    setState(() {
+      showLoaderView = true;
+    });
+
+    await updateLocationData();
+
+    if(retryMethod == 'SelectShiftView'){
+      loadSelectShiftView();
+    }
+
+    if(retryMethod == 'SubmitDutyView'){
+      loadSubmitDutyView();
+    }
+
+    setState(() {
+      showLoaderView = false;
+    });
+
+
   }
 
-  void onLoadSelectShift(){
+  void showPopupAlert(String header, String message, {String cancelText = ''}){
+    setState(() {
+      alertHeader = header;
+      alertMessage = message;
+      showAlert = true;
+      cancelBtnTitle = cancelText;
 
-    printInDebug('load shift');
+    });
+  }
+  void loadSelectShiftView(){
+
+
+    if(!checkDutyLocation(selectedUnitDutyPost, latLong, 'SelectShiftView')){
+      return;
+    }
 
     locationScannerController.dispose();
     Navigator.push(
@@ -489,7 +680,7 @@ class ScanUnitShiftViewState extends State<ScanUnitShiftView>{
           unitDutyPost: selectedUnitDutyPost,
           unitShiftDetail: matchingShiftDetails,
           userPosting: selectedUserPosting,
-          attendanceMode: widget.attendanceMode,
+          attendanceMode: attendanceMode,
           attendanceStatus: widget.attendanceStatus,
           latLong: latLong,
           dutyDateTime:  dutyDateTime.toIso8601String(),
@@ -506,14 +697,30 @@ class ScanUnitShiftViewState extends State<ScanUnitShiftView>{
     });
 
   }
+  void loadSubmitDutyView(){
 
-  void onLoadUpdateUI(){
+    if(!checkDutyLocation(selectedUnitDutyPost, latLong, 'SubmitDutyView')){
+      return;
+    }
+    Navigator.push(
+      context,
+      MaterialPageRoute(
+        builder: (context) => SubmitDutyView(
+          userProfile: widget.userProfile,
+          unitDutyPost: selectedUnitDutyPost,
+          unitShiftDetail: dutyInShiftDetail,
+          userPosting: selectedUserPosting,
+          attendanceMode: widget.attendanceMode,
+          attendanceStatus: widget.attendanceStatus,
+          latLong: latLong,
+          dutyDateTime: dutyDateTime.toIso8601String(),
+          userAttendance: widget.userAttendance,
 
-    imagePath = widget.userProfile.profileImageUrl;
-    name = widget.userProfile.empName;
-    position = widget.userProfile.symbol;
-
+        ),
+      ),
+    );
   }
+
 
 
 }

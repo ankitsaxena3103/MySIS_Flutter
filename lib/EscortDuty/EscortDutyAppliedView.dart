@@ -96,8 +96,7 @@ class EscortDutyAppliedViewState extends State<EscortDutyAppliedView> {
                       right: paddingRight +pathS/3,
                       child: GestureDetector(
                         onTap: (){
-                          // Navigator.of(context).popUntil((route) => route.isFirst);
-                          Navigator.pop(context);
+                          Navigator.of(context).popUntil((route) => route.isFirst);
                         },
                         child: Row(
                           children: [

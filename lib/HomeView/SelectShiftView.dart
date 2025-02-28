@@ -1,3 +1,5 @@
+import 'dart:collection';
+
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
 import 'package:mysis/CommonViews/Utility.dart';
@@ -72,6 +74,7 @@ class SelectShiftViewState extends State<SelectShiftView>{
 
   @override
   Widget build(BuildContext context) {
+    calculateSizes(context);
     return Scaffold(
       body: Stack(
         alignment: Alignment.topCenter,
@@ -107,13 +110,14 @@ class SelectShiftViewState extends State<SelectShiftView>{
                       ),
                       child: Padding(
                         padding: EdgeInsets.only(left: paddingLeft + pathS / 4, right: paddingRight + pathS / 3,top: pathS/5,bottom: pathS/5),
-                        child: Container(
+                        child: SizedBox(
                           width: screenWidth,
                           child: Column(
                             crossAxisAlignment: CrossAxisAlignment.start,
                             children: [
                               Row(
                                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                                crossAxisAlignment: CrossAxisAlignment.start,
                                 children: [
                                   Flexible(
                                     fit: FlexFit.loose,
@@ -195,9 +199,9 @@ class SelectShiftViewState extends State<SelectShiftView>{
 
 
                               Padding(
-                                padding:  EdgeInsets.only(left: pathS/5),
+                                padding:  EdgeInsets.only(left: pathS/5,top: pathS/25),
                                 child: Row(
-                                  crossAxisAlignment: CrossAxisAlignment.center,
+                                  crossAxisAlignment: CrossAxisAlignment.start,
 
                                   children: [
                                     Image.asset(
@@ -265,7 +269,7 @@ class SelectShiftViewState extends State<SelectShiftView>{
                       ),
                     ),
 
-                    SizedBox(height: pathS/1.2),
+                    SizedBox(height: pathS/1.8),
                     Text(
                       'select_shift'.tr(),
                       style: TextStyle(
@@ -276,7 +280,7 @@ class SelectShiftViewState extends State<SelectShiftView>{
                       ),
                       textAlign: TextAlign.center,
                     ),
-                    SizedBox(height: pathS/2),
+                    SizedBox(height: pathS/2.5),
                     SizedBox(
                       height: 2.5*pathL,
                       child: SingleChildScrollView(
@@ -304,11 +308,8 @@ class SelectShiftViewState extends State<SelectShiftView>{
                   ],
                 ),
 
-
-
-
                 Positioned(
-                  bottom: paddingBottom +pathS,
+                  bottom: paddingBottom+pathS/2,
                   child: Row(
                     mainAxisAlignment: MainAxisAlignment.center,
                     children: [
@@ -385,7 +386,6 @@ class SelectShiftViewState extends State<SelectShiftView>{
                   ),
                 ),
 
-
                 ToastMessageView(isVisible: showToastMessageView, message: toastMessage),
                 
               ],
@@ -407,7 +407,7 @@ void initialSetup(){
         child: Container(
           alignment: Alignment.centerLeft,
           height: pathS / 20,
-          width: pathS / 75,
+          width: pathS / 35,
           color: isDarkMode ? whiteColor : greyColor3,
         ),
       ),
@@ -466,8 +466,6 @@ void initialSetup(){
       });
     });
   }
-
-
 
 }
 

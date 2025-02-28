@@ -346,7 +346,7 @@ class PrivacyPolicyViewState extends State<PrivacyPolicyView> {
 
 
 
-  void onTapNext() async {
+  Future <void> onTapNext() async {
     bool isAllPermissionsGranted = await _requestAllPermissions();
 
     if (isAllPermissionsGranted) {
@@ -364,7 +364,7 @@ class PrivacyPolicyViewState extends State<PrivacyPolicyView> {
   }
 
   Future<bool> _requestAllPermissions() async {
-    // 1. Request Contact Permission
+   // 1. Request Contact Permission
     if (!await _requestContactPermission()) {
       // return false;
     }
@@ -390,6 +390,7 @@ class PrivacyPolicyViewState extends State<PrivacyPolicyView> {
     PermissionStatus status = await Permission.contacts.status;
     print(status);
 
+
     if (status.isDenied) {
       // Request permission if denied
       print(status);
@@ -414,17 +415,16 @@ class PrivacyPolicyViewState extends State<PrivacyPolicyView> {
   }
 
   Future<bool> _requestCameraPermission() async {
-    // Check the current status of the camera permission
+
     PermissionStatus status = await Permission.camera.status;
 
     if (status.isGranted) {
-      print("Camera permission already granted.");
+      printInDebug("Camera permission already granted.");
       return true; // Permission already granted
     }
 
     if (status.isDenied) {
-      // Request permission if previously denied
-      print("Requesting camera permission...");
+      printInDebug("Requesting camera permission...");
       status = await Permission.camera.request();
       if (status.isGranted) {
         return true; // Permission granted
@@ -433,12 +433,13 @@ class PrivacyPolicyViewState extends State<PrivacyPolicyView> {
 
     if (status.isPermanentlyDenied) {
       // If permanently denied, redirect the user to app settings
-      print("Camera permission permanently denied.");
+      printInDebug("Camera permission permanently denied.");
       return false;
     }
 
-    return false; // Permission not granted
+    return false;
   }
+
   Future<bool> _requestLocationPermission() async {
 
     LocationPermission permission = await Geolocator.checkPermission();

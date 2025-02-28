@@ -3,10 +3,12 @@ import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:mysis/CommonViews/Utility.dart';
 import 'package:easy_localization/easy_localization.dart';
+import 'package:mysis/HomeView/HomeView.dart';
 import 'package:mysis/HomeView/UserAttendance.dart';
 import 'package:mysis/Profile/UserPosting.dart';
 import 'package:mysis/Profile/UserProfile.dart';
 import '../CommonViews/ToastMessageView.dart';
+import '../MyTabBarView.dart';
 import '../Profile/UnitDutyPost.dart';
 import '../Profile/UnitShiftDetail.dart';
 
@@ -64,10 +66,11 @@ class ThanksDutyViewState extends State<ThanksDutyView>{
   @override
   Widget build(BuildContext context) {
 
-    List<String> activeDayList = widget.latLong.split(',').map((e) => e.trim()).toList();
+    List<String> activeDayList = widget.latLong.isNotEmpty ? widget.latLong.split(',').map((e) => e.trim()).toList() : ['0.0','0.0'];
 
-    double lat = double.parse(activeDayList[1]); // Latitude
-    double lng = double.parse(activeDayList[0]); // Longitude
+    double lat = double.parse(activeDayList[0]) ; // Latitude
+    double lng = double.parse(activeDayList[1]); // Longitude
+
     var backgroundGradientGreen =  LinearGradient(
       colors: [greyColor6,greenColor5],
       begin: Alignment.topCenter,
@@ -93,10 +96,15 @@ class ThanksDutyViewState extends State<ThanksDutyView>{
                   right: paddingRight+pathS/3,
                   child: GestureDetector(
                     onTap: () {
-                      Navigator.of(context).popUntil((route) => route.isFirst);
-
+                      Navigator.pushAndRemoveUntil(
+                          context,
+                          MaterialPageRoute(
+                          builder: (context) => MyTabBarView(),
+                      ),
+                            (route) => false, // This removes all previous routes
+                      );
                     },
-                    child: Container(
+                    child: SizedBox(
                       width: pathS / 3,
                       height: pathS / 3,
                       child: Image.asset(
@@ -371,7 +379,7 @@ class ThanksDutyViewState extends State<ThanksDutyView>{
 
                         SizedBox(height: pathS/12),
 
-                        Row(
+                        if(lat>0.0 && lng > 0.0)Row(
                           mainAxisAlignment: MainAxisAlignment.center,
                           children: [
                             Text(

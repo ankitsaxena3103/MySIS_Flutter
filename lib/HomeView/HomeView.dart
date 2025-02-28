@@ -27,6 +27,7 @@ import 'package:permission_handler/permission_handler.dart';
 import 'package:provider/provider.dart';
 import 'package:url_launcher/url_launcher.dart';
 
+import '../CommonViews/AlertPopupView.dart';
 import '../Notifications/UserNotification.dart';
 import '../Profile/UnitDutyPost.dart';
 import '../Profile/UnitShiftDetail.dart';
@@ -53,11 +54,9 @@ class HomeView extends StatefulWidget {
   HomeViewState createState() => HomeViewState();
 }
 
-
 class HomeViewState extends State<HomeView> {
 
   List<GlobalKey> notificationPageKeys = [];
-
 
   bool showLoaderView = false;
   String assetsImagePath = "assets/images/dashboard-icons/profile-icon.png";
@@ -76,12 +75,6 @@ class HomeViewState extends State<HomeView> {
   String postName = '';
   String currentDutyStartTime = '';
   String postGeoLocation = '';
-  List<UserRoaster> todayRoster = [];
-  List<UserRoaster> monthlyRosters = [];
-
-  List<UserAttendance> todayAttendance = [];
-
-  DateTime dutyTime = DateTime.now();
 
   Color dutyInBgColor = redColor3;
   Color dutyInFontColor = whiteColor;
@@ -102,15 +95,27 @@ class HomeViewState extends State<HomeView> {
   String areaOfficeContact = '';
 
   String approvalPendingCount = "0";
-  String leaveCount = '2';
+  String leaveCount = '0';
   String approvalDoneCount = '0';
 
+  DateTime dutyTime = DateTime.now();
   DateTime _focusedDay = DateTime.now();
-
 
   Map source = {ConnectivityResult.none: false};
   NetworkConnectivity connection = NetworkConnectivity.instance;
   bool isInternet = true;
+
+  bool showAlert = false;
+  String alertHeader = '';
+  String alertMessage = '';
+  String cancelBtnTitle = '';
+  String okBtnTitle = 'ok'.tr();
+
+
+  List<UserRoaster> todayRoster = [];
+  List<UserRoaster> monthlyRosters = [];
+  List<UserAttendance> todayAttendance = [];
+  List<UnitDutyPost> todayUnitDutyPost = [];
 
   List <UserProfile> userProfile = [];
   List <UserRoaster> userRoasters = [];
@@ -120,12 +125,14 @@ class HomeViewState extends State<HomeView> {
   List<UnitDutyPost> unitDutyPosts = [];
   List<UnitShiftDetail> unitShiftDetails = [];
 
+
   List <UserLeaves> userLeaves = [];
   List<UserNotification> userNotifications = [];
 
   List<UserNotification> topNotificationsPage = [];
   List<UserNotification> htmlBottomBodyNotifications = [];
 
+  UserNotification? popUpNotificationPageData;
   List<double> topNotificationPageHeight = [pathL*2.2];
   late PageController _pageController;
   int pageIndex = 0;
@@ -133,6 +140,27 @@ class HomeViewState extends State<HomeView> {
   Timer? dutyOutTimer;
   Timer? dutyInTimer;
 
+  @override
+  void dispose() {
+    _pageController.dispose();
+    super.dispose();
+  }
+  @override
+  void initState() {
+    _pageController = PageController(initialPage: 0);
+
+    super.initState();
+
+    // Future.delayed(Duration(milliseconds: 3), () {
+    //   onLoadDutyAlert();
+    // });
+
+    initialSetup();
+    connection.myStream.listen((_source) {
+      source = _source;
+      onConnectionChange();
+    });
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -615,8 +643,8 @@ class HomeViewState extends State<HomeView> {
                                                       },
                                                       // Disable tap if isTapEnabled is false
                                                       child: Container(
-                                                        width: pathL,
-                                                        height: pathS / 1.5,
+                                                        width: pathL*1.1,
+                                                        height: pathS / 1.6,
                                                         alignment: Alignment.center,
                                                         decoration: BoxDecoration(
                                                           color: dutyInBgColor,                          // border: Border.all(color: Colors.yellow, width: pathS/18),
@@ -634,34 +662,35 @@ class HomeViewState extends State<HomeView> {
                                                           dutyInBtnText,
                                                           style: TextStyle(
                                                             color: dutyInFontColor,
-                                                            fontSize: pathS / 4.5,
+                                                            fontSize: pathS / 4.7,
                                                             fontWeight: FontWeight.w700,
                                                             fontFamily: 'Roboto',
                                                           ),
                                                         ),
                                                       ),
                                                     ),
-                                                    SizedBox(width: pathS/5),
+                                                    SizedBox(width: pathS/8),
                                                     GestureDetector(
                                                       onTap: isDutyOutTapEnabled ?  () {
-                                                        Navigator.push(
-                                                          context,
-                                                          MaterialPageRoute(
-                                                            builder: (context) => ScanUnitShiftView(
-                                                              userProfile: userProfile.first,
-                                                              attendanceMode: keyAttendanceModeSelf,
-                                                              unitDutyPosts: unitDutyPosts,
-                                                              unitShiftDetails: unitShiftDetails,
-                                                              userPostings: userPostings,
-                                                              attendanceStatus: keyAttendanceStatusDutyOut,
-                                                            ),
-                                                          ),
-                                                        );
+                                                        // Navigator.push(
+                                                        //   context,
+                                                        //   MaterialPageRoute(
+                                                        //     builder: (context) => ScanUnitShiftView(
+                                                        //       userProfile: userProfile.first,
+                                                        //       attendanceMode: keyAttendanceModeSelf,
+                                                        //       unitDutyPosts: unitDutyPosts,
+                                                        //       unitShiftDetails: unitShiftDetails,
+                                                        //       userPostings: userPostings,
+                                                        //       attendanceStatus: keyAttendanceStatusDutyOut,
+                                                        //     ),
+                                                        //   ),
+                                                        // );
+                                                        loadScanUnitShiftView(keyAttendanceModeSelf,keyAttendanceStatusDutyOut,todayAttendance.first);
                                                       }
                                                           : null,
                                                       child: Container(
-                                                        width: pathL,
-                                                        height: pathS / 1.5,
+                                                        width: pathL*1.1,
+                                                        height: pathS / 1.6,
                                                         alignment: Alignment.center,
                                                         decoration: BoxDecoration(
                                                           color: dutyOutBgColor,                          // border: Border.all(color: Colors.yellow, width: pathS/18),
@@ -679,8 +708,8 @@ class HomeViewState extends State<HomeView> {
                                                           dutyOutBtnText,
                                                           style: TextStyle(
                                                             color: dutyOutFontColor,
-                                                            fontSize: pathS / 4.5,
-                                                            fontWeight: FontWeight.w600,
+                                                            fontSize: pathS / 4.7,
+                                                            fontWeight: FontWeight.w700,
                                                             fontFamily: 'Roboto',
                                                           ),
                                                         ),
@@ -1570,6 +1599,21 @@ class HomeViewState extends State<HomeView> {
                       //   child: DutyAlertView(),
                       // ),
 
+                      Visibility(
+                        visible: showAlert,
+                        child: AlertPopupView(
+                            header: alertHeader,
+                            message: alertMessage,
+                            cancelBtn: cancelBtnTitle,
+                            okBtn: okBtnTitle,
+                            callBack: (value){
+                              setState(() {
+                                showAlert = false;
+                              });
+
+                            }
+                        ),
+                      ),
                       LoaderView(isVisible: showLoaderView, message: ''),
 
                     ],
@@ -1683,27 +1727,7 @@ class HomeViewState extends State<HomeView> {
     );
   }
 
-  @override
-  void dispose() {
-    _pageController.dispose();
-    super.dispose();
-  }
-  @override
-  void initState() {
-    _pageController = PageController(initialPage: 0);
 
-    super.initState();
-
-    // Future.delayed(Duration(milliseconds: 3), () {
-    //   onLoadDutyAlert();
-    // });
-
-    initialSetup();
-    connection.myStream.listen((_source) {
-      source = _source;
-      onConnectionChange();
-    });
-  }
 
 
   void initialSetup() {
@@ -1763,11 +1787,6 @@ class HomeViewState extends State<HomeView> {
           (map) => UserNotification.fromMap(map),
     );
 
-    for (var data in datas) {
-      printInDebug(' ID: ${data.id}');
-      printInDebug('title name: ${data.title}');
-    }
-
     if(datas.isEmpty){
       onLoadNotificationData();
       return;
@@ -1783,7 +1802,7 @@ class HomeViewState extends State<HomeView> {
 
     final htmlPageNotification = notification
         .where((data) =>
-    (data.isHtmlPage  == true)
+    (data.isHtmlPage  == true && data.readStatus == false)
     ) .toList();
 
     final htmlBodyNotification = datas
@@ -1796,8 +1815,8 @@ class HomeViewState extends State<HomeView> {
     (data.isImageUrl  == true )
     ) .toList();
 
-    if(htmlPageNotification.isNotEmpty){
-      loadWebViewPopup(context, htmlPageNotification.first.message);
+    if(htmlPageNotification.isNotEmpty ){
+      loadWebViewPopup(context, htmlPageNotification.first.message,htmlPageNotification.first);
     }
 
   }
@@ -1852,7 +1871,7 @@ class HomeViewState extends State<HomeView> {
         ) .toList();
 
         if(htmlPageNotification.isNotEmpty){
-          loadWebViewPopup(context, htmlPageNotification.first.message);
+          loadWebViewPopup(context, htmlPageNotification.first.message,htmlPageNotification.first);
         }
 
         if(htmlBody1NotificationData.isNotEmpty){
@@ -2020,8 +2039,8 @@ class HomeViewState extends State<HomeView> {
 
     if(roasterData.isNotEmpty){
       userRoasters = roasterData;
-      updateCurrentDayUI(roasterData);
-      updateNextDaysUI(roasterData);
+      updateCurrentDayRoasterUI(roasterData);
+      updateNextDaysRoasterUI(roasterData);
 
     }else{
       // onLoadRoasterData();
@@ -2030,9 +2049,7 @@ class HomeViewState extends State<HomeView> {
   }
   void onLoadRoasterData() {
 
-    Map <String,String> inputData = {
-
-    };
+    Map <String,String> inputData = {};
 
     APIHelper.instance.getData(userRosterApi,inputData, (data) {
 
@@ -2043,8 +2060,9 @@ class HomeViewState extends State<HomeView> {
         userRoasters = roasters;
 
         syncUserRoasterData(userRoasters);
-        updateCurrentDayUI(userRoasters);
-        updateNextDaysUI(userRoasters);
+        updateCurrentDayRoasterUI(userRoasters);
+        updateNextDaysRoasterUI(userRoasters);
+
 
       }
 
@@ -2064,7 +2082,14 @@ class HomeViewState extends State<HomeView> {
     );
   }
 
-  void updateCurrentDayUI(List<UserRoaster> roasters) {
+  Future<List<UnitDutyPost>> getTodayRosterUnitShiftData() async {
+
+    return unitDutyPosts.where(
+            (data) => data.unitCode == todayRoster.first.unitCode
+    ).toList();
+
+  }
+  void updateCurrentDayRoasterUI(List<UserRoaster> roasters) {
     String todayDate = DateFormat('yyyy-MM-dd').format(DateTime.now());
 
     // Filter roster data for today
@@ -2091,7 +2116,7 @@ class HomeViewState extends State<HomeView> {
        startDutyOutCheck(roaster);
     }
   }
-  void updateNextDaysUI(List<UserRoaster> roasters) {
+  void updateNextDaysRoasterUI(List<UserRoaster> roasters) {
     DateTime todayDate = DateTime.now();
 
     // Filter roster data for dates greater than today
@@ -2116,34 +2141,40 @@ class HomeViewState extends State<HomeView> {
     }
   }
 
-
   Future<void> getPostingTableData() async {
 
-    userPostings = await DatabaseHelper.instance.getAllRecords<UserPosting>(
+    final userPostingsData = await DatabaseHelper.instance.getAllRecords<UserPosting>(
       keyTableUserPosting,
           (map) => UserPosting.fromMap(map),
     );
+     userPostings = userPostingsData.where(
+             (data) => data.deleted == 0).toList();
 
-    for (var data in userPostings) {
-      printInDebug('userPostings Data');
-      data.toMap().forEach((i, j) {
-        printInDebug('$i : $j');
-      });
-
-    }
-
-    unitDutyPosts = await DatabaseHelper.instance.getAllRecords<UnitDutyPost>(
+   final unitDutyPostsData = await DatabaseHelper.instance.getAllRecords<UnitDutyPost>(
       keyTableUnitDutyPost,
           (map) => UnitDutyPost.fromMap(map),
     );
+    unitDutyPosts = unitDutyPostsData.where(
+            (data) => data.deleted == 0).toList();
 
-    unitShiftDetails = await DatabaseHelper.instance.getAllRecords<UnitShiftDetail>(
+    final unitShiftDetailData = await DatabaseHelper.instance.getAllRecords<UnitShiftDetail>(
       keyTableUnitShiftDetail,
           (map) => UnitShiftDetail.fromMap(map),
     );
+    final filteredUnitShiftDetails = unitShiftDetailData.where((data) => data.deleted == 0).toList();
+
+    final Set<String> shiftIds = {};
+    unitShiftDetails = filteredUnitShiftDetails.where((data) {
+      if (shiftIds.contains(data.shiftId)) {
+        return false;
+      } else {
+        shiftIds.add(data.shiftId);
+        return true;
+      }
+    }).toList();
 
     if(userPostings.isNotEmpty && unitDutyPosts.isNotEmpty && unitShiftDetails.isNotEmpty) {
-      print('All duty related data fetched');
+      printInDebug('All duty related data fetched');
     }else{
       onLoadUserPostingData();
     }
@@ -2190,15 +2221,19 @@ class HomeViewState extends State<HomeView> {
         }
         if (data.containsKey('UnitShiftDetail')) {
           final List<dynamic> dataList = data['UnitShiftDetail'];
-          unitShiftDetails = dataList.map((json) => UnitShiftDetail.fromJson(json)).toList();
-          for (var profile in unitShiftDetails) {
-            printInDebug('UnitShiftDetail ID: ${profile.id}');
-            printInDebug('UnitShiftDetail  name: ${profile.shiftName}');
-          }
+          final unitShiftDetailData = dataList.map((json) => UnitShiftDetail.fromJson(json)).toList();
+          final filteredUnitShiftDetails = unitShiftDetailData.where((data) => data.deleted == 0).toList();
 
+          final Set<String> shiftIds = {};
+          unitShiftDetails = filteredUnitShiftDetails.where((data) {
+            if (shiftIds.contains(data.shiftId)) {
+              return false;
+            } else {
+              shiftIds.add(data.shiftId);
+              return true;
+            }
+          }).toList();
           syncUnitShiftDetailData();
-
-
         }
 
       }
@@ -2285,7 +2320,6 @@ class HomeViewState extends State<HomeView> {
           printInDebug(' name: ${data.siteName}');
         }
 
-
         final undeletedAttendance = dataList
             .where((data) =>
         data.deleted == 0)
@@ -2349,7 +2383,10 @@ class HomeViewState extends State<HomeView> {
     }
 
     if (todayAttendance.isNotEmpty) {
-      todayDutyInMarked = true;
+      setState(() {
+        todayDutyInMarked = true;
+      });
+
 
       // Accumulate total duration for all marked attendances
       Duration totalDutyDuration = Duration.zero;
@@ -2577,7 +2614,8 @@ class HomeViewState extends State<HomeView> {
           disableDutyIn();
         }
       });
-    } else {
+    }
+    else {
       disableDutyIn();
       dutyInTimer?.cancel(); // Cancel the timer if conditions are not met
     }
@@ -2589,18 +2627,15 @@ class HomeViewState extends State<HomeView> {
   }
 
   void startDutyOutCheck(UserRoaster roaster) {
-    // Cancel any existing timer
     dutyOutTimer?.cancel();
 
-    // Start a single periodic timer to check duty conditions
     dutyOutTimer = Timer.periodic(Duration(seconds: 60), (Timer timer) {
       updateDutyOutRoaster(roaster);
     });
   }
   void updateDutyOutRoaster(UserRoaster roaster) {
     if (todayDutyInMarked && !todayDutyOutMarked) {
-      if (DateTime.now().isAfter(roaster.dutyStartEnableTime) &&
-          DateTime.now().isBefore(roaster.dutyEndDisableTime) && todayDutyInMarked && !todayDutyOutMarked) {
+      if (DateTime.now().isAfter(roaster.dutyStartEnableTime) && DateTime.now().isBefore(roaster.dutyEndDisableTime) && todayDutyInMarked && !todayDutyOutMarked) {
         enableDutyOut();
       }
       else {
@@ -2623,7 +2658,6 @@ class HomeViewState extends State<HomeView> {
       dutyInShadowColor =  Colors.black.withOpacity(0.2);
       isDutyInTapEnabled =  true;
     });
-
 
   }
   void disableDutyIn(){
@@ -2677,11 +2711,9 @@ class HomeViewState extends State<HomeView> {
     platform.invokeMethod('openSettings');
   }
 
-  /// Check if GPS (Location Services) is enabled
   Future<bool> isGPSEnabled() async {
     return await Geolocator.isLocationServiceEnabled();
   }
-  /// Open GPS settings
   void openGPSSettings() {
     if (Platform.isAndroid) {
       final intent = AndroidIntent(
@@ -2693,7 +2725,6 @@ class HomeViewState extends State<HomeView> {
       openGPSSettingsiOS();
     }
   }
-  /// Open GPS settings on iOS
   void openGPSSettingsiOS() {
     const platform = MethodChannel('app_settings_channel');
     try {
@@ -2713,20 +2744,22 @@ class HomeViewState extends State<HomeView> {
      return;
    }
 
-    loadScanUnitShiftView();
+    loadScanUnitShiftView(keyAttendanceModeSelf,keyAttendanceStatusDutyIn,null);
   }
-  void loadScanUnitShiftView(){
+
+  Future<void> loadScanUnitShiftView(String mode, String status, UserAttendance? todayAttendance) async{
+    todayUnitDutyPost = await getTodayRosterUnitShiftData();
   Navigator.push(
     context,
     MaterialPageRoute(
       builder: (context) => ScanUnitShiftView(
         userProfile: userProfile.first,
-        attendanceMode: keyAttendanceModeSelf,
-        unitDutyPosts: unitDutyPosts,
+        attendanceMode: mode,
+        unitDutyPosts: todayUnitDutyPost,
         unitShiftDetails: unitShiftDetails,
         userPostings: userPostings,
-        attendanceStatus: keyAttendanceStatusDutyIn,
-
+        attendanceStatus: status,
+        userAttendance: todayAttendance,
       ),
     ),
   );
@@ -2745,6 +2778,7 @@ class HomeViewState extends State<HomeView> {
   loadOthersDutyView();
 
 }
+
   void loadOthersDutyView(){
   Navigator.push(
     context,
@@ -2760,29 +2794,80 @@ class HomeViewState extends State<HomeView> {
     ),
   );
 }
+
+  bool checkLocation(UnitDutyPost dutyPost, String currentLatLng){
+
+    bool locationVerified = true;
+
+    List<String> activeDayList = currentLatLng.isNotEmpty ? currentLatLng.split(',').map((e) => e.trim()).toList() : ['0.0','0.0'];
+    double currentLat = double.parse(activeDayList[1]) ; // Latitude
+    double currentLng = double.parse(activeDayList[0]); // Longitude
+
+    if(dutyPost.isGeoFenceAllow == 1){
+      locationVerified = false;
+      if(currentLat > 0.0 && currentLng > 0.0){
+        int currentDistance = getDistanceFromDuty(dutyPost.geoLocation, currentLatLng);
+        if(currentDistance <= dutyPost.allowDistance){
+          locationVerified = true;
+        }
+        else{
+          locationVerified = false;
+          String message = '${'your_location'.tr()}: $currentLatLng\n ${'distance_from_post'.tr()}: $currentDistance ${'meter'.tr()}' ;
+          showPopupAlert(
+              'not_allow_range_location'.tr(),
+              message,
+          );
+        }
+      }
+      else{
+        locationVerified = false;
+        showPopupAlert(
+            'device_location'.tr(),
+            'not_allow_range_location'.tr(),
+        );
+      }
+
+    }
+    else{
+      locationVerified = true;
+    }
+
+    return locationVerified;
+
+  }
+  void showPopupAlert(String header, String message, {String cancelText = ''}){
+    setState(() {
+      alertHeader = header;
+      alertMessage = message;
+      showAlert = true;
+      cancelBtnTitle = cancelText;
+
+    });
+  }
+
+
 }
 
 
-void loadWebViewPopup(BuildContext context, String pageUrl) {
-  return;
+void loadWebViewPopup(BuildContext context, String pageUrl,UserNotification userNotification) {
   showGeneralDialog(
     context: context,
     barrierDismissible: false,
     barrierColor: Colors.black.withOpacity(0.9),
     pageBuilder: (context, _, __) {
-      return WebViewScreen(pageUrl: pageUrl);
+      return WebViewScreen(pageUrl: pageUrl, userNotification: userNotification);
     },
   );
 }
 
 class WebViewScreen extends StatefulWidget {
+  final UserNotification userNotification;
   final String pageUrl;
-  const WebViewScreen({super.key, required this.pageUrl});
+  const WebViewScreen({super.key, required this.pageUrl, required this.userNotification});
 
   @override
   _WebViewScreenState createState() => _WebViewScreenState();
 }
-
 class _WebViewScreenState extends State<WebViewScreen> {
   bool _isLoading = true;
   late InAppWebViewController webViewController;
@@ -2828,7 +2913,12 @@ class _WebViewScreenState extends State<WebViewScreen> {
                       controller.addJavaScriptHandler(
                         handlerName: "closePopup",
                         callback: (args) {
-                          // Handle close popup logic, e.g. close the current screen
+                          Navigator.pop(context);
+                        },
+                      );
+                      controller.addJavaScriptHandler(
+                        handlerName: "skipPopup",
+                        callback: (args) {
                           Navigator.pop(context);
                         },
                       );
@@ -2856,6 +2946,99 @@ class _WebViewScreenState extends State<WebViewScreen> {
       ),
     );
   }
+
+
+  void createNotification(UserNotification notification){
+
+    Map <String, dynamic> notificationData = getUserNotification(notification);
+
+    UserNotification userNotification = UserNotification.fromJson(notificationData);
+
+    List<UserNotification> data = [userNotification];
+
+    syncUserNotificationData(data);
+
+    List<dynamic> list = [notificationData];
+
+    uploadNotification(list);
+
+  }
+
+  Map <String, dynamic> getUserNotification(UserNotification notification){
+
+    Map <String, dynamic> notificationMap = {
+    "id": notification.id,
+    "RegNo": regNo,
+    "MESSAGE_TYPE": notification.messageType,
+    "IS_HTML_BODY": notification.isHtmlBody,
+    "IS_HTML_PAGE": notification.isHtmlPage,
+    "IS_IMAGE_URL": notification.isImageUrl,
+    "TITLE": notification.title,
+    "MESSAGE": notification.message,
+    "ACTION_URL": notification.actionUrl,
+    "EXPIRY_DATE": notification.expiryDate,
+    "ENTITY_ID": notification.entityId,
+    "PARENT_ID": notification.parentId,
+    "PARENT_TYPE": notification.parentType,
+    "READ_STATUS": 1,
+    "READ_DATE": DateTime.now().toIso8601String(),
+    "POPUP_ALERT": notification.popupAlert,
+    "DELETED": notification.deleted,
+    "DATE_MODIFIED": notification.dateModified,
+     "DIRTY_FLAG": 1
+    };
+
+    return notificationMap;
+
+  }
+
+  Future<void> uploadNotification(dynamic notification) async {
+    APIHelper.instance.postAllData(userNotificationPostApi, notification, (responseData) {
+      if (responseData.isNotEmpty) {
+
+        List<dynamic> listData = responseData;
+
+        for (var data in listData) {
+
+          Map<String, dynamic> notificationData = {
+            "id": data['ID'] ?? '',
+            "dirtyFlag": 0,
+          };
+          updateUserNotificationTable(notificationData);
+        }
+      } else {
+        printInDebug('Response data is empty.');
+      }
+    },
+          (error) {
+        // Handle error
+        printInDebug('Error: $error');
+      },
+    );
+  }
+
+  Future<void> updateUserNotificationTable(Map <String,dynamic> notification) async{
+    await DatabaseHelper.instance.updateTableColumns(
+        keyTableUserNotification,
+        notification,
+        'id'
+    );
+
+  }
+
+  Future<void> syncUserNotificationData(List<UserNotification> userNotification) async {
+
+      // Update multiple rows using a generic update function
+      await DatabaseHelper.instance.updateTableData<UserNotification>(
+        keyTableUserNotification,
+        userNotification,
+        'id',
+            (data) => data.toMap(),
+
+      );
+      printInDebug('Updated ${userNotification.length} records in $keyTableUserNotification');
+
+    }
 
 
 
@@ -2886,7 +3069,6 @@ class _WebViewScreenState extends State<WebViewScreen> {
 
     print("PDF Saved: ${file.path}");
   }
-
   Future<void> captureWebViewAsImage() async {
     try {
       final Uint8List? screenshot = await webViewController.takeScreenshot();
@@ -2900,8 +3082,7 @@ class _WebViewScreenState extends State<WebViewScreen> {
     }
   }
 
-
-  void _showPermissionDialog(BuildContext context) {
+  void showPermissionDialog(BuildContext context) {
     showDialog(
       context: context,
       builder: (context) => AlertDialog(

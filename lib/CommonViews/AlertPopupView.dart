@@ -86,22 +86,22 @@ class AlertPopupViewState extends State<AlertPopupView>  {
                       widget.header,
                       style: TextStyle(
                         color: isDarkMode ? whiteColor : greyColor6,
-                        fontSize: pathS / 4,
+                        fontSize: pathS / 4.5,
                         fontWeight: FontWeight.w600,
                         fontFamily: 'Roboto',
                       ),
-                      textAlign: TextAlign.center,
+                      textAlign: TextAlign.left,
                     ),
-                    SizedBox(height: pathS / 5),
+                    SizedBox(height: pathS / 4),
                     Text(
                       widget.message,
                       style: TextStyle(
                         color: isDarkMode ? whiteColor : greyColor6,
-                        fontSize: pathS / 5,
+                        fontSize: pathS / 5.5,
                         fontWeight: FontWeight.w500,
                         fontFamily: 'Roboto',
                       ),
-                      textAlign: TextAlign.center,
+                      textAlign: TextAlign.left,
                     ),
                     SizedBox(height: pathS / 3),
                     Row(
@@ -130,7 +130,7 @@ class AlertPopupViewState extends State<AlertPopupView>  {
                             child: Padding(
                               padding:  EdgeInsets.only(left: pathS/3,right: pathS/3),
                               child: Text(
-                                widget.cancelBtn,
+                                widget.cancelBtn.toUpperCase(),
                                 style: TextStyle(
                                   color: isDarkMode ? whiteColor : whiteColor,
                                   fontSize: pathS / 5,
@@ -164,7 +164,7 @@ class AlertPopupViewState extends State<AlertPopupView>  {
                             child: Padding(
                               padding:  EdgeInsets.only(left: pathS/3,right: pathS/3),
                               child: Text(
-                                widget.okBtn,
+                                widget.okBtn.toUpperCase(),
                                 style: TextStyle(
                                   color: isDarkMode ? whiteColor : whiteColor,
                                   fontSize: pathS / 5,

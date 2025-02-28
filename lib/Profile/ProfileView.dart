@@ -1626,14 +1626,13 @@ class ProfileViewState extends State<ProfileView>{
 
   }
   Future<void> syncUnitDutyPostData() async {
-    await DatabaseHelper.instance.replaceTableData<UnitDutyPost>(keyTableUnitDutyPost, unitDutyPosts, (unitDutyPosts) =>
+  await DatabaseHelper.instance.replaceTableData<UnitDutyPost>(keyTableUnitDutyPost, unitDutyPosts, (unitDutyPosts) =>
         unitDutyPosts.toMap());
 
   }
   Future<void> syncUserPostingData() async {
     await DatabaseHelper.instance.replaceTableData<UserPosting>(keyTableUserPosting, userPostings, (userPosting) =>
         userPosting.toMap());
-
   }
   void onTapChangeMobile(){
     if(userProfile.isEmpty){

@@ -128,36 +128,48 @@ class UserRoaster {
   // Convert a Map into a UserRoaster instance
   factory UserRoaster.fromMap(Map<String, dynamic> map) {
     return UserRoaster(
-      id: map['ID'],
-      rosterId: map['ROSTER_ID'],
-      unitCode: map['UNIT_CODE'],
-      siteName: map['SITE_NAME'],
-      shiftId: map['SHIFT_ID'],
-      shiftName: map['SHIFT_NAME'],
-      rosterDate: map['ROSTER_DATE'],
-      startTime: map['START_TIME'],
-      endTime: map['END_TIME'],
-      dutyHrs: map['DUTY_HRS'],
-      shiftStartTime: DateTime.parse(map['SHIFT_START_TIME']),
-      shiftEndTime: DateTime.parse(map['SHIFT_END_TIME']),
-      dutyStartEnableTime: DateTime.parse(map['DUTY_START_ENABLE_TIME']),
-      dutyStartDisableTime: DateTime.parse(map['DUTY_START_DISABLE_TIME']),
-      dutyEndDisableTime: DateTime.parse(map['DUTY_END_DISABLE_TIME']),
-      deleted: map['DELETED'],
-      dateModified: DateTime.parse(map['DATE_MODIFIED']),
-      regNo: map['REGNO'],
-      dutyPostId: map['DUTY_POST_ID'],
-      postName: map['POST_NAME'],
-      qrId: map['QR_ID'],
-      dutyPostAddress: map['DUTY_POST_ADDRESS'],
-      geoFenceRange: map['GEO_FENCE_RANGE'],
-      isGeoFenceAllow: map['IS_GEO_FENCE_ALLOW'],
-      geoLocation: map['GEO_LOCATION'],
-      dutyRankCode: map['DUTY_RANK_CODE'],
-      dutyRankName: map['DUTY_RANK_NAME'],
+      id: map['id'] ?? '', // Default to empty string
+      rosterId: map['rosterId'] ?? '', // Default to empty string
+      unitCode: map['unitCode'] ?? '', // Default to empty string
+      siteName: map['siteName'] ?? '', // Default to empty string
+      shiftId: map['shiftId'] ?? '', // Default to empty string
+      shiftName: map['shiftName'] ?? '', // Default to empty string
+      rosterDate: map['rosterDate'] ?? '', // Default to empty string
+      startTime: map['startTime'] ?? '', // Default to empty string
+      endTime: map['endTime'] ?? '', // Default to empty string
+      dutyHrs: map['dutyHrs'] ?? '', // Default to empty string
+      shiftStartTime: map['shiftStartTime'] != null
+          ? DateTime.parse(map['shiftStartTime'])
+          : DateTime.now(), // Default to current DateTime
+      shiftEndTime: map['shiftEndTime'] != null
+          ? DateTime.parse(map['shiftEndTime'])
+          : DateTime.now(), // Default to current DateTime
+      dutyStartEnableTime: map['dutyStartEnableTime'] != null
+          ? DateTime.parse(map['dutyStartEnableTime'])
+          : DateTime.now(), // Default to current DateTime
+      dutyStartDisableTime: map['dutyStartDisableTime'] != null
+          ? DateTime.parse(map['dutyStartDisableTime'])
+          : DateTime.now(), // Default to current DateTime
+      dutyEndDisableTime: map['dutyEndDisableTime'] != null
+          ? DateTime.parse(map['dutyEndDisableTime'])
+          : DateTime.now(), // Default to current DateTime
+      deleted: map['deleted'] ?? 0, // Default to 0
+      dateModified: map['dateModified'] != null
+          ? DateTime.parse(map['dateModified'])
+          : DateTime.now(), // Default to current DateTime
+      regNo: map['regNo'] ?? '', // Default to empty string
+      dutyPostId: map['dutyPostId'] ?? '', // Default to empty string
+      postName: map['postName'] ?? '', // Default to empty string
+      qrId: map['qrId'] ?? '', // Default to empty string
+      dutyPostAddress: map['dutyPostAddress'] ?? '', // Default to empty string
+      geoFenceRange: map['geoFenceRange'] ?? '', // Default to empty string
+      isGeoFenceAllow: map['isGeoFenceAllow'] ?? false, // Default to false
+      geoLocation: map['geoLocation'] ?? '', // Default to empty string
+      dutyRankCode: map['dutyRankCode'] ?? '', // Default to empty string
+      dutyRankName: map['dutyRankName'] ?? '', // Default to empty string
       updatedAt: map['updatedAt'] != null
           ? DateTime.parse(map['updatedAt']) // Convert ISO string to DateTime
-          : DateTime.now(),
+          : DateTime.now(), // Default to current DateTime
     );
   }
 

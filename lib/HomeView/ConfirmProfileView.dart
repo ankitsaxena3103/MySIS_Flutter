@@ -40,7 +40,7 @@ class ConfirmProfileView extends StatefulWidget {
 
 class ConfirmProfileViewState extends State<ConfirmProfileView>{
 
-  String profileImage = 'assets/images/home/profile.png';
+  String profileImage = "assets/images/dashboard-icons/profile-icon.png";
   String profileUrl = '';
   String name  = '';
   String position  = '';
@@ -281,7 +281,6 @@ class ConfirmProfileViewState extends State<ConfirmProfileView>{
 
   Future<void> onTapConfirm() async {
     if (widget.attendanceStatus == keyAttendanceStatusDutyOut) {
-      //check for duty in
       final attendance = await DatabaseHelper.instance.getAllRecords<UserAttendance>(
         keyTableUserAttendance,
             (map) => UserAttendance.fromMap(map),
@@ -289,26 +288,27 @@ class ConfirmProfileViewState extends State<ConfirmProfileView>{
 
       List<UserAttendance> todayAttendance = [];
 
-// Filter for entries with dutyStatus == keyAttendanceStatusDutyIn and deleted == 0
       final dutyInRecords = attendance.where(
             (data) => data.dutyStatus == keyAttendanceStatusDutyIn && data.deleted == 0,
       );
 
-// Check if there are any valid records
       if (dutyInRecords.isNotEmpty) {
-        // Find the latest shiftStartDate among the filtered records
         DateTime latestDutyInDate = dutyInRecords
             .map((data) => data.shiftStartDate)
             .reduce((a, b) => a.isAfter(b) ? a : b);
 
-        // Get the records that match the latest shiftStartDate
         todayAttendance = dutyInRecords
             .where((data) => data.shiftStartDate.isAtSameMomentAs(latestDutyInDate))
             .toList();
+
+        printInDebug('$latestDutyInDate');
+
       }
 
 
       if (todayAttendance.isNotEmpty) {
+        printInDebug(todayAttendance.first.dutyStatus);
+
         onLoadScanUnitShift(todayAttendance.first);
       }
       else {
@@ -319,7 +319,8 @@ class ConfirmProfileViewState extends State<ConfirmProfileView>{
           showAlert = true;
         });
       }
-    }else{
+    }
+    else{
       onLoadScanUnitShift(null);
     }
 

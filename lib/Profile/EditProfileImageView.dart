@@ -135,10 +135,9 @@ class EditProfileImageViewState extends State<EditProfileImageView> {
   Future<void> capturePhoto() async {
     final picker = ImagePicker();
     final pickedFile = await picker.pickImage(source: ImageSource.camera);
-    imagePath = (pickedFile?.path)!;
     if (pickedFile != null) {
+      imagePath = (pickedFile?.path)!;
       List<int> imageBytes = await pickedFile.readAsBytes();
-      
       setState(() {
         base64Image = base64Encode(imageBytes);
       });
@@ -153,10 +152,11 @@ class EditProfileImageViewState extends State<EditProfileImageView> {
   Future<void> getImageFromGallery() async {
     final picker = ImagePicker();
     final pickedFile = await picker.pickImage(source: ImageSource.gallery);
-    imagePath = (pickedFile?.path)!;
-    printInDebug(imagePath);
 
     if (pickedFile != null) {
+      imagePath = (pickedFile?.path)!;
+      printInDebug(imagePath);
+
       List<int> imageBytes = await pickedFile.readAsBytes();
 
       setState(() {

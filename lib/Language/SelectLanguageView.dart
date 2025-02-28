@@ -281,6 +281,7 @@ class SelectLanguageViewState extends State<SelectLanguageView> {
                           color: isDarkMode ? whiteColor:greyColor6,
                           fontSize: pathS / 4,
                           fontWeight: FontWeight.w500,
+                          fontFamily: 'Roboto',
                         ),
                         textAlign: TextAlign.center,
                       ),

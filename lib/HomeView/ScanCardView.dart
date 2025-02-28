@@ -209,7 +209,7 @@ class ScanCardViewState extends State<ScanCardView>{
                   bottom: MediaQuery.of(context).padding.bottom,
                   child: GestureDetector(
                     onTap: (){
-                      Navigator.pop(context);
+                      // Navigator.pop(context);
                       onLoadManualEntry();
 
                     },
@@ -236,7 +236,7 @@ class ScanCardViewState extends State<ScanCardView>{
                           SizedBox(width: pathS/8),
                           GestureDetector(
                             onTap: (){
-                              Navigator.pop(context);
+                              // Navigator.pop(context);
                               onLoadManualEntry();
 
                             },
@@ -313,7 +313,7 @@ class ScanCardViewState extends State<ScanCardView>{
   }
 
   void onLoadManualEntry(){
-    Navigator.push(
+    Navigator.pushReplacement(
       context,
       MaterialPageRoute(
         builder: (context) => EnterManuallyView(

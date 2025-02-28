@@ -39,14 +39,18 @@
 		<string>UIInterfaceOrientationPortrait</string>
 		<string>UIInterfaceOrientationPortraitUpsideDown</string>
 	</array>
-	<key>NSLocationWhenInUseUsageDescription</key>
-    <string>Allow MySIS to use the location information of this device.</string>
-    <key>NSLocationAlwaysUsageDescription</key>
-    <string>Allow MySIS to use the location information of this device.</string>
     <key>NSContactsUsageDescription</key>
     <string>MySIS requires permission to access your phone contacts to allow phone calls to be made through the links provided in the application.</string>
     <key>NSCameraUsageDescription</key>
     <string>MySIS requires permission to access your phone camera to take pictures while marking attendance and Changing Profile Image.</string>
+	<key>NSLocationWhenInUseUsageDescription</key>
+    <string>Allow MySIS to use the location information of this device.</string>
+    <key>NSLocationAlwaysUsageDescription</key>
+    <string>Allow MySIS to use the location information of this device.</string>
+    <key>NSFaceIDUsageDescription</key>
+    <string>MySIS use Face ID to secure your app data.</string>
+    <key>NSLocalAuthenticationUsageDescription</key>
+    <string>MySIS need Touch ID/Face ID to authenticate you.</string>
     <key>LSApplicationQueriesSchemes</key>
     <array>
         <string>App-Prefs</string>
@@ -61,6 +65,5 @@
         <string>fetch</string>
         <string>processing</string>
     </array>
-
 </dict>
 </plist>

@@ -17,6 +17,7 @@ class UserNotification {
   final int deleted;
   final DateTime dateModified;
   final DateTime updatedAt;
+  final int dirtyFlag;
 
 
   UserNotification({
@@ -38,6 +39,8 @@ class UserNotification {
     required this.deleted,
     required this.dateModified,
     required this.updatedAt,
+    required this.dirtyFlag,
+
 
   });
 
@@ -65,6 +68,8 @@ class UserNotification {
           ? DateTime.parse(json['DATE_MODIFIED'])
           : DateTime.now(), // Fallback to current date if null
       updatedAt: DateTime.now(), // Default value if not in the JSON
+      dirtyFlag: json['DIRTY_FLAG'] ?? 0,
+
 
     );
   }
@@ -89,6 +94,7 @@ class UserNotification {
       'POPUP_ALERT': popupAlert ? 1 : 0,
       'DELETED': deleted,
       'DATE_MODIFIED': dateModified.toIso8601String(),
+      'DIRTY_FLAG': dirtyFlag,
     };
   }
 
@@ -118,6 +124,7 @@ class UserNotification {
       updatedAt: map['updatedAt'] != null
           ? DateTime.parse(map['updatedAt'])
           : DateTime.now(), // Default to current time
+      dirtyFlag: map['dirtyFlag'] ?? 0,
     );
   }
 
@@ -141,6 +148,8 @@ class UserNotification {
       'deleted': deleted ,
       'dateModified': dateModified.toIso8601String(), // Convert DateTime to ISO8601 string
       'updatedAt':updatedAt.toIso8601String(),
+      'dirtyFlag': dirtyFlag,
+
     };
   }
 
@@ -163,6 +172,7 @@ class UserNotification {
     'deleted': 'INTEGER NOT NULL', // 0 = Active, 1 = Deleted
     'dateModified': 'TEXT NOT NULL', // ISO8601 string format
     'updatedAt':'TEXT NOT NULL',
+    'dirtyFlag': 'INTEGER NOT NULL',
   };
 
 }

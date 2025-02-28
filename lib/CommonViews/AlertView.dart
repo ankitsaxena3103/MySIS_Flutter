@@ -1,12 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_otp_text_field/flutter_otp_text_field.dart';
-import 'package:mysis/CommonViews/CustomAlertView.dart';
-import 'package:mysis/MyTabBarView.dart';
-import 'package:mysis/CommonViews/LoaderView.dart';
-import 'package:mysis/SharedClasses/Preferences.dart';
-import 'package:mysis/CommonViews/ToastMessageView.dart';
 import 'package:mysis/CommonViews/Utility.dart';
-import 'package:mysis/UserAuthViews/SetPINView.dart';
 import 'package:easy_localization/easy_localization.dart';
 import 'package:mysis/SharedClasses/ThemeProvider.dart';
 import 'package:provider/provider.dart';

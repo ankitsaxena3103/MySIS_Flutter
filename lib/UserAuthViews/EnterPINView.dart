@@ -1,7 +1,7 @@
 import 'package:bcrypt/bcrypt.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
-import 'package:mysis/CommonViews/CustomAlertView.dart';
+import 'package:local_auth/local_auth.dart';
 import 'package:mysis/CommonViews/CustomNumericKeypad.dart';
 import 'package:mysis/MyTabBarView.dart';
 import 'package:mysis/CommonViews/LoaderView.dart';
@@ -32,6 +32,8 @@ class EnterPINView extends StatefulWidget {
 }
 
 class EnterPINViewState extends State<EnterPINView> {
+  final LocalAuthentication auth = LocalAuthentication();
+
   TextEditingController txtEnterPIN= TextEditingController(text: "");
 
   bool showPassword = false;
@@ -304,7 +306,7 @@ class EnterPINViewState extends State<EnterPINView> {
                         SizedBox(height: pathS/2),
                         GestureDetector(
                           onTap: (){
-                            onTapNext();
+                            onUserAuthenticatedLoadNext();
 
                           },
                           child: Container(
@@ -433,7 +435,7 @@ class EnterPINViewState extends State<EnterPINView> {
   }
 
   void initialSetup() {
-
+    checkBiometricAvailability();
     recallGetToken();
     setState(() {
       lblErrorMsg = ''.tr();
@@ -500,12 +502,12 @@ class EnterPINViewState extends State<EnterPINView> {
 
   Future<void> onPINChange(String enteredPIN) async {
 
-    final bool checkPassword = BCrypt.checkpw(
+    final bool passwordMatched = BCrypt.checkpw(
       enteredPIN,
       widget.currentPIN,
     );
 
-    if(checkPassword){
+    if(passwordMatched){
       setState(() {
 
           nextBgColor = isDarkMode ? redColor1 : redColor3;
@@ -515,6 +517,7 @@ class EnterPINViewState extends State<EnterPINView> {
           otpContainerColor = isDarkMode ? greyColorDark : greyColor5;
 
       });
+      onUserAuthenticatedLoadNext();
 
     }
     else{
@@ -522,7 +525,7 @@ class EnterPINViewState extends State<EnterPINView> {
         nextBgColor = isDarkMode ? greyColor8 : greyColor2;
         nextFontColor = isDarkMode ? greyColor7 : greyColor3;
         nextShadowColor = Colors.transparent;
-        lblErrorMsg = ''.tr();
+        lblErrorMsg =  enteredPIN.length == 4 ? 'repeat_not_match'.tr() : '';
         otpContainerColor = isDarkMode ? greyColorDark : greyColor5;
 
       });
@@ -532,29 +535,7 @@ class EnterPINViewState extends State<EnterPINView> {
   }
 
 
-  Future<void> onTapNext() async {
-
-    if (txtEnterPIN.text.isEmpty || txtEnterPIN.text.length != 4) {
-      showToastView('repeat_not_match1'.tr());
-      return;
-    }
-
-
-    String hashedPinEntered = BCrypt.hashpw(txtEnterPIN.text, BCrypt.gensalt());  // Hash the PIN
-
-    printInDebug('entered PIN = ${txtEnterPIN.text}');
-    printInDebug('entered hashedPIN = $hashedPinEntered');
-    printInDebug('saved hashPIN = ${widget.currentPIN}');
-
-    final bool checkPassword = BCrypt.checkpw(
-      txtEnterPIN.text,
-      widget.currentPIN,
-    );
-
-    if(!checkPassword){
-      showToastView('repeat_not_match'.tr());
-      return;
-    }
+  Future<void> onUserAuthenticatedLoadNext() async {
 
     if(widget.calledValue <= 1 ){
       loadHomeScreen();
@@ -612,8 +593,46 @@ class EnterPINViewState extends State<EnterPINView> {
     );
   }
 
+  Future<void> checkBiometricAvailability() async {
+    try {
+      bool canCheckBiometrics = await auth.canCheckBiometrics;
+      bool isDeviceSupported = await auth.isDeviceSupported();
+
+      printInDebug('Biometric Available: $canCheckBiometrics, Supported: $isDeviceSupported');
+
+      if (canCheckBiometrics && isDeviceSupported) {
+        authenticateWithTouchID();
+      } else {
+        setState(() {
+          showKeypad = true;
+        });
+      }
+    } catch (e) {
+      printInDebug('Biometric check error: $e');
+      setState(() {
+        showKeypad = true;
+      });
+    }
+  }
+
+  Future<void> authenticateWithTouchID() async {
+    try {
+      bool authenticated = await auth.authenticate(
+        localizedReason: "Authenticate using Touch ID",
+        options: const AuthenticationOptions(
+          biometricOnly: true,
+          stickyAuth: true,
+        ),
+      );
+
+      if(authenticated) {
+        onUserAuthenticatedLoadNext();
+      }
+     printInDebug('$authenticated');
+    } catch (e) {
+      printInDebug('auth error = $e');
+    }
+  }
 
 }
-
-
 

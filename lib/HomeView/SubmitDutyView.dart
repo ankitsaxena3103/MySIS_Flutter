@@ -16,6 +16,7 @@ import 'package:mysis/SharedClasses/DatabaseHelper.dart';
 import 'package:uuid/uuid.dart';
 
 import '../CommonViews/AlertPopupView.dart';
+import '../CommonViews/LoaderView.dart';
 import '../CommonViews/ToastMessageView.dart';
 import '../SharedClasses/APIHelper.dart';
 import 'UserAttendance.dart';
@@ -71,6 +72,10 @@ class SubmitDutyViewState extends State<SubmitDutyView>{
   String alertHeader = '';
   String alertMessage = '';
   bool showAlert = false;
+  bool showLoaderView = false;
+
+  String attendanceImagePath = "";
+
 
   @override
   void initState() {
@@ -125,7 +130,7 @@ class SubmitDutyViewState extends State<SubmitDutyView>{
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
                           Row(
-                            // mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                            crossAxisAlignment: CrossAxisAlignment.start,
                             children: [
                               CachedNetworkImage(
                                 height: pathS / 1.5,
@@ -202,25 +207,24 @@ class SubmitDutyViewState extends State<SubmitDutyView>{
                               ),
                             ],
                           ),
+
                           Column(
                             children: containers,
                           ),
 
 
                           Padding(
-                            padding:  EdgeInsets.only(left: pathS/5),
+                            padding:  EdgeInsets.only(left: pathS/5,top: pathS/25),
                             child: Row(
-                              crossAxisAlignment: CrossAxisAlignment.center,
+                              crossAxisAlignment: CrossAxisAlignment.start,
 
                               children: [
-                                Container(
-                                  child: Image.asset(
-                                    'assets/images/icons/location.png',
-                                    height: pathS/3,
-                                    width: pathS/3,
-                                    color: isDarkMode ? redColor1 :redColor3,
+                                Image.asset(
+                                  'assets/images/icons/location.png',
+                                  height: pathS/3,
+                                  width: pathS/3,
+                                  color: isDarkMode ? redColor1 :redColor3,
 
-                                  ),
                                 ),
                                 SizedBox(width: pathS/5),
                                 Flexible(
@@ -448,6 +452,7 @@ class SubmitDutyViewState extends State<SubmitDutyView>{
 
                   ),
                 ),
+                LoaderView(isVisible: showLoaderView, message: ''),
 
               ],
             ),
@@ -459,14 +464,14 @@ class SubmitDutyViewState extends State<SubmitDutyView>{
   }
 
   void initialSetup(){
-    for (int i = 0; i < 4; i++) {
+    for (int i = 0; i < 5; i++) {
       containers.add(
         Padding(
           padding:  EdgeInsets.only(left: pathS/3,top: pathS/30),
           child: Container(
             alignment: Alignment.centerLeft,
             height: pathS / 20,
-            width: pathS / 75,
+            width: pathS / 35,
             color: isDarkMode ? whiteColor : greyColor3,
           ),
         ),
@@ -483,25 +488,24 @@ class SubmitDutyViewState extends State<SubmitDutyView>{
 
   }
 
-
   Future<void> capturePhoto() async {
     try {
       final picker = ImagePicker();
       final pickedFile = await picker.pickImage(source: ImageSource.camera);
-
       if (pickedFile != null) {
         final imageBytes = await pickedFile.readAsBytes();
+        attendanceImagePath = (pickedFile?.path)!;
+        printInDebug(attendanceImagePath);
 
         setState(() {
           imagePath = pickedFile.path;
           imageData = base64Encode(imageBytes);
         });
       } else {
-        // Handle the case where the user cancels the camera action
-        print("No image selected.");
+        printInDebug("No image selected.");
       }
     } catch (e) {
-      print("Error capturing photo: $e");
+      printInDebug("Error capturing photo: $e");
     }
   }
 
@@ -509,7 +513,7 @@ class SubmitDutyViewState extends State<SubmitDutyView>{
 
   if(imageData.isEmpty){
     showToastView('please_select_shift'.tr());
-    return;
+    // return;
   }
 
   createAttendance();
@@ -520,44 +524,31 @@ class SubmitDutyViewState extends State<SubmitDutyView>{
 
     Map <String, dynamic> dutyAttendance = widget.attendanceStatus == keyAttendanceStatusDutyIn ? getDutyInAttendance() : getDutyOutAttendance();
 
-    // Convert JSON to UserAttendance object
     UserAttendance userAttendance = UserAttendance.fromJson(dutyAttendance);
-
-    // Create a list of UserAttendance objects
     List<UserAttendance> attendanceData = [userAttendance];
-
-    // Call the sync function
-     syncUserAttendanceData(
-        attendanceData,
-        widget.attendanceStatus,
-        'id',
-      );
-
+     syncUserAttendanceData(attendanceData, widget.attendanceStatus, );
     loadThanksScreen(userAttendance);
-    List<dynamic> attendanceList = [dutyAttendance];
 
+    List<dynamic> attendanceList = [dutyAttendance];
     uploadAttendance(attendanceList);
 
   }
 
   Map <String, dynamic> getDutyInAttendance(){
 
-
     String newUuid = Uuid().v4();
-
+    uploadAttendanceImage(attendanceImagePath, newUuid,widget.attendanceStatus);
     List<String> parts = widget.unitShiftDetail.dutyHrs.split(":");
     int shiftMin =  (int.parse(parts[0]) * 60) + int.parse(parts[1]);
-
     String dutyDate = DateFormat('yyyy-MM-dd').format(DateTime.parse(widget.dutyDateTime));
-
-    Map <String, dynamic> attendance = {
+    Map <String, dynamic> dutyInAttendance = {
       "ID": newUuid,
       "REGNO":  widget.userProfile.regNo ,
       "UNIT_CODE": widget.unitDutyPost.unitCode,
       "SITE_NAME": widget.userPosting.siteName,
       "DUTY_POST_ID": widget.unitDutyPost.id,
       "DUTY_POST_NAME": widget.unitDutyPost.postName,
-      "SHIFT_ID": widget.unitShiftDetail.id,
+      "SHIFT_ID": widget.unitShiftDetail.shiftId,
       "SHIFT_NAME": widget.unitShiftDetail.shiftName,
       "SHIFT_START_DATE": createDutyDate(widget.unitShiftDetail,DateTime.parse(widget.dutyDateTime)),
       "SHIFT_START_TIME": DateTime.parse("$dutyDate ${widget.unitShiftDetail.startTime}").toIso8601String(),
@@ -587,22 +578,18 @@ class SubmitDutyViewState extends State<SubmitDutyView>{
       "DIRTY_FLAG": 1
     };
 
-    printInDebug('Attendance Data');
-    attendance.forEach((key, value) {
-      printInDebug('$key : $value');
-    });
-
-    return attendance;
+    return dutyInAttendance;
 
   }
-
   Map <String, dynamic> getDutyOutAttendance(){
 
     UserAttendance dutyInAttendance = widget.userAttendance!;
 
-    String dutyDate = DateFormat('yyyy-MM-dd').format(DateTime.parse(widget.dutyDateTime));
+    uploadAttendanceImage(attendanceImagePath, dutyInAttendance.id,dutyInAttendance.dutyStatus);
+    String formattedDutyDate = DateFormat('yyyy-MM-dd').format(DateTime.parse(widget.dutyDateTime));
+    String formattedDutyStartDate = DateFormat('yyyy-MM-dd').format(dutyInAttendance.shiftStartDate);
 
-    Map <String, dynamic> attendance = {
+    Map <String, dynamic> dutyOutAttendance = {
       "ID": dutyInAttendance.id,
       "REGNO": dutyInAttendance.regNo,
       "UNIT_CODE": dutyInAttendance.unitCode,
@@ -611,14 +598,14 @@ class SubmitDutyViewState extends State<SubmitDutyView>{
       "DUTY_POST_NAME": dutyInAttendance.dutyPostName,
       "SHIFT_ID": dutyInAttendance.shiftId,
       "SHIFT_NAME":dutyInAttendance.shiftName,
-      "SHIFT_START_DATE": dutyInAttendance.shiftStartDate,
+      "SHIFT_START_DATE": formattedDutyStartDate,
       "SHIFT_START_TIME": dutyInAttendance.shiftStartTime.toIso8601String(),
       "SHIFT_END_TIME": dutyInAttendance.shiftEndTime.toIso8601String(),
       "ACT_START_TIME": dutyInAttendance.actStartTime.toIso8601String(),
       "ACT_END_TIME":  widget.dutyDateTime,
       "FINAl_START_TIME": dutyInAttendance.finalStartTime.toIso8601String(),
-      "FINAL_END_TIME":  DateTime.parse(widget.dutyDateTime).isAfter(DateTime.parse("$dutyDate ${widget.unitShiftDetail.endTime}"))
-          ?  DateTime.parse("$dutyDate ${widget.unitShiftDetail.endTime}").toIso8601String() : widget.dutyDateTime,
+      "FINAL_END_TIME":  DateTime.parse(widget.dutyDateTime).isAfter(DateTime.parse("$formattedDutyDate ${widget.unitShiftDetail.endTime}"))
+          ?  DateTime.parse("$formattedDutyDate ${widget.unitShiftDetail.endTime}").toIso8601String() : widget.dutyDateTime,
       "APPROVED_HR": 0,
       "REJECTED_HR": 0,
       "DUTY_COUNT": 0.0,
@@ -638,12 +625,12 @@ class SubmitDutyViewState extends State<SubmitDutyView>{
       "DIRTY_FLAG": 1
     };
 
-    printInDebug('Attendance Data');
-    attendance.forEach((key, value) {
-      printInDebug('$key : $value');
-    });
+    for (var entry in dutyOutAttendance.entries) {
+      printInDebug('${entry.key} : ${entry.value}');
+    }
 
-    return attendance;
+
+    return dutyOutAttendance;
 
   }
 
@@ -674,6 +661,47 @@ class SubmitDutyViewState extends State<SubmitDutyView>{
     );
   }
 
+  Future<void> uploadAttendanceImage(String filePath, String id, String dutyInOutType) async {
+
+    if(attendanceImagePath.isEmpty){
+      return;
+    }
+
+    setState(() {
+      showLoaderView = true;
+    });
+
+    Map <String,String> inputData = {
+      'parentType' : dutyInOutType,
+      'parentID': id,
+      'fileDescription':'attendance photo',
+      'file':filePath,
+    };
+
+    APIHelper.instance.postImage(uploadImageApi, inputData, (responseData) {
+      if (responseData.isNotEmpty) {
+        // Parse the response list directly
+
+        Map<String, dynamic> data = responseData;
+
+        final String message = data['message'] ?? '';
+
+      }
+      else {
+        // Handle empty response
+        printInDebug('Response data is empty.');
+      }
+      setState(() {showLoaderView = false;});
+    },
+          (error) {
+        // Handle error
+        setState(() {
+          showLoaderView = false;
+        });
+        printInDebug('Error: $error');
+      },
+    );
+  }
   Future<void> updateUserAttendanceTable(Map <String,dynamic> attendance) async{
   await DatabaseHelper.instance.updateTableColumns(
       keyTableUserAttendance,
@@ -683,39 +711,28 @@ class SubmitDutyViewState extends State<SubmitDutyView>{
 
 }
 
-  Future<void> syncUserAttendanceData(
-      List<UserAttendance> userAttendance,
-      String mode,
-      String field,
-      ) async {
+  Future<void> syncUserAttendanceData(List<UserAttendance> userAttendance, String mode,) async {
     if (mode == keyAttendanceStatusDutyIn) {
-      // Insert multiple rows using a generic insert function
       await DatabaseHelper.instance.insertTableData<UserAttendance>(
         keyTableUserAttendance,
         userAttendance,
             (attendance) => attendance.toMap(),
       );
-      for (var data in userAttendance) {
-        printInDebug('Attendance Data');
-        data.toMap().forEach((i, j) {
-          printInDebug('$i : $j');
-        });
 
-      }
-        printInDebug('Inserted ${userAttendance.length} records into $keyTableUserAttendance');
+      printInDebug('Inserted ${userAttendance.length} records into $keyTableUserAttendance');
 
-    } else if (mode == keyAttendanceStatusDutyOut) {
+    }
+    else if (mode == keyAttendanceStatusDutyOut) {
       // Update multiple rows using a generic update function
       await DatabaseHelper.instance.updateTableData<UserAttendance>(
         keyTableUserAttendance,
         userAttendance,
-        field,
+        'id',
             (attendance) => attendance.toMap(),
 
       );
-      if (kDebugMode) {
-        print('Updated ${userAttendance.length} records in $keyTableUserAttendance');
-      }
+        printInDebug('Updated ${userAttendance.length} records in $keyTableUserAttendance');
+
     }
   }
 
@@ -737,7 +754,6 @@ class SubmitDutyViewState extends State<SubmitDutyView>{
       ),
     );
   }
-
   void showToastView(String message) {
     setState(() {
       showToastMessageView = true;
@@ -750,19 +766,12 @@ class SubmitDutyViewState extends State<SubmitDutyView>{
       });
     });
   }
-
   String? createDutyDate(UnitShiftDetail shiftDetail,DateTime dutyMarkDateTime) {
-    // Parse the start and end time strings
     final startParts = shiftDetail.startTime.split(':').map(int.parse).toList();
     final endParts = shiftDetail.endTime.split(':').map(int.parse).toList();
 
-    // Current time (duty marking time)
-    // final dutyMarkDateTime = DateTime.now();
-
-    // Base date: assume duty is being marked for today
     DateTime baseDate = DateTime(dutyMarkDateTime.year, dutyMarkDateTime.month, dutyMarkDateTime.day);
 
-    // Calculate the duty start and end windows for "today"
     final shiftStartDuration = _parseDuration(shiftDetail.shiftStartBefore);
     final dutyStartTimeToday = baseDate.add(Duration(hours: startParts[0], minutes: startParts[1], seconds: startParts[2]))
         .subtract(shiftStartDuration);
@@ -771,7 +780,6 @@ class SubmitDutyViewState extends State<SubmitDutyView>{
     final dutyEndTimeToday = baseDate.add(Duration(hours: endParts[0], minutes: endParts[1], seconds: endParts[2]))
         .subtract(dutyInDuration);
 
-    // Check if the current time falls within today's duty marking window
     if (dutyMarkDateTime.isAfter(dutyStartTimeToday) && dutyMarkDateTime.isBefore(dutyEndTimeToday)) {
 
       return DateFormat('yyyy-MM-dd').format(baseDate); // Attendance for today
@@ -797,8 +805,6 @@ class SubmitDutyViewState extends State<SubmitDutyView>{
     printInDebug('Duty marking window is not valid.');
     return null;
   }
-
-// Helper function to parse durations (e.g., "00:45:00" -> Duration(minutes: 45))
   Duration _parseDuration(String durationString) {
     final parts = durationString.split(':').map(int.parse).toList();
     return Duration(hours: parts[0], minutes: parts[1], seconds: parts[2]);

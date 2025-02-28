@@ -1,10 +1,12 @@
 
 import 'dart:core';
+import 'dart:math';
 
 import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter_phone_direct_caller/flutter_phone_direct_caller.dart';
+import 'package:geolocator/geolocator.dart';
 import 'package:package_info_plus/package_info_plus.dart';
 import 'package:social_share/social_share.dart';
 import 'package:url_launcher/url_launcher.dart';
@@ -32,7 +34,8 @@ const String uploadImageApi = '/api/guardApp/FileUpload/upload';
 const String updateProfileApi = '/api/guardApp/Post/UpdateProfile';
 const String userAttendancePostApi = '/api/guardApp/Post/PostUserAttendance';
 const String userLeavesPostApi = '/api/guardApp/Post/PostUserLeaves';
-const String escortDutyPostApi = '/api/guardApp/Post/PostEscortDuty';
+const String escortDutyPostApi = 'api/guardApp/Post/PostEscortDutyRequest';
+const String userNotificationPostApi = '/api/guardApp/Post/PostUserNotification';
 
 
 const keyDataBaseName = 'mysis_database.db';
@@ -52,6 +55,7 @@ const String keyTableEscortDuty = 'EscortDuty';
 
 const keyAttendanceModeSelf = 'DEVICE';
 const keyAttendanceModeOther = 'OTHER_DUTY';
+const keyAttendanceModeEscortDuty = 'ESCORT_DUTY';
 
 const keyAttendanceStatusDutyIn = 'DUTY_IN';
 const keyAttendanceStatusDutyOut = 'DUTY_OUT';
@@ -59,6 +63,11 @@ const keyAttendanceStatusDutyOut = 'DUTY_OUT';
 const keyPendingAttendance = 0;
 const keyApprovedAttendance = 1;
 const keyNotApprovedAttendance = 2;
+
+const keyPendingEscortDuty = 0;
+const keyApprovedEscortDuty = 1;
+const keyRejectedEscortDuty = 2;
+
 
 const keyPendingLeave = 0;
 const keyApprovedLeave = 1;
@@ -325,6 +334,67 @@ void launchGoogleMap(double lat, double lng){
 void loadMyUrl(String urlString){
   Uri web = Uri.parse(urlString);
   launchUrl(web);
+}
+
+Future<String> getCurrentLocation() async {
+  String currentLatLng = '';
+  try {
+    Position position = await Geolocator.getCurrentPosition(
+      locationSettings: LocationSettings(
+        accuracy: LocationAccuracy.best, // Adjust accuracy as needed
+        distanceFilter: 10, // Optional: Minimum distance between updates in meters
+      ),
+    );
+
+    printInDebug('Latitude: ${position.latitude}, Longitude: ${position.longitude}');
+    currentLatLng = '${position.latitude},${position.longitude}';
+  } catch (e) {
+    printInDebug('Error: $e');
+  }
+
+  return currentLatLng;
+
+}
+
+
+int getDistanceFromDuty(String dutyLatLng, String currentLatLng) {
+  int distance = 0;
+
+  List<String> currentLatLngList = currentLatLng.isNotEmpty
+      ? currentLatLng.split(',').map((e) => e.trim()).toList()
+      : ['0.0', '0.0'];
+  double currentLat = double.parse(currentLatLngList[0]); // Latitude
+  double currentLng = double.parse(currentLatLngList[1]); // Longitude
+
+  // Parse duty latitude and longitude
+  List<String> dutyLatLngList = dutyLatLng.isNotEmpty
+      ? dutyLatLng.split(',').map((e) => e.trim()).toList()
+      : ['0.0', '0.0'];
+  double dutyLat = double.parse(dutyLatLngList[1]); // Latitude
+  double dutyLng = double.parse(dutyLatLngList[0]); // Longitude
+
+  // Radius of the Earth in meters
+  const double earthRadius = 6371000;
+
+  // Convert degrees to radians
+  double toRadians(double degree) => degree * pi / 180;
+
+  // Haversine formula
+  double dLat = toRadians(dutyLat - currentLat);
+  double dLng = toRadians(dutyLng - currentLng);
+
+  double a = pow(sin(dLat / 2), 2) +
+      cos(toRadians(currentLat)) *
+          cos(toRadians(dutyLat)) *
+          pow(sin(dLng / 2), 2);
+
+  double c = 2 * atan2(sqrt(a), sqrt(1 - a));
+
+  // Distance in meters
+  distance = (earthRadius * c).toInt();
+
+  printInDebug('Distance from post = $distance meter');
+  return distance;
 }
 
 const Color redColor1 = Color.fromRGBO(235, 74, 77, 1);

@@ -255,7 +255,7 @@
   "shift_not_start": "Your shift has not started.",
   "employee_detail_not_found": "Contact admin. Your details are not found on the server.",
   "qr_code_mismatch": "Wrong QR Code. Your Duty In is found on another Unit/Duty post, Duty Out on this Unit/Duty post is not allowed. Contact your Supervisor/Unit commander for details.",
-  "duty_mark_in_already": "You are already on duty. Duty Detail as below:",
+  "duty_mark_in_already": "You are already on duty. \nDuty Detail as below:",
   "unit_name": "Unit Name:",
   "punch_Time": "Duty IN Time:",
   "auto_Out": "Shift end",
@@ -634,7 +634,14 @@
   "duty_assign_for_day": "Escort Duty already Applied for that day. Please select another date for duty.",
   "logout_message" : "Invalid credentials. Your account is logged in on another device.",
   "no_of_records" : "No of Records",
-  "unsync_records" : "Unsynced Records"
+  "unsync_records" : "Unsynced Records",
+  "mark_escort_duty": "Mark Escort Duty",
+  "no_unit_duty_post": "No Duty Post available for marking duty.",
+  "no_user_post": "No User Posting available for marking duty.",
+  "distance_from_post" : "Distance From Post",
+  "your_location" : "Your Location",
+  "meter" : "Meter"
+
 }
 
 
