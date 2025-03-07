@@ -28,6 +28,7 @@ const String applyLoanApi = '/api/guardApp/Auth/LoanApplication';
 const String requestLoginApi = '/api/guardApp/Auth/RequestLogin';
 const String validateOTPApi =  '/api/guardApp/Auth/ValidateOTP';
 const String escortDutyApi =  '/api/guardApp/Auth/EscortDuty';
+const String branchHierarchyApi =  '/api/guardApp/Auth/BranchHierarchy';
 
 
 const String uploadImageApi = '/api/guardApp/FileUpload/upload';
@@ -36,6 +37,7 @@ const String userAttendancePostApi = '/api/guardApp/Post/PostUserAttendance';
 const String userLeavesPostApi = '/api/guardApp/Post/PostUserLeaves';
 const String escortDutyPostApi = 'api/guardApp/Post/PostEscortDutyRequest';
 const String userNotificationPostApi = '/api/guardApp/Post/PostUserNotification';
+const String postGuardReferalApi = '/api/guardApp/Post/PostGuardReferal';
 
 
 const keyDataBaseName = 'mysis_database.db';
@@ -201,7 +203,6 @@ Future<void> sendSMS(String phoneNumber, String message) async {
   }
 }
 
-
 void shareOnWhatsApp(String appLink) async {
   String content = 'MySIS App:';
   SocialShare.shareWhatsapp(content);
@@ -285,8 +286,6 @@ String getFormattedTime(String timeString, String format) {
 
 
 }
-
-
 
 String getFormattedDateTime(String timeString, String inputFormat, String outputFormat) {
   String convertedTime = timeString;

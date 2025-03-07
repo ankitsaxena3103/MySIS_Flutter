@@ -158,7 +158,7 @@ class MyTabBarViewState extends State<MyTabBarView> {
                     isScrollControlled: true, // Set to true to occupy full screen height
                     builder: (BuildContext context) {
                       return SizedBox(
-                        height: pathL*4.25, // Adjust height factor as needed
+                        height: pathL*4.1, // Adjust height factor as needed
                         child: MenuItemView(
                           onCloseBottomSheet: () {
                             Navigator.pop(context); // Close the bottom sheet

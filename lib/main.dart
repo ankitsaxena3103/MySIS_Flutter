@@ -2,7 +2,6 @@
 
 import 'dart:io';
 import 'package:flutter/material.dart';
-import 'package:mysis/SharedClasses/APIHelper.dart';
 import 'package:mysis/SharedClasses/LanguageProvider.dart';
 import 'package:mysis/SharedClasses/Preferences.dart';
 import 'package:mysis/Language/SelectLanguageView.dart';
@@ -38,6 +37,8 @@ Future<void> main() async {
 }
 
 class MyApp extends StatelessWidget {
+  const MyApp({super.key});
+
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
@@ -107,7 +108,7 @@ Future<bool> futureBuilderData() async {
   phoneNo = await Preferences.getUserPreference(keyMobile) ?? '';
 
 
-  if (currentPin.isNotEmpty && currentPin != null ) {
+  if (currentPin.isNotEmpty ) {
     isLoggedIn = true;
     // APIHelper.instance.checkForTokenExpiry();
   }

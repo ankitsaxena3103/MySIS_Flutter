@@ -345,7 +345,13 @@ class ScanUnitShiftViewState extends State<ScanUnitShiftView>{
                           showAlert = false;
                         });
 
-                        if(value == 0 && cancelBtnTitle == 'refresh'.tr()){
+                        if(value == 0 && cancelBtnTitle == 'Cancel'.tr()){
+                          Navigator.pop(context);
+                        }
+                        if(value == 0 && cancelBtnTitle == 'ignore'.tr()){
+                          onTapIgnoreAndSubmit();
+                        }
+                        if(value == 1 && okBtnTitle == 'refresh'.tr()){
                           onTapRefreshAndRetry();
                         }
                       }
@@ -513,10 +519,13 @@ class ScanUnitShiftViewState extends State<ScanUnitShiftView>{
   }
   Future<void> getUnitShiftDetailsById(String shiftId) async {
 
+    //do we need to show shift detail to select for escort duty
+    //do we need to show all shift or only duty in shift to make duty out
+
     if (dutyInShiftDetail == null && widget.attendanceStatus == keyAttendanceStatusDutyOut) {
       showPopupAlert('alert'.tr(), 'other_mark_shift_not_allowed1'.tr());
     } else {
-      loadSubmitDutyView();
+      loadSelectShiftView();
     }
 
 
@@ -609,7 +618,8 @@ class ScanUnitShiftViewState extends State<ScanUnitShiftView>{
           showPopupAlert(
               'not_allow_range_location'.tr(),
               message,
-              cancelText:'refresh'.tr()
+              cancelText:'Cancel'.tr(),
+            okText: 'refresh'.tr(),
           );
         }
 
@@ -619,7 +629,8 @@ class ScanUnitShiftViewState extends State<ScanUnitShiftView>{
         showPopupAlert(
             'device_location'.tr(),
             'not_allow_range_location'.tr(),
-            cancelText:'refresh'.tr()
+            cancelText:dutyPost.ignoreBlankLocation == 1 ? 'ignore'.tr() : 'Cancel'.tr(),
+            okText:'refresh'.tr(),
         );
       }
 
@@ -632,6 +643,19 @@ class ScanUnitShiftViewState extends State<ScanUnitShiftView>{
     return locationVerified;
 
   }
+  Future<void> onTapIgnoreAndSubmit() async {
+
+    if(retryMethod == 'SelectShiftView'){
+      loadSelectShiftView( ignoreAndSubmit: true);
+    }
+
+    if(retryMethod == 'SubmitDutyView'){
+      loadSubmitDutyView(ignoreAndSubmit: true);
+    }
+
+
+  }
+
   Future<void> onTapRefreshAndRetry() async {
 
     setState(() {
@@ -655,19 +679,20 @@ class ScanUnitShiftViewState extends State<ScanUnitShiftView>{
 
   }
 
-  void showPopupAlert(String header, String message, {String cancelText = ''}){
+  void showPopupAlert(String header, String message, {String cancelText = '', String okText = ''} ){
     setState(() {
       alertHeader = header;
       alertMessage = message;
       showAlert = true;
       cancelBtnTitle = cancelText;
+      okBtnTitle =  okText.isNotEmpty ? okText : 'ok'.tr();
 
     });
   }
-  void loadSelectShiftView(){
+  void loadSelectShiftView({bool ignoreAndSubmit = false}){
 
 
-    if(!checkDutyLocation(selectedUnitDutyPost, latLong, 'SelectShiftView')){
+    if(!checkDutyLocation(selectedUnitDutyPost, latLong, 'SelectShiftView') && ignoreAndSubmit){
       return;
     }
 
@@ -697,9 +722,9 @@ class ScanUnitShiftViewState extends State<ScanUnitShiftView>{
     });
 
   }
-  void loadSubmitDutyView(){
+  void loadSubmitDutyView({bool ignoreAndSubmit = false}){
 
-    if(!checkDutyLocation(selectedUnitDutyPost, latLong, 'SubmitDutyView')){
+    if(!checkDutyLocation(selectedUnitDutyPost, latLong, 'SubmitDutyView') && ignoreAndSubmit){
       return;
     }
     Navigator.push(

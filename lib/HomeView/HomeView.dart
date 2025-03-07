@@ -1,6 +1,7 @@
 
 import 'dart:async';
 import 'dart:io';
+import 'dart:math';
 
 import 'package:android_intent_plus/android_intent.dart';
 import 'package:android_intent_plus/flag.dart';
@@ -1020,7 +1021,7 @@ class HomeViewState extends State<HomeView> {
                                             Column(
                                               children: [
                                                 Padding(
-                                                  padding: EdgeInsets.only(left: pathS/4, top: pathS/3,bottom: pathS/3), // Adjust top and left as needed
+                                                  padding: EdgeInsets.only(top: pathS/3,bottom:pathS/3), // Adjust top and left as needed
                                                   child: Align(
                                                     alignment: Alignment.center,
                                                     child: Column(
@@ -1208,7 +1209,7 @@ class HomeViewState extends State<HomeView> {
                                                                       ],
                                                                       image: DecorationImage(
                                                                         image: AssetImage("assets/images/dashboard-icons/call.png"),
-                                                                        fit: BoxFit.cover,
+                                                                        fit: BoxFit.cover
                                                                       ),
                                                                     ),
                                                                   ),
@@ -1218,25 +1219,30 @@ class HomeViewState extends State<HomeView> {
                                                                   onTap: (){
                                                                     shareOnWhatsApp(areaOfficeContact);
                                                                   },
-                                                                  child: Container(
-                                                                    height: pathS/1.8,
-                                                                    width: pathS/1.8,
+                                                                  child:Container(
+                                                                    height: pathS / 1.8,
+                                                                    width: pathS / 1.8,
                                                                     decoration: BoxDecoration(
                                                                       shape: BoxShape.circle,
+                                                                      color: redColor3,
                                                                       boxShadow: [
                                                                         BoxShadow(
-                                                                          color: Colors.black.withOpacity(0.35), // Shadow color
-                                                                          blurRadius: pathS/10, // Spread of the shadow
-                                                                          // spreadRadius: pathS/15, // How far the shadow extends
-                                                                          offset:  Offset(-pathS/12, pathS/12),
+                                                                          color: Colors.black.withOpacity(0.3), // Shadow color
+                                                                          blurRadius: pathS / 10, // Spread of the shadow
+                                                                          offset: Offset(-pathS / 12, pathS / 12),
                                                                         ),
                                                                       ],
-                                                                      image: DecorationImage(
-                                                                        image: AssetImage("assets/images/dashboard-icons/whatsApp.png"),
-                                                                        fit: BoxFit.cover,
+                                                                    ),
+                                                                    child: Center( // Center the image inside the container
+                                                                      child: Image.asset(
+                                                                        'assets/images/home/whatsapp.png',
+                                                                        width: pathS /3,  // Set width explicitly
+                                                                        height: pathS /3, // Set height explicitly
+                                                                        fit: BoxFit.contain, // Ensure the image fits within its box
                                                                       ),
                                                                     ),
                                                                   ),
+
                                                                 ),
 
                                                               ],
@@ -2392,7 +2398,11 @@ class HomeViewState extends State<HomeView> {
       Duration totalDutyDuration = Duration.zero;
 
       for (final userAttendance in todayAttendance) {
-        DateTime endTime = userAttendance.actEndTime ?? DateTime.now();
+
+        DateTime endTime = userAttendance.actEndTime ??
+            (userAttendance.shiftEndTime.isBefore(DateTime.now())
+                ? userAttendance.shiftEndTime
+                : DateTime.now());
         totalDutyDuration += endTime.difference(userAttendance.actStartTime);
       }
 

@@ -4,7 +4,9 @@ import 'package:mysis/CommonViews/SuccessAlertView.dart';
 import 'package:mysis/CommonViews/Utility.dart';
 import 'package:easy_localization/easy_localization.dart';
 
+import '../CommonViews/LoaderView.dart';
 import '../CommonViews/ToastMessageView.dart';
+import '../SharedClasses/APIHelper.dart';
 
 class G2GView extends StatefulWidget {
   @override
@@ -17,13 +19,28 @@ class G2GViewState extends State<G2GView>{
   bool showToastMessageView = false;
   String toastMessage = '';
   TextEditingController txtName = TextEditingController(text: "");
+
+  TextEditingController txtMobile = TextEditingController(text: "");
+
   TextEditingController txtDOB = TextEditingController(text: "");
   TextEditingController txtFname = TextEditingController(text: "");
   TextEditingController txtAadharNo = TextEditingController(text: "");
+
   TextEditingController txtPreferredUnit = TextEditingController(text: "");
 
-bool isCalendarView = false;
-bool isSucces = false;
+  bool isCalendarView = false;
+  bool isSucces = false;
+
+  bool showLoaderView = false;
+
+  Color nextBgColor = Color.fromRGBO(51, 51, 51, 0.2);
+  Color nextFontColor = Color.fromRGBO(51, 51, 51, 0.6);
+  Color nextShadowColor = Colors.transparent;
+  String btnNext = 'submit_referral'.tr();
+  bool isTapEnabled = false;
+
+  final mobileNoRegExp = RegExp(r'^[6789]\d{9}$');
+  final aadharRegExp = RegExp(r'^[2-9]\d{11}$');
 
 
   @override
@@ -129,6 +146,9 @@ bool isSucces = false;
                                     alignment:Alignment.bottomLeft,
                                     child: TextField(
                                       onChanged: (value) {
+                                        if(txtName.text.length > 2){
+                                          onChangeData();
+                                        }
                                       },
                                       controller: txtName,
                                       decoration:  InputDecoration(
@@ -138,16 +158,64 @@ bool isSucces = false;
                                         hintStyle: TextStyle(
                                           color: isDarkMode ? greyColor1 : greyColor3,
                                           fontSize: pathS/5,
-                                          fontWeight: FontWeight.normal,
+                                          fontWeight: FontWeight.w500,
+                                          fontFamily: 'Roboto',
                                         ),
                                         border: InputBorder.none,
                                       ),
                                       style: TextStyle(
                                         color: isDarkMode ? whiteColor : greyColor6,
                                         fontSize: pathS/4,
-                                        fontWeight: FontWeight.normal,
+                                        fontWeight: FontWeight.w500,
+                                        fontFamily: 'Roboto',
                                       ),
                                     ),
+                                ),
+                                SizedBox(height: pathS / 8),
+                                Padding(
+                                  padding: EdgeInsets.only(right: 0),
+                                  child: Container(
+                                    height: 1,
+                                    color: isDarkMode ? greyColorDark : greyColor2,
+                                  ),
+                                ),
+
+                                SizedBox(height: pathS/5),
+
+                                Container(
+                                  // width: pathL*1.5,
+                                  height: pathS/2,
+                                  alignment:Alignment.bottomLeft,
+                                  child: TextField(
+                                    onChanged: (value) {
+                                      if(txtMobile.text.length == 10 && mobileNoRegExp.hasMatch(txtMobile.text)){
+                                        onChangeData();
+                                        FocusScope.of(context).unfocus();
+                                      }
+
+                                    },
+                                    controller: txtMobile,
+                                    maxLength: 10,
+                                    keyboardType: TextInputType.number,
+                                    decoration:  InputDecoration(
+                                      hintText: '${'mobile'.tr()}*', // Placeholder text
+                                      contentPadding: EdgeInsets.fromLTRB(0, 0, 8, 0),
+
+                                      hintStyle: TextStyle(
+                                        color: isDarkMode ? greyColor1 : greyColor3,
+                                        fontSize: pathS/5,
+                                        fontWeight: FontWeight.w500,
+                                        fontFamily: 'Roboto',
+                                      ),
+                                      border: InputBorder.none,
+                                    ),
+                                    style: TextStyle(
+                                      color: isDarkMode ? whiteColor : greyColor6,
+                                      fontSize: pathS/4,
+                                      fontWeight: FontWeight.w500,
+                                      fontFamily: 'Roboto',
+                                    ),
+                                  ),
                                 ),
                                 SizedBox(height: pathS / 8),
                                 Padding(
@@ -175,6 +243,12 @@ bool isSucces = false;
                                         height: pathS/2,
                                         alignment:Alignment.bottomLeft,
                                         child: TextField(
+                                          onChanged: (value) {
+                                            if(txtDOB.text.isNotEmpty){
+                                              onChangeData();
+                                            }
+
+                                          },
                                           readOnly: true,
                                           controller: txtDOB,
                                           decoration:  InputDecoration(
@@ -184,14 +258,16 @@ bool isSucces = false;
                                             hintStyle: TextStyle(
                                               color: isDarkMode ? greyColor1 : greyColor3,
                                               fontSize: pathS/5,
-                                              fontWeight: FontWeight.normal,
+                                              fontWeight: FontWeight.w500,
+                                              fontFamily: 'Roboto',
                                             ),
                                             border: InputBorder.none,
                                           ),
                                           style: TextStyle(
                                             color: isDarkMode ? whiteColor : greyColor6,
                                             fontSize: pathS/4,
-                                            fontWeight: FontWeight.normal,
+                                            fontWeight: FontWeight.w500,
+                                            fontFamily: 'Roboto',
                                           ),
                                         ),
                                       ),
@@ -223,6 +299,11 @@ bool isSucces = false;
                                   alignment:Alignment.bottomLeft,
                                   child: TextField(
                                     onChanged: (value) {
+                                      if(txtFname.text.length > 2){
+                                        onChangeData();
+                                        FocusScope.of(context).unfocus();
+                                      }
+
                                     },
                                     controller: txtFname,
                                     decoration:  InputDecoration(
@@ -232,14 +313,16 @@ bool isSucces = false;
                                       hintStyle: TextStyle(
                                         color: isDarkMode ? greyColor1 : greyColor3,
                                         fontSize: pathS/5,
-                                        fontWeight: FontWeight.normal,
+                                        fontWeight: FontWeight.w500,
+                                        fontFamily: 'Roboto',
                                       ),
                                       border: InputBorder.none,
                                     ),
                                     style: TextStyle(
                                       color: isDarkMode ? whiteColor : greyColor6,
                                       fontSize: pathS/4,
-                                      fontWeight: FontWeight.normal,
+                                      fontWeight: FontWeight.w500,
+                                      fontFamily: 'Roboto',
                                     ),
                                   ),
                                 ),
@@ -259,8 +342,14 @@ bool isSucces = false;
                                   alignment:Alignment.bottomLeft,
                                   child: TextField(
                                     onChanged: (value) {
+                                      if(aadharRegExp.hasMatch(txtAadharNo.text)){
+                                        onChangeData();
+                                        FocusScope.of(context).unfocus();
+                                      }
+
                                     },
                                     controller: txtAadharNo,
+                                    maxLength: 12,
                                     keyboardType: TextInputType.number,
                                     decoration:  InputDecoration(
                                       hintText: '${'aadhar_no'.tr()}', // Placeholder text
@@ -269,14 +358,16 @@ bool isSucces = false;
                                       hintStyle: TextStyle(
                                         color: isDarkMode ? greyColor1 : greyColor3,
                                         fontSize: pathS/5,
-                                        fontWeight: FontWeight.normal,
+                                        fontWeight: FontWeight.w500,
+                                        fontFamily: 'Roboto',
                                       ),
                                       border: InputBorder.none,
                                     ),
                                     style: TextStyle(
                                       color: isDarkMode ? whiteColor : greyColor6,
                                       fontSize: pathS/4,
-                                      fontWeight: FontWeight.normal,
+                                      fontWeight: FontWeight.w500,
+                                      fontFamily: 'Roboto',
                                     ),
                                   ),
                                 ),
@@ -301,18 +392,19 @@ bool isSucces = false;
                                     decoration:  InputDecoration(
                                       hintText: '${'preferred_unit'.tr()}', // Placeholder text
                                       contentPadding: EdgeInsets.fromLTRB(0, 0, 8, 0),
-
                                       hintStyle: TextStyle(
                                         color: isDarkMode ? greyColor1 : greyColor3,
                                         fontSize: pathS/5,
-                                        fontWeight: FontWeight.normal,
+                                        fontWeight: FontWeight.w500,
+                                        fontFamily: 'Roboto',
                                       ),
                                       border: InputBorder.none,
                                     ),
                                     style: TextStyle(
                                       color: isDarkMode ? whiteColor : greyColor6,
                                       fontSize: pathS/4,
-                                      fontWeight: FontWeight.normal,
+                                      fontWeight: FontWeight.w500,
+                                      fontFamily: 'Roboto',
                                     ),
                                   ),
                                 ),
@@ -335,35 +427,57 @@ bool isSucces = false;
                   ),
                 ),
 
+
+
                 Positioned(
                   bottom: MediaQuery.of(context).padding.bottom,
 
-                  child: GestureDetector(
-                    onTap: (){
-                      onLoadSubmit();
-                    },
-                    child: Container(
-                      width: screenWidth,
-                      height: pathS / 1.5,
-                      alignment: Alignment.center,
-                      decoration: BoxDecoration(
-                        color: isDarkMode ? greyColor8:whiteColor,                          // border: Border.all(color: Colors.yellow, width: pathS/18),
-                        // borderRadius: BorderRadius.circular(pathS/3),
-                        boxShadow: [
-                          BoxShadow(
-                            color: Colors.black.withOpacity(0.1), // Shadow color
-                            blurRadius: pathS/10, // Spread of the shadow
-                            // spreadRadius: pathS/15, // How far the shadow extends
-                            offset:  Offset(-pathS/12, pathS/12),
+                  child: Container(
+                    width: screenWidth,
+                    height: pathS / 1.2,
+                    alignment: Alignment.center,
+                    decoration: BoxDecoration(
+                      color: isDarkMode ? greyColor8:whiteColor,                          // border: Border.all(color: Colors.yellow, width: pathS/18),
+                      // borderRadius: BorderRadius.circular(pathS/3),
+                      boxShadow: [
+                        BoxShadow(
+                          color: Colors.black.withOpacity(0.1), // Shadow color
+                          blurRadius: pathS/10, // Spread of the shadow
+                          spreadRadius: pathS/8,
+                          offset:  Offset(-pathS/12, pathS/12),
+                        ),
+                      ],
+                    ),
+                    child: GestureDetector(
+                      onTap: isTapEnabled ? onLoadSubmit : null, // Disable tap if isTapEnabled is false
+                      child: Container(
+                        width: pathL*1.5,
+                        height: pathS / 2,
+                        alignment: Alignment.center,
+                        decoration: BoxDecoration(
+                          color: nextBgColor,                          // border: Border.all(color: Colors.yellow, width: pathS/18),
+                          borderRadius: BorderRadius.circular(pathS/3),
+                          boxShadow: [
+                            BoxShadow(
+                              color: nextShadowColor, // Shadow color
+                              blurRadius: pathS/10, // Spread of the shadow
+                              // spreadRadius: pathS/15, // How far the shadow extends
+                              offset:  Offset(-pathS/12, pathS/12),
+                            ),
+                          ],
+                        ),
+                        child: Padding(
+                          padding: const EdgeInsets.all(8.0),
+                          child: Text(
+                            btnNext,
+                            style: TextStyle(
+                              color: nextFontColor,
+                              fontSize: pathS / 5,
+                              fontWeight: FontWeight.w600,
+                              fontFamily: 'Roboto',
+                            ),
+                            textAlign: TextAlign.center,
                           ),
-                        ],
-                      ),
-                      child: Text(
-                        'submit_referral'.tr(),
-                        style: TextStyle(
-                          color: isDarkMode ? redColor1:redColor3,                          // border: Border.all(color: Colors.yellow, width: pathS/18),
-                          fontSize: pathS / 5,
-                          fontWeight: FontWeight.w700,
                         ),
                       ),
                     ),
@@ -372,29 +486,23 @@ bool isSucces = false;
                 Positioned(
                   bottom: 0,
 
-                  child: GestureDetector(
-                    onTap: (){
-
-
-                    },
-                    child: Container(
-                      width: screenWidth,
-                      height: pathS / 1.5,
-                      alignment: Alignment.center,
-                      decoration: BoxDecoration(
-                        color: isDarkMode ? greyColor8:whiteColor,                          // border: Border.all(color: Colors.yellow, width: pathS/18),
-                        // borderRadius: BorderRadius.circular(pathS/3),
-                        boxShadow: [
-                          BoxShadow(
-                            color: Colors.black.withOpacity(0.1), // Shadow color
-                            blurRadius: pathS/10, // Spread of the shadow
-                            // spreadRadius: pathS/15, // How far the shadow extends
-                            offset:  Offset(-pathS/12, pathS/12),
-                          ),
-                        ],
-                      ),
-
+                  child: Container(
+                    width: screenWidth,
+                    height: MediaQuery.of(context).padding.bottom,
+                    alignment: Alignment.center,
+                    decoration: BoxDecoration(
+                      color: isDarkMode ? greyColor8:whiteColor,                          // border: Border.all(color: Colors.yellow, width: pathS/18),
+                      // borderRadius: BorderRadius.circular(pathS/3),
+                      boxShadow: [
+                        BoxShadow(
+                          color: Colors.black.withOpacity(0.1), // Shadow color
+                          blurRadius: pathS/10, // Spread of the shadow
+                          // spreadRadius: pathS/15, // How far the shadow extends
+                          offset:  Offset(-pathS/12, pathS/12),
+                        ),
+                      ],
                     ),
+
                   ),
                 ),
 
@@ -425,15 +533,13 @@ bool isSucces = false;
                           isSucces = false;
 
                         });
-
                         Navigator.pop(context);
-
-
                       },
 
                     message: 'submitted_referral_success'.tr(),),
                 ),
                 ToastMessageView(isVisible: showToastMessageView, message: toastMessage),
+                LoaderView(isVisible: showLoaderView, message: ''),
 
               ],
             ),
@@ -460,20 +566,72 @@ bool isSucces = false;
     });
   }
 
-  void onLoadSubmit(){
-    if(txtName.text.isEmpty){
-      showToast('please_enter_name'.tr());
+
+  void onChangeData() {
+
+    setState(() {
+      nextBgColor = Color.fromRGBO(51, 51, 51, 0.2);
+      nextFontColor = Color.fromRGBO(51, 51, 51, 0.6);
+      nextShadowColor = Colors.transparent;
+      isTapEnabled = false; // Disable tap
+    });
+
+
+
+    if(txtName.text.length < 3){
+      return;
+    }
+    if(!mobileNoRegExp.hasMatch(txtMobile.text)){
       return;
     }
     if(txtDOB.text.isEmpty){
-      showToast('please_enter_dob'.tr());
       return;
     }
-    if(txtFname.text.isEmpty){
+    if(txtFname.text.length < 3){
+      return;
+    }
+    if(txtAadharNo.text.isEmpty && !aadharRegExp.hasMatch(txtAadharNo.text)){
+      return;
+    }
+    if(txtPreferredUnit.text.isEmpty){
+      return;
+    }
+
+
+
+      setState(() {
+        nextBgColor = Color.fromRGBO(195, 50, 30, 1);
+        nextFontColor = Colors.white;
+        nextShadowColor = Colors.black.withOpacity(0.2);
+        isTapEnabled = true; // Enable tap
+      });
+
+
+
+  }
+
+  void onLoadSubmit(){
+    final mobileNoRegExp = RegExp(r'^[6789]\d{9}$');
+    final aadharRegExp = RegExp(r'^[2-9]\d{11}$');
+
+
+    if(txtName.text.length < 3){
+      showToast('please_enter_name'.tr());
+      return;
+    }
+    if(!mobileNoRegExp.hasMatch(txtMobile.text)){
+      showToast('inValid_Number'.tr());
+      return;
+    }
+    if(txtDOB.text.isEmpty){
+      showToast('please_enter_DOB'.tr());
+      return;
+    }
+    if(txtFname.text.length < 3){
       showToast('please_enter_fatherName'.tr());
       return;
     }
-    if(txtAadharNo.text.isEmpty){
+    if(txtAadharNo.text.isEmpty && !aadharRegExp.hasMatch(txtAadharNo.text)){
       showToast('please_enter_adharnumber'.tr());
       return;
     }
@@ -481,9 +639,47 @@ bool isSucces = false;
       showToast('please_enter_preferunit'.tr());
       return;
     }
+
+
     setState(() {
       isSucces = true;
     });
+
+    return;
+    setState(() {
+      showLoaderView = true;
+    });
+    Map <String,String> inputData = {
+      "RegionCode": "",
+      "BranchCode": "",
+      "CandidateName": txtName.text,
+      "MobileNo": txtMobile.text,
+      "DateOfBirth": txtDOB.text,
+      "FatherName": txtFname.text,
+      "AadharNo": txtAadharNo.text
+
+    };
+
+    APIHelper.instance.getData(postGuardReferalApi,inputData, (data) {
+
+      setState(() {
+        showLoaderView = false;
+      });
+      if(data.isNotEmpty){
+
+        Map<String, dynamic> userData = data.first as Map<String, dynamic>;
+
+
+      }
+
+    },(error){
+      setState(() {
+        showLoaderView = false;
+      });
+      printInDebug('error received');
+
+    }
+    );
 
   }
 

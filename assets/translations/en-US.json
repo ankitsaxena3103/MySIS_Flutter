@@ -627,6 +627,7 @@
   "service_not_free":"This service comes with interest rates, it's not free.",
   "loan_not_by_sis":"This loan is not provided by SIS",
   "disclaimer": "Disclaimer",
+  "disclaimer_data": "Upon clicking the \"Apply\" button provided below, your details will be shared with the website/portal operated by Entitled Solutions Private Limited (Entitled). Through this website/portal, you may choose to avail an interest-bearing loan as per the terms and conditions offered by banks/NBFC partners of Entitled. It is important to note that any loan provided to you under this scheme will be from Entitled Solutions Private Limited and NOT from SIS Limited (or any of its subsidiaries).\n\n\\n\\nShould you wish to avail of such a loan, we encourage you to carefully read all loan-related documents, visit https://www.entitled.co.in/how-it-works or contact Entitled at 022-48963081. Any loan provided to you under this scheme is a transaction between you and Entitled, and SIS is not responsible for any terms and conditions of such loan, or any consequences arising thereof.",
   "agree_apply": "Agree and Apply",
   "existing_mobile" : "Your mobile number is already updated.",
   "leave_count_valid" : "You can only mark 7 days leaves.",
@@ -640,8 +641,9 @@
   "no_user_post": "No User Posting available for marking duty.",
   "distance_from_post" : "Distance From Post",
   "your_location" : "Your Location",
-  "meter" : "Meter"
-
+  "meter" : "Meter",
+  "mobile": "Mobile Number",
+  "ignore": "Ignore & Submit"
 }
 
 

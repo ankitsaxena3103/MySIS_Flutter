@@ -50,6 +50,7 @@ class LoginViewState extends State<LoginView> {
   Color nextFontColor = Color.fromRGBO(51, 51, 51, 0.6);
   Color nextShadowColor = Colors.transparent;
   String btnNext = 'next'.tr();
+  bool isTapEnabled = false;
 
   Color lineBorderColor = Color.fromRGBO(51, 51, 51, 0.5);
 
@@ -61,7 +62,7 @@ class LoginViewState extends State<LoginView> {
   String lblUserIdHintText = 'ex_mobile'.tr();
 
   late LanguageProvider languageProvider;
-  bool isTapEnabled = false;
+
 
 
   @override
@@ -413,7 +414,7 @@ class LoginViewState extends State<LoginView> {
   }
 
 
-  Future<String> getAppToken() async {
+  Future<String> getAppInfo() async {
     // Get app version
     PackageInfo packageInfo = await PackageInfo.fromPlatform();
     String appVersion = packageInfo.version;
@@ -442,17 +443,18 @@ class LoginViewState extends State<LoginView> {
     }
   }
   Future<void> onTapLogin() async {
-    String appTokenString = await getAppToken();
+    String appInfoSendToServer = await getAppInfo();
     if (txtUserId.text.isEmpty) {
       showToastView("enter_mobile_no");
       return;
     }
+
       setState(() {
         showLoaderView = true;
       });
       Map <String,String> inputData = {
         "UserName": txtUserId.text,
-        "AppToken" : appTokenString,
+        "AppToken" : appInfoSendToServer,
         "BypassOTPScreen" : "1",
         "Enable_OTPEntry" : "0"
 

@@ -173,6 +173,7 @@ class VerifyOTPViewState extends State<VerifyOTPView> {
                         color: isDarkMode ? whiteColor : greyColor6,
                         fontSize: pathS / 4,
                         fontWeight: FontWeight.w500,
+                        fontFamily: 'Roboto',
                       ),
                       textAlign: TextAlign.center,
                     ),
@@ -208,6 +209,7 @@ class VerifyOTPViewState extends State<VerifyOTPView> {
                                   color: Color.fromRGBO(51, 51, 51, 1),
                                   fontSize: pathS / 6.5,
                                   fontWeight: FontWeight.w500,
+                                  fontFamily: 'Roboto',
                                 ),
                                 textAlign: TextAlign.center,
                               ),
@@ -224,6 +226,7 @@ class VerifyOTPViewState extends State<VerifyOTPView> {
                                   color: Color.fromRGBO(51, 51, 51, 1),
                                   fontSize: pathS / 6,
                                   fontWeight: FontWeight.w500,
+                                  fontFamily: 'Roboto',
                                 ),
                                 textAlign: TextAlign.center,
                               ),
@@ -240,6 +243,7 @@ class VerifyOTPViewState extends State<VerifyOTPView> {
                                   color: redColor1,
                                   fontSize: pathS / 6,
                                   fontWeight: FontWeight.w500,
+                                  fontFamily: 'Roboto',
                                 ),
                                 textAlign: TextAlign.center,
                               ),
@@ -313,7 +317,7 @@ class VerifyOTPViewState extends State<VerifyOTPView> {
                           color: Color.fromRGBO(255, 0, 0, 1),
                           fontSize: pathS / 6.5,
                           fontWeight: FontWeight.w500,
-
+                          fontFamily: 'Roboto',
                         ),
                         textAlign: TextAlign.center,
                       ),
@@ -361,6 +365,7 @@ class VerifyOTPViewState extends State<VerifyOTPView> {
                           color: nextFontColor,
                           fontSize: pathS / 4.5,
                           fontWeight: FontWeight.w700,
+                          fontFamily: 'Roboto',
                         ),
                       ),
                     ),
@@ -773,6 +778,7 @@ class _OtpScreenState extends State<OtpScreen> with CodeAutoFill {
   bool _isOtpDetected = false;
   final List<TextEditingController> _controllers =
   List.generate(4, (index) => TextEditingController());
+  final TextEditingController controllerForiOS = TextEditingController();
 
   @override
   void initState() {
@@ -816,43 +822,90 @@ class _OtpScreenState extends State<OtpScreen> with CodeAutoFill {
   Widget build(BuildContext context) {
 
     return Center(
-      child: Row(
-        mainAxisAlignment: MainAxisAlignment.center,
-        children: List.generate(
-          4,
-              (index) => Container(
+      child: Stack(
+        alignment: Alignment.center,
+        children: [
+          Row(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: List.generate(4, (index) {
+              return Container(
+                margin: const EdgeInsets.symmetric(horizontal: 5.0),
+                width: pathS / 2.2,
+                height: pathS / 1.5,
+                decoration: BoxDecoration(
+                  color: Colors.white,
+                  border: Border(
+                    bottom: BorderSide(
+                      color: isDarkMode ? Colors.grey[800]! : Colors.grey[300]!,
+                      width: 1.5,
+                    ),
+                  ),
+                ),
+                child: Center(
+                  child: TextField(
+                    controller: _controllers[index],
+                    style: TextStyle(
+                      color: isDarkMode ? Colors.white : Colors.black,
+                      fontSize: pathS / 4,
+                      fontWeight: FontWeight.w500,
+                      fontFamily: 'Roboto',
+                    ),
+                    textAlign: TextAlign.center,
+                    keyboardType: TextInputType.none,
+                    maxLength: 1,
+                    autofillHints: index == 0 ? [AutofillHints.oneTimeCode] : null, // Add autofill to first field only
+                    decoration: const InputDecoration(
+                      counterText: "",
+                      border: InputBorder.none,
+                    ),
+                    onChanged: (value) {
+                    },
+                  ),
+                ),
+              );
+            }),
+          ),
+          Container(
             margin: const EdgeInsets.symmetric(horizontal: 5.0),
-            width: pathS / 2.2, // Adjust width for the container
-            height: pathS / 1.5, // Adjust height for the container
+            width: pathL ,
+            height: pathS / 1.5,
             decoration: BoxDecoration(
-              color: Colors.white,
+              color: Colors.transparent,
               border: Border(
                 bottom: BorderSide(
-                  color: isDarkMode ? greyColorDark : greyColor5,
-                  width: 1.5, // Underline thickness
+                  color: Colors.transparent,
+                  width: 1.5,
                 ),
               ),
             ),
             child: Center(
               child: TextField(
-                controller: _controllers[index],
+                controller:controllerForiOS,
                 style: TextStyle(
-                  color: isDarkMode ? whiteColor : greyColor6,
-                  fontSize: pathS / 3,
+                  color: Colors.transparent,
+                  fontSize: 1,
                   fontWeight: FontWeight.w500,
                   fontFamily: 'Roboto',
                 ),
-                textAlign: TextAlign.center,
-                keyboardType: TextInputType.none, // Prevent keyboard popup
-                maxLength: 1, // Ensure only 1 digit can be entered
+                textAlign: TextAlign.left,
+                keyboardType: TextInputType.number,
+                maxLength: 4,
                 decoration: const InputDecoration(
-                  counterText: "", // Remove the character counter
+                  counterText: "",
                   border: InputBorder.none,
                 ),
+                onChanged: (value) {
+                  printInDebug(value);
+                  if(value.length == 4) {
+                    _checkOtpComplete(value);
+                  }else{
+                    controllerForiOS.text = '';
+                  }
+                },
               ),
             ),
           ),
-        ),
+        ],
       ),
     );
   }
@@ -863,4 +916,98 @@ class _OtpScreenState extends State<OtpScreen> with CodeAutoFill {
     printInDebug("App Hash: $appSignature");
   }
 
+  void _checkOtpComplete(String receivedOTP) {
+    String otp = receivedOTP;
+
+    // Autofill the OTP
+    for (int i = 0; i < otp.length && i < _controllers.length; i++) {
+      _controllers[i].text = otp[i];
+    }
+    if (otp.length == 4) {
+      widget.onOtpReceived(otp);
+    }
+  }
+
+
+}
+
+
+class OtpInputField extends StatefulWidget {
+  final Function(String) onOtpReceived;
+  const OtpInputField({Key? key, required this.onOtpReceived}) : super(key: key);
+
+  @override
+  _OtpInputFieldState createState() => _OtpInputFieldState();
+}
+
+class _OtpInputFieldState extends State<OtpInputField> {
+  List<TextEditingController> _controllers = List.generate(4, (index) => TextEditingController());
+
+  @override
+  void dispose() {
+    for (var controller in _controllers) {
+      controller.dispose();
+    }
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    bool isDarkMode = false; // Change based on theme
+    double pathS = MediaQuery.of(context).size.width / 4;
+
+    return Center(
+      child: Row(
+        mainAxisAlignment: MainAxisAlignment.center,
+        children: List.generate(4, (index) {
+          return Container(
+            margin: const EdgeInsets.symmetric(horizontal: 5.0),
+            width: pathS / 2.2,
+            height: pathS / 1.5,
+            decoration: BoxDecoration(
+              color: Colors.white,
+              border: Border(
+                bottom: BorderSide(
+                  color: isDarkMode ? Colors.grey[800]! : Colors.grey[300]!,
+                  width: 1.5,
+                ),
+              ),
+            ),
+            child: Center(
+              child: TextField(
+                controller: _controllers[index],
+                style: TextStyle(
+                  color: isDarkMode ? Colors.white : Colors.black,
+                  fontSize: pathS / 3,
+                  fontWeight: FontWeight.w500,
+                  fontFamily: 'Roboto',
+                ),
+                textAlign: TextAlign.center,
+                keyboardType: TextInputType.number,
+                maxLength: 1,
+                autofillHints: index == 0 ? [AutofillHints.oneTimeCode] : null, // Add autofill to first field only
+                decoration: const InputDecoration(
+                  counterText: "",
+                  border: InputBorder.none,
+                ),
+                onChanged: (value) {
+                  if (value.isNotEmpty && index < _controllers.length - 1) {
+                    FocusScope.of(context).nextFocus();
+                  }
+                  _checkOtpComplete();
+                },
+              ),
+            ),
+          );
+        }),
+      ),
+    );
+  }
+
+  void _checkOtpComplete() {
+    String otp = _controllers.map((e) => e.text).join();
+    if (otp.length == 4) {
+      widget.onOtpReceived(otp);
+    }
+  }
 }

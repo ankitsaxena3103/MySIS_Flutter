@@ -7,6 +7,9 @@ class UnitDutyPost {
   final String unitCode;
   final int isGeoFenceAllow;
   final int allowDistance;
+  final int geoAlert;
+  final int geoAlertDistance;
+  final int ignoreBlankLocation;
   final int deleted;
   final DateTime dateModified;
   final DateTime updatedAt;
@@ -21,27 +24,35 @@ class UnitDutyPost {
     required this.unitCode,
     required this.isGeoFenceAllow,
     required this.allowDistance,
+    required this.geoAlert,
+    required this.geoAlertDistance,
+    required this.ignoreBlankLocation,
     required this.deleted,
     required this.dateModified,
     required this.updatedAt,
+
 
   });
 
   // Factory method for JSON deserialization
   factory UnitDutyPost.fromJson(Map<String, dynamic> json) {
     return UnitDutyPost(
-      id: json['ID'] as String,
-      postName: json['POST_NAME'] as String,
-      address: json['ADDRESS'] as String,
-      geoLocation: json['GEO_LOCATION'] as String,
-      qrId: json['QR_ID'] as String,
-      unitCode: json['UNIT_CODE'] as String,
-      isGeoFenceAllow: json['IS_GEO_FENCE_ALLOW'] as int,
-      allowDistance: json['ALLOW_DISTANCE'] as int,
-      deleted: json['DELETED'] as int,
-      dateModified: DateTime.parse(json['DATE_MODIFIED']),
-      updatedAt:DateTime.now(),
-
+      id: json['ID'] ?? '',
+      postName: json['POST_NAME'] ?? '',
+      address: json['ADDRESS'] ?? '',
+      geoLocation: json['GEO_LOCATION'] ?? '',
+      qrId: json['QR_ID'] ?? '',
+      unitCode: json['UNIT_CODE'] ?? '',
+      isGeoFenceAllow: json['IS_GEO_FENCE_ALLOW'] ?? 0,
+      allowDistance: json['ALLOW_DISTANCE'] ?? 0,
+      geoAlert: json['GEO_ALERT'] ?? 0,
+      geoAlertDistance: json['GEO_ALERT_DISTANCE'] ?? 0,
+      ignoreBlankLocation: json['IGNORE_BLANK_LOCATION'] ?? 0,
+      deleted: json['DELETED'] ?? 0,
+      dateModified: json['DATE_MODIFIED'] != null
+          ? DateTime.tryParse(json['DATE_MODIFIED']) ?? DateTime.now()
+          : DateTime.now(),
+      updatedAt: DateTime.now(),
     );
   }
 
@@ -73,23 +84,30 @@ class UnitDutyPost {
   'deleted': 'INTEGER NOT NULL',
   'dateModified': 'TEXT NOT NULL',
   'updatedAt':'TEXT NOT NULL',
-
+   'geoAlert': 'INTEGER NOT NULL',
+   'geoAlertDistance': 'INTEGER NOT NULL',
+   'ignoreBlankLocation': 'INTEGER NOT NULL',
 
   };
   factory UnitDutyPost.fromMap(Map<String, dynamic> map) {
     return UnitDutyPost(
-      id: map['id'] as String,
-      postName: map['postName'] as String,
-      address: map['address'] as String,
-      geoLocation: map['geoLocation'] as String,
-      qrId: map['qrId'] as String,
-      unitCode: map['unitCode'] as String,
-      isGeoFenceAllow: map['isGeoFenceAllow'] as int,
-      allowDistance: map['allowDistance'] as int,
-      deleted: map['deleted'] as int,
-      dateModified: DateTime.parse(map['dateModified'] as String),
+      id: map['id'] ?? '',
+      postName: map['postName'] ?? '',
+      address: map['address'] ?? '',
+      geoLocation: map['geoLocation'] ?? '',
+      qrId: map['qrId'] ?? '',
+      unitCode: map['unitCode'] ?? '',
+      isGeoFenceAllow: map['isGeoFenceAllow'] ?? 0,
+      allowDistance: map['allowDistance'] ?? 0,
+      geoAlert: map['geoAlert'] ?? 0,
+      geoAlertDistance: map['geoAlertDistance'] ?? 0,
+      ignoreBlankLocation: map['ignoreBlankLocation'] ?? 0,
+      deleted: map['deleted'] ?? 0,
+      dateModified: map['dateModified'] != null
+          ? DateTime.tryParse(map['dateModified']) ?? DateTime.now()
+          : DateTime.now(),
       updatedAt: map['updatedAt'] != null
-          ? DateTime.parse(map['updatedAt']) // Convert ISO string to DateTime
+          ? DateTime.tryParse(map['updatedAt']) ?? DateTime.now()
           : DateTime.now(),
     );
   }
@@ -104,9 +122,12 @@ class UnitDutyPost {
       'unitCode': unitCode,
       'isGeoFenceAllow': isGeoFenceAllow,
       'allowDistance': allowDistance,
+      'geoAlert': geoAlert,
+      'geoAlertDistance': geoAlertDistance,
+      'ignoreBlankLocation': ignoreBlankLocation,
       'deleted': deleted,
       'dateModified': dateModified.toIso8601String(),
-      'updatedAt':updatedAt.toIso8601String(),
+      'updatedAt': updatedAt.toIso8601String(),
     };
   }
 
