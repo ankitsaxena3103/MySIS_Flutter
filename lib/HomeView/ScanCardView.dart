@@ -81,9 +81,9 @@ class ScanCardViewState extends State<ScanCardView>{
                       color: isDarkMode ? greyColor8 : whiteColor,
                       boxShadow: [
                         BoxShadow(
-                          color: Colors.black,
+                          color: shadowColor,
                           blurRadius: pathS / 15,
-                          offset: Offset(-pathS / 12, pathS / 15),
+                          offset: Offset(-0, pathS / 15),
                         ),
                       ],
                     ),
@@ -157,26 +157,46 @@ class ScanCardViewState extends State<ScanCardView>{
                     controller: mobileNoScannerController,
                     onDetect: (barcodeCapture) {
                       for (final barcode in barcodeCapture.barcodes) {
-                        debugPrint('Barcode found: ${barcode.rawValue}');
-                        if(widget.userProfile.mobile == barcode.rawValue || widget.userProfile.regNo == barcode.rawValue) {
-                          onUserScannedId(barcode.rawValue!);
-                        }
-                        else{
-                          onUserScannedData(barcode.rawValue!);
-                        }
+                        String? rawValue = barcode.rawValue;
 
+                        if (rawValue != null && rawValue.startsWith('\n')) {
+                          rawValue = rawValue.substring(1); // Remove the first newline character
+                          debugPrint('Filtered Barcode: $rawValue'); // Debugging output
 
+                          if (widget.userProfile.mobile == rawValue || widget.userProfile.regNo == rawValue) {
+                            onUserScannedId(rawValue);
+                          } else {
+                            onUserScannedData(rawValue);
+                          }
+                        }
                       }
                     },
+
                     fit: BoxFit.cover, // Ensure the scanner fills the container
                     placeholderBuilder: (context, constraints) {
                       return Center(
-                        child: Text('Initializing camera...'),
+                        child: Text(
+                            'camera_init'.tr(),
+                          style: TextStyle(
+                            color: isDarkMode ? whiteColor : greyColor6,
+                            fontSize: pathS / 5.5,
+                            fontWeight: FontWeight.w400,
+                            fontFamily: 'Roboto',
+                          ),
+                        ),
                       );
                     },
                     errorBuilder: (context, error, child) {
                       return Center(
-                        child: Text('Error: ${error.errorCode}'),
+                        child: Text(
+                            'error_camera_init'.tr(),
+                          style: TextStyle(
+                            color: isDarkMode ? whiteColor : greyColor6,
+                            fontSize: pathS / 5.5,
+                            fontWeight: FontWeight.w400,
+                            fontFamily: 'Roboto',
+                          ),
+                        ),
                       );
                     },
                   ),
@@ -219,6 +239,13 @@ class ScanCardViewState extends State<ScanCardView>{
                       alignment: Alignment.center,
                       decoration: BoxDecoration(
                         color: isDarkMode ? greyColor6:whiteColor,
+                        boxShadow: [
+                          BoxShadow(
+                            color: shadowColor,
+                            blurRadius: pathS / 15,
+                            offset: Offset(-0, -pathS / 15),
+                          ),
+                        ],
                       ),
                       child: Row(
                         mainAxisAlignment: MainAxisAlignment.center,

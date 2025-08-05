@@ -643,7 +643,10 @@
   "your_location" : "Your Location",
   "meter" : "Meter",
   "mobile": "Mobile Number",
-  "ignore": "Ignore & Submit"
+  "ignore": "Ignore & Submit",
+  "camera_init": "Initializing camera...",
+  "error_camera_init": "Camera error",
+  "apply_loan_alert": "Are you sure? You want to apply loan."
 }
 
 

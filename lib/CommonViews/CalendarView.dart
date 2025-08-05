@@ -5,12 +5,9 @@ import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:mysis/CommonViews/Utility.dart';
 import 'package:easy_localization/easy_localization.dart';
-import 'package:mysis/SharedClasses/ThemeProvider.dart';
-import 'package:provider/provider.dart';
 import 'package:table_calendar/table_calendar.dart';
 
 import '../CommonViews/ToastMessageView.dart';
-import '../SharedClasses/LanguageProvider.dart';
 
 
 class CalendarView extends StatefulWidget {
@@ -210,7 +207,7 @@ class CalendarViewState extends State<CalendarView> {
                                                       '${day.day}',
                                                       style: TextStyle(
                                                         color: calendarDaysColor,
-                                                        fontWeight: FontWeight.normal,
+                                                        fontWeight: FontWeight.w500,
                                                         fontSize: pathS/6,
                                                       ),
                                                     ),
@@ -234,8 +231,6 @@ class CalendarViewState extends State<CalendarView> {
                                               setState(() {
 
                                                 dateSelected = focusedDay;
-
-
 
 
                                               });

@@ -1733,9 +1733,6 @@ class HomeViewState extends State<HomeView> {
     );
   }
 
-
-
-
   void initialSetup() {
     getNotificationTableData();
 

@@ -31,6 +31,7 @@ class SyncDataViewState extends State<SyncDataView> {
   bool noData = true;
 
   List<Map<String, dynamic>> tableRecords = [];
+  List<Map<String, dynamic>> allTablesToClear = [];
 
   bool showLoaderView = false;
 
@@ -234,10 +235,14 @@ class SyncDataViewState extends State<SyncDataView> {
                                                 children: [
                                                   GestureDetector(
                                                     onTap: () {
+
+                                                      if(table['unsyncedRecords'] > 0){
+                                                        return;
+                                                      }
                                                       setState(() {
                                                         showLoaderView = true;
                                                       });
-                                                      // Handle clear data action
+
                                                       List<Map<String,dynamic>>  tableToClear = [];
                                                       tableToClear.add({
                                                         'tableName': table['tableName'],
@@ -260,10 +265,14 @@ class SyncDataViewState extends State<SyncDataView> {
                                                         // SizedBox(width: pathS/25),
                                                         Column(
                                                           children: [
-                                                            SizedBox(
+                                                            Container(
                                                               width: pathS/2,
                                                               height: pathS/2,
+                                                              decoration:  BoxDecoration(
+                                                                shape: BoxShape.circle,
+                                                                color:   whiteColor,
 
+                                                              ),
                                                               child: Image.asset(
                                                                 'assets/images/sync/clear.png',
                                                                 // color: isDarkMode ? whiteColor:greyColor6,
@@ -470,14 +479,19 @@ class SyncDataViewState extends State<SyncDataView> {
                                   ),
                                   textAlign: TextAlign.center,
                                 ),
-                                SizedBox(width: pathS/15),
+                                SizedBox(width: pathS/10),
                                 Column(
                                   mainAxisAlignment: MainAxisAlignment.center,
                                   crossAxisAlignment: CrossAxisAlignment.center,
                                   children: [
-                                    SizedBox(
+                                    Container(
                                       width: pathS/4,
                                       height: pathS/4,
+                                      decoration:  BoxDecoration(
+                                        shape: BoxShape.circle,
+                                        color:   whiteColor,
+
+                                      ),
 
                                       child: Image.asset(
                                         'assets/images/sync/clear.png',
@@ -565,7 +579,7 @@ class SyncDataViewState extends State<SyncDataView> {
                         setState(() {
                           showLoaderView = true;
                         });
-                        onClearAllData(tableRecords);
+                        onClearAllData(allTablesToClear);
                       }
                     },
                   ),
@@ -584,7 +598,7 @@ class SyncDataViewState extends State<SyncDataView> {
 
 
   void onTapClearAll(){
-    if(tableRecords.isEmpty){
+    if(allTablesToClear.isEmpty){
       return;
     }
     setState(() {
@@ -617,11 +631,14 @@ class SyncDataViewState extends State<SyncDataView> {
 
   }
   void fetchAndShowTableRecords() async {
-    // Database db = await openDatabase(keyDataBaseName);
 
     final allTablesData = await DatabaseHelper.instance.getTableRecords();
+    allTablesToClear.clear();
+    for (var tableRecord in allTablesData) {
 
-    for (var tableRecord in tableRecords) {
+      if(tableRecord['unsyncedRecords'] == 0){
+        allTablesToClear.add(tableRecord);
+      }
       printInDebug(
           "Table: ${tableRecord['tableName']}, Total Records: ${tableRecord['totalRecords']}, Unsynced Records: ${tableRecord['unsyncedRecords']}");
     }

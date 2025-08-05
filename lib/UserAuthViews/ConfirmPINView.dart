@@ -16,12 +16,10 @@ class ConfirmPINView extends StatefulWidget {
 
   final String userPIN;
 
-
   final String pinEntered;
   final String mobile;
   final String regNo;
   final int calledValue;
-
 
   const ConfirmPINView({
     super.key,
@@ -60,6 +58,7 @@ class ConfirmPINViewState extends State<ConfirmPINView> {
   Color nextFontColor = isDarkMode ? greyColor7 : greyColor3;
   Color pinBorderColor = isDarkMode ? whiteColor:greyColor6;
   Color nextShadowColor = Colors.transparent;
+
 
   String lblErrorMsg = '';
 

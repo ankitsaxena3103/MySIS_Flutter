@@ -3,12 +3,15 @@ import 'package:mysis/CommonViews/CalendarView.dart';
 import 'package:mysis/CommonViews/SuccessAlertView.dart';
 import 'package:mysis/CommonViews/Utility.dart';
 import 'package:easy_localization/easy_localization.dart';
+import 'package:mysis/G2G/BranchHierarchy.dart';
 
 import '../CommonViews/LoaderView.dart';
 import '../CommonViews/ToastMessageView.dart';
 import '../SharedClasses/APIHelper.dart';
 
 class G2GView extends StatefulWidget {
+  const G2GView({super.key});
+
   @override
   G2GViewState createState() => G2GViewState();
 }
@@ -33,8 +36,9 @@ class G2GViewState extends State<G2GView>{
 
   bool showLoaderView = false;
 
-  Color nextBgColor = Color.fromRGBO(51, 51, 51, 0.2);
-  Color nextFontColor = Color.fromRGBO(51, 51, 51, 0.6);
+  Color nextBgColor = isDarkMode ? greyColorDark : greyColor2;
+  Color nextFontColor = isDarkMode ? greyColor6 : greyColor3;
+
   Color nextShadowColor = Colors.transparent;
   String btnNext = 'submit_referral'.tr();
   bool isTapEnabled = false;
@@ -42,11 +46,18 @@ class G2GViewState extends State<G2GView>{
   final mobileNoRegExp = RegExp(r'^[6789]\d{9}$');
   final aadharRegExp = RegExp(r'^[2-9]\d{11}$');
 
+  List<BranchHierarchy> branchHierarchyData = [];
+  List<Map<String,String>> regionData = [];
+  List<Map<String,String>> branchData = [];
+
+  String selectedRegionCode = '';
+
+  String selectedBranchCode = '';
 
   @override
   void initState() {
+    onLoadData();
     super.initState();
-
   }
 
   @override
@@ -108,7 +119,7 @@ class G2GViewState extends State<G2GView>{
                   ),
                 ),
 
-                Container(
+                SizedBox(
                   height: screenHeight - pathS - paddingTop - paddingBottom,
                   child: SingleChildScrollView(
                     child: Column(
@@ -119,6 +130,7 @@ class G2GViewState extends State<G2GView>{
                         SizedBox(height: pathS/1.5),
 
                         Container(
+                          alignment: Alignment.center,
                           width: screenWidth - 2.5 * marginValue,
                           decoration: BoxDecoration(
                             shape: BoxShape.rectangle,
@@ -133,7 +145,7 @@ class G2GViewState extends State<G2GView>{
                             ],
                           ),
                           child: Padding(
-                            padding: EdgeInsets.only(left: pathS / 4, top: pathS / 4, bottom: pathS / 2,right: pathS/5),
+                            padding: EdgeInsets.only(left: pathS / 4, top: pathS / 4, bottom: pathS / 2,right: pathS/4),
                             child: Column(
                               mainAxisAlignment: MainAxisAlignment.start,
                               crossAxisAlignment: CrossAxisAlignment.start,
@@ -232,7 +244,6 @@ class G2GViewState extends State<G2GView>{
                                   onTap: () {
                                     setState(() {
                                       isCalendarView = true;
-
                                     });
                                   },
                                   child: Row(
@@ -301,7 +312,6 @@ class G2GViewState extends State<G2GView>{
                                     onChanged: (value) {
                                       if(txtFname.text.length > 2){
                                         onChangeData();
-                                        FocusScope.of(context).unfocus();
                                       }
 
                                     },
@@ -382,40 +392,37 @@ class G2GViewState extends State<G2GView>{
 
                                 SizedBox(height: pathS/5),
 
-                                Container(
-                                  height: pathS/2,
-                                  alignment:Alignment.bottomLeft,
-                                  child: TextField(
-                                    onChanged: (value) {
-                                    },
-                                    controller: txtPreferredUnit,
-                                    decoration:  InputDecoration(
-                                      hintText: '${'preferred_unit'.tr()}', // Placeholder text
-                                      contentPadding: EdgeInsets.fromLTRB(0, 0, 8, 0),
-                                      hintStyle: TextStyle(
-                                        color: isDarkMode ? greyColor1 : greyColor3,
-                                        fontSize: pathS/5,
-                                        fontWeight: FontWeight.w500,
-                                        fontFamily: 'Roboto',
-                                      ),
-                                      border: InputBorder.none,
-                                    ),
-                                    style: TextStyle(
-                                      color: isDarkMode ? whiteColor : greyColor6,
-                                      fontSize: pathS/4,
-                                      fontWeight: FontWeight.w500,
-                                      fontFamily: 'Roboto',
-                                    ),
-                                  ),
+                                CustomDropdown(
+                                  items: regionData,
+                                  placeholder: 'Select Region',
+                                  onSelected: (selectedRegion) {
+                                    setState(() {
+                                      selectedRegionCode = selectedRegion;
+                                      selectedBranchCode = ''; // Reset branch selection
+                                      branchData.clear(); // Clear existing branches before fetching new data
+                                    });
+                                    onChangeData();
+                                    extractBranchData(branchHierarchyData);
+                                    print("Selected Region: $selectedRegion"); // Handle selection
+                                  },
                                 ),
-                                SizedBox(height: pathS / 8),
-                                Padding(
-                                  padding: EdgeInsets.only(right: 0),
-                                  child: Container(
-                                    height: 1,
-                                    color: isDarkMode ? greyColorDark : greyColor2,
-                                  ),
+
+                                SizedBox(height: pathS/5),
+                                CustomDropdown(
+                                  items: branchData,
+                                  placeholder: 'Select Branch',
+                                  selectedValue: selectedBranchCode, // Ensure reset happens
+                                  onSelected: (selectedBranch) {
+                                    setState(() {
+                                      selectedBranchCode = selectedBranch;
+                                    });
+                                    onChangeData();
+                                    print("Selected Branch: $selectedBranch"); // Handle selection
+                                  },
                                 ),
+
+
+
 
 
                               ],
@@ -449,7 +456,7 @@ class G2GViewState extends State<G2GView>{
                       ],
                     ),
                     child: GestureDetector(
-                      onTap: isTapEnabled ? onLoadSubmit : null, // Disable tap if isTapEnabled is false
+                      onTap: isTapEnabled ? onTapSubmit : null, // Disable tap if isTapEnabled is false
                       child: Container(
                         width: pathL*1.5,
                         height: pathS / 2,
@@ -514,7 +521,7 @@ class G2GViewState extends State<G2GView>{
                           isCalendarView = false;
                           if(val == 1){
 
-                            txtDOB.text = data;
+                            txtDOB.text = getFormattedDateTime(data, "dd-MMM-yyyy", "yyyy-MM-dd");
 
                           }
                         });
@@ -552,6 +559,72 @@ class G2GViewState extends State<G2GView>{
     );
   }
 
+  void extractRegionData(List<BranchHierarchy> branchHierarchyData) {
+    Map<String, String> regionMap = {};
+
+    for (var item in branchHierarchyData) {
+      regionMap[item.regionCode] = item.regionName; // Ensure uniqueness
+    }
+
+    setState(() {
+      regionData = regionMap.entries
+          .map((e) => {'id': e.key, 'name': e.value})
+          .toList();
+
+      // Sort by name (ascending)
+      regionData.sort((a, b) => a['name']!.compareTo(b['name']!));
+    });
+  }
+
+  void extractBranchData(List<BranchHierarchy> branchHierarchyData) {
+    Map<String, String> branchMap = {};
+
+    for (var item in branchHierarchyData) {
+      if (selectedRegionCode == item.regionCode) {
+        branchMap[item.branchCode] = item.branchName; // Ensure uniqueness
+      }
+    }
+
+    setState(() {
+      branchData = branchMap.entries.map((e) => {'id': e.key, 'name': e.value}).toList();
+      branchData.sort((a, b) => a['name']!.compareTo(b['name']!));
+
+    });
+  }
+
+  void onLoadData() {
+
+    setState(() {
+      showLoaderView = true;
+    });
+    Map <String,String> inputData = {
+
+    };
+
+    APIHelper.instance.getData(branchHierarchyApi,inputData, (data) {
+
+      setState(() {
+        showLoaderView = false;
+      });
+
+      if(data.isNotEmpty){
+        print(data);
+        List<BranchHierarchy> hierarchyData = data.map((json) => BranchHierarchy.fromJson(json)).toList();
+
+          branchHierarchyData = hierarchyData;
+
+          extractRegionData(branchHierarchyData);
+      }
+
+    },(error){
+      setState(() {
+        showLoaderView = false;
+      });
+    }
+    );
+
+  }
+
 
   void showToast(String message) {
     setState(() {
@@ -565,13 +638,12 @@ class G2GViewState extends State<G2GView>{
       });
     });
   }
-
-
   void onChangeData() {
 
     setState(() {
-      nextBgColor = Color.fromRGBO(51, 51, 51, 0.2);
-      nextFontColor = Color.fromRGBO(51, 51, 51, 0.6);
+      nextBgColor =   isDarkMode ? greyColorDark : greyColor2;
+
+      nextFontColor = isDarkMode ? greyColor6 : greyColor3;
       nextShadowColor = Colors.transparent;
       isTapEnabled = false; // Disable tap
     });
@@ -593,14 +665,17 @@ class G2GViewState extends State<G2GView>{
     if(txtAadharNo.text.isEmpty && !aadharRegExp.hasMatch(txtAadharNo.text)){
       return;
     }
-    if(txtPreferredUnit.text.isEmpty){
+    if(selectedRegionCode.isEmpty){
+      return;
+    }
+
+    if(selectedBranchCode.isEmpty){
       return;
     }
 
 
-
       setState(() {
-        nextBgColor = Color.fromRGBO(195, 50, 30, 1);
+        nextBgColor = redColor3;
         nextFontColor = Colors.white;
         nextShadowColor = Colors.black.withOpacity(0.2);
         isTapEnabled = true; // Enable tap
@@ -609,8 +684,7 @@ class G2GViewState extends State<G2GView>{
 
 
   }
-
-  void onLoadSubmit(){
+  void onTapSubmit(){
     final mobileNoRegExp = RegExp(r'^[6789]\d{9}$');
     final aadharRegExp = RegExp(r'^[2-9]\d{11}$');
 
@@ -635,39 +709,39 @@ class G2GViewState extends State<G2GView>{
       showToast('please_enter_adharnumber'.tr());
       return;
     }
-    if(txtPreferredUnit.text.isEmpty){
+    if(selectedRegionCode.isEmpty || selectedBranchCode.isEmpty){
       showToast('please_enter_preferunit'.tr());
       return;
     }
 
 
-    setState(() {
-      isSucces = true;
-    });
 
-    return;
+
+
     setState(() {
       showLoaderView = true;
     });
     Map <String,String> inputData = {
-      "RegionCode": "",
-      "BranchCode": "",
+      "RegionCode": selectedRegionCode,
+      "BranchCode": selectedBranchCode,
       "CandidateName": txtName.text,
       "MobileNo": txtMobile.text,
       "DateOfBirth": txtDOB.text,
       "FatherName": txtFname.text,
-      "AadharNo": txtAadharNo.text
+      "AadharNo": txtAadharNo.text,
 
     };
 
-    APIHelper.instance.getData(postGuardReferalApi,inputData, (data) {
+    APIHelper.instance.postData(postGuardReferalApi,inputData, (data) {
 
       setState(() {
         showLoaderView = false;
       });
       if(data.isNotEmpty){
 
-        Map<String, dynamic> userData = data.first as Map<String, dynamic>;
+        setState(() {
+          isSucces = true;
+        });
 
 
       }
@@ -684,5 +758,82 @@ class G2GViewState extends State<G2GView>{
   }
 
 
+}
+
+
+class CustomDropdown extends StatefulWidget {
+  final List<Map<String, String>> items; // List of data (Region, Branch, etc.)
+  final Function(String) onSelected; // Callback function
+  final String placeholder; // Placeholder text
+  final String? selectedValue; // Selected value (optional)
+
+  const CustomDropdown({
+    super.key,
+    required this.items,
+    required this.onSelected,
+    required this.placeholder,
+    this.selectedValue, // Make it optional
+  });
+
+  @override
+  _CustomDropdownState createState() => _CustomDropdownState();
+}
+
+class _CustomDropdownState extends State<CustomDropdown> {
+  @override
+  Widget build(BuildContext context) {
+    return DropdownButtonFormField<String>(
+      value: widget.selectedValue?.isNotEmpty == true ? widget.selectedValue : null, // Ensure null if no selection
+      decoration: InputDecoration(
+        hintText: widget.placeholder, // Placeholder text
+        hintStyle: TextStyle(
+          color: isDarkMode ? greyColor1 : greyColor3,
+          fontSize: pathS/5,
+          fontWeight: FontWeight.w500,
+          fontFamily: 'Roboto',
+        ), // Customize placeholder
+        enabledBorder: UnderlineInputBorder(
+          borderSide: BorderSide(
+            color: isDarkMode ? greyColorDark : greyColor2,
+
+          ),
+        ),
+        focusedBorder: UnderlineInputBorder(
+          borderSide: BorderSide(
+            color: isDarkMode ? greyColorDark : greyColor2,
+          ),
+        ),
+      ),
+      items: widget.items.map((item) {
+        return DropdownMenuItem(
+          value: item['id'],
+          child: SizedBox(
+            width: screenWidth-2.5*marginValue-pathS, // Limit width
+            child: Text(
+              item['name']!,
+              overflow: TextOverflow.ellipsis, // Prevent text from overflowing
+              style: TextStyle(
+                color: isDarkMode ? whiteColor : greyColor6,
+                fontSize: pathS/4.2,
+                fontWeight: FontWeight.w500,
+                fontFamily: 'Roboto',
+              ), // Customize text
+            ),
+          ),
+        );
+      }).toList(),
+      onChanged: (value) {
+        widget.onSelected(value!); // Pass the selected value
+      },
+      style: TextStyle(
+        color: isDarkMode ? whiteColor : greyColor6,
+        fontSize: pathS/5,
+        fontWeight: FontWeight.w500,
+        fontFamily: 'Roboto',
+      ), // Selected item text color
+      dropdownColor: isDarkMode ? greyColorDark :Colors.white, // Dropdown background color
+        menuMaxHeight:screenWidth,
+    );
+  }
 
 }

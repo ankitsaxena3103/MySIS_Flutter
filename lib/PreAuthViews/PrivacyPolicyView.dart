@@ -375,8 +375,8 @@ class PrivacyPolicyViewState extends State<PrivacyPolicyView> {
     }
 
     // 3. Request Location Permission
-    //     if (!await _requestLocationPermission() || !await _requestContactPermission() || !await _requestContactPermission()) {
-     if (!await _requestLocationPermission()) {//this is temp
+        if (!await _requestLocationPermission() || !await _requestContactPermission() || !await _requestContactPermission()) {
+     // if (!await _requestLocationPermission()) {//this is temp
 
       return false;
     }

@@ -615,7 +615,7 @@ class MenuItemViewState extends State<MenuItemView> {
                                           height: iconSize,
 
                                           child: Image.asset(
-                                            'assets/images/dashboard-icons/sulabh-loan.png',
+                                            'assets/images/dashboard-icons/sarvam_logo.png',
                                             color: isDarkMode ? whiteColor:greyColor6,
 
                                           ),

@@ -404,5 +404,44 @@ class DatabaseHelper {
     }
   }
 
+  Future<int> countMonthExtraDuties(String empId, int month, int year) async {
+    final db = await instance.database;
+
+    final result = await db.rawQuery('''
+    SELECT COUNT(DISTINCT duty_date) as total_extra_duty
+    FROM (
+      SELECT DATE(shiftStartDate) as duty_date, COUNT(*) as total_shifts
+      FROM UserAttendance
+      WHERE strftime('%m', shiftStartDate) = ? 
+        AND strftime('%Y', shiftStartDate) = ? 
+        AND regNo = ?
+        AND shiftMin = 720
+      GROUP BY duty_date
+      HAVING total_shifts > 1
+    ) 
+  ''', [month.toString().padLeft(2, '0'), year.toString(), empId]);
+
+    return result.isNotEmpty ? result.first['total_extra_duty'] as int : 0;
+  }
+
+  Future<int> getTotalDutyMinutes(String empId, int date, int month, int year) async {
+    final db = await instance.database;
+
+    final result = await db.rawQuery('''
+    SELECT SUM(shiftMin) as total_duty_minutes
+    FROM UserAttendance
+    WHERE strftime('%m', shiftStartDate) = ? 
+      AND strftime('%Y', shiftStartDate) = ? 
+      AND strftime('%d', shiftStartDate) = ? 
+      AND regNo = ?
+  ''', [month.toString().padLeft(2, '0'), year.toString(), date.toString().padLeft(2, '0'), empId]);
+
+    return result.isNotEmpty && result.first['total_duty_minutes'] != null
+        ? result.first['total_duty_minutes'] as int
+        : 0;
+  }
+
+
+
 
 }

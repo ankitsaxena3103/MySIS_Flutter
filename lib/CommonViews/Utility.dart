@@ -53,6 +53,8 @@ const String keyTableUserLeave = 'UserLeaves';
 const String keyTableLeaveType = 'LeaveType';
 const String keyTableHelpMaster = 'HelpMaster';
 const String keyTableEscortDuty = 'EscortDuty';
+const String keyTableBranchHierarchy = 'BranchHierarchy';
+// const String keyTablePostGuardReferal = 'PostGuardReferal';
 
 
 const keyAttendanceModeSelf = 'DEVICE';
