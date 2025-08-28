@@ -8,25 +8,25 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter_phone_direct_caller/flutter_phone_direct_caller.dart';
 import 'package:geolocator/geolocator.dart';
 import 'package:package_info_plus/package_info_plus.dart';
-import 'package:social_share/social_share.dart';
 import 'package:url_launcher/url_launcher.dart';
 
 
 const String baseUrl = 'mysis.sisersys.com:8446';
-const String authenticateApi = '/api/guardApp/Auth/isValidUser';
+// const String authenticateApi = '/api/guardApp/Auth/isValidUser';
 const String profileApi = '/api/guardApp/Auth/UserProfile';
-const String tokenApi = '/api/guardApp/Auth/GenerateToken';
+const String tokenApi = '/api/guardApp/GenerateToken';
 const String userPostingApi = '/api/guardApp/Auth/UserPosting';
 const String contactSISApi = '/api/guardApp/Auth/ContactSIS';
 const String userRosterApi = '/api/guardApp/Auth/UserRoster';
 const String userNotificationApi = '/api/guardApp/Auth/UserNotification';
 const String userAttendanceApi = '/api/guardApp/Auth/UserAttendance';
 const String userLeavesApi = '/api/guardApp/Auth/UserLeaves';
+
 const String leaveTypeMasterApi = '/api/guardApp/Auth/LeaveTypeMaster';
 const String helpMasterApi = '/api/guardApp/Auth/HelpMaster';
 const String applyLoanApi = '/api/guardApp/Auth/LoanApplication';
-const String requestLoginApi = '/api/guardApp/Auth/RequestLogin';
-const String validateOTPApi =  '/api/guardApp/Auth/ValidateOTP';
+const String requestLoginApi = '/api/guardApp/RequestLogin';
+const String validateOTPApi =  '/api/guardApp/ValidateOTP';
 const String escortDutyApi =  '/api/guardApp/Auth/EscortDuty';
 const String branchHierarchyApi =  '/api/guardApp/Auth/BranchHierarchy';
 
@@ -34,7 +34,7 @@ const String branchHierarchyApi =  '/api/guardApp/Auth/BranchHierarchy';
 const String uploadImageApi = '/api/guardApp/FileUpload/upload';
 const String updateProfileApi = '/api/guardApp/Post/UpdateProfile';
 const String userAttendancePostApi = '/api/guardApp/Post/PostUserAttendance';
-const String userLeavesPostApi = '/api/guardApp/Post/PostUserLeaves';
+const String userLeavesPostApi = '/api/guardApp/Post/PostUserLeaveRequest';
 const String escortDutyPostApi = 'api/guardApp/Post/PostEscortDutyRequest';
 const String userNotificationPostApi = '/api/guardApp/Post/PostUserNotification';
 const String postGuardReferalApi = '/api/guardApp/Post/PostGuardReferal';
@@ -56,6 +56,7 @@ const String keyTableEscortDuty = 'EscortDuty';
 const String keyTableBranchHierarchy = 'BranchHierarchy';
 // const String keyTablePostGuardReferal = 'PostGuardReferal';
 
+const String appToken = r"$2a$11$QGo3jefJUjhG1kwyJSDKV.q7emFNRSntKuQUgo7KKOEycVnWYX0tm";
 
 const keyAttendanceModeSelf = 'DEVICE';
 const keyAttendanceModeOther = 'OTHER_DUTY';
@@ -205,11 +206,22 @@ Future<void> sendSMS(String phoneNumber, String message) async {
   }
 }
 
-void shareOnWhatsApp(String appLink) async {
+void shareOnWhatsApp_old(String appLink) async {
   String content = 'MySIS App:';
-  SocialShare.shareWhatsapp(content);
-
+  // SocialShare.shareWhatsapp(content);
 }
+
+void shareOnWhatsApp(String appLink) async {
+  // final text = Uri.encodeComponent('MySIS App:\n$appLink');
+  final url = 'https://wa.me/$appLink?text=Hello';
+
+  if (await canLaunchUrl(Uri.parse(url))) {
+    await launchUrl(Uri.parse(url), mode: LaunchMode.externalApplication);
+  } else {
+    printInDebug('WhatsApp not installed');
+  }
+}
+
 
 PackageInfo packageInfo = PackageInfo(
   appName: 'MySIS',

@@ -169,84 +169,81 @@ class APIHelper {
 
   }
 
-  void getData( String apiName,Map<String, String> queryParams, Function(List<dynamic>) completion,Function(Map<String, dynamic>) error) async {
-    // Map<String, dynamic> responseData = {};
+  void getData(
+      String apiName,
+      Map<String, String> queryParams,
+      Function(List<dynamic>) completion,
+      Function(Map<String, dynamic>) error,
+      ) async {
     List<dynamic> responseData = [];
-
     Map<String, dynamic> responseError = {};
 
-      var apiUrl = Uri.https(baseUrl,apiName);
-
-    var url = queryParams.isNotEmpty ? Uri.parse('$apiUrl').replace(queryParameters: queryParams) : apiUrl;
+    var apiUrl = Uri.https(baseUrl, apiName);
+    var url = queryParams.isNotEmpty
+        ? Uri.parse('$apiUrl').replace(queryParameters: queryParams)
+        : apiUrl;
 
     final headers = {
-        'accept': '*/*',
-        'Authorization': 'Bearer $token',
-      };
-      try {
-        final response = await http.get(
-          url,
-          headers: headers,
-        );
-        printInDebug('request  url=$url headers =$headers');
+      'accept': '*/*',
+      'Authorization': 'Bearer $token',
+    };
 
-        if (response.statusCode == 200) {
-          printInDebug('Response: ${response.body}');
-          // final List< dynamic> dataList =  jsonDecode(response.body);
-          // responseData = dataList;
+    try {
+      final response = await http.get(url, headers: headers);
+      printInDebug('request url=$url headers=$headers');
 
-          final Map<String, dynamic> jsonResponse =
-          jsonDecode(response.body) as Map<String, dynamic>;
+      if (response.statusCode == 200) {
+        printInDebug('Response: ${response.body}');
 
-          if (jsonResponse.containsKey('data')) {
+        final Map<String, dynamic> jsonResponse =
+        jsonDecode(response.body) as Map<String, dynamic>;
 
-            final List<dynamic> dataList = jsonResponse['data'];
-             responseData = dataList;
-
-            if (dataList.isNotEmpty) {
-              completion(responseData);
-            }
-          }
-
-          // completion(responseData);
+        if (jsonResponse.containsKey('data')) {
+          // Case 1: response has "data"
+          final List<dynamic> dataList = jsonResponse['data'];
+          responseData = dataList;
+          completion(responseData);
+        } else {
+          // Case 2: response is a single object (like login token)
+          responseData = [jsonResponse]; // wrap into list
+          completion(responseData);
         }
-        else if(response.statusCode == 401){
-          final Map<String, dynamic> jsonResponse = jsonDecode(response.body) as Map<String, dynamic>;
-          responseError = jsonResponse.containsKey('data')
-              ? jsonResponse['data'] as Map<String, dynamic>
-              : {'ErrorMessage': 'Unexpected error'};
+      } else if (response.statusCode == 401) {
+        final Map<String, dynamic> jsonResponse =
+        jsonDecode(response.body) as Map<String, dynamic>;
 
-          bool isForceLogout = (responseError['ForceLogout'] ?? 0) == 1;
+        responseError = jsonResponse.containsKey('data')
+            ? jsonResponse['data'] as Map<String, dynamic>
+            : {'ErrorMessage': 'Unexpected error'};
 
-          if(isForceLogout){
-            Preferences.saveUserPreferenceBool(keyIsForcedLogOut, true);
-          }else{
-            recallGetToken();
-          }
-          error(responseError);
+        bool isForceLogout = (responseError['ForceLogout'] ?? 0) == 1;
+
+        if (isForceLogout) {
+          Preferences.saveUserPreferenceBool(keyIsForcedLogOut, true);
+        } else {
+          recallGetToken();
         }
-        else {
-          printInDebug('Request failed with status: ${response.statusCode}');
-          printInDebug('error: ${response.body}');
+        error(responseError);
+      } else {
+        printInDebug('Request failed with status: ${response.statusCode}');
+        printInDebug('error: ${response.body}');
 
-          final Map<String, dynamic> jsonResponse = jsonDecode(response.body) as Map<String, dynamic>;
+        final Map<String, dynamic> jsonResponse =
+        jsonDecode(response.body) as Map<String, dynamic>;
 
-          if (jsonResponse.containsKey('data')) {
-            final Map<String, dynamic> data = jsonResponse['data'];
-            responseError = data;
-          }
-          else {
-            responseError = {'ErrorMessage': 'Unexpected error'};
-          }
-
-          error(responseError);
+        if (jsonResponse.containsKey('data')) {
+          responseError = jsonResponse['data'] as Map<String, dynamic>;
+        } else {
+          responseError = {'ErrorMessage': 'Unexpected error'};
         }
-      }
-      catch (e) {
-        printInDebug('Error: $e');
-        responseError = {'ErrorMessage': 'Unexpected error'};
+
         error(responseError);
       }
+    } catch (e) {
+      printInDebug('Error: $e');
+      responseError = {'ErrorMessage': 'Unexpected error'};
+      error(responseError);
+    }
   }
 
   void getUserData( String apiName,Map<String, String> queryParams, Function(Map<String, dynamic>) completion,Function(Map<String, dynamic>) error) async {
@@ -460,26 +457,31 @@ class APIHelper {
 
   }
 
-  void getToken(String userId, String pwd){
-    Map <String,String> inputData = {
+  void getToken(String userId, String pwd) {
+    Map<String, String> inputData = {
       "Username": userId,
       "Password": pwd,
+      "AppToken": appToken,
     };
-    APIHelper.instance.postData(tokenApi,inputData, (data) {
 
-      if(data.isNotEmpty){
+    APIHelper.instance.getData(tokenApi, inputData, (data) {
+      if (data.isNotEmpty) {
+        // Since getData returns List<dynamic>, take first object
+        final Map<String, dynamic> tokenData = data.first;
 
-        token = data['token'] ?? '';
-        String expiryTime = data['expirytime'] ?? '';
+        token = tokenData['token'] ?? '';
+        String expiryTime = tokenData['expirytime'] ?? '';
+
         Preferences.saveUserPreference(keyUserToken, token);
         Preferences.saveUserPreference(keyTokenExpiryTime, expiryTime);
         Preferences.saveUserPreferenceBool(keyIsForcedLogOut, false);
 
+        printInDebug("✅ Token received: $token");
+        printInDebug("✅ Expiry: $expiryTime");
       }
-
-    },(error){
+    }, (error) {
       if (kDebugMode) {
-        print(error);
+        printInDebug("❌ Error in getToken: $error");
       }
     });
   }

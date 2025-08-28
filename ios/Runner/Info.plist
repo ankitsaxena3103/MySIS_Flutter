@@ -24,12 +24,31 @@
 	<string>????</string>
 	<key>CFBundleVersion</key>
 	<string>$(FLUTTER_BUILD_NUMBER)</string>
+	<key>LSApplicationQueriesSchemes</key>
+	<array>
+		<string>App-Prefs</string>
+		<string>prefs</string>
+	</array>
 	<key>LSRequiresIPhoneOS</key>
 	<true/>
+	<key>NSCameraUsageDescription</key>
+	<string>MySIS requires permission to access your phone camera to take pictures while marking attendance and Changing Profile Image.</string>
+	<key>NSContactsUsageDescription</key>
+	<string>MySIS requires permission to access your phone contacts to allow phone calls to be made through the links provided in the application.</string>
+	<key>NSFaceIDUsageDescription</key>
+	<string>MySIS use Face ID to secure your app data.</string>
+	<key>NSLocalAuthenticationUsageDescription</key>
+	<string>MySIS need Touch ID/Face ID to authenticate you.</string>
+	<key>NSLocationWhenInUseUsageDescription</key>
+	<string>MySIS uses location data to verify the location from which Attendance is being marked and while on Duty. Permission is required while the app is in use.</string>
+	<key>NSPhotoLibraryAddUsageDescription</key>
+	<string>MySIS need permission to save files to your device.</string>
 	<key>NSPhotoLibraryUsageDescription</key>
-	<string>Photo library access is required to select photos from your device.</string>
+	<string>MySIS need access to your photo library to save the downloaded PDF.</string>
 	<key>UIApplicationSupportsIndirectInputEvents</key>
 	<true/>
+	<key>UIBackgroundModes</key>
+	<array/>
 	<key>UILaunchStoryboardName</key>
 	<string>LaunchScreen</string>
 	<key>UIMainStoryboardFile</key>
@@ -39,31 +58,9 @@
 		<string>UIInterfaceOrientationPortrait</string>
 		<string>UIInterfaceOrientationPortraitUpsideDown</string>
 	</array>
-    <key>NSContactsUsageDescription</key>
-    <string>MySIS requires permission to access your phone contacts to allow phone calls to be made through the links provided in the application.</string>
-    <key>NSCameraUsageDescription</key>
-    <string>MySIS requires permission to access your phone camera to take pictures while marking attendance and Changing Profile Image.</string>
-	<key>NSLocationWhenInUseUsageDescription</key>
-    <string>Allow MySIS to use the location information of this device.</string>
-    <key>NSLocationAlwaysUsageDescription</key>
-    <string>Allow MySIS to use the location information of this device.</string>
-    <key>NSFaceIDUsageDescription</key>
-    <string>MySIS use Face ID to secure your app data.</string>
-    <key>NSLocalAuthenticationUsageDescription</key>
-    <string>MySIS need Touch ID/Face ID to authenticate you.</string>
-    <key>LSApplicationQueriesSchemes</key>
-    <array>
-        <string>App-Prefs</string>
-        <string>prefs</string>
-    </array>
-    <key>NSPhotoLibraryUsageDescription</key>
-    <string>MySIS need access to your photo library to save the downloaded PDF.</string>
-    <key>NSPhotoLibraryAddUsageDescription</key>
-    <string>MySIS need permission to save files to your device.</string>
-    <key>UIBackgroundModes</key>
-    <array>
-        <string>fetch</string>
-        <string>processing</string>
-    </array>
+	<key>NSLocationAlwaysAndWhenInUseUsageDescription</key>
+	<string>MySIS uses location data in the background to verify your attendance and duty location even when the app is not actively open.</string>
+	<key>NSMicrophoneUsageDescription</key>
+	<string>MySIS requires access to the microphone to record audio for certain features.</string>
 </dict>
 </plist>

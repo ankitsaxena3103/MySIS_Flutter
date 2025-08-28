@@ -323,9 +323,10 @@ class SelectLeaveReasonState extends State<SelectLeaveReason> {
 
     String newUuid = Uuid().v4();
 
-    String startDate = DateFormat('yyyy-MM-dd').format(widget.appliedLeavesDate.first);
-    String endDate = DateFormat('yyyy-MM-dd').format(widget.appliedLeavesDate.last);
+    final DateFormat formatter = DateFormat('yyyy-MM-dd');
 
+    String startDate = formatter.format(widget.appliedLeavesDate.first);
+    String endDate   = formatter.format(widget.appliedLeavesDate.last);
     Map <String, dynamic> leaves = {
     "ID": newUuid,
     "REGNO": regNo,

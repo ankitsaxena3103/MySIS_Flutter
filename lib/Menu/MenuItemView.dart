@@ -56,7 +56,7 @@ class MenuItemViewState extends State<MenuItemView> {
     calculateSizes(context);
     double iconSize = pathS/3;
     double iconTextGap = pathS/8;
-    double verticalGap = pathS/2.5;
+    double verticalGap = pathS/5;
     double horizontalGap = 0;
     var backgroundGradientDark =  LinearGradient(
       colors: [greyColor8, greyColor8],
@@ -86,599 +86,683 @@ class MenuItemViewState extends State<MenuItemView> {
                         child:  Column(
                           mainAxisAlignment: MainAxisAlignment.end,
                           children: [
-
                             Row(
                               mainAxisAlignment: MainAxisAlignment.center,
                               children: [
+                                // Home
                                 GestureDetector(
-                                  onTap: (){
+                                  behavior: HitTestBehavior.opaque,
+                                  onTap: () {
                                     widget.onCloseBottomSheet();
-                                   widget.onTabSelected(0);
+                                    widget.onTabSelected(0);
                                   },
-                                  child:  Column(
-                                    children: [
-                                      SizedBox(
-                                        width: iconSize,
-                                        height: iconSize,
-
-                                        child: Image.asset(
-                                          'assets/images/dashboard-icons/home.png',
-                                          color: isDarkMode ? whiteColor:greyColor6,
+                                  child: Container(
+                                    width: screenWidth / 3,
+                                    padding: const EdgeInsets.symmetric(vertical: 8),
+                                    child: Column(
+                                      mainAxisSize: MainAxisSize.min,
+                                      children: [
+                                        SizedBox(
+                                          width: iconSize,
+                                          height: iconSize,
+                                          child: Image.asset(
+                                            'assets/images/dashboard-icons/home.png',
+                                            color: isDarkMode ? whiteColor : greyColor6,
+                                          ),
                                         ),
-                                      ),
-                                      SizedBox(height: iconTextGap),
-                                      SizedBox(
-                                        width: screenWidth/3,
-                                        child:Text(
+                                        SizedBox(height: iconTextGap),
+                                        Text(
                                           'home'.tr(),
                                           style: TextStyle(
-                                            color: isDarkMode ? whiteColor:greyColor6,
+                                            color: isDarkMode ? whiteColor : greyColor6,
                                             fontSize: pathS / 5,
                                             fontWeight: FontWeight.w700,
                                             fontFamily: 'Roboto',
                                           ),
                                           textAlign: TextAlign.center,
-                                        ) ,
-                                      ),
-
-                                    ],
-                                  ),//home
+                                        ),
+                                      ],
+                                    ),
+                                  ),
                                 ),
+
                                 SizedBox(width: horizontalGap),
+
+                                // Duty
                                 GestureDetector(
-                                    onTap: (){
-                                      widget.onCloseBottomSheet();
-                                      widget.onTabSelected(1);
-                                    },
-                                    child:Column(
+                                  behavior: HitTestBehavior.opaque,
+                                  onTap: () {
+                                    widget.onCloseBottomSheet();
+                                    widget.onTabSelected(1);
+                                  },
+                                  child: Container(
+                                    width: screenWidth / 3,
+                                    padding: const EdgeInsets.symmetric(vertical: 8),
+                                    child: Column(
+                                      mainAxisSize: MainAxisSize.min,
                                       children: [
                                         SizedBox(
                                           width: iconSize,
                                           height: iconSize,
                                           child: Image.asset(
                                             'assets/images/dashboard-icons/duty.png',
-                                            color: isDarkMode ? whiteColor:greyColor6,
+                                            color: isDarkMode ? whiteColor : greyColor6,
                                           ),
                                         ),
                                         SizedBox(height: iconTextGap),
-                                        SizedBox(
-                                          width: screenWidth/3,
-                                          child:Text(
-                                            'txt_duty'.tr(),
-                                            style: TextStyle(
-                                              color: isDarkMode ? whiteColor:greyColor6,
-                                              fontSize: pathS / 5,
-                                              fontWeight: FontWeight.w700,
-                                              fontFamily: 'Roboto',
-                                            ),
-                                            textAlign: TextAlign.center,
-                                          ),
-                                        ),
-                                      ],
-                                    ),
-                                ),
-                                SizedBox(width: horizontalGap),
-                                GestureDetector(
-                                    onTap: (){
-                                      widget.onCloseBottomSheet();
-                                      onLoadProfileView();
-                                    },
-                                    child:SizedBox(
-                                      child: Column(
-                                        children: [
-                                          SizedBox(
-                                            width: iconSize,
-                                            height: iconSize,
-                                            child: Image.asset(
-                                              'assets/images/dashboard-icons/user.png',
-                                              color: isDarkMode ? whiteColor:greyColor6,
-                                            ),
-                                          ),
-                                          SizedBox(height: iconTextGap),
-                                          SizedBox(
-                                            width: screenWidth/3,
-                                            child:Text(
-                                              'profile'.tr(),
-                                              style: TextStyle(
-                                                color: isDarkMode ? whiteColor:greyColor6,
-                                                fontSize: pathS / 5,
-                                                fontWeight: FontWeight.w700,
-                                                fontFamily: 'Roboto',
-                                              ),
-                                              textAlign: TextAlign.center,
-                                            ),
-                                          ),
-                                        ],
-                                      ),
-                                    ),
-                                ),
-
-                              ],
-                            ),
-                            SizedBox(height: verticalGap),
-                            Row(
-                              mainAxisAlignment: MainAxisAlignment.center,
-
-                              children: [
-                                GestureDetector(
-                                    onTap: (){
-                                      widget.onCloseBottomSheet();
-                                      onLoadNotificationView();
-
-                                    },
-                                    child:Column(
-                                      children: [
-                                        Container(
-                                          width: iconSize,
-                                          height: iconSize,
-
-                                          child: Image.asset(
-                                            'assets/images/dashboard-icons/notification.png',
-                                            color: isDarkMode ? whiteColor:greyColor6,
-
-                                          ),
-                                        ),
-                                        SizedBox(height: iconTextGap),
-                                        SizedBox(
-                                          width: screenWidth/3,
-                                          child: Text(
-                                            'notification'.tr(),
-                                            style: TextStyle(
-                                              color: isDarkMode ? whiteColor:greyColor6,
-                                              fontSize: pathS / 5,
-                                              fontWeight: FontWeight.w700,
-                                              fontFamily: 'Roboto',
-                                            ),
-                                            textAlign: TextAlign.center,
-                                          ),
-                                        )
-
-                                      ],
-                                    ),
-                                ),
-
-                                SizedBox(width: horizontalGap),
-                                GestureDetector(
-                                    onTap: (){
-                                      widget.onCloseBottomSheet();
-
-                                      onLoadLeaveView();
-
-                                    },
-                                    child: Column(
-                                      children: [
-                                        Container(
-                                          width: iconSize,
-                                          height: iconSize,
-
-                                          child: Image.asset(
-                                            'assets/images/dashboard-icons/leaves.png',
-                                            color: isDarkMode ? whiteColor:greyColor6,
-
-                                          ),
-                                        ),
-                                        SizedBox(height: iconTextGap),
-                                        Container(
-                                          width: screenWidth/3,
-                                          child: Text(
-                                            'txt_leaves'.tr(),
-                                            style: TextStyle(
-                                              color: isDarkMode ? whiteColor:greyColor6,
-                                              fontSize: pathS / 5,
-                                              fontWeight: FontWeight.w700,
-                                              fontFamily: 'Roboto',
-                                            ),
-                                            textAlign: TextAlign.center,
-                                          ),
-                                        ),
-
-                                      ],
-                                    ),
-                                ),
-
-                                SizedBox(width: horizontalGap),
-                                GestureDetector(
-                                    onTap: (){
-                                      widget.onCloseBottomSheet();
-                                      onLoadSyncDataView();
-
-                                    },
-                                    child:Column(
-                                      children: [
-                                        Container(
-                                          width: iconSize,
-                                          height: iconSize,
-
-                                          child: Image.asset(
-                                            'assets/images/dashboard-icons/circular-refresh.png',
-                                            color: isDarkMode ? whiteColor:greyColor6,
-
-                                          ),
-                                        ),
-                                        SizedBox(height: iconTextGap),
-                                        Container(
-                                          width: screenWidth/3,
-                                          child:Text(
-                                            'txt_sync'.tr(),
-                                            style: TextStyle(
-                                              color: isDarkMode ? whiteColor:greyColor6,
-                                              fontSize: pathS / 5,
-                                              fontWeight: FontWeight.w700,
-                                              fontFamily: 'Roboto',
-                                            ),
-                                            textAlign: TextAlign.center,
-                                          ),
-                                        ),
-
-                                      ],
-                                    ),
-                                ),
-
-                              ],
-                            ),
-                            SizedBox(height: verticalGap),
-                            Row(
-                              mainAxisAlignment: MainAxisAlignment.center,
-
-                              children: [
-                                GestureDetector(
-                                    onTap: (){
-                                      widget.onCloseBottomSheet();
-                                      onLoadGeneralQAView();
-
-                                    },
-                                    child:Column(
-                                      children: [
-                                        Container(
-                                          width: iconSize,
-                                          height: iconSize,
-
-                                          child: Image.asset(
-                                            'assets/images/dashboard-icons/faqs.png',
-                                            color: isDarkMode ? whiteColor:greyColor6,
-
-                                          ),
-                                        ),
-                                        SizedBox(height: iconTextGap),
-                                        Container(
-                                          width: screenWidth/3,
-                                          child:Text(
-                                            'faq'.tr(),
-                                            style: TextStyle(
-                                              color: isDarkMode ? whiteColor:greyColor6,
-                                              fontSize: pathS / 5,
-                                              fontWeight: FontWeight.w700,
-                                              fontFamily: 'Roboto',
-                                            ),
-                                            textAlign: TextAlign.center,
-                                          ),
-                                        ),
-
-                                      ],
-                                    ),
-                                ),
-
-                                SizedBox(width: horizontalGap),
-                                GestureDetector(
-                                    onTap: (){
-                                      widget.onCloseBottomSheet();
-                                      onLoadERCView();
-                                    },
-                                    child:Column(
-                                      children: [
-                                        SizedBox(
-                                          width: iconSize,
-                                          height: iconSize,
-
-                                          child: Image.asset(
-                                            'assets/images/dashboard-icons/erc.png',
-                                            color: isDarkMode ? whiteColor:greyColor6,
-
-                                          ),
-                                        ),
-                                        SizedBox(height: iconTextGap),
-                                        SizedBox(
-                                          width: screenWidth/3,
-                                          child:Text(
-                                            'erc'.tr(),
-                                            style: TextStyle(
-                                              color: isDarkMode ? whiteColor:greyColor6,
-                                              fontSize: pathS / 5,
-                                              fontWeight: FontWeight.w700,
-                                              fontFamily: 'Roboto',
-                                            ),
-                                            textAlign: TextAlign.center,
-                                          ),
-                                        ),
-
-                                      ],
-                                    ),
-                                ),
-
-                                SizedBox(width: horizontalGap),
-                                GestureDetector(
-                                  onTap: (){
-                                    widget.onCloseBottomSheet();
-
-                                    onLoadLanguageView();
-
-                                  },
-                                  child: Column(
-                                    children: [
-                                      Container(
-                                        width: iconSize,
-                                        height: iconSize,
-
-                                        child: Image.asset(
-                                          'assets/images/dashboard-icons/language.png',
-                                          color: isDarkMode ? whiteColor:greyColor6,
-
-                                        ),
-                                      ),
-                                      SizedBox(height: iconTextGap),
-                                      Container(
-                                        width: screenWidth/3,
-                                        child:Text(
-                                          'language'.tr(),
+                                        Text(
+                                          'txt_duty'.tr(),
                                           style: TextStyle(
-                                            color: isDarkMode ? whiteColor:greyColor6,
+                                            color: isDarkMode ? whiteColor : greyColor6,
                                             fontSize: pathS / 5,
                                             fontWeight: FontWeight.w700,
                                             fontFamily: 'Roboto',
                                           ),
                                           textAlign: TextAlign.center,
                                         ),
-                                      ),
-
-                                    ],
+                                      ],
+                                    ),
                                   ),
                                 ),
 
-                              ],
-                            ),
-                            SizedBox(height: verticalGap),
-                            Row(
-                              mainAxisAlignment: MainAxisAlignment.center,
-
-                              children: [
-                                GestureDetector(
-                                    onTap: (){
-                                      widget.onCloseBottomSheet();
-                                      onLoadSalaryView();
-
-                                    },
-                                    child:Column(
-                                      children: [
-                                        Container(
-                                          width: iconSize,
-                                          height: iconSize,
-
-                                          child: Image.asset(
-                                            'assets/images/dashboard-icons/salary.png',
-                                            color: isDarkMode ? whiteColor:greyColor6,
-
-                                          ),
-                                        ),
-                                        SizedBox(height: iconTextGap),
-                                        Container(
-                                          width: screenWidth/3,
-                                          child:Text(
-                                            'salary'.tr(),
-                                            style: TextStyle(
-                                              color: isDarkMode ? whiteColor:greyColor6,
-                                              fontSize: pathS / 5,
-                                              fontWeight: FontWeight.w700,
-                                              fontFamily: 'Roboto',
-                                            ),
-                                            textAlign: TextAlign.center,
-                                          ),
-                                        ),
-
-                                      ],
-                                    ),
-                                ),
-
                                 SizedBox(width: horizontalGap),
+
+                                // Profile
                                 GestureDetector(
-                                    onTap: (){
-                                      widget.onCloseBottomSheet();
-                                      onLoadGeneralRuleView();
-
-
-                                    },
-                                    child:Column(
+                                  behavior: HitTestBehavior.opaque,
+                                  onTap: () {
+                                    widget.onCloseBottomSheet();
+                                    onLoadProfileView();
+                                  },
+                                  child: Container(
+                                    width: screenWidth / 3,
+                                    padding: const EdgeInsets.symmetric(vertical: 8),
+                                    child: Column(
+                                      mainAxisSize: MainAxisSize.min,
                                       children: [
-                                        Container(
+                                        SizedBox(
                                           width: iconSize,
                                           height: iconSize,
-
                                           child: Image.asset(
-                                            'assets/images/dashboard-icons/documents.png',
-                                            color: isDarkMode ? whiteColor:greyColor6,
-
+                                            'assets/images/dashboard-icons/user.png',
+                                            color: isDarkMode ? whiteColor : greyColor6,
                                           ),
                                         ),
                                         SizedBox(height: iconTextGap),
-                                        Container(
-                                          width: screenWidth/3,
-                                          child: Text(
-                                            'general_rules'.tr(),
-                                            style: TextStyle(
-                                              color: isDarkMode ? whiteColor:greyColor6,
-                                              fontSize: pathS / 5,
-                                              fontWeight: FontWeight.w700,
-                                              fontFamily: 'Roboto',
-                                            ),
-                                            textAlign: TextAlign.center,
+                                        Text(
+                                          'profile'.tr(),
+                                          style: TextStyle(
+                                            color: isDarkMode ? whiteColor : greyColor6,
+                                            fontSize: pathS / 5,
+                                            fontWeight: FontWeight.w700,
+                                            fontFamily: 'Roboto',
                                           ),
+                                          textAlign: TextAlign.center,
                                         ),
-
                                       ],
                                     ),
+                                  ),
                                 ),
-
-                                SizedBox(width: horizontalGap),
-                                GestureDetector(
-                                    onTap: (){
-                                      widget.onCloseBottomSheet();
-                                      onLoadG2GView();
-
-                                    },
-                                    child:Column(
-                                      children: [
-                                        Container(
-                                          width: iconSize,
-                                          height: iconSize,
-
-                                          child: Image.asset(
-                                            'assets/images/dashboard-icons/g2g.png',
-                                            color: isDarkMode ? whiteColor:greyColor6,
-
-                                          ),
-                                        ),
-                                        SizedBox(height: iconTextGap),
-                                        Container(
-                                          width: screenWidth/3,
-                                          child:Text(
-                                            'g2g'.tr(),
-                                            style: TextStyle(
-                                              color: isDarkMode ? whiteColor:greyColor6,
-                                              fontSize: pathS / 5,
-                                              fontWeight: FontWeight.w700,
-                                              fontFamily: 'Roboto',
-                                            ),
-                                            textAlign: TextAlign.center,
-                                          ),
-                                        ),
-
-                                      ],
-                                    ),
-                                ),
-
                               ],
                             ),
 
                             SizedBox(height: verticalGap),
                             Row(
                               mainAxisAlignment: MainAxisAlignment.center,
-
                               children: [
+                                // Notification
                                 GestureDetector(
-                                    onTap: (){
-                                      widget.onCloseBottomSheet();
-                                      onLoadAKRView();
-
-
-                                    },
-                                    child:Column(
+                                  behavior: HitTestBehavior.opaque,
+                                  onTap: () {
+                                    widget.onCloseBottomSheet();
+                                    onLoadNotificationView();
+                                  },
+                                  child: Container(
+                                    width: screenWidth / 3,
+                                    padding: const EdgeInsets.symmetric(vertical: 8),
+                                    child: Column(
+                                      mainAxisSize: MainAxisSize.min,
                                       children: [
-                                        Container(
+                                        SizedBox(
                                           width: iconSize,
                                           height: iconSize,
-
                                           child: Image.asset(
-                                            'assets/images/dashboard-icons/akr.png',
-                                            color: isDarkMode ? whiteColor:greyColor6,
-
+                                            'assets/images/dashboard-icons/notification.png',
+                                            color: isDarkMode ? whiteColor : greyColor6,
                                           ),
                                         ),
                                         SizedBox(height: iconTextGap),
-                                        Container(
-                                          width: screenWidth/3,
-                                          child:Text(
-                                            'akr'.tr(),
-                                            style: TextStyle(
-                                              color: isDarkMode ? whiteColor:greyColor6,
-                                              fontSize: pathS / 5,
-                                              fontWeight: FontWeight.w700,
-                                              fontFamily: 'Roboto',
-                                            ),
-                                            textAlign: TextAlign.center,
+                                        Text(
+                                          'notification'.tr(),
+                                          style: TextStyle(
+                                            color: isDarkMode ? whiteColor : greyColor6,
+                                            fontSize: pathS / 5,
+                                            fontWeight: FontWeight.w700,
+                                            fontFamily: 'Roboto',
                                           ),
+                                          textAlign: TextAlign.center,
                                         ),
-
                                       ],
                                     ),
+                                  ),
                                 ),
 
                                 SizedBox(width: horizontalGap),
-                                GestureDetector(
-                                    onTap: (){
-                                      widget.onCloseBottomSheet();
-                                      onLoadSarvamLoanView();
 
-                                    },
-                                    child:Column(
+                                // Leaves
+                                GestureDetector(
+                                  behavior: HitTestBehavior.opaque,
+                                  onTap: () {
+                                    widget.onCloseBottomSheet();
+                                    onLoadLeaveView();
+                                  },
+                                  child: Container(
+                                    width: screenWidth / 3,
+                                    padding: const EdgeInsets.symmetric(vertical: 8),
+                                    child: Column(
+                                      mainAxisSize: MainAxisSize.min,
                                       children: [
-                                        Container(
+                                        SizedBox(
                                           width: iconSize,
                                           height: iconSize,
-
                                           child: Image.asset(
-                                            'assets/images/dashboard-icons/sarvam_logo.png',
-                                            color: isDarkMode ? whiteColor:greyColor6,
-
+                                            'assets/images/dashboard-icons/leaves.png',
+                                            color: isDarkMode ? whiteColor : greyColor6,
                                           ),
                                         ),
                                         SizedBox(height: iconTextGap),
-                                        Container(
-                                          width: screenWidth/3,
-                                          child: Text(
-                                            'loan_by_sarvam'.tr(),
-                                            style: TextStyle(
-                                              color: isDarkMode ? whiteColor:greyColor6,
-                                              fontSize: pathS / 5,
-                                              fontWeight: FontWeight.w700,
-                                              fontFamily: 'Roboto',
-                                            ),
-                                            textAlign: TextAlign.center,
+                                        Text(
+                                          'txt_leaves'.tr(),
+                                          style: TextStyle(
+                                            color: isDarkMode ? whiteColor : greyColor6,
+                                            fontSize: pathS / 5,
+                                            fontWeight: FontWeight.w700,
+                                            fontFamily: 'Roboto',
                                           ),
+                                          textAlign: TextAlign.center,
                                         ),
-
                                       ],
                                     ),
+                                  ),
                                 ),
 
                                 SizedBox(width: horizontalGap),
-                                GestureDetector(
-                                    onTap: (){
-                                      widget.onCloseBottomSheet();
-                                      onLoadEscortDutyView();
 
-                                    },
-                                    child:Column(
+                                // Sync
+                                GestureDetector(
+                                  behavior: HitTestBehavior.opaque,
+                                  onTap: () {
+                                    widget.onCloseBottomSheet();
+                                    onLoadSyncDataView();
+                                  },
+                                  child: Container(
+                                    width: screenWidth / 3,
+                                    padding: const EdgeInsets.symmetric(vertical: 8),
+                                    child: Column(
+                                      mainAxisSize: MainAxisSize.min,
                                       children: [
-                                        Container(
+                                        SizedBox(
                                           width: iconSize,
                                           height: iconSize,
-
                                           child: Image.asset(
-                                            'assets/images/dashboard-icons/escort-duty.png',
-                                            color: isDarkMode ? whiteColor:greyColor6,
-
+                                            'assets/images/dashboard-icons/circular-refresh.png',
+                                            color: isDarkMode ? whiteColor : greyColor6,
                                           ),
                                         ),
                                         SizedBox(height: iconTextGap),
-                                        Container(
-                                          width: screenWidth/3,
-                                          child:Text(
-                                            'Escort_Duty'.tr(),
-                                            style: TextStyle(
-                                              color: isDarkMode ? whiteColor:greyColor6,
-                                              fontSize: pathS / 5,
-                                              fontWeight: FontWeight.w700,
-                                              fontFamily: 'Roboto',
-                                            ),
-                                            textAlign: TextAlign.center,
+                                        Text(
+                                          'txt_sync'.tr(),
+                                          style: TextStyle(
+                                            color: isDarkMode ? whiteColor : greyColor6,
+                                            fontSize: pathS / 5,
+                                            fontWeight: FontWeight.w700,
+                                            fontFamily: 'Roboto',
                                           ),
+                                          textAlign: TextAlign.center,
                                         ),
-
                                       ],
                                     ),
+                                  ),
                                 ),
-
                               ],
                             ),
+
+                            SizedBox(height: verticalGap),
+                            Row(
+                              mainAxisAlignment: MainAxisAlignment.center,
+                              children: [
+                                // FAQ
+                                GestureDetector(
+                                  behavior: HitTestBehavior.opaque,
+                                  onTap: () {
+                                    widget.onCloseBottomSheet();
+                                    onLoadGeneralQAView();
+                                  },
+                                  child: Container(
+                                    width: screenWidth / 3,
+                                    padding: const EdgeInsets.symmetric(vertical: 8),
+                                    child: Column(
+                                      mainAxisSize: MainAxisSize.min,
+                                      children: [
+                                        SizedBox(
+                                          width: iconSize,
+                                          height: iconSize,
+                                          child: Image.asset(
+                                            'assets/images/dashboard-icons/faqs.png',
+                                            color: isDarkMode ? whiteColor : greyColor6,
+                                          ),
+                                        ),
+                                        SizedBox(height: iconTextGap),
+                                        Text(
+                                          'faq'.tr(),
+                                          style: TextStyle(
+                                            color: isDarkMode ? whiteColor : greyColor6,
+                                            fontSize: pathS / 5,
+                                            fontWeight: FontWeight.w700,
+                                            fontFamily: 'Roboto',
+                                          ),
+                                          textAlign: TextAlign.center,
+                                        ),
+                                      ],
+                                    ),
+                                  ),
+                                ),
+
+                                SizedBox(width: horizontalGap),
+
+                                // ERC (Coming Soon)
+                                GestureDetector(
+                                  behavior: HitTestBehavior.opaque,
+                                  onTap: () {
+                                    ScaffoldMessenger.of(context).showSnackBar(
+                                      SnackBar(content: Text('coming_soon'.tr())),
+                                    );
+                                  },
+                                  child: Container(
+                                    width: screenWidth / 3,
+                                    padding: const EdgeInsets.symmetric(vertical: 8),
+                                    child: Column(
+                                      mainAxisSize: MainAxisSize.min,
+                                      children: [
+                                        SizedBox(
+                                          width: iconSize,
+                                          height: iconSize,
+                                          child: Stack(
+                                            clipBehavior: Clip.none,
+                                            children: [
+                                              Image.asset(
+                                                'assets/images/dashboard-icons/erc.png',
+                                                color: isDarkMode ? whiteColor : greyColor6,
+                                                width: iconSize,
+                                                height: iconSize,
+                                              ),
+                                              Positioned(
+                                                top: -4,
+                                                right: -4,
+                                                child: Container(
+                                                  padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
+                                                  decoration: BoxDecoration(
+                                                    color: Colors.redAccent,
+                                                    borderRadius: BorderRadius.circular(12),
+                                                  ),
+                                                  child: Text(
+                                                    'coming_soon'.tr(),
+                                                    style: const TextStyle(
+                                                      color: Colors.white,
+                                                      fontSize: 8,
+                                                      fontWeight: FontWeight.bold,
+                                                    ),
+                                                  ),
+                                                ),
+                                              ),
+                                            ],
+                                          ),
+                                        ),
+                                        SizedBox(height: iconTextGap),
+                                        Text(
+                                          'erc'.tr(),
+                                          style: TextStyle(
+                                            color: isDarkMode ? whiteColor : greyColor6,
+                                            fontSize: pathS / 5,
+                                            fontWeight: FontWeight.w700,
+                                            fontFamily: 'Roboto',
+                                          ),
+                                          textAlign: TextAlign.center,
+                                        ),
+                                      ],
+                                    ),
+                                  ),
+                                ),
+
+                                SizedBox(width: horizontalGap),
+
+                                // Language
+                                GestureDetector(
+                                  behavior: HitTestBehavior.opaque,
+                                  onTap: () {
+                                    widget.onCloseBottomSheet();
+                                    onLoadLanguageView();
+                                  },
+                                  child: Container(
+                                    width: screenWidth / 3,
+                                    padding: const EdgeInsets.symmetric(vertical: 8),
+                                    child: Column(
+                                      mainAxisSize: MainAxisSize.min,
+                                      children: [
+                                        SizedBox(
+                                          width: iconSize,
+                                          height: iconSize,
+                                          child: Image.asset(
+                                            'assets/images/dashboard-icons/language.png',
+                                            color: isDarkMode ? whiteColor : greyColor6,
+                                          ),
+                                        ),
+                                        SizedBox(height: iconTextGap),
+                                        Text(
+                                          'language'.tr(),
+                                          style: TextStyle(
+                                            color: isDarkMode ? whiteColor : greyColor6,
+                                            fontSize: pathS / 5,
+                                            fontWeight: FontWeight.w700,
+                                            fontFamily: 'Roboto',
+                                          ),
+                                          textAlign: TextAlign.center,
+                                        ),
+                                      ],
+                                    ),
+                                  ),
+                                ),
+                              ],
+                            ),
+
+                            SizedBox(height: verticalGap),
+                            Row(
+                              mainAxisAlignment: MainAxisAlignment.center,
+                              children: [
+                                // Salary (Coming Soon)
+                                GestureDetector(
+                                  behavior: HitTestBehavior.opaque,
+                                  onTap: () {
+                                    ScaffoldMessenger.of(context).showSnackBar(
+                                      SnackBar(content: Text('coming_soon'.tr())),
+                                    );
+                                  },
+                                  child: Container(
+                                    width: screenWidth / 3,
+                                    padding: const EdgeInsets.symmetric(vertical: 8),
+                                    child: Column(
+                                      mainAxisSize: MainAxisSize.min,
+                                      children: [
+                                        SizedBox(
+                                          width: iconSize,
+                                          height: iconSize,
+                                          child: Stack(
+                                            clipBehavior: Clip.none,
+                                            children: [
+                                              Image.asset(
+                                                'assets/images/dashboard-icons/salary.png',
+                                                color: isDarkMode ? whiteColor : greyColor6,
+                                                width: iconSize,
+                                                height: iconSize,
+                                              ),
+                                              Positioned(
+                                                top: -4,
+                                                right: -4,
+                                                child: Container(
+                                                  padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
+                                                  decoration: BoxDecoration(
+                                                    color: Colors.redAccent,
+                                                    borderRadius: BorderRadius.circular(12),
+                                                  ),
+                                                  child: Text(
+                                                    'coming_soon'.tr(),
+                                                    style: const TextStyle(
+                                                      color: Colors.white,
+                                                      fontSize: 8,
+                                                      fontWeight: FontWeight.bold,
+                                                    ),
+                                                  ),
+                                                ),
+                                              ),
+                                            ],
+                                          ),
+                                        ),
+                                        SizedBox(height: iconTextGap),
+                                        Text(
+                                          'salary'.tr(),
+                                          style: TextStyle(
+                                            color: isDarkMode ? whiteColor : greyColor6,
+                                            fontSize: pathS / 5,
+                                            fontWeight: FontWeight.w700,
+                                            fontFamily: 'Roboto',
+                                          ),
+                                          textAlign: TextAlign.center,
+                                        ),
+                                      ],
+                                    ),
+                                  ),
+                                ),
+
+                                SizedBox(width: horizontalGap),
+
+                                // General Rules
+                                GestureDetector(
+                                  behavior: HitTestBehavior.opaque,
+                                  onTap: () {
+                                    widget.onCloseBottomSheet();
+                                    onLoadGeneralRuleView();
+                                  },
+                                  child: Container(
+                                    width: screenWidth / 3,
+                                    padding: const EdgeInsets.symmetric(vertical: 8),
+                                    child: Column(
+                                      mainAxisSize: MainAxisSize.min,
+                                      children: [
+                                        Image.asset(
+                                          'assets/images/dashboard-icons/documents.png',
+                                          width: iconSize,
+                                          height: iconSize,
+                                          color: isDarkMode ? whiteColor : greyColor6,
+                                        ),
+                                        SizedBox(height: iconTextGap),
+                                        Text(
+                                          'general_rules'.tr(),
+                                          style: TextStyle(
+                                            color: isDarkMode ? whiteColor : greyColor6,
+                                            fontSize: pathS / 5,
+                                            fontWeight: FontWeight.w700,
+                                            fontFamily: 'Roboto',
+                                          ),
+                                          textAlign: TextAlign.center,
+                                        ),
+                                      ],
+                                    ),
+                                  ),
+                                ),
+
+                                SizedBox(width: horizontalGap),
+
+                                // G2G
+                                GestureDetector(
+                                  behavior: HitTestBehavior.opaque,
+                                  onTap: () {
+                                    widget.onCloseBottomSheet();
+                                    onLoadG2GView();
+                                  },
+                                  child: Container(
+                                    width: screenWidth / 3,
+                                    padding: const EdgeInsets.symmetric(vertical: 8),
+                                    child: Column(
+                                      mainAxisSize: MainAxisSize.min,
+                                      children: [
+                                        Image.asset(
+                                          'assets/images/dashboard-icons/g2g.png',
+                                          width: iconSize,
+                                          height: iconSize,
+                                          color: isDarkMode ? whiteColor : greyColor6,
+                                        ),
+                                        SizedBox(height: iconTextGap),
+                                        Text(
+                                          'g2g'.tr(),
+                                          style: TextStyle(
+                                            color: isDarkMode ? whiteColor : greyColor6,
+                                            fontSize: pathS / 5,
+                                            fontWeight: FontWeight.w700,
+                                            fontFamily: 'Roboto',
+                                          ),
+                                          textAlign: TextAlign.center,
+                                        ),
+                                      ],
+                                    ),
+                                  ),
+                                ),
+                              ],
+                            ),
+
+                            SizedBox(height: verticalGap),
+                            Row(
+                              mainAxisAlignment: MainAxisAlignment.center,
+                              children: [
+                                // AKR - Coming Soon
+                                GestureDetector(
+                                  behavior: HitTestBehavior.opaque,
+                                  onTap: () {
+                                    ScaffoldMessenger.of(context).showSnackBar(
+                                      SnackBar(content: Text('coming_soon'.tr())),
+                                    );
+                                  },
+                                  child: Container(
+                                    width: screenWidth / 3,
+                                    padding: const EdgeInsets.symmetric(vertical: 8),
+                                    child: Column(
+                                      mainAxisSize: MainAxisSize.min,
+                                      children: [
+                                        SizedBox(
+                                          width: iconSize,
+                                          height: iconSize,
+                                          child: Stack(
+                                            clipBehavior: Clip.none,
+                                            children: [
+                                              Image.asset(
+                                                'assets/images/dashboard-icons/akr.png',
+                                                width: iconSize,
+                                                height: iconSize,
+                                                color: isDarkMode ? whiteColor : greyColor6,
+                                              ),
+                                              Positioned(
+                                                top: -4,
+                                                right: -4,
+                                                child: Container(
+                                                  padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
+                                                  decoration: BoxDecoration(
+                                                    color: Colors.redAccent,
+                                                    borderRadius: BorderRadius.circular(12),
+                                                  ),
+                                                  child: Text(
+                                                    'coming_soon'.tr(),
+                                                    style: const TextStyle(
+                                                      color: Colors.white,
+                                                      fontSize: 8,
+                                                      fontWeight: FontWeight.bold,
+                                                    ),
+                                                  ),
+                                                ),
+                                              ),
+                                            ],
+                                          ),
+                                        ),
+                                        SizedBox(height: iconTextGap),
+                                        Text(
+                                          'akr'.tr(),
+                                          style: TextStyle(
+                                            color: isDarkMode ? whiteColor : greyColor6,
+                                            fontSize: pathS / 5,
+                                            fontWeight: FontWeight.w700,
+                                            fontFamily: 'Roboto',
+                                          ),
+                                          textAlign: TextAlign.center,
+                                        ),
+                                      ],
+                                    ),
+                                  ),
+                                ),
+
+                                SizedBox(width: horizontalGap),
+
+                                // Sarvam Loan
+                                GestureDetector(
+                                  behavior: HitTestBehavior.opaque,
+                                  onTap: () {
+                                    widget.onCloseBottomSheet();
+                                    onLoadSarvamLoanView();
+                                  },
+                                  child: Container(
+                                    width: screenWidth / 3,
+                                    padding: const EdgeInsets.symmetric(vertical: 8),
+                                    child: Column(
+                                      mainAxisSize: MainAxisSize.min,
+                                      children: [
+                                        Image.asset(
+                                          'assets/images/dashboard-icons/sarvam_logo.png',
+                                          width: iconSize,
+                                          height: iconSize,
+                                          color: isDarkMode ? whiteColor : greyColor6,
+                                        ),
+                                        SizedBox(height: iconTextGap),
+                                        Text(
+                                          'loan_by_sarvam'.tr(),
+                                          style: TextStyle(
+                                            color: isDarkMode ? whiteColor : greyColor6,
+                                            fontSize: pathS / 5,
+                                            fontWeight: FontWeight.w700,
+                                            fontFamily: 'Roboto',
+                                          ),
+                                          textAlign: TextAlign.center,
+                                        ),
+                                      ],
+                                    ),
+                                  ),
+                                ),
+
+                                SizedBox(width: horizontalGap),
+
+                                // Escort Duty
+                                GestureDetector(
+                                  behavior: HitTestBehavior.opaque,
+                                  onTap: () {
+                                    widget.onCloseBottomSheet();
+                                    onLoadEscortDutyView();
+                                  },
+                                  child: Container(
+                                    width: screenWidth / 3,
+                                    padding: const EdgeInsets.symmetric(vertical: 8),
+                                    child: Column(
+                                      mainAxisSize: MainAxisSize.min,
+                                      children: [
+                                        Image.asset(
+                                          'assets/images/dashboard-icons/escort-duty.png',
+                                          width: iconSize,
+                                          height: iconSize,
+                                          color: isDarkMode ? whiteColor : greyColor6,
+                                        ),
+                                        SizedBox(height: iconTextGap),
+                                        Text(
+                                          'Escort_Duty'.tr(),
+                                          style: TextStyle(
+                                            color: isDarkMode ? whiteColor : greyColor6,
+                                            fontSize: pathS / 5,
+                                            fontWeight: FontWeight.w700,
+                                            fontFamily: 'Roboto',
+                                          ),
+                                          textAlign: TextAlign.center,
+                                        ),
+                                      ],
+                                    ),
+                                  ),
+                                ),
+                              ],
+                            ),
+
 
                           ],
                         ),

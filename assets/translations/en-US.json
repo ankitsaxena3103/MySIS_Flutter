@@ -325,7 +325,7 @@
   "term_and_conditions": "Terms of Service and Policy",
   "term_cond_content": "We understand the nature & sensitivity of your personal data & have taken strong measures to ensure that your data is not compromised.",
   "device_location": "Device Location",
-  "device_location_content": "MySIS uses location Data to verify the location from which Attendance is being marked and then uses it to verify your location while on Duty and requires permission for the same. The nature of usage is in the background “when the app is in use.”",
+  "device_location_content": "MySIS uses location Data to verify the location from which Attendance is being marked and then uses it to verify your location while on Duty and requires permission for the same. The nature of usage is in the background “when the app is in use.",
   "sms": "SMS",
   "sms_content": "MySIS requires permission to access your SMS data for reading OTP during processes like changing PIN & Contact Number",
   "camera": "Camera",

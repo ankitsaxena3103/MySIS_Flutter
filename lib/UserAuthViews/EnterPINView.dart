@@ -431,7 +431,7 @@ class EnterPINViewState extends State<EnterPINView> {
 
     String pin = otpList.join();
     txtEnterPIN.text = pin;
-    onPINChange(pin);
+    onPINEntered(pin);
   }
 
   void initialSetup() {
@@ -468,39 +468,15 @@ class EnterPINViewState extends State<EnterPINView> {
 
   }
 
-  void getToken(String userId, String pwd){
-    Map <String,String> inputData = {
-      "Username": userId,
-      "Password": pwd,
-    };
-    APIHelper.instance.postData(tokenApi,inputData, (data) {
-
-      if(data.isNotEmpty){
-
-        token = data['token'] ?? '';
-        String expiryTime = data['expirytime'] ?? '';
-        Preferences.saveUserPreference(keyUserToken, token);
-        Preferences.saveUserPreference(keyTokenExpiryTime, expiryTime);
-        Preferences.saveUserPreferenceBool(keyIsForcedLogOut, false);
-
-      }
-
-    },(error){
-      if (kDebugMode) {
-        print('token error = $error');
-        bool isForceLogout = (error['ForceLogout'] ?? 0) == 1;
-        if(isForceLogout){
-          setState(() {
-            alertHeader = '';
-            alertMessage = 'logout_message'.tr();
-            showAlert = true;
-          });
-        }
-      }
-    });
+  void getToken(String userId, String pwd) {
+    APIHelper.instance.getToken(userId, pwd);
   }
 
-  Future<void> onPINChange(String enteredPIN) async {
+
+  Future<void> onPINEntered(String enteredPIN) async {
+
+    printInDebug("enteredPIN = $enteredPIN");
+    printInDebug("widget.currentPIN = ${widget.currentPIN}");
 
     final bool passwordMatched = BCrypt.checkpw(
       enteredPIN,

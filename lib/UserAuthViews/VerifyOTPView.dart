@@ -72,7 +72,7 @@ class VerifyOTPViewState extends State<VerifyOTPView> {
 
   String btnNext = 'next'.tr();
 
-  bool showKeypad = false;
+  bool showKeypad = true;
 
   List<String> otpList = []; // List of 4 empty strings
 

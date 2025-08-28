@@ -1132,6 +1132,7 @@ class ProfileViewState extends State<ProfileView>{
             ),
             )
           ),
+
           Positioned(
             bottom: 0,
 

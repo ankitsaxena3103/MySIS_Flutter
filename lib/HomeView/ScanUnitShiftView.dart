@@ -1,7 +1,7 @@
 
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter_barcode_scanner/flutter_barcode_scanner.dart';
+// import 'package:flutter_barcode_scanner/flutter_barcode_scanner.dart';
 import 'package:geolocator/geolocator.dart';
 import 'package:mobile_scanner/mobile_scanner.dart';
 import 'package:mysis/CommonViews/LocationAlertPopupView.dart';
@@ -316,6 +316,7 @@ class ScanUnitShiftViewState extends State<ScanUnitShiftView>{
                           for (final barcode in barcodeCapture.barcodes) {
                             debugPrint('Barcode found: ${barcode.rawValue}');
                             getUnitPostData(barcode.rawValue!);
+                            break;
                           }
                         },
                         fit: BoxFit.cover, // Ensure the scanner fills the container
@@ -477,17 +478,16 @@ class ScanUnitShiftViewState extends State<ScanUnitShiftView>{
   }
 
   Future<void> scanBarcode() async {
-
-    String barcodeScanRes = await FlutterBarcodeScanner.scanBarcode(
-      '#ff6666', // Color for the scan button
-      'Cancel', // Text for the cancel button
-      true, // Wait for the result before returning
-      ScanMode.BARCODE, // Specify the type of scan (BARCODE or QR)
+    final result = await Navigator.push(
+      context,
+      MaterialPageRoute(builder: (context) => const BarcodeScannerPage()),
     );
 
-    getUnitPostData(barcodeScanRes);
-
+    if (result != null && result is String) {
+      getUnitPostData(result); // Use scanned result
+    }
   }
+
   Future<void> getUnitPostData(String qrId) async {
 
    final unitDutyPost = widget.unitDutyPosts.where((post) => post.qrId == qrId).toList();
@@ -897,4 +897,28 @@ class ScanUnitShiftViewState extends State<ScanUnitShiftView>{
   }
 
 
+}
+
+
+class BarcodeScannerPage extends StatelessWidget {
+  const BarcodeScannerPage({super.key});
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      appBar: AppBar(title: const Text('Scan Barcode')),
+      body: MobileScanner(
+        // allowDuplicates: false,
+        // key: locationScannerKey, // Assign the unique key
+        // controller: locationScannerController,
+        onDetect: (capture) {
+          final barcode = capture.barcodes.first;
+          final String? code = barcode.rawValue;
+          if (code != null) {
+            Navigator.pop(context, code); // Return scanned result
+          }
+        },
+      ),
+    );
+  }
 }

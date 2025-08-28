@@ -229,46 +229,7 @@ class LoginViewErrorState extends State<LoginViewError> {
 
   void initialSetup() {}
 
-  void onTapLogin() {
-    if (txtUserId.text.isEmpty || txtPassword.text.isEmpty) {
-      showToastView("All fields are required");
-      return;
-    }
 
-    setState(() {
-      showLoaderView = true;
-    });
-    Map<String, dynamic> data = {"email": txtUserId.text, "password": txtPassword.text};
-
-    APIHelper.instance.postData(authenticateApi, data, (userData) {
-      setState(() {
-        showLoaderView = false;
-      });
-      if (userData.isNotEmpty) {
-        token = userData['jwtToken'] ?? '';
-        userName = userData['agentName'] ?? 'Agent';
-        regNo = userData['id'] ?? 0;
-        Preferences.saveUserPreference(keyUserToken, token);
-        Preferences.saveUserPreference(keyUserName, userName);
-        Preferences.saveUserPreference(keyUserID, '$regNo');
-
-        Navigator.pushReplacement(
-          context,
-          MaterialPageRoute(
-            builder: (context) => MyTabBarView(),
-          ),
-        );
-      }
-    }, (error) {
-      setState(() {
-        showLoaderView = false;
-      });
-      setState(() {
-        isAlertVisible = true;
-        alertMessage = '$error';
-      });
-    });
-  }
 
   void showToastView(String message) {
     setState(() {

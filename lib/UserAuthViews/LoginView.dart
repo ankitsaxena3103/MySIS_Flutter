@@ -443,7 +443,7 @@ class LoginViewState extends State<LoginView> {
     }
   }
   Future<void> onTapLogin() async {
-    String appInfoSendToServer = await getAppInfo();
+    String appInfoSendToServer =  appToken;
     if (txtUserId.text.isEmpty) {
       showToastView("enter_mobile_no");
       return;
@@ -455,9 +455,8 @@ class LoginViewState extends State<LoginView> {
       Map <String,String> inputData = {
         "UserName": txtUserId.text,
         "AppToken" : appInfoSendToServer,
-        "BypassOTPScreen" : "1",
-        "Enable_OTPEntry" : "0"
-
+        "BypassOTPScreen" : "0",
+        "Enable_OTPEntry" : "1"
       };
 
       APIHelper.instance.getData(requestLoginApi,inputData, (data) {
@@ -515,29 +514,10 @@ class LoginViewState extends State<LoginView> {
 
   }
 
-  void getToken(String userId, String pwd){
-  Map <String,String> inputData = {
-    "Username": userId,
-    "Password": pwd,
+  void getToken(String userId, String pwd) {
+    APIHelper.instance.getToken(userId, pwd);
+  }
 
-  };
-  APIHelper.instance.postData(tokenApi,inputData, (data) {
-
-    if(data.isNotEmpty){
-
-      token = data['token'] ?? '';
-      Preferences.saveUserPreference(keyUserToken, token);
-      Preferences.saveUserPreferenceBool(keyIsForcedLogOut, false);
-
-
-    }
-
-  },(error){
-   if (kDebugMode) {
-     print(error);
-   }
-  });
-}
   void loadNextScreen(bool enableOtpEntry, String otpId,int timerVal, String pin, String mobileNo,String regNo) {
     if(otpId.isNotEmpty){
       Navigator.push(
