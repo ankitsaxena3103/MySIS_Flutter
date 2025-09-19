@@ -1,7 +1,9 @@
 import 'dart:convert';
 import 'dart:core';
+import 'dart:io';
 
 import 'package:cached_network_image/cached_network_image.dart';
+import 'package:camera/camera.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:image_picker/image_picker.dart';
@@ -54,6 +56,7 @@ class SubmitDutyView extends StatefulWidget {
 
 class SubmitDutyViewState extends State<SubmitDutyView>{
   String assetsImagePath = "assets/images/dashboard-icons/profile-icon.png";
+
   String imagePath = '';
   String name  = '';
   String position  = '';
@@ -79,8 +82,10 @@ class SubmitDutyViewState extends State<SubmitDutyView>{
 
   @override
   void initState() {
+
     onLoadUpdateUI();
     initialSetup();
+    openCamera();
     super.initState();
 
   }
@@ -137,11 +142,11 @@ class SubmitDutyViewState extends State<SubmitDutyView>{
                                 width: pathS / 1.5,
                                 imageUrl: profileUrl,
                                 placeholder: (context, url) => CircleAvatar(
-                                  backgroundImage: AssetImage(profileImage),
+                                  backgroundImage: AssetImage(assetsImagePath),
                                   backgroundColor: Colors.white,
                                 ),
                                 errorWidget: (context, url, error) => CircleAvatar(
-                                  backgroundImage: AssetImage(profileImage),
+                                  backgroundImage: AssetImage(assetsImagePath),
                                   backgroundColor: Colors.white,
                                 ),
                                 imageBuilder: (context, imageProvider) => CircleAvatar(
@@ -193,6 +198,7 @@ class SubmitDutyViewState extends State<SubmitDutyView>{
                               ),
                               Spacer(),
                               GestureDetector(
+                                behavior: HitTestBehavior.translucent,
                                 onTap: () {
                                   Navigator.pop(context);
                                 },
@@ -315,125 +321,128 @@ class SubmitDutyViewState extends State<SubmitDutyView>{
                   ),
 
                 ),
-                Column(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  children: [
-                    SizedBox(height: pathL+ paddingTop),
+                Positioned(
+                  bottom: MediaQuery.of(context).padding.bottom +pathS/4,
+                  child: Column(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      // SizedBox(height: pathL*1.8 + MediaQuery.of(context).padding.top),
 
-                    Container(
-                      alignment: Alignment.center,
-                      width: pathL * 2,
-                      height: pathL * 2,
-                      decoration: BoxDecoration(
-                        color: isDarkMode ? greyColor6 : whiteColor,
-                        borderRadius: BorderRadius.circular(pathS / 8),
-                        boxShadow: [
-                          BoxShadow(
-                            color: shadowColor,
-                            blurRadius: pathS / 10, // Spread of the shadow
-                            offset: Offset(-pathS / 12, pathS / 12),
+                      Container(
+                        alignment: Alignment.center,
+                        width: pathL * 1.8,
+                        height: pathL * 1.8,
+                        decoration: BoxDecoration(
+                          color: isDarkMode ? greyColor6 : whiteColor,
+                          borderRadius: BorderRadius.circular(pathS / 8),
+                          boxShadow: [
+                            BoxShadow(
+                              color: shadowColor,
+                              blurRadius: pathS / 10, // Spread of the shadow
+                              offset: Offset(-pathS / 12, pathS / 12),
+                            ),
+                          ],
+                        ),
+                        child: ClipRect(
+                          child: imageData.isNotEmpty
+                              ? Image.memory(
+                            base64Decode(imageData),
+                            fit: BoxFit.cover,
+                            width: double.infinity,
+                            height: double.infinity,
+                          )
+                              : Center(
+                            child: GestureDetector(
+                              onTap: (){
+                                openCamera();
+                              },
+                              child: Icon(
+                                Icons.camera_alt, // Camera icon as placeholder
+                                size: pathS/2,      // Adjust size of the icon
+                                color: Colors.grey, // Adjust color for better contrast
+                              ),
+                            ),
+                          ),
+                        ),
+                      ),
+
+                      SizedBox(height: pathS),
+                      Row(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        children: [
+                          GestureDetector(
+                            onTap: (){
+                              openCamera();
+                            },
+                            child: Container(
+                              width: pathL,
+                              height: pathS / 1.5,
+                              alignment: Alignment.center,
+                              decoration: BoxDecoration(
+                                color: isDarkMode ? greyColor6:whiteColor,
+                                // border: Border.all(color: Colors.yellow, width: pathS/18),
+                                borderRadius: BorderRadius.circular(pathS/3),
+                                border: Border.all(
+                                    color: isDarkMode ? redColor1:redColor3,
+
+                                    width:1),
+                                boxShadow: [
+                                  BoxShadow(
+                                    color: Colors.transparent, // Shadow color
+                                    blurRadius: pathS/10, // Spread of the shadow
+                                    // spreadRadius: pathS/15, // How far the shadow extends
+                                    offset:  Offset(-pathS/12, pathS/12),
+                                  ),
+                                ],
+                              ),
+                              child: Text(
+                                'txt_retake'.tr(),
+                                style: TextStyle(
+                                  color: isDarkMode ? redColor1:redColor3,
+
+                                  fontSize: pathS / 4.5,
+                                  fontWeight: FontWeight.bold,
+                                ),
+                              ),
+                            ),
+                          ),
+                          SizedBox(width: pathS/3),
+                          GestureDetector(
+                            onTap: (){
+                              onTapSubmit();
+
+                            },
+                            child: Container(
+                              width: pathL,
+                              height: pathS / 1.5,
+                              alignment: Alignment.center,
+                              decoration: BoxDecoration(
+                                color: redColor3,                          // border: Border.all(color: Colors.yellow, width: pathS/18),
+                                borderRadius: BorderRadius.circular(pathS/3),
+                                boxShadow: [
+                                  BoxShadow(
+                                    color: shadowColor, // Shadow color
+                                    blurRadius: pathS/15, // Spread of the shadow
+                                    // spreadRadius: pathS/15, // How far the shadow extends
+                                    offset:  Offset(-pathS/15, pathS/15),
+                                  ),
+                                ],
+                              ),
+                              child: Text(
+                                'submit'.tr(),
+                                style: TextStyle(
+                                  color: whiteColor,
+                                  fontSize: pathS / 4.5,
+                                  fontWeight: FontWeight.bold,
+                                ),
+                              ),
+                            ),
                           ),
                         ],
                       ),
-                      child: ClipRect(
-                        child: imageData.isNotEmpty
-                            ? Image.memory(
-                          base64Decode(imageData),
-                          fit: BoxFit.cover,
-                          width: double.infinity,
-                          height: double.infinity,
-                        )
-                            : Center(
-                          child: GestureDetector(
-                            onTap: (){
-                              capturePhoto();
-                            },
-                            child: Icon(
-                              Icons.camera_alt, // Camera icon as placeholder
-                              size: pathS/2,      // Adjust size of the icon
-                              color: Colors.grey, // Adjust color for better contrast
-                            ),
-                          ),
-                        ),
-                      ),
-                    ),
 
-                    SizedBox(height: pathS*1.5),
-                    Row(
-                      mainAxisAlignment: MainAxisAlignment.center,
-                      children: [
-                        GestureDetector(
-                          onTap: (){
-                            capturePhoto();
-                          },
-                          child: Container(
-                            width: pathL,
-                            height: pathS / 1.5,
-                            alignment: Alignment.center,
-                            decoration: BoxDecoration(
-                              color: isDarkMode ? greyColor6:whiteColor,
-                              // border: Border.all(color: Colors.yellow, width: pathS/18),
-                              borderRadius: BorderRadius.circular(pathS/3),
-                              border: Border.all(
-                                  color: isDarkMode ? redColor1:redColor3,
-
-                                  width:1),
-                              boxShadow: [
-                                BoxShadow(
-                                  color: Colors.transparent, // Shadow color
-                                  blurRadius: pathS/10, // Spread of the shadow
-                                  // spreadRadius: pathS/15, // How far the shadow extends
-                                  offset:  Offset(-pathS/12, pathS/12),
-                                ),
-                              ],
-                            ),
-                            child: Text(
-                              'txt_retake'.tr(),
-                              style: TextStyle(
-                                color: isDarkMode ? redColor1:redColor3,
-
-                                fontSize: pathS / 4.5,
-                                fontWeight: FontWeight.bold,
-                              ),
-                            ),
-                          ),
-                        ),
-                        SizedBox(width: pathS/3),
-                        GestureDetector(
-                          onTap: (){
-                            onTapSubmit();
-
-                          },
-                          child: Container(
-                            width: pathL,
-                            height: pathS / 1.5,
-                            alignment: Alignment.center,
-                            decoration: BoxDecoration(
-                              color: redColor3,                          // border: Border.all(color: Colors.yellow, width: pathS/18),
-                              borderRadius: BorderRadius.circular(pathS/3),
-                              boxShadow: [
-                                BoxShadow(
-                                  color: shadowColor, // Shadow color
-                                  blurRadius: pathS/15, // Spread of the shadow
-                                  // spreadRadius: pathS/15, // How far the shadow extends
-                                  offset:  Offset(-pathS/15, pathS/15),
-                                ),
-                              ],
-                            ),
-                            child: Text(
-                              'submit'.tr(),
-                              style: TextStyle(
-                                color: whiteColor,
-                                fontSize: pathS / 4.5,
-                                fontWeight: FontWeight.bold,
-                              ),
-                            ),
-                          ),
-                        ),
-                      ],
-                    ),
-
-                  ],
+                    ],
+                  ),
                 ),
 
                ToastMessageView(isVisible: showToastMessageView, message: toastMessage),
@@ -489,13 +498,22 @@ class SubmitDutyViewState extends State<SubmitDutyView>{
   }
 
   Future<void> capturePhoto() async {
+
     try {
       final picker = ImagePicker();
-      final pickedFile = await picker.pickImage(source: ImageSource.camera);
+
+      // Force open camera
+      final pickedFile = await picker.pickImage(
+        source: ImageSource.camera,
+        preferredCameraDevice: CameraDevice.front, // 👈 ensures rear camera
+        imageQuality: 85, // Optional: compress
+        maxWidth: 1080,   // Optional: resize
+      );
+
       if (pickedFile != null) {
         final imageBytes = await pickedFile.readAsBytes();
-        attendanceImagePath = (pickedFile?.path)!;
-        printInDebug(attendanceImagePath);
+        attendanceImagePath = pickedFile.path;
+        printInDebug("Captured image path: $attendanceImagePath");
 
         setState(() {
           imagePath = pickedFile.path;
@@ -507,13 +525,39 @@ class SubmitDutyViewState extends State<SubmitDutyView>{
     } catch (e) {
       printInDebug("Error capturing photo: $e");
     }
+
+
+  }
+
+
+
+  Future<void> openCamera() async {
+
+    if (Platform.isIOS) {
+      capturePhoto();
+      return;
+    }
+
+    Navigator.push(
+      context,
+      MaterialPageRoute(
+        builder: (context) => CameraCaptureScreen(
+          onImageCaptured: (path, base64Img) {
+            setState(() {
+              imagePath = path;
+              imageData = base64Img;
+            });
+          },
+        ),
+      ),
+    );
   }
 
   void onTapSubmit(){
 
   if(imageData.isEmpty){
-    showToastView('please_select_shift'.tr());
-    // return;
+    showToastView('submit_and_confirm_the_captured_photo'.tr());
+    return;
   }
 
   createAttendance();
@@ -633,7 +677,6 @@ class SubmitDutyViewState extends State<SubmitDutyView>{
     return dutyOutAttendance;
 
   }
-
 
   Future<void> uploadAttendance(dynamic attendance) async {
     APIHelper.instance.postAllData(userAttendancePostApi, attendance, (responseData) {
@@ -813,3 +856,124 @@ class SubmitDutyViewState extends State<SubmitDutyView>{
 
 }
 
+class CameraCaptureScreen extends StatefulWidget {
+  final Function(String path, String base64Image) onImageCaptured;
+
+  const CameraCaptureScreen({super.key, required this.onImageCaptured});
+
+  @override
+  State<CameraCaptureScreen> createState() => _CameraCaptureScreenState();
+}
+
+class _CameraCaptureScreenState extends State<CameraCaptureScreen> {
+  CameraController? _cameraController;
+  bool _isReady = false;
+
+  @override
+  void initState() {
+    super.initState();
+    initCamera();
+  }
+
+  Future<void> initCamera() async {
+    try {
+      final cameras = await availableCameras();
+      final frontCamera = cameras.firstWhere(
+            (camera) => camera.lensDirection == CameraLensDirection.front,
+      );
+
+      _cameraController = CameraController(
+        frontCamera,
+        ResolutionPreset.high,
+        enableAudio: false,
+      );
+
+      await _cameraController!.initialize();
+      if (mounted) {
+        setState(() => _isReady = true);
+      }
+    } catch (e) {
+      debugPrint("Camera init error: $e");
+    }
+  }
+
+  Future<void> capturePhoto() async {
+    if (!mounted) return;
+    if (_cameraController == null || !_cameraController!.value.isInitialized) return;
+
+    try {
+      final file = await _cameraController!.takePicture();
+      final bytes = await file.readAsBytes();
+      final base64Image = base64Encode(bytes);
+
+      widget.onImageCaptured(file.path, base64Image);
+
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        if (mounted) {
+          Navigator.of(context).pop();
+        }
+      });
+    } catch (e) {
+      debugPrint("Error capturing photo: $e");
+    }
+  }
+
+  @override
+  void dispose() {
+    _cameraController?.dispose();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    if (!_isReady) {
+      return const Scaffold(
+        body: Center(child: CircularProgressIndicator()),
+      );
+    }
+
+    return Scaffold(
+      body: Stack(
+        fit: StackFit.expand,
+        children: [
+          _cameraController != null && _cameraController!.value.isInitialized
+              ? FittedBox(
+            fit: BoxFit.cover,
+            child: SizedBox(
+              width: _cameraController!.value.previewSize!.height,
+              height: _cameraController!.value.previewSize!.width,
+              child: CameraPreview(_cameraController!),
+            ),
+          )
+              : const Center(child: CircularProgressIndicator()),
+
+          /// Close button
+          Positioned(
+            top: 40,
+            left: 20,
+            child: IconButton(
+              icon: const Icon(Icons.close, color: Colors.white, size: 30),
+              onPressed: () {
+                if (mounted) Navigator.of(context).pop();
+              },
+            ),
+          ),
+
+          /// Capture button
+          Positioned(
+            bottom: 40,
+            left: 0,
+            right: 0,
+            child: Center(
+              child: FloatingActionButton(
+                backgroundColor: Colors.white,
+                onPressed: capturePhoto,
+                child: const Icon(Icons.camera_alt, color: Colors.black, size: 28),
+              ),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+}

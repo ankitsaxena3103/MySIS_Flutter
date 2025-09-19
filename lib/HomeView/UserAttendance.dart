@@ -83,6 +83,7 @@ class UserAttendance {
         return null;
       }
     }
+
     return UserAttendance(
       id: json['ID'] ?? '',
       regNo: json['REGNO'] ?? '',
@@ -92,39 +93,32 @@ class UserAttendance {
       dutyPostName: json['DUTY_POST_NAME'] ?? '',
       shiftId: json['SHIFT_ID'] ?? '',
       shiftName: json['SHIFT_NAME'] ?? '',
-      shiftStartDate: DateTime.parse(json['SHIFT_START_DATE']),
-      shiftStartTime: DateTime.parse(json['SHIFT_START_TIME']),
-      shiftEndTime: DateTime.parse(json['SHIFT_END_TIME']),
+      shiftStartDate: safeParseDate(json['SHIFT_START_DATE'])!,
+      shiftStartTime: safeParseDate(json['SHIFT_START_TIME'])!,
+      shiftEndTime: safeParseDate(json['SHIFT_END_TIME'])!,
       actStartTime: DateTime.parse(json['ACT_START_TIME']),
-
-
-      actEndTime: json['ACT_END_TIME'] != null ? DateTime.parse(json['ACT_END_TIME']) : null, // Nullable
-
-      finalStartTime: DateTime.parse(json['FINAl_START_TIME']),
-      finalEndTime: json['FINAL_END_TIME'] != null ? DateTime.parse(json['FINAL_END_TIME']) : null, // Nullable
-
-      approvedHr: json['APPROVED_HR'] as int?, // Nullable
-      rejectedHr: json['REJECTED_HR'] as int?, // Nullable
-
+      actEndTime: safeParseDate(json['ACT_END_TIME']),
+      finalStartTime: DateTime.parse(json['ACT_START_TIME']),
+      finalEndTime: safeParseDate(json['FINAL_END_TIME']),
+      approvedHr: json['APPROVED_HR'] as int?,
+      rejectedHr: json['REJECTED_HR'] as int?,
       dutyCount: json['DUTY_COUNT'] ?? 0,
       dutyInLatLng: json['DUTY_IN_LAT_LNG'] ?? '',
-      dutyOutLatLng: json['DUTY_OUT_LAT_LNG'] ?? '', // Nullable
-
+      dutyOutLatLng: json['DUTY_OUT_LAT_LNG'] ?? '',
       deleted: json['DELETED'] ?? 0,
       isAbsent: json['IS_ABSENT'] ?? false,
       isApproved: json['IS_APPROVED'] ?? 0,
       attendanceMode: json['ATTENDANCE_MODE'] ?? '',
       dutyRank: json['DUTY_RANK'] ?? '',
       dutyStatus: json['DUTY_STATUS'] ?? '',
-      createdOn: DateTime.parse(json['CREATED_ON']),
+      createdOn: safeParseDate(json['CREATED_ON']) ?? DateTime.now(),
       empRank: json['EMP_RANK'] ?? '',
       dutyRankName: json['DUTY_RANK_NAME'] ?? '',
       shiftHrs: json['SHIFT_HRS'] ?? '',
       shiftMin: json['SHIFT_MIN'] ?? 0,
       dirtyFlag: json['DIRTY_FLAG'] ?? 0,
-      dateModified: safeParseDate(json['DATE_MODIFIED']) ?? DateTime.now(), // Handle null or invalid
-      updatedAt: DateTime.now(), // Default value if not in the JSON
-
+      dateModified: safeParseDate(json['DATE_MODIFIED']) ?? DateTime.now(),
+      updatedAt: DateTime.now(),
     );
   }
 

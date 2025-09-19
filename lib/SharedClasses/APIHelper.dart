@@ -246,6 +246,48 @@ class APIHelper {
     }
   }
 
+  void getHTMLData(
+      String apiName,
+      Map<String, String> queryParams,
+      Function(String) completion,
+      Function(Map<String, dynamic>) error,
+      ) async {
+    Map<String, dynamic> responseError = {};
+
+    var apiUrl = Uri.https(baseUrl, apiName);
+    var url = queryParams.isNotEmpty
+        ? Uri.parse('$apiUrl').replace(queryParameters: queryParams)
+        : apiUrl;
+
+    final headers = {
+      'accept': '*/*',
+      'Authorization': 'Bearer $token',
+    };
+
+    try {
+      final response = await http.get(url, headers: headers);
+      printInDebug('request url=$url headers=$headers');
+
+      if (response.statusCode == 200) {
+        printInDebug('Response: ${response.body}');
+
+        // HTML response is returned directly
+        completion(response.body);
+      } else {
+        responseError = {
+          'ErrorMessage': 'Status code: ${response.statusCode}',
+          'Response': response.body
+        };
+        error(responseError);
+      }
+    } catch (e) {
+      printInDebug('Error: $e');
+      responseError = {'ErrorMessage': 'Unexpected error'};
+      error(responseError);
+    }
+  }
+
+
   void getUserData( String apiName,Map<String, String> queryParams, Function(Map<String, dynamic>) completion,Function(Map<String, dynamic>) error) async {
     Map<String, dynamic> responseData = {};
     // List<dynamic> responseData = [];

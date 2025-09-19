@@ -87,6 +87,7 @@ class G2GViewState extends State<G2GView>{
                   top: MediaQuery.of(context).padding.top+pathS/12,
                   left: paddingLeft +pathS/3,
                   child: GestureDetector(
+                    behavior: HitTestBehavior.translucent,
                     onTap: (){
                       Navigator.pop(context);
                     },

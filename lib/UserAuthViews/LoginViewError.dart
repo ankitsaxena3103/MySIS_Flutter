@@ -168,6 +168,7 @@ class LoginViewErrorState extends State<LoginViewError> {
                     SizedBox(height: pathS/1.2),
 
                     GestureDetector(
+                      behavior: HitTestBehavior.translucent,
                       onTap: (){
                         Navigator.pop(context);
                       },

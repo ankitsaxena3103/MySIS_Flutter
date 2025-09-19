@@ -59,6 +59,7 @@ class NewEscortDutyViewState extends State<NewEscortDutyView>{
                   top: MediaQuery.of(context).padding.top+pathS/12,
                   left: paddingLeft +pathS/3,
                   child: GestureDetector(
+                    behavior: HitTestBehavior.translucent,
                     onTap: (){
                       Navigator.pop(context);
                     },
@@ -186,6 +187,7 @@ class NewEscortDutyViewState extends State<NewEscortDutyView>{
                       child: Row(
                         children: [
                           GestureDetector(
+                            behavior: HitTestBehavior.translucent,
                             onTap: (){
                               Navigator.pop(context);
                             },

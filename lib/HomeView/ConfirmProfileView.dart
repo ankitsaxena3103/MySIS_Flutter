@@ -173,6 +173,7 @@ class ConfirmProfileViewState extends State<ConfirmProfileView>{
                       mainAxisAlignment: MainAxisAlignment.center,
                       children: [
                         GestureDetector(
+                          behavior: HitTestBehavior.translucent,
                           onTap: (){
                             Navigator.pop(context);
                           },

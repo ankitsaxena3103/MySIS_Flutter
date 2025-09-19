@@ -178,6 +178,7 @@ class SarvamLoanViewState extends State<SarvamLoanView>{
               top: paddingTop+pathS/2,
               left: paddingLeft +pathS/3,
               child: GestureDetector(
+                behavior: HitTestBehavior.translucent,
                 onTap: (){
                   Navigator.pop(context);
                 },

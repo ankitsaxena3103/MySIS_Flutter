@@ -610,6 +610,8 @@
   "no_data": "No Data",
   "no_calendar_data": "You have no data.",
   "pin_txt": "PIN",
+
+
   "date": "Date",
   "sync_date_time" : "Last Sync Date Time",
   "total_records" : "Total Records",
@@ -645,8 +647,14 @@
   "mobile": "Mobile Number",
   "ignore": "Ignore & Submit",
   "camera_init": "Initializing camera...",
-  "error_camera_init": "Camera error",
-  "apply_loan_alert": "Are you sure? You want to apply loan."
+  "error_camera_init": "Camera permission required",
+  "apply_loan_alert": "Are you sure? You want to apply loan.",
+  "GMD_se_bolo": "GMD se bolo",
+  "no_wi_fi" : "Your mobile data is turned off. Please enable mobile data to mark your duty.",
+  "no_gps" : "Your GPS is turned off. Please enable GPS to mark your duty.",
+
+  "no_records_to_clear" : "No record to clear"
+
 }
 
 

@@ -84,7 +84,9 @@ class UserLeaves {
   }
 
   // Convert a Dart object into a JSON object
+
   Map<String, dynamic> toJson() {
+    final dateFormat = DateFormat('yyyy-MM-dd');
     return {
       'ID': id,
       'REGNO': regNo,
@@ -92,8 +94,8 @@ class UserLeaves {
       'LEAVE_TYPE_NAME': leaveTypeName, // Updated field
       'LEAVE_TYPE_SYMBOL': leaveTypeSymbol, // Updated field
       'LEAVE_STATUS': leaveStatus,
-      'LEAVE_START_DATE': leaveStartDate.toIso8601String(),
-      'LEAVE_END_DATE': leaveEndDate.toIso8601String(),
+      'LEAVE_START_DATE': dateFormat.format(leaveStartDate),
+      'LEAVE_END_DATE': dateFormat.format(leaveEndDate),
       'CANCLED': canceled,
       'DELETED': deleted,
       'DATE_MODIFIED': dateModified.toIso8601String(),

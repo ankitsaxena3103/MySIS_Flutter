@@ -12,6 +12,7 @@ import 'package:mysis/SharedClasses/DatabaseHelper.dart';
 
 import '../CommonViews/AlertPopupView.dart';
 import '../CommonViews/LoaderView.dart';
+import '../CommonViews/ToastMessageView.dart';
 import '../HomeView/UserAttendance.dart';
 import '../HomeView/UserRoaster.dart';
 import '../Profile/UnitShiftDetail.dart';
@@ -39,9 +40,13 @@ class SyncDataViewState extends State<SyncDataView> {
   String alertHeader = '';
   String alertMessage = '';
 
+  bool showToastMessageView = false;
+  String toastMessage = '';
+
+
   @override
-  void initState() {
-    fetchAndShowTableRecords();
+  void initState()  {
+     fetchAndShowTableRecords();
     super.initState();
   }
 
@@ -75,6 +80,7 @@ class SyncDataViewState extends State<SyncDataView> {
                       .top + pathS / 12,
                   left: paddingLeft + pathS / 3,
                   child: GestureDetector(
+                    behavior: HitTestBehavior.translucent,
                     onTap: () {
                       Navigator.pop(context);
                     },
@@ -236,18 +242,12 @@ class SyncDataViewState extends State<SyncDataView> {
                                                   GestureDetector(
                                                     onTap: () {
 
-                                                      if(table['unsyncedRecords'] > 0){
+                                                      if(table['totalRecords'] ==  0)  {
+                                                        showToastView('no_records_to_clear'.tr());
                                                         return;
                                                       }
-                                                      setState(() {
-                                                        showLoaderView = true;
-                                                      });
 
-                                                      List<Map<String,dynamic>>  tableToClear = [];
-                                                      tableToClear.add({
-                                                        'tableName': table['tableName'],
-                                                      });
-                                                      onClearAllData(tableToClear);
+                                                      clearData(table['tableName']);
                                                     },
                                                     child: Row(
                                                       crossAxisAlignment:CrossAxisAlignment.center,
@@ -288,6 +288,9 @@ class SyncDataViewState extends State<SyncDataView> {
                                                   GestureDetector(
                                                     onTap: () {
                                                       // Handle sync data action
+                                                      uploadData(table['tableName']);
+                                                      syncData(table['tableName']);
+
                                                     },
                                                     child: Row(
                                                       children: [
@@ -362,7 +365,7 @@ class SyncDataViewState extends State<SyncDataView> {
                                                   ),
                                                 ],
                                               ),
-                                              Column(
+                                             if(table['unsyncedRecords'] != null) Column(
                                                 mainAxisAlignment: MainAxisAlignment.start,
                                                 crossAxisAlignment: CrossAxisAlignment.start,
                                                 children: [
@@ -579,13 +582,15 @@ class SyncDataViewState extends State<SyncDataView> {
                         setState(() {
                           showLoaderView = true;
                         });
-                        onClearAllData(allTablesToClear);
+                        clearData();
                       }
                     },
                   ),
                 ),
 
                 LoaderView(isVisible: showLoaderView, message: ''),
+                ToastMessageView(isVisible: showToastMessageView, message: toastMessage),
+
 
               ],
             ),
@@ -598,9 +603,6 @@ class SyncDataViewState extends State<SyncDataView> {
 
 
   void onTapClearAll(){
-    if(allTablesToClear.isEmpty){
-      return;
-    }
     setState(() {
        showAlert = true;
        alertHeader = 'alert'.tr();
@@ -609,50 +611,211 @@ class SyncDataViewState extends State<SyncDataView> {
 
   }
 
-  void onTapSyncAll(){
-    onLoadAllData();
+  Future<void> clearData([String? tableName]) async {
+    // 🔹 First upload unsynced data
+    await uploadData(tableName);
+
+    setState(() {
+      showLoaderView = true;
+    });
+
+    DatabaseHelper dbHelper = DatabaseHelper.instance;
+
+    if (tableName == null || tableName == keyTableUserProfile) {
+      await dbHelper.clearTable(keyTableUserProfile);
+    }
+
+    if (tableName == null || tableName == keyTableUserPosting) {
+      await dbHelper.clearTable(keyTableUserPosting);
+    }
+
+    if (tableName == null || tableName == keyTableUnitDutyPost) {
+      await dbHelper.clearTable(keyTableUnitDutyPost);
+    }
+
+    if (tableName == null || tableName == keyTableUnitShiftDetail) {
+      await dbHelper.clearTable(keyTableUnitShiftDetail);
+    }
+
+    if (tableName == null || tableName == keyTableUserRoster) {
+      await dbHelper.clearTable(keyTableUserRoster);
+    }
+
+    if (tableName == null || tableName == keyTableUserAttendance) {
+      await dbHelper.clearTable(keyTableUserAttendance);
+    }
+
+    if (tableName == null || tableName == keyTableLeaveType) {
+      await dbHelper.clearTable(keyTableLeaveType);
+    }
+
+    if (tableName == null || tableName == keyTableUserLeave) {
+      await dbHelper.clearTable(keyTableUserLeave);
+    }
+
+    if (tableName == null || tableName == keyTableHelpMaster) {
+      await dbHelper.clearTable(keyTableHelpMaster);
+    }
+
+    if (tableName == null || tableName == keyTableEscortDuty) {
+      await dbHelper.clearTable(keyTableEscortDuty);
+    }
+
+    fetchAndShowTableRecords();
   }
-  Future<void> onClearAllData(List<Map<String, dynamic>> tablesToClean) async {
 
-   bool result = await DatabaseHelper.instance.clearAllTables(tablesToClean);
+  void onTapSyncAll() async {
+    // 🔹 Upload before syncing fresh data
+    await uploadData();
 
-   if(result) {
-     Future.delayed(Duration(seconds: 1),(){
-       setState(() {
-         showLoaderView = false;
-       });
-       tableRecords = [];
-       fetchAndShowTableRecords();
-     });
-   }else{
+    // 🔹 Now fetch new data from server
+    await syncData();
+  }
 
-   }
+  Future<void> uploadData([String? tableName]) async {
+    if (tableName == null || tableName == keyTableUserAttendance) {
+      await uploadTableDataToServer(
+        tableName: keyTableUserAttendance,
+        idColumn: "id",
+        apiUrl: userAttendancePostApi,
+      );
+    }
 
+    if (tableName == null || tableName == keyTableUserLeave) {
+      await uploadTableDataToServer(
+        tableName: keyTableUserLeave,
+        idColumn: "id",
+        apiUrl: userLeavesPostApi,
+      );
+    }
+
+    if (tableName == null || tableName == keyTableEscortDuty) {
+      await uploadTableDataToServer(
+        tableName: keyTableEscortDuty,
+        idColumn: "id",
+        apiUrl: escortDutyPostApi,
+      );
+    }
+  }
+
+  Future<void> syncData([String? tableName])async {
+    if (tableName == null || tableName == keyTableUserProfile) {
+      fetchAndSyncData<UserProfile>(
+        apiUrl: profileApi,
+        tableName: keyTableUserProfile,
+        fromJson: (json) => UserProfile.fromJson(json),
+        toMap: (data) => data.toMap(),
+      );
+    }
+
+    if (tableName == null || tableName == keyTableUserPosting ||  tableName == keyTableUnitDutyPost || tableName == keyTableUnitShiftDetail) {
+      fetchAndSyncUserPostingData();
+    }
+
+    if (tableName == null || tableName == keyTableUserRoster) {
+      fetchAndSyncData<UserRoaster>(
+        apiUrl: userRosterApi,
+        tableName: keyTableUserRoster,
+        fromJson: (json) => UserRoaster.fromJson(json),
+        toMap: (data) => data.toMap(),
+      );
+    }
+
+
+    if (tableName == null || tableName == keyTableUserAttendance) {
+      fetchAndSyncData<UserAttendance>(
+        apiUrl: userAttendanceApi,
+        tableName: keyTableUserAttendance,
+        fromJson: (json) => UserAttendance.fromJson(json),
+        toMap: (data) => data.toMap(),
+      );
+    }
+
+    if (tableName == null || tableName == keyTableLeaveType) {
+      fetchAndSyncData<LeaveType>(
+        apiUrl: leaveTypeMasterApi,
+        tableName: keyTableLeaveType,
+        fromJson: (json) => LeaveType.fromJson(json),
+        toMap: (data) => data.toMap(),
+      );
+    }
+
+    if (tableName == null || tableName == keyTableUserLeave) {
+      fetchAndSyncData<UserLeaves>(
+        apiUrl: userLeavesApi,
+        tableName: keyTableUserLeave,
+        fromJson: (json) => UserLeaves.fromJson(json),
+        toMap: (data) => data.toMap(),
+      );
+    }
+
+    if (tableName == null || tableName == keyTableHelpMaster) {
+      fetchAndSyncData<HelpMaster>(
+        apiUrl: helpMasterApi,
+        tableName: keyTableHelpMaster,
+        fromJson: (json) => HelpMaster.fromJson(json),
+        toMap: (data) => data.toMap(),
+      );
+    }
+
+    if (tableName == null || tableName == keyTableEscortDuty) {
+      fetchAndSyncData<EscortDuty>(
+        apiUrl: escortDutyApi,
+        tableName: keyTableEscortDuty,
+        fromJson: (json) => EscortDuty.fromJson(json),
+        toMap: (data) => data.toMap(),
+      );
+    }
 
   }
-  void fetchAndShowTableRecords() async {
+
+
+  Future<void> fetchAndShowTableRecords() async {
+    tableRecords = [];
+    allTablesToClear.clear();
 
     final allTablesData = await DatabaseHelper.instance.getTableRecords();
-    allTablesToClear.clear();
-    for (var tableRecord in allTablesData) {
 
-      if(tableRecord['unsyncedRecords'] == 0){
+    // Allowed table names
+    final allowedTables = {
+      'UserProfile',
+      'UserPosting',
+      'UnitShiftDetail',
+      'UnitDutyPost',
+      'UserRoster',
+      'UserAttendance',
+      'UserLeaves',
+      'LeaveType',
+      'EscortDuty',
+      'HelpMaster',
+      //'GeneralRules'//need to add once created
+    };
+
+
+
+    // Filter only allowed tables
+    final filteredTables = allTablesData.where((tableRecord) {
+      return allowedTables.contains(tableRecord['tableName']);
+    }).toList();
+
+    // Process only filtered tables
+    for (var tableRecord in filteredTables) {
+      if (tableRecord['unsyncedRecords'] == 0) {
         allTablesToClear.add(tableRecord);
       }
-      printInDebug(
-          "Table: ${tableRecord['tableName']}, Total Records: ${tableRecord['totalRecords']}, Unsynced Records: ${tableRecord['unsyncedRecords']}");
     }
 
-    if(allTablesData.isNotEmpty) {
+    if (filteredTables.isNotEmpty) {
       setState(() {
-        tableRecords = allTablesData;
+        tableRecords = filteredTables;
       });
     }
-    // Close the database connection
-    // await db.close();
+
+    setState(() {showLoaderView = false;});
 
 
   }
+
 
   String formatTableName(String tableName) {
     // Add a space before each uppercase letter (except the first character)
@@ -794,96 +957,94 @@ class SyncDataViewState extends State<SyncDataView> {
 
   }
 
-  void onLoadAllData() {
 
-    fetchAndSyncData<UserProfile>(
-      apiUrl: profileApi,
-      tableName: keyTableUserProfile,
-      fromJson: (json) => UserProfile.fromJson(json),
-      toMap: (data) => data.toMap(),
+  Future<void> uploadTableDataToServer({
+    required String tableName,
+    required String idColumn,
+    required String apiUrl,
+  }) async {
+    final dirtyRows = await DatabaseHelper.instance.getDirtyRows(tableName);
+
+    if (dirtyRows.isEmpty) {
+      printInDebug("No dirty rows found for $tableName");
+      return;
+    }
+
+    APIHelper.instance.postAllData(
+      apiUrl,
+      dirtyRows,
+          (responseData) async {
+        if (responseData.isNotEmpty) {
+          for (var record in responseData) {
+            final idValue = record['ID']; // assumes API response has "ID"
+            if (idValue != null) {
+              await DatabaseHelper.instance.markRowSynced(tableName, idColumn, idValue);
+            }
+          }
+        } else {
+          printInDebug("Empty response for $tableName");
+        }
+      },
+          (error) {
+        printInDebug("Error uploading $tableName: $error");
+      },
     );
-
-    fetchAndSyncUserPostingData();
-
-    fetchAndSyncData<ContactSIS>(
-      apiUrl: contactSISApi,
-      tableName: keyTableContactSIS,
-      fromJson: (json) => ContactSIS.fromJson(json),
-      toMap: (data) => data.toMap(),
-    );
-
-    fetchAndSyncData<UserRoaster>(
-      apiUrl: userRosterApi,
-      tableName: keyTableUserRoster,
-      fromJson: (json) => UserRoaster.fromJson(json),
-      toMap: (data) => data.toMap(),
-    );
-
-    fetchAndSyncData<UserNotification>(
-      apiUrl: userNotificationApi,
-      tableName: keyTableUserNotification,
-      fromJson: (json) => UserNotification.fromJson(json),
-      toMap: (data) => data.toMap(),
-    );
-
-
-
-    fetchAndSyncData<UserProfile>(
-      apiUrl: profileApi,
-      tableName: keyTableUserProfile,
-      fromJson: (json) => UserProfile.fromJson(json),
-      toMap: (data) => data.toMap(),
-    );
-
-      fetchAndSyncData<UserRoaster>(
-        apiUrl: userRosterApi,
-        tableName: keyTableUserRoster,
-        fromJson: (json) => UserRoaster.fromJson(json),
-        toMap: (roaster) => roaster.toMap(),
-      );
-
-      fetchAndSyncData<UserAttendance>(
-        apiUrl: userAttendanceApi,
-        tableName: keyTableUserAttendance,
-        fromJson: (json) => UserAttendance.fromJson(json),
-        toMap: (data) => data.toMap(),
-      );
-
-
-      fetchAndSyncData<LeaveType>(
-        apiUrl: leaveTypeMasterApi,
-        tableName: keyTableLeaveType,
-        fromJson: (json) => LeaveType.fromJson(json),
-        toMap: (data) => data.toMap(),
-      );
-
-      fetchAndSyncData<UserLeaves>(
-        apiUrl: userLeavesApi,
-        tableName: keyTableUserLeave,
-        fromJson: (json) => UserLeaves.fromJson(json),
-        toMap: (data) => data.toMap(),
-      );
-
-
-    fetchAndSyncData<HelpMaster>(
-      apiUrl: helpMasterApi,
-      tableName: keyTableHelpMaster,
-      fromJson: (json) => HelpMaster.fromJson(json),
-      toMap: (data) => data.toMap(),
-    );
-
-    fetchAndSyncData<EscortDuty>(
-      apiUrl: escortDutyApi,
-      tableName: keyTableEscortDuty,
-      fromJson: (json) => EscortDuty.fromJson(json),
-      toMap: (data) => data.toMap(),
-    );
-
-
-
   }
 
 
 
 
+
+  void showToastView(String message) {
+    setState(() {
+      showToastMessageView = true;
+      toastMessage = message;
+    });
+
+    Future.delayed(Duration(seconds: 3), () {
+      setState(() {
+        showToastMessageView = false;
+      });
+    });
+  }
+
+
+  // User Profile
+  // User Posting
+  // Roster
+  // Attendance
+  // Leave
+  // Escort Duty
+  // FAQ
+  // General Rule
+
+  //  'UserProfile';
+  // 'UserPosting';
+  //  'UnitShiftDetail';
+  // 'UnitDutyPost';
+  // 'UserRoster';
+  // UserAttendance
+  // UserLeaves
+  // LeaveType
+  // EscortDuty
+  // HelpMaster
+
+
+
 }
+
+// Define your sync keys
+enum SyncTarget {
+  all,
+  userProfile,
+  userPosting,
+  userRoster,
+  userNotification,
+  userAttendance,
+  leaveType,
+  userLeaves,
+  helpMaster,
+  escortDuty,
+}
+
+// Main sync method

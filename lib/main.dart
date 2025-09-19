@@ -13,6 +13,8 @@ import 'package:provider/provider.dart';
 import 'package:mysis/UserAuthViews/EnterPINView.dart';
 import 'package:package_info_plus/package_info_plus.dart';
 
+import 'HomeView/route_observer.dart';
+
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
   await EasyLocalization.ensureInitialized();
@@ -45,6 +47,7 @@ class MyApp extends StatelessWidget {
         localizationsDelegates: context.localizationDelegates,
         supportedLocales: context.supportedLocales,
         locale: context.locale,
+        navigatorObservers: [routeObserver],
         home: MyHomePage()
     );
   }

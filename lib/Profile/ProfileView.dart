@@ -121,12 +121,13 @@ class ProfileViewState extends State<ProfileView>{
             top: MediaQuery.of(context).padding.top+pathS/12,
             left: paddingLeft +pathS/3,
             child: GestureDetector(
+              behavior: HitTestBehavior.translucent,
               onTap: (){
                 Navigator.pop(context);
               },
               child: Row(
                 children: [
-                  Container(
+                  SizedBox(
                     width: pathS/5,
                     height: pathS/2,
                       child: Image.asset(

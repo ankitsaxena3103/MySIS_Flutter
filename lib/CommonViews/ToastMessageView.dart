@@ -35,7 +35,7 @@ class ToastMessageView extends StatelessWidget {
                     message,
                     style: TextStyle(
                       color: Colors.white,
-                      fontSize: pathS / 5,
+                      fontSize: pathS / 5.5,
                       fontWeight: FontWeight.w500,
                       fontFamily: 'Roboto',
 

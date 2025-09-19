@@ -130,6 +130,7 @@ class DutyAlertViewState extends State<DutyAlertView> with TickerProviderStateMi
                       top: MediaQuery.of(context).padding.top+pathS/12,
                       right: paddingRight+pathS/3,
                       child: GestureDetector(
+                        behavior: HitTestBehavior.translucent,
                         onTap: (){
                           Navigator.pop(context);
 

@@ -1,29 +1,25 @@
 
-// import 'dart:html';
 
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:mysis/CommonViews/Utility.dart';
 import 'package:easy_localization/easy_localization.dart';
-import 'package:mysis/Leaves/Leaves-Help/LeaveViewHelp.dart';
 import 'package:mysis/Notifications/NotificationsView.dart';
 import 'package:mysis/SharedClasses/ThemeProvider.dart';
 import 'package:mysis/SyncData/SyncDataView.dart';
-import 'package:mysis/SyncData/SyncDataViewHelp.dart';
 import 'package:provider/provider.dart';
 import 'package:mysis/Language/SelectLanguageView.dart';
 import 'package:mysis/Profile/ProfileView.dart';
 import 'package:mysis/Leaves/LeaveView.dart';
 
 import '../AKR/AKRView.dart';
-import '../ERC/ERCView.dart';
+import '../GMD/GMDSeBolo.dart';
 import '../EscortDuty/EscortDutyView.dart';
 import '../G2G/G2GView.dart';
 import '../GeneralQuestions/GenerealQuestionsView.dart';
 import '../GeneralRules/GeneralRulesView.dart';
 import '../Salary/SalaryView.dart';
 import '../SulabhLoan/SarvamLoanView.dart';
-import '../SulabhLoan/SulabhLoanView.dart';
 
 class MenuItemView extends StatefulWidget {
 
@@ -56,7 +52,7 @@ class MenuItemViewState extends State<MenuItemView> {
     calculateSizes(context);
     double iconSize = pathS/3;
     double iconTextGap = pathS/8;
-    double verticalGap = pathS/5;
+    double verticalGap = pathS/6;
     double horizontalGap = 0;
     var backgroundGradientDark =  LinearGradient(
       colors: [greyColor8, greyColor8],
@@ -69,8 +65,8 @@ class MenuItemViewState extends State<MenuItemView> {
         return Material(
           child: Scaffold(
             body: Container(
-                width: logicalWidth,
-                height: logicalHeight,
+                width: MediaQuery.of(context).size.width,
+                height: MediaQuery.of(context).size.height,
                 alignment: Alignment.center,
                 decoration: BoxDecoration(
                   gradient: isDarkMode ? backgroundGradientDark : backgroundGradient,
@@ -116,7 +112,7 @@ class MenuItemViewState extends State<MenuItemView> {
                                           style: TextStyle(
                                             color: isDarkMode ? whiteColor : greyColor6,
                                             fontSize: pathS / 5,
-                                            fontWeight: FontWeight.w700,
+                                            fontWeight: FontWeight.w500,
                                             fontFamily: 'Roboto',
                                           ),
                                           textAlign: TextAlign.center,
@@ -155,7 +151,7 @@ class MenuItemViewState extends State<MenuItemView> {
                                           style: TextStyle(
                                             color: isDarkMode ? whiteColor : greyColor6,
                                             fontSize: pathS / 5,
-                                            fontWeight: FontWeight.w700,
+                                            fontWeight: FontWeight.w500,
                                             fontFamily: 'Roboto',
                                           ),
                                           textAlign: TextAlign.center,
@@ -194,7 +190,7 @@ class MenuItemViewState extends State<MenuItemView> {
                                           style: TextStyle(
                                             color: isDarkMode ? whiteColor : greyColor6,
                                             fontSize: pathS / 5,
-                                            fontWeight: FontWeight.w700,
+                                            fontWeight: FontWeight.w500,
                                             fontFamily: 'Roboto',
                                           ),
                                           textAlign: TextAlign.center,
@@ -237,7 +233,7 @@ class MenuItemViewState extends State<MenuItemView> {
                                           style: TextStyle(
                                             color: isDarkMode ? whiteColor : greyColor6,
                                             fontSize: pathS / 5,
-                                            fontWeight: FontWeight.w700,
+                                            fontWeight: FontWeight.w500,
                                             fontFamily: 'Roboto',
                                           ),
                                           textAlign: TextAlign.center,
@@ -276,7 +272,7 @@ class MenuItemViewState extends State<MenuItemView> {
                                           style: TextStyle(
                                             color: isDarkMode ? whiteColor : greyColor6,
                                             fontSize: pathS / 5,
-                                            fontWeight: FontWeight.w700,
+                                            fontWeight: FontWeight.w500,
                                             fontFamily: 'Roboto',
                                           ),
                                           textAlign: TextAlign.center,
@@ -315,7 +311,7 @@ class MenuItemViewState extends State<MenuItemView> {
                                           style: TextStyle(
                                             color: isDarkMode ? whiteColor : greyColor6,
                                             fontSize: pathS / 5,
-                                            fontWeight: FontWeight.w700,
+                                            fontWeight: FontWeight.w500,
                                             fontFamily: 'Roboto',
                                           ),
                                           textAlign: TextAlign.center,
@@ -358,7 +354,7 @@ class MenuItemViewState extends State<MenuItemView> {
                                           style: TextStyle(
                                             color: isDarkMode ? whiteColor : greyColor6,
                                             fontSize: pathS / 5,
-                                            fontWeight: FontWeight.w700,
+                                            fontWeight: FontWeight.w500,
                                             fontFamily: 'Roboto',
                                           ),
                                           textAlign: TextAlign.center,
@@ -370,61 +366,43 @@ class MenuItemViewState extends State<MenuItemView> {
 
                                 SizedBox(width: horizontalGap),
 
-                                // ERC (Coming Soon)
                                 GestureDetector(
                                   behavior: HitTestBehavior.opaque,
                                   onTap: () {
-                                    ScaffoldMessenger.of(context).showSnackBar(
-                                      SnackBar(content: Text('coming_soon'.tr())),
-                                    );
+                                    widget.onCloseBottomSheet();
+                                    onLoadERCView();
                                   },
-                                  child: Container(
+                                  child: SizedBox(
                                     width: screenWidth / 3,
-                                    padding: const EdgeInsets.symmetric(vertical: 8),
+                                    // padding: const EdgeInsets.symmetric(vertical: 5),
                                     child: Column(
                                       mainAxisSize: MainAxisSize.min,
                                       children: [
-                                        SizedBox(
+                                        Container(
                                           width: iconSize,
                                           height: iconSize,
-                                          child: Stack(
-                                            clipBehavior: Clip.none,
-                                            children: [
-                                              Image.asset(
-                                                'assets/images/dashboard-icons/erc.png',
-                                                color: isDarkMode ? whiteColor : greyColor6,
-                                                width: iconSize,
-                                                height: iconSize,
-                                              ),
-                                              Positioned(
-                                                top: -4,
-                                                right: -4,
-                                                child: Container(
-                                                  padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
-                                                  decoration: BoxDecoration(
-                                                    color: Colors.redAccent,
-                                                    borderRadius: BorderRadius.circular(12),
-                                                  ),
-                                                  child: Text(
-                                                    'coming_soon'.tr(),
-                                                    style: const TextStyle(
-                                                      color: Colors.white,
-                                                      fontSize: 8,
-                                                      fontWeight: FontWeight.bold,
-                                                    ),
-                                                  ),
-                                                ),
-                                              ),
-                                            ],
+                                          decoration: BoxDecoration(
+                                            shape: BoxShape.circle, // makes it circular
+                                            border: Border.all(
+                                              color: isDarkMode ? Colors.white : Colors.grey, // border color
+                                              width: 1, // border thickness
+                                            ),
+                                          ),
+                                          padding: EdgeInsets.all(1), // optional padding inside the circle
+                                          child: Image.asset(
+                                            'assets/images/dashboard-icons/gmd.png',
+                                            // color: isDarkMode ? Colors.white : Colors.grey[800], // optional tint
+                                            fit: BoxFit.contain,
                                           ),
                                         ),
+
                                         SizedBox(height: iconTextGap),
                                         Text(
-                                          'erc'.tr(),
+                                          'GMD_se_bolo'.tr(),
                                           style: TextStyle(
                                             color: isDarkMode ? whiteColor : greyColor6,
                                             fontSize: pathS / 5,
-                                            fontWeight: FontWeight.w700,
+                                            fontWeight: FontWeight.w500,
                                             fontFamily: 'Roboto',
                                           ),
                                           textAlign: TextAlign.center,
@@ -463,7 +441,7 @@ class MenuItemViewState extends State<MenuItemView> {
                                           style: TextStyle(
                                             color: isDarkMode ? whiteColor : greyColor6,
                                             fontSize: pathS / 5,
-                                            fontWeight: FontWeight.w700,
+                                            fontWeight: FontWeight.w500,
                                             fontFamily: 'Roboto',
                                           ),
                                           textAlign: TextAlign.center,
@@ -479,13 +457,11 @@ class MenuItemViewState extends State<MenuItemView> {
                             Row(
                               mainAxisAlignment: MainAxisAlignment.center,
                               children: [
-                                // Salary (Coming Soon)
                                 GestureDetector(
                                   behavior: HitTestBehavior.opaque,
                                   onTap: () {
-                                    ScaffoldMessenger.of(context).showSnackBar(
-                                      SnackBar(content: Text('coming_soon'.tr())),
-                                    );
+                                    widget.onCloseBottomSheet();
+                                    onLoadSalaryView();
                                   },
                                   child: Container(
                                     width: screenWidth / 3,
@@ -504,6 +480,55 @@ class MenuItemViewState extends State<MenuItemView> {
                                                 color: isDarkMode ? whiteColor : greyColor6,
                                                 width: iconSize,
                                                 height: iconSize,
+                                              ),
+                                            ],
+                                          ),
+                                        ),
+                                        SizedBox(height: iconTextGap),
+                                        Text(
+                                          'salary'.tr(),
+                                          style: TextStyle(
+                                            color: isDarkMode ? whiteColor : greyColor6,
+                                            fontSize: pathS / 5,
+                                            fontWeight: FontWeight.w500,
+                                            fontFamily: 'Roboto',
+                                          ),
+                                          textAlign: TextAlign.center,
+                                        ),
+                                      ],
+                                    ),
+                                  ),
+                                ),
+
+                                SizedBox(width: horizontalGap),
+
+                                GestureDetector(
+                                  behavior: HitTestBehavior.opaque,
+                                  onTap: () {
+                                    ScaffoldMessenger.of(context).showSnackBar(
+                                      SnackBar(content: Text('coming_soon'.tr())),
+                                    );
+                                    return;
+                                    widget.onCloseBottomSheet();
+                                    onLoadGeneralRuleView();
+                                  },
+                                  child: Container(
+                                    width: screenWidth / 3,
+                                    padding: const EdgeInsets.symmetric(vertical: 8),
+                                    child: Column(
+                                      mainAxisSize: MainAxisSize.min,
+                                      children: [
+                                        SizedBox(
+                                          width: iconSize,
+                                          height: iconSize,
+                                          child: Stack(
+                                            clipBehavior: Clip.none,
+                                            children: [
+                                              Image.asset(
+                                                'assets/images/dashboard-icons/documents.png',
+                                                width: iconSize,
+                                                height: iconSize,
+                                                color: isDarkMode ? whiteColor : greyColor6,
                                               ),
                                               Positioned(
                                                 top: -4,
@@ -529,48 +554,11 @@ class MenuItemViewState extends State<MenuItemView> {
                                         ),
                                         SizedBox(height: iconTextGap),
                                         Text(
-                                          'salary'.tr(),
-                                          style: TextStyle(
-                                            color: isDarkMode ? whiteColor : greyColor6,
-                                            fontSize: pathS / 5,
-                                            fontWeight: FontWeight.w700,
-                                            fontFamily: 'Roboto',
-                                          ),
-                                          textAlign: TextAlign.center,
-                                        ),
-                                      ],
-                                    ),
-                                  ),
-                                ),
-
-                                SizedBox(width: horizontalGap),
-
-                                // General Rules
-                                GestureDetector(
-                                  behavior: HitTestBehavior.opaque,
-                                  onTap: () {
-                                    widget.onCloseBottomSheet();
-                                    onLoadGeneralRuleView();
-                                  },
-                                  child: Container(
-                                    width: screenWidth / 3,
-                                    padding: const EdgeInsets.symmetric(vertical: 8),
-                                    child: Column(
-                                      mainAxisSize: MainAxisSize.min,
-                                      children: [
-                                        Image.asset(
-                                          'assets/images/dashboard-icons/documents.png',
-                                          width: iconSize,
-                                          height: iconSize,
-                                          color: isDarkMode ? whiteColor : greyColor6,
-                                        ),
-                                        SizedBox(height: iconTextGap),
-                                        Text(
                                           'general_rules'.tr(),
                                           style: TextStyle(
                                             color: isDarkMode ? whiteColor : greyColor6,
                                             fontSize: pathS / 5,
-                                            fontWeight: FontWeight.w700,
+                                            fontWeight: FontWeight.w500,
                                             fontFamily: 'Roboto',
                                           ),
                                           textAlign: TextAlign.center,
@@ -607,7 +595,7 @@ class MenuItemViewState extends State<MenuItemView> {
                                           style: TextStyle(
                                             color: isDarkMode ? whiteColor : greyColor6,
                                             fontSize: pathS / 5,
-                                            fontWeight: FontWeight.w700,
+                                            fontWeight: FontWeight.w500,
                                             fontFamily: 'Roboto',
                                           ),
                                           textAlign: TextAlign.center,
@@ -677,7 +665,7 @@ class MenuItemViewState extends State<MenuItemView> {
                                           style: TextStyle(
                                             color: isDarkMode ? whiteColor : greyColor6,
                                             fontSize: pathS / 5,
-                                            fontWeight: FontWeight.w700,
+                                            fontWeight: FontWeight.w500,
                                             fontFamily: 'Roboto',
                                           ),
                                           textAlign: TextAlign.center,
@@ -714,7 +702,7 @@ class MenuItemViewState extends State<MenuItemView> {
                                           style: TextStyle(
                                             color: isDarkMode ? whiteColor : greyColor6,
                                             fontSize: pathS / 5,
-                                            fontWeight: FontWeight.w700,
+                                            fontWeight: FontWeight.w500,
                                             fontFamily: 'Roboto',
                                           ),
                                           textAlign: TextAlign.center,
@@ -751,7 +739,7 @@ class MenuItemViewState extends State<MenuItemView> {
                                           style: TextStyle(
                                             color: isDarkMode ? whiteColor : greyColor6,
                                             fontSize: pathS / 5,
-                                            fontWeight: FontWeight.w700,
+                                            fontWeight: FontWeight.w500,
                                             fontFamily: 'Roboto',
                                           ),
                                           textAlign: TextAlign.center,
@@ -775,7 +763,7 @@ class MenuItemViewState extends State<MenuItemView> {
                             style: TextStyle(
                               color: isDarkMode ? whiteColor:greyColor6,
                               fontSize: pathS / 5.5,
-                              fontWeight: FontWeight.normal,
+                              fontWeight: FontWeight.w600,
                               fontFamily: 'Roboto',
                             ),
                             textAlign: TextAlign.center,
@@ -787,7 +775,7 @@ class MenuItemViewState extends State<MenuItemView> {
                             style: TextStyle(
                               color: isDarkMode ? whiteColor:greyColor6,
                               fontSize: pathS / 5.5,
-                              fontWeight: FontWeight.normal,
+                              fontWeight: FontWeight.w600,
                               fontFamily: 'Roboto',
                             ),
                             textAlign: TextAlign.center,
@@ -808,7 +796,7 @@ class MenuItemViewState extends State<MenuItemView> {
                                   style: TextStyle(
                                     color: isDarkMode ? whiteColor:greyColor6,
                                     fontSize: pathS / 5.5,
-                                    fontWeight: FontWeight.normal,
+                                    fontWeight: FontWeight.w600,
                                     fontFamily: 'Roboto',
                                   ),
                                   textAlign: TextAlign.center,
@@ -842,11 +830,11 @@ class MenuItemViewState extends State<MenuItemView> {
                                           SizedBox(width: pathS/20),
 
                                           Text(
-                                            isDarkMode ? 'off'.tr():'on'.tr(),
+                                            isDarkMode ? 'off'.tr().toUpperCase():'on'.tr().toUpperCase(),
                                             style: TextStyle(
                                               color: isDarkMode ?  greyColor7:greyColor7,
-                                              fontSize: pathS / 5.5,
-                                              fontWeight: FontWeight.bold,
+                                              fontSize: pathS / 6,
+                                              fontWeight: FontWeight.w500,
                                               fontFamily: 'Roboto',
                                             ),
                                             textAlign: TextAlign.center,
@@ -928,7 +916,7 @@ class MenuItemViewState extends State<MenuItemView> {
     Navigator.push(
       context,
       MaterialPageRoute(
-        builder: (context) => ERCView(),
+        builder: (context) => GMDSeBolo(),
       ),
     );
   }
@@ -941,6 +929,7 @@ class MenuItemViewState extends State<MenuItemView> {
     );
   }
   void onLoadSalaryView(){
+
     Navigator.push(
       context,
       MaterialPageRoute(

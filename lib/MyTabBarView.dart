@@ -26,6 +26,7 @@ class MyTabBarViewState extends State<MyTabBarView> {
   void initState() {
     super.initState();
     tabs = [
+
       HomeView(onTabSelected: (value ) {
         setState(() {
           tabSelectedIndex = value;

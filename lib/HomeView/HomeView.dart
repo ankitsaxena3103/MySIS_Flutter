@@ -40,6 +40,7 @@ import 'OthersDutyView.dart';
 
 import 'package:pdf/widgets.dart' as pw;
 import 'package:printing/printing.dart';
+import 'route_observer.dart'; // <- import the file
 
 class HomeView extends StatefulWidget {
   final Function(int) onTabSelected;
@@ -54,7 +55,7 @@ class HomeView extends StatefulWidget {
   HomeViewState createState() => HomeViewState();
 }
 
-class HomeViewState extends State<HomeView> {
+class HomeViewState extends State<HomeView>with RouteAware {
 
   List<GlobalKey> notificationPageKeys = [];
 
@@ -114,7 +115,7 @@ class HomeViewState extends State<HomeView> {
 
   List<UserRoaster> todayRoster = [];
   List<UserRoaster> monthlyRosters = [];
-  List<UserAttendance> todayAttendance = [];
+  List<UserAttendance> todayUserAttendance = [];
   List<UnitDutyPost> todayUnitDutyPost = [];
 
   List <UserProfile> userProfile = [];
@@ -140,8 +141,21 @@ class HomeViewState extends State<HomeView> {
   Timer? dutyOutTimer;
   Timer? dutyInTimer;
 
+
+  @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    routeObserver.subscribe(this, ModalRoute.of(context)!);
+  }
+
+  @override
+  void didPopNext() {
+    // Called when returning to HomeScreen from any pushed screen
+    initialSetup(); // fetch latest data
+  }
   @override
   void dispose() {
+    routeObserver.unsubscribe(this);
     _pageController.dispose();
     super.dispose();
   }
@@ -169,7 +183,7 @@ class HomeViewState extends State<HomeView> {
     return Consumer2<LanguageProvider, ThemeProvider>(
         builder: (context, languageProvider, themeProvider, child) {
           return MaterialApp(
-            // theme: themeProvider.themeData,
+            theme: themeProvider.themeData,
             home: Scaffold(
               body: Container(
                   width: logicalWidth,
@@ -671,23 +685,24 @@ class HomeViewState extends State<HomeView> {
                                                     ),
                                                     SizedBox(width: pathS/8),
                                                     GestureDetector(
-                                                      onTap: isDutyOutTapEnabled ?  () {
-                                                        // Navigator.push(
-                                                        //   context,
-                                                        //   MaterialPageRoute(
-                                                        //     builder: (context) => ScanUnitShiftView(
-                                                        //       userProfile: userProfile.first,
-                                                        //       attendanceMode: keyAttendanceModeSelf,
-                                                        //       unitDutyPosts: unitDutyPosts,
-                                                        //       unitShiftDetails: unitShiftDetails,
-                                                        //       userPostings: userPostings,
-                                                        //       attendanceStatus: keyAttendanceStatusDutyOut,
-                                                        //     ),
-                                                        //   ),
-                                                        // );
-                                                        loadScanUnitShiftView(keyAttendanceModeSelf,keyAttendanceStatusDutyOut,todayAttendance.first);
+                                                      onTap: isDutyOutTapEnabled
+                                                          ? () {
+                                                        if (todayUserAttendance.isNotEmpty) {
+                                                          loadScanUnitShiftView(
+                                                            keyAttendanceModeSelf,
+                                                            keyAttendanceStatusDutyOut,
+                                                            todayUserAttendance.first,
+                                                          );
+                                                        } else {
+                                                          printInDebug("No attendance record found for today.");
+                                                          // Optionally show a Snackbar, Dialog, etc.
+                                                          ScaffoldMessenger.of(context).showSnackBar(
+                                                            SnackBar(content: Text("No attendance record available")),
+                                                          );
+                                                        }
                                                       }
                                                           : null,
+
                                                       child: Container(
                                                         width: pathL*1.1,
                                                         height: pathS / 1.6,
@@ -1735,7 +1750,7 @@ class HomeViewState extends State<HomeView> {
   void initialSetup() {
     getNotificationTableData();
 
-    getRoasterTableData();
+    getRoasterViewData();
 
     getAttendanceTableData();
 
@@ -1929,10 +1944,10 @@ class HomeViewState extends State<HomeView> {
      userProfile = userProfiles;
      showDataOnUI(userProfiles.first);
    }else{
-     // onLoadProfileData();
+     onLoadProfileData();
    }
 
-    onLoadProfileData();
+    // onLoadProfileData();
 
   }
   void showDataOnUI(UserProfile userProfile){
@@ -2022,22 +2037,14 @@ class HomeViewState extends State<HomeView> {
         userProfile.toMap());
   }
 
-  Future<void> getRoasterTableData() async {
-    final roasterData = await DatabaseHelper.instance.getAllRecords<UserRoaster>(
-      keyTableUserRoster,
-          (map) => UserRoaster.fromMap(map),
-    );
+  Future<void> getRoasterViewData() async {
 
+    // final roasterData = await DatabaseHelper.instance.getAllRecords<UserRoaster>(
+    //   keyTableUserRoster,
+    //       (map) => UserRoaster.fromMap(map),
+    // );
 
-
-    for (var data in roasterData) {
-        printInDebug('Roaster Data');
-        data.toMap().forEach((i, j) {
-          printInDebug('$i : $j');
-        });
-
-    }
-
+    final roasterData = await DatabaseHelper.instance.fetchRosterFromView();
 
     if(roasterData.isNotEmpty){
       userRoasters = roasterData;
@@ -2045,10 +2052,11 @@ class HomeViewState extends State<HomeView> {
       updateNextDaysRoasterUI(roasterData);
 
     }else{
-      // onLoadRoasterData();
+      onLoadRoasterData();
     }
-    onLoadRoasterData();
   }
+
+
   void onLoadRoasterData() {
 
     Map <String,String> inputData = {};
@@ -2074,7 +2082,7 @@ class HomeViewState extends State<HomeView> {
     );
 
   }
-  Future<void> syncUserRoasterData(   List <UserRoaster> userRoaster) async {
+  Future<void> syncUserRoasterData(List <UserRoaster> userRoaster) async {
 
     await DatabaseHelper.instance.updateOrDeleteTableData<UserRoaster>(
         keyTableUserRoster,
@@ -2082,6 +2090,8 @@ class HomeViewState extends State<HomeView> {
         'id',
         (userRoaster) => userRoaster.toMap()
     );
+
+    getRoasterViewData();
   }
 
   Future<List<UnitDutyPost>> getTodayRosterUnitShiftData() async {
@@ -2110,14 +2120,81 @@ class HomeViewState extends State<HomeView> {
          unitCode = roaster.unitCode;
          postName = '${roaster.postName} -${roaster.qrId.substring(roaster.qrId.length - 4)}';
          currentDutyStartTime = roaster.startTime;
-
          postGeoLocation = roaster.geoLocation;
+
       });
 
-       startDutyInCheck(roaster);
-       startDutyOutCheck(roaster);
+       updateDutyInButton(roaster);
+       updateDutyOutButton(roaster);
+
+      //old flow commented
+       // startDutyInCheck(roaster);
+       // startDutyOutCheck(roaster);
     }
   }
+  void updateDutyInButton(UserRoaster roaster){
+
+    if(!todayDutyInMarked) {
+      final now = DateTime.now();
+      final dutyStartEnableTime = roaster.dutyStartEnableTime;
+      final dutyStartDisableTime = roaster.dutyStartDisableTime;
+
+      if(roaster.dutyStatus != null &&
+          (roaster.dutyStatus == keyAttendanceStatusDutyIn ||
+              roaster.dutyStatus == keyAttendanceStatusDutyOut)){
+        setState(() {todayDutyInMarked = true;});
+        dutyInBtnText = roaster.actStartTime != null
+            ? "${'duty_in'.tr()} ${DateFormat('h:mm a').format(roaster.actStartTime!).toUpperCase()}"
+            : 'duty_in'.tr();
+        disableDutyIn();
+      }
+      else if (dutyStartEnableTime != null &&
+          dutyStartDisableTime != null &&
+          now.isAfter(dutyStartEnableTime) &&
+          now.isBefore(dutyStartDisableTime)) {
+        enableDutyIn();
+      } else {
+        disableDutyIn();
+      }
+    }
+    else {
+      disableDutyIn();
+    }
+
+  }
+  void updateDutyOutButton(UserRoaster roaster) {
+    if (todayDutyInMarked && !todayDutyOutMarked) {
+
+      final now = DateTime.now();
+      final dutyStartEnableTime = roaster.dutyStartEnableTime;
+      final dutyEndDisableTime = roaster.dutyEndDisableTime;
+
+      if(roaster.dutyStatus != null && roaster.dutyStatus == keyAttendanceStatusDutyOut){
+        setState(() {todayDutyOutMarked = true;});
+        dutyOutBtnText = roaster.actEndTime != null
+            ? "${'duty_out'.tr()} ${DateFormat('h:mm a').format(roaster.actEndTime!).toUpperCase()}"
+            : 'duty_out'.tr();
+        disableDutyOut();
+      }
+
+    else if (dutyStartEnableTime != null &&
+          dutyEndDisableTime != null &&
+          now.isAfter(dutyStartEnableTime) &&
+          now.isBefore(dutyEndDisableTime)
+          && roaster.dutyStatus == keyAttendanceStatusDutyIn) {
+
+        enableDutyOut();
+      }
+      else {
+        disableDutyOut();
+      }
+    }
+    else {
+      disableDutyOut();
+    }
+  }
+
+
   void updateNextDaysRoasterUI(List<UserRoaster> roasters) {
     DateTime todayDate = DateTime.now();
 
@@ -2274,15 +2351,6 @@ class HomeViewState extends State<HomeView> {
           (map) => UserAttendance.fromMap(map),
     );
 
-    for (var data in userAttendanceData) {
-        printInDebug('Attendance Data');
-        data.toMap().forEach((i, j) {
-          printInDebug('$i : $j');
-        });
-
-    }
-
-
     final undeletedAttendance = userAttendanceData
         .where((data) =>
         data.deleted == 0)
@@ -2356,7 +2424,14 @@ class HomeViewState extends State<HomeView> {
         'id',
         (userAttendance) => userAttendance.toMap()
     );
+
+    getRoasterViewData();
+
   }
+
+
+
+  //this method need be checked
   void updateDutyInOutAttendance(List<UserAttendance> attendance) {
     DateTime todayDate = DateTime.now();
     DateTime startOfDay = DateTime(todayDate.year, todayDate.month, todayDate.day);
@@ -2385,9 +2460,10 @@ class HomeViewState extends State<HomeView> {
     }
 
     if (todayAttendance.isNotEmpty) {
-      setState(() {
-        todayDutyInMarked = true;
-      });
+      todayUserAttendance = todayAttendance;
+      // setState(() {
+      //   todayDutyInMarked = true;
+      // });
 
 
       // Accumulate total duration for all marked attendances
@@ -2413,24 +2489,31 @@ class HomeViewState extends State<HomeView> {
             '${adjustedHour.toString().padLeft(2, '0')}: ${adjustedMinute.toString().padLeft(2, '0')}';
         dutyInHourBanner = dutyDuration;
 
-        // Update dutyIn button text
-        dutyInBtnText = todayAttendance.isNotEmpty
-            ? "${'duty_in'.tr()} ${DateFormat('h:mm').format(todayAttendance.first.actStartTime)} ${DateFormat('a').format(todayAttendance.first.actStartTime).toUpperCase()}"
-            : 'duty_in'.tr();
+        // // Update dutyIn button text
+        // dutyInBtnText = todayAttendance.isNotEmpty
+        //     ? "${'duty_in'.tr()} ${DateFormat('h:mm').format(todayAttendance.first.actStartTime)} ${DateFormat('a').format(todayAttendance.first.actStartTime).toUpperCase()}"
+        //     : 'duty_in'.tr();
       });
 
-      disableDutyIn();
-      stopDutyInCheck();
-      enableDutyOut();
+      // disableDutyIn();
+      // stopDutyInCheck();
+      // enableDutyOut();
     }
 
-    if (todayAttendance.isNotEmpty && todayAttendance.first.actEndTime != null) {
-      todayDutyOutMarked = true;
-      dutyOutBtnText =
-      "${'duty_out'.tr()} ${DateFormat('h:mm').format(todayAttendance.first.actEndTime!)} ${DateFormat('a').format(todayAttendance.first.actEndTime!).toUpperCase()}";
-      disableDutyOut();
-      stopDutyOutCheck();
-    }
+    // if (todayAttendance.isNotEmpty && todayAttendance.first.actEndTime != null) {
+    //   todayDutyOutMarked = true;
+    //   dutyOutBtnText =
+    //   "${'duty_out'.tr()} ${DateFormat('h:mm').format(todayAttendance.first.actEndTime!)} ${DateFormat('a').format(todayAttendance.first.actEndTime!).toUpperCase()}";
+    //   disableDutyOut();
+    //   stopDutyOutCheck();
+    // }else{
+    //   todayDutyOutMarked = false;
+    //   dutyOutBtnText = 'duty_out'.tr();
+    //   if(todayDutyInMarked) {
+    //     enableDutyOut();
+    //   }
+    //
+    // }
 
   }
 
@@ -2521,6 +2604,8 @@ class HomeViewState extends State<HomeView> {
         'id',
             (userLeaves) => userLeaves.toMap()
     );
+
+
   }
 
   Future<void> updateCalendarData(DateTime date) async {
@@ -2606,15 +2691,23 @@ class HomeViewState extends State<HomeView> {
     dutyInTimer?.cancel();
 
     // Start a single periodic timer to check duty conditions
-    dutyInTimer = Timer.periodic(Duration(seconds: 60), (Timer timer) {
+    dutyInTimer = Timer.periodic(Duration(milliseconds: 600), (Timer timer) {
       updateDutyInRoaster(roaster);
     });
   }
   void updateDutyInRoaster(UserRoaster roaster){
 
     if(!todayDutyInMarked) {
-      Timer.periodic(Duration(seconds: 60), (Timer timer) {
-        if (DateTime.now().isAfter(roaster.dutyStartEnableTime) && DateTime.now().isBefore(roaster.dutyStartDisableTime) && !todayDutyInMarked) {
+      Timer.periodic(Duration(milliseconds: 60), (Timer timer) {
+        final now = DateTime.now();
+        final dutyStartEnableTime = roaster.dutyStartEnableTime;
+        final dutyStartDisableTime = roaster.dutyStartDisableTime;
+
+        if (dutyStartEnableTime != null &&
+            dutyStartDisableTime != null &&
+            now.isAfter(dutyStartEnableTime) &&
+            now.isBefore(dutyStartDisableTime) &&
+            !todayDutyInMarked) {
           enableDutyIn();
         } else {
           disableDutyIn();
@@ -2635,13 +2728,23 @@ class HomeViewState extends State<HomeView> {
   void startDutyOutCheck(UserRoaster roaster) {
     dutyOutTimer?.cancel();
 
-    dutyOutTimer = Timer.periodic(Duration(seconds: 60), (Timer timer) {
+    dutyOutTimer = Timer.periodic(Duration(milliseconds: 500), (Timer timer) {
       updateDutyOutRoaster(roaster);
     });
   }
   void updateDutyOutRoaster(UserRoaster roaster) {
     if (todayDutyInMarked && !todayDutyOutMarked) {
-      if (DateTime.now().isAfter(roaster.dutyStartEnableTime) && DateTime.now().isBefore(roaster.dutyEndDisableTime) && todayDutyInMarked && !todayDutyOutMarked) {
+
+      final now = DateTime.now();
+      final dutyStartEnableTime = roaster.dutyStartEnableTime;
+      final dutyEndDisableTime = roaster.dutyEndDisableTime;
+
+      if (dutyStartEnableTime != null &&
+          dutyEndDisableTime != null &&
+          now.isAfter(dutyStartEnableTime) &&
+          now.isBefore(dutyEndDisableTime) &&
+          todayDutyInMarked &&
+          !todayDutyOutMarked) {
         enableDutyOut();
       }
       else {
@@ -2678,20 +2781,20 @@ class HomeViewState extends State<HomeView> {
   }
   void enableDutyOut(){
     setState(() {
+      isDutyOutTapEnabled = true;
       dutyOutBgColor =   redColor3 ;
       dutyOutFontColor =  whiteColor ;
       dutyOutShadowColor =   Colors.black.withOpacity(0.2);
-      isDutyOutTapEnabled =  true ;
     });
 
 
   }
   void disableDutyOut(){
     setState(() {
+      isDutyOutTapEnabled = false;
       dutyOutBgColor =  isDarkMode? greyColor5:greyColor1;
       dutyOutFontColor =  isDarkMode? greyColor7:greyColor4;
       dutyOutShadowColor =   Colors.transparent;
-      isDutyOutTapEnabled =  false;
     });
 
   }
@@ -2773,13 +2876,30 @@ class HomeViewState extends State<HomeView> {
 
   Future<void> onTapOtherDuty() async {
   if(! await isGPSEnabled()){
-    openGPSSettings();
+    setState(() {
+      alertHeader = '';
+      alertMessage = 'no_gps'.tr();
+      showAlert = true;
+      cancelBtnTitle = '';
+      okBtnTitle =   'ok'.tr();
+    });
+
+    // openGPSSettings();
     return;
   }
   if(! await isWifiOrMobileDataConnected()){
-    openMobileDataSettings();
+    setState(() {
+      alertHeader = '';
+      alertMessage = 'no_wi_fi'.tr();
+      showAlert = true;
+      cancelBtnTitle = '';
+      okBtnTitle =   'ok'.tr();
+    });
+    // openMobileDataSettings();
     return;
   }
+
+
 
   loadOthersDutyView();
 
@@ -3074,7 +3194,9 @@ class _WebViewScreenState extends State<WebViewScreen> {
     await Printing.sharePdf(bytes: await pdf.save(), filename: filename);
 
     print("PDF Saved: ${file.path}");
-  }
+   {
+
+  }}
   Future<void> captureWebViewAsImage() async {
     try {
       final Uint8List? screenshot = await webViewController.takeScreenshot();

@@ -133,6 +133,7 @@ class ApplyEscortDutyViewState extends State<ApplyEscortDutyView> {
                             color: isDarkMode ? greyColor6:whiteColor,
 
                             child: GestureDetector(
+                              behavior: HitTestBehavior.translucent,
                               onTap: (){
                                 Navigator.pop(context);
                               },
@@ -624,6 +625,7 @@ class ApplyEscortDutyViewState extends State<ApplyEscortDutyView> {
                           child: Row(
                             children: [
                               GestureDetector(
+                                behavior: HitTestBehavior.translucent,
                                 onTap: (){
                                   Navigator.pop(context);
                                 },

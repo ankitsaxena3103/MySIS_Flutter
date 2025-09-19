@@ -3,7 +3,6 @@ import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:mysis/CommonViews/Utility.dart';
 import 'package:easy_localization/easy_localization.dart';
-import 'package:mysis/HomeView/HomeView.dart';
 import 'package:mysis/HomeView/UserAttendance.dart';
 import 'package:mysis/Profile/UserPosting.dart';
 import 'package:mysis/Profile/UserProfile.dart';
@@ -68,8 +67,16 @@ class ThanksDutyViewState extends State<ThanksDutyView>{
 
     List<String> activeDayList = widget.latLong.isNotEmpty ? widget.latLong.split(',').map((e) => e.trim()).toList() : ['0.0','0.0'];
 
-    double lat = double.parse(activeDayList[0]) ; // Latitude
-    double lng = double.parse(activeDayList[1]); // Longitude
+    double unformattedLat = double.parse(activeDayList[0]); // Latitude
+    double unformattedLng = double.parse(activeDayList[1]); // Longitude
+
+    // Keep formatted string for display
+    String latStr = unformattedLat.toStringAsFixed(5);
+    String lngStr = unformattedLng.toStringAsFixed(5);
+
+    // Convert back to double if you need to compare
+    double lat = double.parse(latStr);
+    double lng = double.parse(lngStr);
 
     var backgroundGradientGreen =  LinearGradient(
       colors: [greyColor6,greenColor5],
@@ -141,8 +148,8 @@ class ThanksDutyViewState extends State<ThanksDutyView>{
                     SizedBox(height: pathS/2),
                     Container(
                       alignment: Alignment.center,
-                      width: pathL *1.5,
-                      height: pathL*1.5 ,
+                      width: pathL *1.4,
+                      height: pathL*1.4 ,
                       decoration: BoxDecoration(
                         shape: BoxShape.circle,
                         gradient: isDarkMode ? backgroundGradientDark : backgroundGradientGreen ,
@@ -311,7 +318,7 @@ class ThanksDutyViewState extends State<ThanksDutyView>{
                 ),
 
                 Positioned(
-                  bottom: MediaQuery.of(context).padding.bottom + pathS/3,
+                  bottom: MediaQuery.of(context).padding.bottom + pathS/10,
                     child: Column(
                       children: [
                         Container(
@@ -319,7 +326,7 @@ class ThanksDutyViewState extends State<ThanksDutyView>{
                           height: 1,
                           color: isDarkMode ? greyColor5 : greyColor3,
                         ),
-                        SizedBox(height: pathS/5),
+                        SizedBox(height: pathS/10),
                         Row(
                           mainAxisAlignment: MainAxisAlignment.center,
                           children: [
@@ -377,7 +384,7 @@ class ThanksDutyViewState extends State<ThanksDutyView>{
                           ],
                         ),
 
-                        SizedBox(height: pathS/12),
+                        SizedBox(height: pathS/18),
 
                         if(lat>0.0 && lng > 0.0)Row(
                           mainAxisAlignment: MainAxisAlignment.center,

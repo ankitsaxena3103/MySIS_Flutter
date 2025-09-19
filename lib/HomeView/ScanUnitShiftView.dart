@@ -13,6 +13,7 @@ import 'package:mysis/HomeView/UserAttendance.dart';
 import 'package:mysis/Profile/UnitDutyPost.dart';
 import 'package:mysis/Profile/UserPosting.dart';
 import 'package:mysis/Profile/UserProfile.dart';
+import 'package:permission_handler/permission_handler.dart';
 
 import '../CommonViews/AlertPopupView.dart';
 import '../CommonViews/LoaderView.dart';
@@ -98,12 +99,19 @@ class ScanUnitShiftViewState extends State<ScanUnitShiftView>{
 
     attendanceMode = widget.attendanceMode;
     updateEscortDutyUI();
-    locationScannerController = MobileScannerController();
+    locationScannerController = MobileScannerController(
+      facing: CameraFacing.back,
+      detectionSpeed: DetectionSpeed.normal,
+      returnImage: false,
+    );
     updateLocationData();
     onLoadUpdateUI();
     super.initState();
 
   }
+
+
+
 
   @override
   void dispose() {
@@ -206,6 +214,7 @@ class ScanUnitShiftViewState extends State<ScanUnitShiftView>{
                               ),
                               Spacer(),
                               GestureDetector(
+                                behavior: HitTestBehavior.opaque,
                                 onTap: () {
                                   Navigator.pop(context);
                                 },
@@ -334,6 +343,47 @@ class ScanUnitShiftViewState extends State<ScanUnitShiftView>{
                           );
                         },
                         errorBuilder: (context, error, child) {
+                          if (error is MobileScannerException &&
+                              error.errorCode == MobileScannerErrorCode.permissionDenied) {
+                            return Center(
+                              child: Column(
+                                mainAxisAlignment: MainAxisAlignment.center,
+                                children: [
+                                  Text(
+                                    'error_camera_init'.tr(),
+                                    style: TextStyle(
+                                      color: isDarkMode ? whiteColor : greyColor6,
+                                      fontSize: pathS / 5.5,
+                                      fontWeight: FontWeight.w400,
+                                      fontFamily: 'Roboto',
+                                    ),
+                                  ),
+                                  SizedBox(height: pathS / 8),
+                                  ElevatedButton(
+                                    onPressed: () async {
+                                      final status = await Permission.camera.request();
+                                      if (status.isGranted) {
+                                        locationScannerController.start(); // restart scanner
+                                      } else if (status.isPermanentlyDenied) {
+                                        await openAppSettings(); // open phone settings
+                                      }
+                                    },
+                                    child: Text(
+                                      'permission_ensure'.tr(),
+                                      style: TextStyle(
+                                        color: isDarkMode ? redColor1 : redColor3,
+                                        fontSize: pathS / 5.5,
+                                        fontWeight: FontWeight.w400,
+                                        fontFamily: 'Roboto',
+                                      ),
+                                    ),
+                                  ),
+                                ],
+                              ),
+                            );
+                          }
+
+                          // fallback for other errors
                           return Center(
                             child: Text(
                               'error_camera_init'.tr(),
@@ -348,8 +398,6 @@ class ScanUnitShiftViewState extends State<ScanUnitShiftView>{
                         },
                       ),
                     ),
-
-
 
                   ],
                 ),
@@ -413,6 +461,10 @@ class ScanUnitShiftViewState extends State<ScanUnitShiftView>{
         ],
       ),
     );
+  }
+
+  Future<void> _openSettings() async {
+    await openAppSettings();
   }
 
   Future<void> updateEscortDutyUI() async {
@@ -493,7 +545,7 @@ class ScanUnitShiftViewState extends State<ScanUnitShiftView>{
    final unitDutyPost = widget.unitDutyPosts.where((post) => post.qrId == qrId).toList();
 
     if (unitDutyPost.isEmpty) {
-      showPopupAlert('alert'.tr(), 'no_data_available'.tr());
+      showPopupAlert('alert'.tr(), 'no_unit_duty_post'.tr());
     } else {
       selectedUnitDutyPost = unitDutyPost.first;
       getUserPosting(unitDutyPost.first.unitCode);
@@ -625,7 +677,7 @@ class ScanUnitShiftViewState extends State<ScanUnitShiftView>{
       }
   }
 
-  Future<void> getUnitShiftDetailsById(String shiftId) async {
+  Future<void> getUnitShiftDetailsByIdold(String shiftId) async {
 
     DateTime now = DateTime.now();
     TimeOfDay currentTime = TimeOfDay(hour: now.hour, minute: now.minute);
@@ -652,6 +704,38 @@ class ScanUnitShiftViewState extends State<ScanUnitShiftView>{
       loadSubmitDutyView();
     }
   }
+
+  Future<void> getUnitShiftDetailsById(String shiftId) async {
+    DateTime now = DateTime.now();
+    TimeOfDay currentTime = TimeOfDay(hour: now.hour, minute: now.minute);
+
+    final matches = widget.unitShiftDetails.where((shift) {
+      final startTime = _parseTimeOfDay(shift.startTime);
+      final endTime = _parseTimeOfDay(shift.endTime);
+
+      final shiftStartBeforeDuration = _parseShiftDuration(shift.shiftStartBefore);
+      final shiftEndAfterDuration = _parseShiftDuration(shift.dutyInBefore);
+
+      final adjustedStartTime = _adjustTimeOfDay(startTime, shiftStartBeforeDuration);
+      final adjustedEndTime = _adjustTimeOfDay(endTime, shiftEndAfterDuration);
+
+      return shift.shiftId == shiftId &&
+          _isTimeBetween(currentTime, adjustedStartTime, adjustedEndTime);
+    }).toList();
+
+    if (matches.isEmpty) {
+      if (widget.attendanceStatus == keyAttendanceStatusDutyOut) {
+        showPopupAlert('alert'.tr(), 'other_mark_shift_not_allowed1'.tr());
+      } else {
+        showPopupAlert('alert'.tr(), 'no_shift_found'.tr());
+      }
+      return;
+    }
+
+    dutyInShiftDetail = matches.first;
+    loadSubmitDutyView();
+  }
+
   Future<List<EscortDuty>> getApprovedEscortDuty(DateTime selectedDate) async {
 
     List<EscortDuty> escortDutyAllData = await DatabaseHelper.instance.getAllRecords<EscortDuty>(
@@ -922,3 +1006,4 @@ class BarcodeScannerPage extends StatelessWidget {
     );
   }
 }
+

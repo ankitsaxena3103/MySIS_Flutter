@@ -176,6 +176,7 @@ class SelectShiftViewState extends State<SelectShiftView>{
                                     ),
                                   ),
                                   GestureDetector(
+                                    behavior: HitTestBehavior.translucent,
                                     onTap: () {
                                       Navigator.pop(context);
                                     },
@@ -315,7 +316,7 @@ class SelectShiftViewState extends State<SelectShiftView>{
                     children: [
                       GestureDetector(
                         onTap: (){
-
+                          Navigator.pop(context);
                         },
                         child: Container(
                           width: pathL,

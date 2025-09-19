@@ -79,6 +79,7 @@ class LeaveApplicationStatusViewState extends State<LeaveApplicationStatusViewHe
                   top: MediaQuery.of(context).padding.top+pathS/12,
                   left: paddingLeft +pathS/3,
                   child: GestureDetector(
+                    behavior: HitTestBehavior.translucent,
                     onTap: (){
                       Navigator.pop(context);
                     },

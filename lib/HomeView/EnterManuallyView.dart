@@ -6,11 +6,15 @@ import 'package:mysis/HomeView/ScanCardView.dart';
 import 'package:mysis/HomeView/UserAttendance.dart';
 
 import '../CommonViews/AlertPopupView.dart';
+import '../CommonViews/LoaderView.dart';
+import '../CommonViews/ToastMessageView.dart';
 import '../Profile/UnitDutyPost.dart';
 import '../Profile/UnitShiftDetail.dart';
 import '../Profile/UserPosting.dart';
 import '../Profile/UserProfile.dart';
+import '../SharedClasses/APIHelper.dart';
 import '../SharedClasses/DatabaseHelper.dart';
+import 'Model/EmployeeRoasterDetail.dart';
 import 'SimpleTextField.dart';
 
 
@@ -43,6 +47,8 @@ class EnterManuallyViewState extends State<EnterManuallyView>{
   bool noData = true;
 
   TextEditingController txtUserId = TextEditingController(text: "");
+
+  bool showLoaderView = false;
 
   bool showToastMessageView = false;
   String toastMessage = '';
@@ -139,6 +145,7 @@ class EnterManuallyViewState extends State<EnterManuallyView>{
                             ],
                           ),
                           GestureDetector(
+                            behavior: HitTestBehavior.translucent,
                             onTap: () {
                               Navigator.pop(context);
                             },
@@ -376,8 +383,9 @@ class EnterManuallyViewState extends State<EnterManuallyView>{
                         });
                       }
                   ),
-                )
-
+                ),
+                LoaderView(isVisible: showLoaderView, message: ''),
+                ToastMessageView(isVisible: showToastMessageView, message: toastMessage),
               ],
             ),
           ),
@@ -511,11 +519,18 @@ class EnterManuallyViewState extends State<EnterManuallyView>{
         });
       }
       else{
-        loadConfirmScreen();
+        loadConfirmScreen(
+          widget.userProfile,
+          widget.attendanceMode,
+          widget.unitDutyPosts,
+          widget.unitShiftDetails,
+          widget.userPostings,
+          widget.attendanceStatus,
+        );
       }
     }else{
      // call API to show data
-
+      onLoadEmployeeRoasterData(txtUserId.text);
     }
   }
 
@@ -551,21 +566,70 @@ class EnterManuallyViewState extends State<EnterManuallyView>{
 
   }
 
-void loadConfirmScreen(){
-  Navigator.push(
-    context,
-    MaterialPageRoute(
-      builder: (context) => ConfirmProfileView(
-        userProfile:widget.userProfile,
-        attendanceMode: widget.attendanceMode,
-        unitDutyPosts: widget.unitDutyPosts,
-        unitShiftDetails: widget.unitShiftDetails,
-        userPostings: widget.userPostings,
-        attendanceStatus: widget.attendanceStatus,
 
+  void onLoadEmployeeRoasterData(String userId) {
+
+
+    setState(() {
+      showLoaderView = true;
+    });
+    Map <String,String> inputData = {
+      "regNo": userId,
+      "dutyMode":widget.attendanceStatus,
+    };
+
+    APIHelper.instance.getUserData(employeeRoasterApi,inputData, (data) {
+
+      setState(() {
+        showLoaderView = false;
+      });
+
+      if(data.isNotEmpty){
+
+        final employeeRoaster = EmployeeRoasterDetail.fromJson(data);
+        // Example usage:
+        printInDebug(employeeRoaster.employeeDetail.first.empName);
+
+        loadConfirmScreen(
+          employeeRoaster.employeeDetail.first,
+          widget.attendanceMode,
+          employeeRoaster.unitDutyPost,
+          employeeRoaster.unitShiftDetail,
+          employeeRoaster.userPosting,
+          widget.attendanceStatus,
+        );
+      }
+
+    },(error){
+      setState(() {
+        showLoaderView = false;
+        print('test $error');
+        String msg = error['ErrorMessage'] ?? 'invalid_credentials_sign_IN'.tr();
+        showToastView(msg);      });
+
+    }
+    );
+
+  }
+
+  void loadConfirmScreen(UserProfile userProfile, String attendanceMode, List<UnitDutyPost> unitDutyPosts, List<UnitShiftDetail> unitShiftDetails, List<UserPosting> userPostings, String attendanceStatus,){
+
+    Navigator.push(
+      context,
+      MaterialPageRoute(
+        builder: (context) => ConfirmProfileView(
+          userProfile: userProfile,
+          attendanceMode: attendanceMode,
+          unitDutyPosts: unitDutyPosts,
+          unitShiftDetails: unitShiftDetails,
+          userPostings: userPostings,
+          attendanceStatus: attendanceStatus,
+
+        ),
       ),
-    ),
-  );
-}
+    );
+
+  }
+
 
 }

@@ -21,6 +21,7 @@ const String userRosterApi = '/api/guardApp/Auth/UserRoster';
 const String userNotificationApi = '/api/guardApp/Auth/UserNotification';
 const String userAttendanceApi = '/api/guardApp/Auth/UserAttendance';
 const String userLeavesApi = '/api/guardApp/Auth/UserLeaves';
+const String salaryApi = '/api/guardApp/Auth/Payslip';
 
 const String leaveTypeMasterApi = '/api/guardApp/Auth/LeaveTypeMaster';
 const String helpMasterApi = '/api/guardApp/Auth/HelpMaster';
@@ -38,7 +39,7 @@ const String userLeavesPostApi = '/api/guardApp/Post/PostUserLeaveRequest';
 const String escortDutyPostApi = 'api/guardApp/Post/PostEscortDutyRequest';
 const String userNotificationPostApi = '/api/guardApp/Post/PostUserNotification';
 const String postGuardReferalApi = '/api/guardApp/Post/PostGuardReferal';
-
+const String employeeRoasterApi = 'api/guardApp/Auth/EmployeeRosterDetail';
 
 const keyDataBaseName = 'mysis_database.db';
 const keyTableUserProfile = 'UserProfile';
@@ -53,7 +54,7 @@ const String keyTableUserLeave = 'UserLeaves';
 const String keyTableLeaveType = 'LeaveType';
 const String keyTableHelpMaster = 'HelpMaster';
 const String keyTableEscortDuty = 'EscortDuty';
-const String keyTableBranchHierarchy = 'BranchHierarchy';
+
 // const String keyTablePostGuardReferal = 'PostGuardReferal';
 
 const String appToken = r"$2a$11$QGo3jefJUjhG1kwyJSDKV.q7emFNRSntKuQUgo7KKOEycVnWYX0tm";

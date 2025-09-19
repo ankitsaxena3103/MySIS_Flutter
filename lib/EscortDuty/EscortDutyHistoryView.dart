@@ -68,6 +68,7 @@ class EscortDutyHistoryViewState extends State<EscortDutyHistoryView>{
                   top: MediaQuery.of(context).padding.top+pathS/12,
                   left: paddingLeft +pathS/3,
                   child: GestureDetector(
+                    behavior: HitTestBehavior.translucent,
                     onTap: (){
                       Navigator.pop(context);
                     },
@@ -144,7 +145,7 @@ class EscortDutyHistoryViewState extends State<EscortDutyHistoryView>{
                             return   Column(
                               children: [
                                 Container(
-                                  alignment: Alignment.center,
+                                  // alignment: Alignment.center,
                                   width: screenWidth - 2*marginValue,
                                   decoration:  BoxDecoration(
                                     shape: BoxShape.rectangle,
@@ -165,48 +166,70 @@ class EscortDutyHistoryViewState extends State<EscortDutyHistoryView>{
                                       crossAxisAlignment: CrossAxisAlignment.start,
                                       children: [
                                         SizedBox(height: pathS/5),
-
                                         Padding(
-                                          padding:  EdgeInsets.only(left: pathS/4),
+                                          padding:  EdgeInsets.only(left: pathS/4,right: pathS/4),
                                           child: Column(
                                             crossAxisAlignment: CrossAxisAlignment.start,
                                             children: [
-                                              Padding(
-                                                padding:  EdgeInsets.only(right: pathS/4),
-                                                child: Row(
-                                                  mainAxisAlignment: MainAxisAlignment.center,
-                                                  children: [
-                                                    Container(
-                                                      alignment: Alignment.centerLeft,
-                                                      width: pathL,
-                                                      child: Text(
-                                                        postingName(duty.unitCode),
-                                                        style: TextStyle(
-                                                          color: isDarkMode ?  whiteColor:greyColor6,
-                                                          fontSize: pathS /6.5,
-                                                          fontWeight: FontWeight.w500,
-                                                          fontFamily: 'Roboto',
-                                                        ),
-                                                        textAlign: TextAlign.left,
-                                                      ),
+                                              Row(
+                                                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                                                children: [
+                                                  Text(
+                                                    duty.formattedEscortDutyDate,
+                                                    style: TextStyle(
+                                                      color: isDarkMode ?  whiteColor:greyColor5,
+                                                      fontSize: pathS /6.5,
+                                                      fontWeight: FontWeight.w500,
+                                                      fontFamily: 'Roboto',
                                                     ),
-
-                                                    Spacer(),
-
-                                                  ],
-                                                ),
+                                                    textAlign: TextAlign.left,
+                                                  ),
+                                                  Text(
+                                                    getStatusMessage(duty.status) ,
+                                                    style: TextStyle(
+                                                      color: getStatusColor(duty.status),
+                                                      fontSize: pathS /6.5,
+                                                      fontWeight: FontWeight.w500,
+                                                      fontFamily: 'Roboto',
+                                                    ),
+                                                    textAlign: TextAlign.right,
+                                                  ),
+                                                ],
                                               ),
-                                              SizedBox(height: pathS/8),
+                                              SizedBox(height: pathS/20),
                                               Text(
-                                                duty.formattedLeaves,
+                                                postingName(duty.unitCode),
                                                 style: TextStyle(
                                                   color: isDarkMode ?  whiteColor:greyColor6,
-                                                  fontSize: pathS /3.5,
+                                                  fontSize: pathS /5.5,
                                                   fontWeight: FontWeight.w600,
                                                   fontFamily: 'Roboto',
                                                 ),
                                                 textAlign: TextAlign.left,
                                               ),
+                                              Text(
+                                                postingAddress(duty.unitCode),
+                                                style: TextStyle(
+                                                  color: isDarkMode ?  whiteColor:greyColor5,
+                                                  fontSize: pathS /6,
+                                                  fontWeight: FontWeight.w500,
+                                                  fontFamily: 'Roboto',
+                                                ),
+                                                textAlign: TextAlign.left,
+                                              ),
+                                              SizedBox(height: pathS/20),
+
+                                              Text(
+                                                duty.unitCode,
+                                                style: TextStyle(
+                                                  color: isDarkMode ?  whiteColor:greyColor6,
+                                                  fontSize: pathS /5.5,
+                                                  fontWeight: FontWeight.w600,
+                                                  fontFamily: 'Roboto',
+                                                ),
+                                                textAlign: TextAlign.left,
+                                              ),
+
                                             ],
                                           ),
                                         ),
@@ -256,15 +279,15 @@ class EscortDutyHistoryViewState extends State<EscortDutyHistoryView>{
       });
     }
 
-    final filteredLeave = duties.where((leave) =>
+    final filteredData = duties.where((leave) =>
      leave.deleted == 0
     ).toList();
 
-    filteredLeave.sort((a, b) => a.startDate.compareTo(b.startDate));
+    filteredData.sort((a, b) => b.startDate.compareTo(a.startDate));
 
-    if(filteredLeave.isNotEmpty) {
+    if(filteredData.isNotEmpty) {
       setState(() {
-        escortDuties = filteredLeave;
+        escortDuties = filteredData;
       });
 
 
@@ -320,6 +343,23 @@ class EscortDutyHistoryViewState extends State<EscortDutyHistoryView>{
     return siteName;
 
   }
+  String postingAddress(String unitId){
+
+    printInDebug(unitId);
+    String siteName = 'N/A';
+
+    for(var data in userPostings){
+      if(data.unitCode == unitId){
+
+        siteName = data.siteAddress;
+        break;
+      }
+    }
+
+    return siteName;
+
+  }
+
   String getAssetImage(int status){
 
     if(status == 0){
@@ -355,7 +395,7 @@ class EscortDutyHistoryViewState extends State<EscortDutyHistoryView>{
     String statusMessage = '';
 
     if(status == 0){
-      statusMessage = 'pending'.tr();
+      statusMessage = 'in_progress'.tr();
     }
 
     if(status == 1){
@@ -368,6 +408,7 @@ class EscortDutyHistoryViewState extends State<EscortDutyHistoryView>{
 
     return statusMessage;
   }
+
 
 
 }

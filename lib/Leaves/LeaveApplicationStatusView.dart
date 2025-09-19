@@ -83,6 +83,7 @@ class LeaveApplicationStatusViewState extends State<LeaveApplicationStatusView>{
                   top: MediaQuery.of(context).padding.top+pathS/12,
                   left: paddingLeft +pathS/3,
                   child: GestureDetector(
+                    behavior: HitTestBehavior.translucent,
                     onTap: (){
                       Navigator.pop(context);
                     },
@@ -488,6 +489,9 @@ class LeaveApplicationStatusViewState extends State<LeaveApplicationStatusView>{
             "dirtyFlag": 0,
           };
           updateUserLeavesTable(attendance);
+          setState(() {
+            isNotSyncedData = false;
+          });
         }
       }
       else {

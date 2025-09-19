@@ -116,18 +116,18 @@ class EscortDuty {
     return endDate.difference(startDate).inDays + 1;
   }
 
-  String get formattedLeaves{
-    String leaveDates = '';
+  String get formattedEscortDutyDate{
+    String dutyDates = '';
 
     if (startDate.isAtSameMomentAs(endDate)) {
       // Single date
-      leaveDates = DateFormat('dd MMM').format(startDate);
+      dutyDates = DateFormat('dd MMM yyyy').format(startDate);
     } else {
       // Date range
-      leaveDates =
-      '${DateFormat('dd MMM').format(startDate)} - ${DateFormat('dd MMM').format(endDate)}';
+      dutyDates =
+      '${DateFormat('dd MMM yyyy').format(startDate)} - ${DateFormat('dd MMM yyyy').format(endDate)}';
     }
 
-    return leaveDates;
+    return dutyDates;
   }
 }

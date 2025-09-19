@@ -44,6 +44,7 @@ bool noData = true;
                   top: paddingTop+pathS/2,
                   left: paddingLeft +pathS/2,
                   child: GestureDetector(
+                    behavior: HitTestBehavior.translucent,
                     onTap: (){
                       Navigator.pop(context);
                     },

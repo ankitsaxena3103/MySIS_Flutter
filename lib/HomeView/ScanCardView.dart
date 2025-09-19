@@ -1,14 +1,21 @@
+import 'dart:convert';
+
 import 'package:flutter/material.dart';
 import 'package:mobile_scanner/mobile_scanner.dart';
 import 'package:mysis/CommonViews/Utility.dart';
 import 'package:easy_localization/easy_localization.dart';
 import 'package:mysis/HomeView/EnterManuallyView.dart';
+import 'package:permission_handler/permission_handler.dart';
 
+import '../CommonViews/LoaderView.dart';
+import '../CommonViews/ToastMessageView.dart';
 import '../Profile/UnitDutyPost.dart';
 import '../Profile/UnitShiftDetail.dart';
 import '../Profile/UserPosting.dart';
 import '../Profile/UserProfile.dart';
+import '../SharedClasses/APIHelper.dart';
 import 'ConfirmProfileView.dart';
+import 'Model/EmployeeRoasterDetail.dart';
 
 class ScanCardView extends StatefulWidget {
   final UserProfile userProfile;
@@ -37,13 +44,19 @@ class ScanCardViewState extends State<ScanCardView>{
 
   Key scannerKey = UniqueKey();
   bool noData = true;
+  bool showLoaderView = false;
+  bool showToastMessageView = false;
+  String toastMessage = '';
 
   late  MobileScannerController mobileNoScannerController;
 
   @override
   void initState() {
-    mobileNoScannerController = MobileScannerController();
-    super.initState();
+    mobileNoScannerController = MobileScannerController(
+      facing: CameraFacing.back,
+      detectionSpeed: DetectionSpeed.normal,
+      returnImage: false,
+    );    super.initState();
 
   }
 
@@ -116,6 +129,7 @@ class ScanCardViewState extends State<ScanCardView>{
                             ],
                           ),
                           GestureDetector(
+                            behavior: HitTestBehavior.translucent,
                             onTap: () {
                               Navigator.pop(context);
                             },
@@ -159,14 +173,22 @@ class ScanCardViewState extends State<ScanCardView>{
                       for (final barcode in barcodeCapture.barcodes) {
                         String? rawValue = barcode.rawValue;
 
-                        if (rawValue != null && rawValue.startsWith('\n')) {
-                          rawValue = rawValue.substring(1); // Remove the first newline character
-                          debugPrint('Filtered Barcode: $rawValue'); // Debugging output
+                        if (rawValue != null && rawValue.isNotEmpty) {
+                          if (rawValue.startsWith('\n')) {
+                            rawValue = rawValue.substring(1);
+                          }
 
-                          if (widget.userProfile.mobile == rawValue || widget.userProfile.regNo == rawValue) {
-                            onUserScannedId(rawValue);
-                          } else {
-                            onUserScannedData(rawValue);
+                          List<String> lines = rawValue.split('\n');
+
+                          if (lines.length >= 2) {
+                            String secondLine = lines[1].trim(); // this will be PAT069548
+                            debugPrint('Second Line: $secondLine');
+
+                            if (widget.userProfile.mobile == secondLine || widget.userProfile.regNo == secondLine) {
+                              onUserScannedId(secondLine);
+                            } else {
+                              onUserScannedData(secondLine);
+                            }
                           }
                         }
                       }
@@ -187,9 +209,50 @@ class ScanCardViewState extends State<ScanCardView>{
                       );
                     },
                     errorBuilder: (context, error, child) {
+                      if (error is MobileScannerException &&
+                          error.errorCode == MobileScannerErrorCode.permissionDenied) {
+                        return Center(
+                          child: Column(
+                            mainAxisAlignment: MainAxisAlignment.center,
+                            children: [
+                              Text(
+                                'error_camera_init'.tr(),
+                                style: TextStyle(
+                                  color: isDarkMode ? whiteColor : greyColor6,
+                                  fontSize: pathS / 5.5,
+                                  fontWeight: FontWeight.w400,
+                                  fontFamily: 'Roboto',
+                                ),
+                              ),
+                              SizedBox(height: pathS / 8),
+                              ElevatedButton(
+                                onPressed: () async {
+                                  final status = await Permission.camera.request();
+                                  if (status.isGranted) {
+                                    mobileNoScannerController.start(); // restart scanner
+                                  } else if (status.isPermanentlyDenied) {
+                                    await openAppSettings(); // open phone settings
+                                  }
+                                },
+                                child: Text(
+                                    'permission_ensure'.tr(),
+                                  style: TextStyle(
+                                    color: isDarkMode ? redColor1:redColor3,
+                                    fontSize: pathS / 5.5,
+                                    fontWeight: FontWeight.w400,
+                                    fontFamily: 'Roboto',
+                                  ),
+                                ),
+                              ),
+                            ],
+                          ),
+                        );
+                      }
+
+                      // fallback for other errors
                       return Center(
                         child: Text(
-                            'error_camera_init'.tr(),
+                          'error_camera_init'.tr(),
                           style: TextStyle(
                             color: isDarkMode ? whiteColor : greyColor6,
                             fontSize: pathS / 5.5,
@@ -199,7 +262,9 @@ class ScanCardViewState extends State<ScanCardView>{
                         ),
                       );
                     },
+
                   ),
+
                 ),
 
                 Positioned(
@@ -284,6 +349,10 @@ class ScanCardViewState extends State<ScanCardView>{
                   ),
                 ),
 
+                LoaderView(isVisible: showLoaderView, message: ''),
+                ToastMessageView(isVisible: showToastMessageView, message: toastMessage),
+
+
               ],
             ),
           ),
@@ -295,11 +364,20 @@ class ScanCardViewState extends State<ScanCardView>{
     );
   }
 
-
+  Future<void> _openSettings() async {
+    await openAppSettings();
+  }
   void onUserScannedId(String myId){
     printInDebug(myId);
     if(widget.userProfile.mobile == myId || widget.userProfile.regNo == myId) {
-      loadConfirmScreen();
+      loadConfirmScreen(
+         widget.userProfile,
+        widget.attendanceMode,
+        widget.unitDutyPosts,
+        widget.unitShiftDetails,
+        widget.userPostings,
+        widget.attendanceStatus,
+      );
     }else{
 
     }
@@ -309,21 +387,70 @@ class ScanCardViewState extends State<ScanCardView>{
     //dispose once done scanning
     // mobileNoScannerController.dispose();
     printInDebug(scannedData);
+    onLoadEmployeeRoasterData(scannedData);
 
   }
 
-  void loadConfirmScreen(){
+  void onLoadEmployeeRoasterData(String userId) {
+
+
+    setState(() {
+      showLoaderView = true;
+    });
+    Map <String,String> inputData = {
+      "regNo": userId,
+      "dutyMode":widget.attendanceStatus,
+    };
+
+    APIHelper.instance.getUserData(employeeRoasterApi,inputData, (data) {
+
+      setState(() {
+        showLoaderView = false;
+      });
+
+      if(data.isNotEmpty){
+
+        final employeeRoaster = EmployeeRoasterDetail.fromJson(data);
+        // Example usage:
+        printInDebug(employeeRoaster.employeeDetail.first.empName);
+        printInDebug(employeeRoaster.employeeAttendance.first.shiftName);
+        loadConfirmScreen(
+          employeeRoaster.employeeDetail.first,
+          widget.attendanceMode,
+          employeeRoaster.unitDutyPost,
+          employeeRoaster.unitShiftDetail,
+          employeeRoaster.userPosting,
+          widget.attendanceStatus,
+        );
+      }
+
+    },(error){
+      setState(() {
+        showLoaderView = false;
+
+        print('test $error');
+        String msg = error['ErrorMessage'] ?? 'invalid_credentials_sign_IN'.tr();
+        showToastView(msg);
+
+      });
+
+    }
+    );
+
+  }
+
+  void loadConfirmScreen(UserProfile userProfile, String attendanceMode, List<UnitDutyPost> unitDutyPosts, List<UnitShiftDetail> unitShiftDetails, List<UserPosting> userPostings, String attendanceStatus,){
     mobileNoScannerController.dispose();
     Navigator.push(
       context,
       MaterialPageRoute(
         builder: (context) => ConfirmProfileView(
-          userProfile: widget.userProfile,
-          attendanceMode: widget.attendanceMode,
-          unitDutyPosts: widget.unitDutyPosts,
-          unitShiftDetails: widget.unitShiftDetails,
-          userPostings: widget.userPostings,
-          attendanceStatus: widget.attendanceStatus,
+          userProfile: userProfile,
+          attendanceMode: attendanceMode,
+          unitDutyPosts: unitDutyPosts,
+          unitShiftDetails: unitShiftDetails,
+          userPostings: userPostings,
+          attendanceStatus: attendanceStatus,
         ),
       ),
     )
@@ -356,5 +483,16 @@ class ScanCardViewState extends State<ScanCardView>{
     );
   }
 
+  void showToastView(String message) {
+    setState(() {
+      showToastMessageView = true;
+      toastMessage = message;
+    });
 
+    Future.delayed(Duration(seconds: 3), () {
+      setState(() {
+        showToastMessageView = false;
+      });
+    });
+  }
 }

@@ -608,6 +608,7 @@ class VerifyOTPViewState extends State<VerifyOTPView> {
     Navigator.pushAndRemoveUntil(
       context,
       MaterialPageRoute(
+
         builder: (context) => MyTabBarView(),
       ),
           (route) => false, // This removes all previous routes

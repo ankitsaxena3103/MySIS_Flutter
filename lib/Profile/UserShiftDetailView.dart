@@ -76,6 +76,7 @@ class UserShiftDetailViewState extends State<UserShiftDetailView> {
               top: MediaQuery.of(context).padding.top+pathS/12,
               right: paddingRight +pathS/3,
               child: GestureDetector(
+                behavior: HitTestBehavior.translucent,
                 onTap: (){
                   // widget.callBack(0);
                   Navigator.pop(context);

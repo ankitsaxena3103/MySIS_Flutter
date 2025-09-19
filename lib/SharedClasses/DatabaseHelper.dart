@@ -23,8 +23,6 @@ class DatabaseHelper {
   static final DatabaseHelper _instance = DatabaseHelper._();
   // Getter for the instance
   static DatabaseHelper get instance => _instance;
-
-
   // static final DatabaseHelper instance = DatabaseHelper._init();
 
   static Database? _database;
@@ -47,6 +45,7 @@ class DatabaseHelper {
 
 
   void _createDB(Database db, int version) async {
+    // Create all tables
     await db.execute(generateCreateTableSQL(keyTableUserProfile, UserProfile.fields));
     await db.execute(generateCreateTableSQL(keyTableUnitDutyPost, UnitDutyPost.fields));
     await db.execute(generateCreateTableSQL(keyTableUnitShiftDetail, UnitShiftDetail.fields));
@@ -60,6 +59,84 @@ class DatabaseHelper {
     await db.execute(generateCreateTableSQL(keyTableHelpMaster, HelpMaster.fields));
     await db.execute(generateCreateTableSQL(keyTableEscortDuty, EscortDuty.fields));
 
+    //  Create all views
+    await _createViews(db);
+  }
+
+  Future<void> _createViews(Database db) async {
+    await db.execute('''
+    CREATE VIEW IF NOT EXISTS vwUnitShift AS
+    SELECT DISTINCT shiftId, dutyHrs, shiftStartBefore, shiftEndAfter, dutyInBefore, startTime, endTime
+    FROM UnitShiftDetail
+  ''');
+
+    await db.execute('''
+    CREATE VIEW IF NOT EXISTS vwRoster AS
+    SELECT 
+        unitCode, siteName, shiftId, shiftName,
+        strftime('%Y-%m-%d', rosterDate) AS rosterDate,
+        strftime('%H:%M:%S', startTime)  AS startTime,
+        strftime('%H:%M:%S', endTime)    AS endTime,
+        dutyHrs,
+        strftime('%Y-%m-%d %H:%M:%S', shiftStartTime) AS shiftStartTime,
+        strftime('%Y-%m-%d %H:%M:%S', shiftEndTime)   AS shiftEndTime,
+        strftime('%Y-%m-%d %H:%M:%S', dutyStartEnableTime)  AS dutyStartEnableTime,
+        strftime('%Y-%m-%d %H:%M:%S', dutyStartDisableTime) AS dutyStartDisableTime,
+        strftime('%Y-%m-%d %H:%M:%S', dutyEndDisableTime)   AS dutyEndDisableTime,
+        regNo, dutyPostId, postName, qrId, dutyPostAddress,
+        geoFenceRange, isGeoFenceAllow, geoLocation
+    FROM UserRoster
+    UNION
+    SELECT 
+        M.unitCode, M.siteName, M.shiftId, M.shiftName,
+        strftime('%Y-%m-%d', M.shiftStartDate) AS rosterDate,
+        strftime('%H:%M:%S', D.startTime)      AS startTime,
+        strftime('%H:%M:%S', D.endTime)        AS endTime,
+        M.shiftHrs dutyHrs,
+        strftime('%Y-%m-%d %H:%M:%S', M.shiftStartTime) AS shiftStartTime,
+        strftime('%Y-%m-%d %H:%M:%S', M.shiftEndTime)   AS shiftEndTime,
+        strftime('%Y-%m-%d %H:%M:%S', datetime(M.shiftStartTime, '-' || shiftStartBefore)) AS dutyStartEnableTime,
+        strftime('%Y-%m-%d %H:%M:%S', datetime(M.shiftEndTime, '-1 hours'))                 AS dutyStartDisableTime,
+        strftime('%Y-%m-%d %H:%M:%S', datetime(M.shiftEndTime, shiftEndAfter))              AS dutyEndDisableTime,
+        M.regNo, M.dutyPostId, M.dutyPostName AS postName,
+        E.qrId, E.address AS dutyPostAddress, E.allowDistance AS geoFenceRange,
+        E.isGeoFenceAllow AS isGeoFenceAllow, E.geoLocation AS geoLocation
+    FROM UserAttendance M
+    INNER JOIN vwUnitShift D ON M.shiftId=D.shiftId
+    INNER JOIN UnitDutyPost E ON M.dutyPostId=E.Id
+    ORDER BY rosterDate
+  ''');
+
+    await db.execute('DROP VIEW IF EXISTS vwRosterDetail');
+
+    await db.execute('''
+  CREATE VIEW vwRosterDetail AS
+  SELECT M.*, D.dutyStatus, D.actStartTime, D.actEndTime
+  FROM vwRoster M
+  LEFT OUTER JOIN UserAttendance D
+    ON M.regNo=D.regNo
+   AND M.unitCode=D.unitCode
+   AND M.shiftId=D.shiftId
+   AND M.rosterDate= strftime('%Y-%m-%d', D.shiftStartDate)
+   AND M.dutyPostId=D.dutyPostId
+  WHERE strftime('%Y-%m-%d', datetime('now')) >= date('now')
+''');
+
+    //   await db.execute('''
+  //   CREATE VIEW IF NOT EXISTS vwRosterDetail AS
+  //   SELECT M.*, D.dutyStatus, D.actStartTime, D.actEndTime
+  //   FROM vwRoster M
+  //   LEFT OUTER JOIN UserAttendance D
+  //     ON M.regNo=D.regNo
+  //    AND M.unitCode=D.unitCode
+  //    AND M.shiftId=D.shiftId
+  //    AND M.rosterDate= strftime('%Y-%m-%d', D.shiftStartDate)
+  //    AND M.dutyPostId=D.dutyPostId
+  //    WHERE date(dutyStartEnableTime) >= date('now')
+  //   // WHERE strftime('%Y-%m-%d', dutyStartEnableTime)
+  //   //       BETWEEN strftime('%Y-%m-%d', datetime('now'))
+  //   //           AND strftime('%Y-%m-%d', datetime('now', '1 day'))
+  // ''');
   }
 
   String generateCreateTableSQL(String tableName, Map<String, String> fields) {
@@ -290,6 +367,7 @@ class DatabaseHelper {
       String tableName,
       T Function(Map<String, dynamic>) fromMap,
       ) async {
+
     final db = await instance.database;
 
     // Query all rows from the given table
@@ -372,16 +450,36 @@ class DatabaseHelper {
   }
 
 
-  Future<void> clearAllTables1(List<Map<String, dynamic>> tables) async {
+  Future<bool> clearTable(String tableName) async {
     final db = await instance.database;
 
-    for (var table in tables) {
-      String tableName = table['tableName'];
-      // Clear all data from the table
-      await db.rawQuery("DELETE FROM $tableName");
+    try {
+      // 🔹 Check if table has a dirtyFlag column
+      final columnInfo = await db.rawQuery("PRAGMA table_info($tableName)");
+      final hasDirtyFlag = columnInfo.any((col) => col['name'] == 'dirtyFlag');
+
+      if (hasDirtyFlag) {
+        final result = await db.rawQuery(
+            "SELECT COUNT(*) as cnt FROM $tableName WHERE dirtyFlag = 1"
+        );
+
+        final unsyncedCount = Sqflite.firstIntValue(result) ?? 0;
+
+        if (unsyncedCount > 0) {
+          printInDebug("Skipped clearing $tableName → $unsyncedCount unsynced rows exist");
+          return false; // Do not clear if unsynced data exists
+        }
+      }
+
+      // 🔹 Safe to clear (either no dirtyFlag or no unsynced rows)
+      await db.rawDelete("DELETE FROM $tableName");
+      printInDebug("Cleared table: $tableName");
+      return true;
+    } catch (e) {
+      printInDebug("Error clearing table $tableName: $e");
+      return false;
     }
   }
-
   Future<bool> clearAllTables(List<Map<String, dynamic>> tables) async {
     final db = await instance.database;
 
@@ -442,6 +540,42 @@ class DatabaseHelper {
   }
 
 
+  Future<List<UserRoaster>> fetchRosterFromView() async {
+    final db = await instance.database;
+    final result = await db.query('vwRosterDetail');
+    final rosters = result.map((row) => UserRoaster.fromMap(row)).toList();
+
+    printInDebug('vwRosterDetail');
+    for (var roster in rosters) {
+      debugPrint('📌 Roster ID: ${roster.rosterId}, '
+          'Site: ${roster.siteName}, '
+          'Shift: ${roster.shiftName}, '
+          'Start: ${roster.shiftStartTime}, '
+          'End: ${roster.shiftEndTime}');
+    }
+    return rosters;
+  }
+
+  Future<List<Map<String, dynamic>>> getDirtyRows(String tableName) async {
+    final db = await instance.database;
+
+    return await db.query(
+      tableName,
+      where: "dirtyFlag = ?",
+      whereArgs: [1],
+    );
+  }
+
+  Future<void> markRowSynced(String tableName, String idColumn, dynamic idValue) async {
+    final db = await instance.database;
+
+    await db.update(
+      tableName,
+      {"dirtyFlag": 0},
+      where: "$idColumn = ?",
+      whereArgs: [idValue],
+    );
+  }
 
 
 }
