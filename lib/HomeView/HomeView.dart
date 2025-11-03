@@ -11,7 +11,6 @@ import 'package:flutter/services.dart';
 import 'package:flutter_html/flutter_html.dart';
 import 'package:flutter_inappwebview/flutter_inappwebview.dart';
 import 'package:geolocator/geolocator.dart';
-import 'package:mysis/HomeView/DutyAlertView.dart';
 import 'package:mysis/HomeView/ScanUnitShiftView.dart';
 import 'package:mysis/HomeView/UserAttendance.dart';
 import 'package:mysis/HomeView/UserRoaster.dart';
@@ -24,6 +23,7 @@ import 'package:easy_localization/easy_localization.dart';
 import 'package:mysis/SharedClasses/ThemeProvider.dart';
 import 'package:path_provider/path_provider.dart';
 import 'package:permission_handler/permission_handler.dart';
+import 'package:permission_handler/permission_handler.dart' as AppSettings;
 import 'package:provider/provider.dart';
 import 'package:url_launcher/url_launcher.dart';
 
@@ -36,6 +36,7 @@ import '../Profile/UserProfile.dart';
 import '../SharedClasses/APIHelper.dart';
 import '../SharedClasses/DatabaseHelper.dart';
 import '../SharedClasses/NetworkConnectivity.dart';
+import 'Model/DutyCard.dart';
 import 'OthersDutyView.dart';
 
 import 'package:pdf/widgets.dart' as pw;
@@ -63,19 +64,19 @@ class HomeViewState extends State<HomeView>with RouteAware {
   String assetsImagePath = "assets/images/dashboard-icons/profile-icon.png";
   String exclamationImage = isDarkMode ? "assets/images/dashboard-icons/exclamation-icon.png" : "assets/images/dashboard-icons/exclamation-red.png";
   String imagePath = '';
-  bool todayDutyInMarked = false;
-  bool todayDutyOutMarked = false;
+  bool todayDutyInMarked = true;
+  // bool todayDutyOutMarked = false;
 
   String dutyInHourBanner = '';
   String dutyInBtnText = 'duty_in'.tr();
   String dutyOutBtnText = 'duty_out'.tr();
 
-  String dutyShiftName = '';
-  String siteName = '';
-  String unitCode = '';
-  String postName = '';
-  String currentDutyStartTime = '';
-  String postGeoLocation = '';
+  // String dutyShiftName = '';
+  // String siteName = '';
+  // String unitCode = '';
+  // String postName = '';
+  // String currentDutyStartTime = '';
+  // String postGeoLocation = '';
 
   Color dutyInBgColor = redColor3;
   Color dutyInFontColor = whiteColor;
@@ -124,7 +125,7 @@ class HomeViewState extends State<HomeView>with RouteAware {
 
   List<UserPosting> userPostings = [];
   List<UnitDutyPost> unitDutyPosts = [];
-  List<UnitShiftDetail> unitShiftDetails = [];
+  List<UnitShiftDetail> userShiftDetailsData = [];
 
 
   List <UserLeaves> userLeaves = [];
@@ -141,6 +142,10 @@ class HomeViewState extends State<HomeView>with RouteAware {
   Timer? dutyOutTimer;
   Timer? dutyInTimer;
 
+  List<DutyCard> userDutyCard = [];
+  late PageController cardPageController;
+  int cardIndex = 0;
+  int cardSelectedIndex = 0;
 
   @override
   void didChangeDependencies() {
@@ -157,18 +162,15 @@ class HomeViewState extends State<HomeView>with RouteAware {
   void dispose() {
     routeObserver.unsubscribe(this);
     _pageController.dispose();
+    cardPageController.dispose();
     super.dispose();
   }
   @override
   void initState() {
+    cardPageController = PageController(initialPage: cardSelectedIndex);
     _pageController = PageController(initialPage: 0);
 
     super.initState();
-
-    // Future.delayed(Duration(milliseconds: 3), () {
-    //   onLoadDutyAlert();
-    // });
-
     initialSetup();
     connection.myStream.listen((_source) {
       source = _source;
@@ -372,8 +374,6 @@ class HomeViewState extends State<HomeView>with RouteAware {
                                   ),
                                 ),
 
-
-
                               ],
                             ),
                           ),
@@ -484,323 +484,41 @@ class HomeViewState extends State<HomeView>with RouteAware {
                                       ),//internet
                                      if(!isInternet) SizedBox(height: pathS/5),
 
-                                      //current day duty ui
-                                      if(todayRoster.isNotEmpty)Container(
-                                        width: screenWidth-2.5*marginValue,
-                                        height: pathL*2.8,
-                                        decoration:  BoxDecoration(
-                                          shape: BoxShape.rectangle,
-                                          borderRadius: BorderRadius.circular(pathS/8),
-                                          color: isDarkMode?greyColor8:Colors.white,
-                                          boxShadow: [
-                                            BoxShadow(
-                                              color: Colors.black.withOpacity(0.1), // Shadow color
-                                              blurRadius: pathS/10, // Spread of the shadow
-                                              // spreadRadius: pathS/15, // How far the shadow extends
-                                              offset:  Offset(-pathS/12, pathS/12),
-                                            ),
-                                          ],
-                                        ),
-                                        child: Stack(
-                                          alignment: Alignment.topLeft,
+
+                                      if (userDutyCard.isNotEmpty)
+                                        Column(
                                           children: [
-                                            Padding(
-                                              padding: EdgeInsets.only(left: pathS/4, top: pathS/4), // Adjust top and left as needed
-                                              child: Align(
-                                                alignment: Alignment.topLeft,
-                                                child: Column(
-                                                  crossAxisAlignment: CrossAxisAlignment.start,
-                                                  children: [
-                                                    Row(
-                                                      children: [
-                                                        Container(
-                                                          decoration: BoxDecoration(
-                                                            shape: BoxShape.rectangle,
-                                                            borderRadius: BorderRadius.circular(pathS / 15),
-                                                            color: isDarkMode ?  greenColor1:greenColor1,
-                                                          ),
-                                                          child:Padding(
-                                                            padding: EdgeInsets.only(left: pathS/5, top: pathS/10,right: pathS/5,bottom: pathS/10), // Adjust top and left as needed
-                                                            child: Text(
-                                                              'current_duty_txt'.tr(),
-                                                              style: TextStyle(
-                                                                color: isDarkMode ?  greenColor6:greenColor6,
-                                                                fontSize: pathS / 5.5,
-                                                                fontWeight: FontWeight.bold,
-                                                                fontFamily: 'Roboto',
-                                                              ),
-                                                              textAlign: TextAlign.center,
-                                                            ),
-                                                          ),
-                                                        ),
-                                                        Spacer(),
-                                                        Container(
-                                                          decoration: BoxDecoration(
-                                                            shape: BoxShape.rectangle,
-                                                            borderRadius: BorderRadius.only(
-                                                              topLeft: Radius.circular(pathS / 15), // Adjust as needed
-                                                              bottomLeft: Radius.circular(pathS / 15), // Adjust as needed
-                                                            ),
-                                                            color: isDarkMode ?  greenColor1:greenColor1,
-                                                          ),
-                                                          child:Padding(
-                                                            padding: EdgeInsets.only(left: pathS/5, top: pathS/10,right: pathS/8,bottom: pathS/10), // Adjust top and left as needed
-                                                            child: Text(
-                                                              dutyShiftName,
-                                                              style: TextStyle(
-                                                                color: isDarkMode ?  greenColor6:greenColor6,
-                                                                fontSize: pathS / 5.5,
-                                                                fontWeight: FontWeight.bold,
-                                                                fontFamily: 'Roboto',
-                                                              ),
-                                                              textAlign: TextAlign.center,
-                                                            ),
-                                                          ),
-                                                        ),
-                                                      ],
-                                                    ),
-                                                    SizedBox(height: pathS / 5),
-                                                    Padding(
-                                                      padding: EdgeInsets.only(right: pathS/5), // Adjust top and left as needed
-                                                      child: Text(
-                                                        siteName,
-                                                        style: TextStyle(
-                                                          color: isDarkMode ?  greyColor1:greyColor5,
-                                                          fontSize: pathS / 5.5,
-                                                          fontWeight: FontWeight.w500,
-                                                          fontFamily: 'Roboto',
-                                                        ),
-                                                        textAlign: TextAlign.start,
-                                                      ),
-                                                    ),
-
-                                                    Text(
-                                                      unitCode,
-                                                      style: TextStyle(
-                                                        color: isDarkMode ?  whiteColor:greyColor6,
-                                                        fontSize: pathS / 5.5,
-                                                        fontWeight: FontWeight.w600,
-                                                        fontFamily: 'Roboto',
-                                                      ),
-                                                      textAlign: TextAlign.start,
-                                                    ),
-                                                    Text(
-                                                      postName,
-                                                      style: TextStyle(
-                                                        color: isDarkMode ?  greyColor1:greyColor5,
-                                                        fontSize: pathS / 5.5,
-                                                        fontWeight: FontWeight.w500,
-                                                        fontFamily: 'Roboto',
-                                                      ),
-                                                      textAlign: TextAlign.start,
-                                                    ),
-                                                    SizedBox(height: pathS/5),
-
-                                                    SizedBox(
-                                                      width: screenWidth-2.5*marginValue,
-                                                      child: Text(
-                                                        getDateTime('EEEE d MMM'),
-                                                        style: TextStyle(
-                                                          color: isDarkMode ?  greyColor1:greyColor4,
-                                                          fontSize: pathS / 5.5,
-                                                          fontWeight: FontWeight.w500,
-                                                          fontFamily: 'Roboto',
-                                                        ),
-                                                        textAlign: TextAlign.center,
-                                                      ),
-                                                    ),
-
-                                                    Row(
-                                                      mainAxisAlignment: MainAxisAlignment.center,
-                                                      children: [
-                                                        Text(
-                                                          getFormattedTime(currentDutyStartTime,"h:mm"),
-                                                          style: TextStyle(
-                                                            color: isDarkMode ?  whiteColor:greyColor7,
-                                                            fontSize: pathS / 1.6,
-                                                            fontWeight: FontWeight.w500,
-                                                            fontFamily: 'Roboto',
-                                                          ),
-                                                          textAlign: TextAlign.center,
-                                                        ),
-                                                        SizedBox(width: pathS/8),
-                                                        Text(
-                                                          getFormattedTime(currentDutyStartTime,"a").toUpperCase(),
-
-                                                          style: TextStyle(
-                                                            color: isDarkMode ?  greyColor1:greyColor4,
-                                                            fontSize: pathS / 5.5,
-                                                            fontWeight: FontWeight.w500,
-                                                            fontFamily: 'Roboto',
-                                                          ),
-                                                          textAlign: TextAlign.center,
-                                                        ),
-                                                      ],
-                                                    ),
-                                                    SizedBox(height: pathS/2),
-
-                                                  ],
-                                                ),
+                                            SizedBox(
+                                              width: screenWidth - 3 * marginValue,
+                                              height: screenWidth - 2 * marginValue,
+                                              child: PageView.builder(
+                                                controller: cardPageController,
+                                                onPageChanged: (index) {
+                                                  setState(() {
+                                                    cardIndex = index; // ✅ this updates the selected dot
+                                                  });
+                                                },
+                                                itemCount: userDutyCard.length,
+                                                itemBuilder: (context, index) {
+                                                  return buildDutyCard(userDutyCard[index]);
+                                                },
                                               ),
                                             ),
-                                            Column(
-                                              mainAxisAlignment: MainAxisAlignment.end,
-                                              children: [
-                                                Row(
-                                                  mainAxisAlignment: MainAxisAlignment.center,
-                                                  children: [
-                                                    GestureDetector(
-                                                      onTap: () {
-                                                        if(isDutyInTapEnabled) {
-                                                          onTapDutyIn();
-                                                        }
-                                                      },
-                                                      // Disable tap if isTapEnabled is false
-                                                      child: Container(
-                                                        width: pathL*1.1,
-                                                        height: pathS / 1.6,
-                                                        alignment: Alignment.center,
-                                                        decoration: BoxDecoration(
-                                                          color: dutyInBgColor,                          // border: Border.all(color: Colors.yellow, width: pathS/18),
-                                                          borderRadius: BorderRadius.circular(pathS/3),
-                                                          boxShadow: [
-                                                            BoxShadow(
-                                                              color: dutyInShadowColor, // Shadow color
-                                                              blurRadius: pathS/10, // Spread of the shadow
-                                                              // spreadRadius: pathS/15, // How far the shadow extends
-                                                              offset:  Offset(-pathS/12, pathS/12),
-                                                            ),
-                                                          ],
-                                                        ),
-                                                        child: Text(
-                                                          dutyInBtnText,
-                                                          style: TextStyle(
-                                                            color: dutyInFontColor,
-                                                            fontSize: pathS / 4.7,
-                                                            fontWeight: FontWeight.w700,
-                                                            fontFamily: 'Roboto',
-                                                          ),
-                                                        ),
-                                                      ),
-                                                    ),
-                                                    SizedBox(width: pathS/8),
-                                                    GestureDetector(
-                                                      onTap: isDutyOutTapEnabled
-                                                          ? () {
-                                                        if (todayUserAttendance.isNotEmpty) {
-                                                          loadScanUnitShiftView(
-                                                            keyAttendanceModeSelf,
-                                                            keyAttendanceStatusDutyOut,
-                                                            todayUserAttendance.first,
-                                                          );
-                                                        } else {
-                                                          printInDebug("No attendance record found for today.");
-                                                          // Optionally show a Snackbar, Dialog, etc.
-                                                          ScaffoldMessenger.of(context).showSnackBar(
-                                                            SnackBar(content: Text("No attendance record available")),
-                                                          );
-                                                        }
-                                                      }
-                                                          : null,
-
-                                                      child: Container(
-                                                        width: pathL*1.1,
-                                                        height: pathS / 1.6,
-                                                        alignment: Alignment.center,
-                                                        decoration: BoxDecoration(
-                                                          color: dutyOutBgColor,                          // border: Border.all(color: Colors.yellow, width: pathS/18),
-                                                          borderRadius: BorderRadius.circular(pathS/3),
-                                                          boxShadow: [
-                                                            BoxShadow(
-                                                              color: dutyOutShadowColor, // Shadow color
-                                                              blurRadius: pathS/10, // Spread of the shadow
-                                                              // spreadRadius: pathS/15, // How far the shadow extends
-                                                              offset:  Offset(-pathS/12, pathS/12),
-                                                            ),
-                                                          ],
-                                                        ),
-                                                        child: Text(
-                                                          dutyOutBtnText,
-                                                          style: TextStyle(
-                                                            color: dutyOutFontColor,
-                                                            fontSize: pathS / 4.7,
-                                                            fontWeight: FontWeight.w700,
-                                                            fontFamily: 'Roboto',
-                                                          ),
-                                                        ),
-                                                      ),
-                                                    ),
-
-                                                  ],
-                                                ),
-                                                SizedBox(height: pathS/5),
-                                                Container(
-                                                  width: screenWidth,
-                                                  height:  pathS/80,
-                                                  color: isDarkMode? greyColorDark:greyColor2,
-                                                ),
-                                                SizedBox(height: pathS/5),
-                                                Row(
-                                                  mainAxisAlignment: MainAxisAlignment.center,
-                                                  children: [
-
-                                                    GestureDetector(
-                                                      onTap: (){
-                                                        List<String> activeDayList = postGeoLocation.split(',').map((e) => e.trim()).toList();
-
-                                                        double lat = double.parse(activeDayList[1]); // Latitude
-                                                        double lng = double.parse(activeDayList[0]); // Longitude
-
-                                                        launchGoogleMap(lat, lng);
-
-                                                      },
-                                                      child: Container(
-
-                                                        child:Padding(
-                                                          padding: EdgeInsets.only(left: pathS/10,right: pathS/8,top: pathS/20,bottom: pathS/4), // Adjust top and left as needed
-                                                          child: Row(
-                                                            children: [
-                                                              Container(
-                                                                height: pathS/3,
-                                                                width: pathS/4,
-                                                                decoration: BoxDecoration(
-                                                                  // shape: BoxShape.circle,
-                                                                  image: DecorationImage(
-                                                                    image: AssetImage("assets/images/dashboard-icons/location-on.png"),
-                                                                    fit: BoxFit.cover,
-                                                                  ),
-                                                                ),
-                                                              ),
-                                                              SizedBox(width: pathS/6),
-
-                                                              Text(
-                                                                'location_on_map'.tr(),
-                                                                style: TextStyle(
-                                                                  color: isDarkMode ?  redColor1:redColor3,
-                                                                  fontSize: pathS / 4.5,
-                                                                  fontWeight: FontWeight.bold,
-                                                                  fontFamily: 'Roboto',
-
-                                                                ),
-                                                                textAlign: TextAlign.center,
-                                                              ),
-                                                            ],
-                                                          ),
-                                                        ),
-                                                      ),
-                                                    ),
-
-                                                  ],
-                                                ),
-
-                                              ],
+                                            SizedBox(height: pathS/8),
+                                            Row(
+                                              mainAxisAlignment: MainAxisAlignment.center,
+                                              children: List.generate(
+                                                userDutyCard.length,
+                                                    (index) => GestureDetector(
+                                                    onTap: () => animateDutyCardPageToIndex(index),
+                                                    child:buildDutyCardsDot(index)),
+                                              ),
                                             ),
-
+                                            SizedBox(height: pathS/8),
                                           ],
                                         ),
 
-                                      ),//duty in out
-                                      if(todayRoster.isNotEmpty)SizedBox(height: pathS/5),
+                                      if(userDutyCard.isNotEmpty)SizedBox(height: pathS/5),
 
                                       if (topNotificationsPage.isNotEmpty)
                                         SizedBox(
@@ -1688,6 +1406,17 @@ class HomeViewState extends State<HomeView>with RouteAware {
       ],
     );
   }
+  Widget buildDutyCardsDot(int index) {
+    return Container(
+      margin: EdgeInsets.all(pathS/20),
+      width: cardIndex == index ? 12.0 : 8.0,
+      height: 8.0,
+      decoration: BoxDecoration(
+        shape: BoxShape.circle,
+        color: cardIndex == index ? isDarkMode? redColor1: redColor3 : greyColor4,
+      ),
+    );
+  }
   Widget buildDot(int index) {
     return Container(
       margin: EdgeInsets.all(pathS/20),
@@ -1699,6 +1428,298 @@ class HomeViewState extends State<HomeView>with RouteAware {
       ),
     );
   }
+  Widget buildDutyCard(DutyCard card) {
+    final String dutyShiftName     = card.shiftName;
+    final String siteName          = card.siteName ?? '';
+    final String unitCode          = card.unitCode ?? '';
+    final String postName          = card.postName ?? '';
+    final String dutyInBtnText     = card.dutyInButtonText ?? '';
+    final String dutyOutBtnText    = card.dutyOutButtonText  ?? '';
+    final String postGeoLocation   = card.geoLocation ?? '';
+    final bool isDutyInTapEnabled  = (card.dutyInButtonEnable ?? 0) == 1;
+    final bool isDutyOutTapEnabled = (card.dutyOutButtonEnable ?? 0) == 1;
+    String currentDutyStartTime = card.shiftStartTime ;
+
+    // 🎨 Colors & shadows based on enable/disable
+    Color dutyInBgColor     = isDutyInTapEnabled ? redColor3 : (isDarkMode ? greyColor5 : greyColor1);
+    Color dutyInFontColor   = isDutyInTapEnabled ? whiteColor : (isDarkMode ? greyColor7 : greyColor4);
+    Color dutyInShadowColor = isDutyInTapEnabled ? Colors.black.withOpacity(0.2) : Colors.transparent;
+
+    Color dutyOutBgColor     = isDutyOutTapEnabled ? redColor3 : (isDarkMode ? greyColor5 : greyColor1);
+    Color dutyOutFontColor   = isDutyOutTapEnabled ? whiteColor : (isDarkMode ? greyColor7 : greyColor4);
+    Color dutyOutShadowColor = isDutyOutTapEnabled ? Colors.black.withOpacity(0.2) : Colors.transparent;
+    debugPrint('''
+        ---- Duty Card Info ----
+        
+        Shift Name         : $dutyShiftName
+        Site Name          : $siteName
+        Unit Code          : $unitCode
+        Post Name          : $postName
+        Duty In Button     : $dutyInBtnText (Enabled: $isDutyInTapEnabled)
+        Duty Out Button    : $dutyOutBtnText (Enabled: $isDutyOutTapEnabled)
+        Post Geo Location  : $postGeoLocation
+        Duty Start Time : $currentDutyStartTime
+        Duty end Time : ${card.shiftEndTime}
+        Duty start Enable  time : ${card.dutyStartEnableTime}
+         Duty start Disable  time : ${card.dutyStartDisableTime}
+         Duty end Disable  time : ${card.dutyEndDisableTime}
+
+        -------------------------
+       ''');
+
+
+    return Container(
+      width: screenWidth - 2.5 * marginValue,
+      height: pathL * 2.8,
+      decoration: BoxDecoration(
+        borderRadius: BorderRadius.circular(pathS / 8),
+        color: isDarkMode ? greyColor8 : Colors.white,
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withOpacity(0.1),
+            blurRadius: pathS / 10,
+            offset: Offset(-pathS / 12, pathS / 12),
+          ),
+        ],
+      ),
+      child: Stack(
+        alignment: Alignment.topLeft,
+        children: [
+          Padding(
+            padding: EdgeInsets.only(left: pathS / 4, top: pathS / 4),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Row(
+                  children: [
+                    // ----- Current Duty Label -----
+                    Container(
+                      decoration: BoxDecoration(
+                        borderRadius: BorderRadius.circular(pathS / 15),
+                        color: greenColor1,
+                      ),
+                      padding: EdgeInsets.symmetric(
+                        horizontal: pathS / 5,
+                        vertical: pathS / 10,
+                      ),
+                      child: Text(
+                        card.cardTitle ?? '',
+                        style: TextStyle(
+                          color: greenColor6,
+                          fontSize: pathS / 5.5,
+                          fontWeight: FontWeight.bold,
+                          fontFamily: 'Roboto',
+                        ),
+                      ),
+                    ),
+                    Spacer(),
+                    // ----- Shift Name -----
+                    Container(
+                      decoration: BoxDecoration(
+                        borderRadius: BorderRadius.horizontal(
+                          left: Radius.circular(pathS / 15),
+                        ),
+                        color: greenColor1,
+                      ),
+                      padding: EdgeInsets.symmetric(
+                        horizontal: pathS / 5,
+                        vertical: pathS / 10,
+                      ),
+                      child: Text(
+                        dutyShiftName,
+                        style: TextStyle(
+                          color: greenColor6,
+                          fontSize: pathS / 5.5,
+                          fontWeight: FontWeight.bold,
+                          fontFamily: 'Roboto',
+                        ),
+                      ),
+                    ),
+                  ],
+                ),
+                SizedBox(height: pathS / 5),
+
+                Text(siteName,
+                    style: TextStyle(
+                        color: isDarkMode ? greyColor1 : greyColor5,
+                        fontSize: pathS / 5.5,
+                        fontWeight: FontWeight.w500)),
+
+                Text(unitCode,
+                    style: TextStyle(
+                        color: isDarkMode ? whiteColor : greyColor6,
+                        fontSize: pathS / 5.5,
+                        fontWeight: FontWeight.w600)),
+
+                Text(postName,
+                    style: TextStyle(
+                        color: isDarkMode ? greyColor1 : greyColor5,
+                        fontSize: pathS / 5.5,
+                        fontWeight: FontWeight.w500)),
+
+                SizedBox(height: pathS / 5),
+
+                Center(
+                  child: Text(
+                    getDateTime('EEEE d MMM'),
+                    style: TextStyle(
+                      color: isDarkMode ? greyColor1 : greyColor4,
+                      fontSize: pathS / 5.5,
+                      fontWeight: FontWeight.w500,
+                    ),
+                  ),
+                ),
+
+                // ----- Start Time -----
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    Text(
+                      getFormattedTime(currentDutyStartTime,"h:mm"),
+                      style: TextStyle(
+                        color: isDarkMode ? whiteColor : greyColor7,
+                        fontSize: pathS / 1.6,
+                        fontWeight: FontWeight.w500,
+                      ),
+                    ),
+                    SizedBox(width: pathS / 8),
+                    Text(
+                      getFormattedTime(currentDutyStartTime,"a").toUpperCase(),
+                      style: TextStyle(
+                        color: isDarkMode ? greyColor1 : greyColor4,
+                        fontSize: pathS / 5.5,
+                        fontWeight: FontWeight.w500,
+                      ),
+                    ),
+                  ],
+                ),
+                SizedBox(height: pathS / 2),
+              ],
+            ),
+          ),
+
+          // ===== Bottom Section =====
+          Column(
+            mainAxisAlignment: MainAxisAlignment.end,
+            children: [
+              Row(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  // Duty In
+                  if (card.dutyInOutButtonShow != null && card.dutyInOutButtonShow == 1)
+                    GestureDetector(
+                      onTap: isDutyInTapEnabled
+                          ? () => onTapDutyIn(card.shiftId) // ✅ Pass shiftId inside a closure
+                          : null,
+                      child: Container(
+                        width: pathL * 1.1,
+                        height: pathS / 1.6,
+                        alignment: Alignment.center,
+                        decoration: BoxDecoration(
+                          color: dutyInBgColor,
+                          borderRadius: BorderRadius.circular(pathS / 3),
+                          boxShadow: [
+                            BoxShadow(
+                              color: dutyInShadowColor,
+                              blurRadius: pathS / 10,
+                              offset: Offset(-pathS / 12, pathS / 12),
+                            ),
+                          ],
+                        ),
+                        child: Text(
+                          dutyInBtnText,
+                          style: TextStyle(
+                            color: dutyInFontColor,
+                            fontSize: pathS / 4.8,
+                            fontWeight: FontWeight.w700,
+                          ),
+                        ),
+                      ),
+                    ),
+
+                  SizedBox(width: pathS / 8),
+
+                  // Duty Out
+                 if(card.dutyInOutButtonShow != null && card.dutyInOutButtonShow == 1) GestureDetector(
+                   onTap: isDutyOutTapEnabled
+                       ? () => onTapDutyOut(card.shiftId) // ✅ Pass shiftId inside a closure
+                       : null,
+                   child: Container(
+                      width: pathL * 1.1,
+                      height: pathS / 1.6,
+                      alignment: Alignment.center,
+                      decoration: BoxDecoration(
+                        color: dutyOutBgColor,
+                        borderRadius: BorderRadius.circular(pathS / 3),
+                        boxShadow: [
+                          BoxShadow(
+                            color: dutyOutShadowColor,
+                            blurRadius: pathS / 10,
+                            offset: Offset(-pathS / 12, pathS / 12),
+                          ),
+                        ],
+                      ),
+                      child: Text(
+                        dutyOutBtnText,
+                        style: TextStyle(
+                          color: dutyOutFontColor,
+                          fontSize: pathS / 4.9,
+                          fontWeight: FontWeight.w700,
+                        ),
+                      ),
+                    ),
+                  ),
+                ],
+              ),
+              SizedBox(height: pathS / 5),
+
+              Container(
+                width: screenWidth,
+                height: pathS / 80,
+                color: isDarkMode ? greyColorDark : greyColor2,
+              ),
+              SizedBox(height: pathS / 5),
+
+              // Location Button
+              GestureDetector(
+                onTap: () {
+                  final parts = postGeoLocation.split(',');
+                  if (parts.length == 2) {
+                    final lat = double.tryParse(parts[1].trim());
+                    final lng = double.tryParse(parts[0].trim());
+                    if (lat != null && lng != null) {
+                      launchGoogleMap(lat, lng);
+                    }
+                  }
+                },
+                child: Row(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    Image.asset(
+                      "assets/images/dashboard-icons/location-on.png",
+                      height: pathS / 3,
+                      width: pathS / 4,
+                    ),
+                    SizedBox(width: pathS / 6),
+                    Text(
+                      'location_on_map'.tr(),
+                      style: TextStyle(
+                        color: isDarkMode ? redColor1 : redColor3,
+                        fontSize: pathS / 4.5,
+                        fontWeight: FontWeight.bold,
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+              SizedBox(height: pathS / 4),
+
+            ],
+          ),
+        ],
+      ),
+    );
+  }
   void animatePageIndex(int index) {
     _pageController.animateToPage(
       index,
@@ -1706,7 +1727,14 @@ class HomeViewState extends State<HomeView>with RouteAware {
       curve: Curves.easeInOut,
     );
   }
-
+  void animateDutyCardPageToIndex(int index) {
+      setState(() {cardIndex = index;});
+      cardPageController.animateToPage(
+      index,
+      duration: Duration(milliseconds: 300),
+      curve: Curves.easeInOut,
+    );
+  }
   void updatePageHeight(GlobalKey key, int index){
     Future.delayed(Duration(milliseconds: 1),(){
     if(key == null)return;
@@ -1716,7 +1744,6 @@ class HomeViewState extends State<HomeView>with RouteAware {
       });
     });
   }
-
   Widget _buildHtmlWeb(String htmlBody, String actionUrl) {
     return GestureDetector(
       onTap: () async {
@@ -1747,21 +1774,24 @@ class HomeViewState extends State<HomeView>with RouteAware {
     );
   }
 
-  void initialSetup() {
-    getNotificationTableData();
+  Future<void> initialSetup() async {
 
-    getRoasterViewData();
-
-    getAttendanceTableData();
-
-    getProfileTableData();
-
-    getPostingTableData();
-
-    getUserLeavesTableData();
+    await getNotificationTableData();
+    await getRoasterViewData();
+    await getAttendanceTableData();
+    await getProfileTableData();
+    await getPostingTableData();
+    await getUserLeavesTableData();
 
   }
 
+  Future<void> loadServerData() async {
+    await onLoadNotificationData();
+    await onLoadAttendanceData();
+    await onLoadRoasterData();
+    await onLoadUserPostingData();
+    await onLoadProfileData();
+  }
   void onConnectionChange(){
 
     bool isConnected = true;
@@ -1789,55 +1819,8 @@ class HomeViewState extends State<HomeView>with RouteAware {
 
 
   }
-  void onLoadDutyAlert(){
-      Navigator.push(
-        context,
-        MaterialPageRoute(
-          builder: (context) => DutyAlertView(dutyTime: DateTime.now(),shift: shift,place: unitCode,location: postName),
-        ),
-      );
-    }
 
-  Future<void> getNotificationTableData() async {
-    List<UserNotification> datas = await DatabaseHelper.instance.getAllRecords<UserNotification>(
-      keyTableUserNotification,
-          (map) => UserNotification.fromMap(map),
-    );
-
-    if(datas.isEmpty){
-      onLoadNotificationData();
-      return;
-    }
-
-    DateTime dateTimeNow = DateTime.now();
-    final notification = datas
-        .where((data) =>
-    (data.expiryDate.year >= dateTimeNow.year
-        && data.expiryDate.month >= dateTimeNow.month
-        && data.expiryDate.day >= dateTimeNow.day && data.deleted == 0)
-    ).toList();
-
-    final htmlPageNotification = notification
-        .where((data) =>
-    (data.isHtmlPage  == true && data.readStatus == false)
-    ) .toList();
-
-    final htmlBodyNotification = datas
-        .where((data) =>
-    (data.isHtmlBody  == true )
-    ) .toList();
-
-    final imageNotification = datas
-        .where((data) =>
-    (data.isImageUrl  == true )
-    ) .toList();
-
-    if(htmlPageNotification.isNotEmpty ){
-      loadWebViewPopup(context, htmlPageNotification.first.message,htmlPageNotification.first);
-    }
-
-  }
-  void onLoadNotificationData() {
+  Future<void>  onLoadNotificationData() async{
     // setState(() {
     //   showLoaderView = true;
     // });
@@ -1845,73 +1828,15 @@ class HomeViewState extends State<HomeView>with RouteAware {
 
     };
 
-    APIHelper.instance.getData(userNotificationApi,inputData, (data) {
+    APIHelper.instance.getData(userNotificationApi,inputData, (data) async {
 
       // setState(() {
       //   showLoaderView = false;
       // });
 
       if(data.isNotEmpty){
-        List<UserNotification> datas = data.map((json) => UserNotification.fromJson(json)).toList();
-
-        for (var data in datas) {
-          printInDebug(' ID: ${data.id}');
-          printInDebug('title name: ${data.title}');
-        }
-
-        DateTime dateTimeNow = DateTime.now();
-        final notification = datas
-            .where((data) =>
-        (data.expiryDate.year >= dateTimeNow.year
-            && data.expiryDate.month >= dateTimeNow.month
-            && data.expiryDate.day >= dateTimeNow.day && data.deleted == 0)
-        ).toList();
-
-        final htmlPageNotification = notification
-            .where((data) =>
-        (data.isHtmlPage  == true && data.messageType == 5)
-        ) .toList();
-
-        final htmlBody1NotificationData = notification
-            .where((data) =>
-        (data.isHtmlBody  == true  && data.messageType == 1)
-        ) .toList();
-
-        final htmlBody2NotificationData = notification
-            .where((data) =>
-        (data.isHtmlBody  == true && data.messageType == 2)
-        ) .toList();
-
-        final imageNotification = notification
-            .where((data) =>
-        (data.isImageUrl  == true )
-        ) .toList();
-
-        if(htmlPageNotification.isNotEmpty){
-          loadWebViewPopup(context, htmlPageNotification.first.message,htmlPageNotification.first);
-        }
-
-        if(htmlBody1NotificationData.isNotEmpty){
-         setState(() {
-           topNotificationsPage = htmlBody1NotificationData;
-            notificationPageKeys = List.generate(
-             topNotificationsPage.length,
-                 (index) => GlobalKey(),
-           );
-
-           topNotificationPageHeight = List.generate(
-             topNotificationsPage.length,
-                 (index) => pathL*2.2,
-           );
-
-         });
-        }
-
-        if(htmlBody2NotificationData.isNotEmpty){
-          setState(() {
-            htmlBottomBodyNotifications = htmlBody2NotificationData;
-          });
-        }
+        List<UserNotification> notificationData = data.map((json) => UserNotification.fromJson(json)).toList();
+        await syncUserNotificationData(notificationData);
 
       }
 
@@ -1924,8 +1849,317 @@ class HomeViewState extends State<HomeView>with RouteAware {
     );
 
   }
+  Future<void> onLoadAttendanceData() async {
+    // setState(() {
+    //   showLoaderView = true;
+    // });
+    Map <String,String> inputData = {
+
+    };
+
+    APIHelper.instance.getData(userAttendanceApi,inputData, (data) async {
+
+      // setState(() {
+      //   showLoaderView = false;
+      // });
+
+      if(data.isNotEmpty){
+
+        List<UserAttendance> dataList = data.map((json) => UserAttendance.fromJson(json)).toList();
+        for (var data in dataList) {
+          printInDebug(' ID: ${data.id}');
+          printInDebug(' name: ${data.siteName}');
+        }
+
+        // final undeletedAttendance = dataList
+        //     .where((data) =>
+        // data.deleted == 0)
+        //     .toList();
+
+        // if(undeletedAttendance.isNotEmpty){
+        //   userAttendance = undeletedAttendance;
+        //   updateDutyInOutAttendance(userAttendance);
+        //   updateCalendarDataAttendance(_focusedDay);
+        // }
+
+        if(dataList.isNotEmpty) {
+
+          await syncUserAttendanceData(dataList);
+
+        }
+      }
+
+    },(error){
+      // setState(() {
+      //   showLoaderView = false;
+      // });
+
+    }
+    );
+
+  }
+  Future<void> onLoadProfileData() async{
 
 
+    // setState(() {
+    //   showLoaderView = true;
+    // });
+    Map <String,String> inputData = {
+
+    };
+
+    APIHelper.instance.getData(profileApi,inputData, (data) {
+
+      // setState(() {
+      //   showLoaderView = false;
+      // });
+
+      if(data.isNotEmpty){
+
+        List<UserProfile> userProfiles = data.map((json) => UserProfile.fromJson(json)).toList();
+        for (var profile in userProfiles) {
+          printInDebug('profile ID: ${profile.id}');
+          printInDebug('profile emp name: ${profile.empName}');
+          printInDebug('profile manager mob: ${profile.managerMobile}');
+
+        }
+
+        if(userProfiles.isNotEmpty) {
+          // showProfileDataOnUI(userProfiles.first);
+          //
+          // userProfile = userProfiles;
+
+          syncUserProfileData(userProfiles);
+        }else{
+          printInDebug('data is empty');
+        }
+
+        // List <UserProfile> userProfile = [];
+
+
+
+      }
+
+    },(error){
+      // setState(() {
+      //   showLoaderView = false;
+      // });
+
+    }
+    );
+
+  }
+  Future<void> onLoadUserPostingData() async{
+    // setState(() {
+    //   showLoaderView = true;
+    // });
+
+    Map <String, String> inputData = {
+
+    };
+
+    APIHelper.instance.getUserData(userPostingApi, inputData, (data) {
+
+      // setState(() {
+      //   showLoaderView = false;
+      // });
+
+      if (data.isNotEmpty) {
+        if (data.containsKey('UserPosting')) {
+          final List<dynamic> dataList = data['UserPosting'];
+
+          final userPostings = dataList.map((json) => UserPosting.fromJson(json)).toList();
+          syncUserPostingData(userPostings);
+
+        }
+        if (data.containsKey('UnitDutyPost')) {
+          final List<dynamic> dataList = data['UnitDutyPost'];
+          final unitDutyPosts = dataList.map((json) => UnitDutyPost.fromJson(json)).toList();
+
+          syncUnitDutyPostData(unitDutyPosts);
+        }
+        if (data.containsKey('UnitShiftDetail')) {
+          final List<dynamic> dataList = data['UnitShiftDetail'];
+          final unitShiftDetailData = dataList.map((json) => UnitShiftDetail.fromJson(json)).toList();
+          final filteredUnitShiftDetails = unitShiftDetailData.where((data) => data.deleted == 0).toList();
+
+          final Set<String> shiftIds = {};
+          userShiftDetailsData = filteredUnitShiftDetails.where((data) {
+            if (shiftIds.contains(data.shiftId)) {
+              return false;
+            } else {
+              shiftIds.add(data.shiftId);
+              return true;
+            }
+          }).toList();
+          syncUnitShiftDetailData(userShiftDetailsData);
+        }
+
+      }
+    }, (error) {
+      // setState(() {
+      //   showLoaderView = false;
+      // });
+      setState(() {
+        // isAlertVisible = true;
+        // alertMessage = '$error';
+      });
+    });
+  }
+  Future<void> onLoadRoasterData() async {
+
+    Map <String,String> inputData = {};
+
+    APIHelper.instance.getData(userRosterApi,inputData, (data) {
+
+      if(data.isNotEmpty){
+
+        List<UserRoaster> roasters = data.map((json) => UserRoaster.fromJson(json)).toList();
+
+        // userRoasters = roasters;
+
+        syncUserRoasterData(roasters);
+        // updateNextDaysRoasterUI(userRoasters);
+
+
+      }
+
+    },(error){
+
+    }
+    );
+
+  }
+
+  Future<void> syncUserNotificationData(List<UserNotification> userNotificationData) async {
+
+    // Update multiple rows using a generic update function
+    await DatabaseHelper.instance.updateTableData<UserNotification>(
+      keyTableUserNotification,
+      userNotificationData,
+      'id',
+          (data) => data.toMap(),
+
+    );
+    await getNotificationTableData();
+
+  }
+  Future<void> syncUserAttendanceData(   List <UserAttendance> userAttendance) async {
+    await DatabaseHelper.instance.updateOrDeleteTableData<UserAttendance>(
+        keyTableUserAttendance,
+        userAttendance,
+        'id',
+            (userAttendance) => userAttendance.toMap()
+    );
+
+    await getRoasterViewData();
+    await getAttendanceTableData();
+
+  }
+  Future<void> syncUserProfileData(   List <UserProfile> userProfile) async {
+    await DatabaseHelper.instance.replaceTableData<UserProfile>(keyTableUserProfile, userProfile, (userProfile) =>
+        userProfile.toMap());
+
+    await getProfileTableData();
+  }
+  Future<void> syncUnitShiftDetailData( List<UnitShiftDetail> userShiftDetailsData) async {
+    await DatabaseHelper.instance.replaceTableData<UnitShiftDetail>(keyTableUnitShiftDetail, userShiftDetailsData, (unitShiftDetail) =>
+        unitShiftDetail.toMap());
+
+    await getPostingTableData();
+  }
+  Future<void> syncUnitDutyPostData( List<UnitDutyPost> unitDutyPosts) async {
+    await DatabaseHelper.instance.replaceTableData<UnitDutyPost>(keyTableUnitDutyPost, unitDutyPosts, (unitDutyPosts) =>
+        unitDutyPosts.toMap());
+
+    await getPostingTableData();
+  }
+  Future<void> syncUserPostingData(List<UserPosting> userPostings) async {
+    await DatabaseHelper.instance.replaceTableData<UserPosting>(
+        keyTableUserPosting,
+        userPostings,
+            (userPosting) => userPosting.toMap());
+
+    await getPostingTableData();
+  }
+  Future<void> syncUserRoasterData(List <UserRoaster> userRoaster) async {
+
+    await DatabaseHelper.instance.updateOrDeleteTableData<UserRoaster>(
+        keyTableUserRoster,
+        userRoaster,
+        'id',
+            (userRoaster) => userRoaster.toMap()
+    );
+
+    await getRoasterViewData();
+  }
+  Future<void> getNotificationTableData() async {
+    List<UserNotification> userNotificationTableData = await DatabaseHelper.instance.getAllRecords<UserNotification>(
+      keyTableUserNotification,
+          (map) => UserNotification.fromMap(map),
+    );
+
+    if(userNotificationTableData.isEmpty){
+         // onLoadNotificationData();
+      return;
+    }
+
+    DateTime dateTimeNow = DateTime.now();
+    final notification = userNotificationTableData
+        .where((data) =>
+    (data.expiryDate.year >= dateTimeNow.year
+        && data.expiryDate.month >= dateTimeNow.month
+        && data.expiryDate.day >= dateTimeNow.day && data.deleted == 0)
+    ).toList();
+
+    final htmlPageNotification = notification
+        .where((data) =>
+    (data.isHtmlPage  == true && data.messageType == 5 && data.readStatus == false)
+    ) .toList();
+
+    final htmlBody1NotificationData = notification
+        .where((data) =>
+    (data.isHtmlBody  == true  && data.messageType == 1 && data.readStatus == false)
+    ) .toList();
+
+    final htmlBody2NotificationData = notification
+        .where((data) =>
+    (data.isHtmlBody  == true && data.messageType == 2 && data.readStatus == false)
+    ) .toList();
+
+    final imageNotification = notification
+        .where((data) =>
+    (data.isImageUrl  == true && data.readStatus == false )
+    ) .toList();
+
+    if(htmlPageNotification.isNotEmpty){
+      loadWebViewPopup(context, htmlPageNotification.first.message,htmlPageNotification.first);
+    }
+
+    if(htmlBody1NotificationData.isNotEmpty){
+      setState(() {
+        topNotificationsPage = htmlBody1NotificationData;
+        notificationPageKeys = List.generate(
+          topNotificationsPage.length,
+              (index) => GlobalKey(),
+        );
+
+        topNotificationPageHeight = List.generate(
+          topNotificationsPage.length,
+              (index) => pathL*2.2,
+        );
+
+      });
+    }
+
+    if(htmlBody2NotificationData.isNotEmpty){
+      setState(() {
+        htmlBottomBodyNotifications = htmlBody2NotificationData;
+      });
+    }
+
+
+  }
   Future<void> getProfileTableData() async {
     final userProfiles = await DatabaseHelper.instance.getAllRecords<UserProfile>(
       keyTableUserProfile,
@@ -1942,15 +2176,13 @@ class HomeViewState extends State<HomeView>with RouteAware {
 
    if( userProfiles.isNotEmpty){
      userProfile = userProfiles;
-     showDataOnUI(userProfiles.first);
+     showProfileDataOnUI(userProfiles.first);
    }else{
-     onLoadProfileData();
+     await onLoadProfileData();
    }
 
-    // onLoadProfileData();
-
   }
-  void showDataOnUI(UserProfile userProfile){
+  void showProfileDataOnUI(UserProfile userProfile){
 
     setState(() {
 
@@ -1981,61 +2213,6 @@ class HomeViewState extends State<HomeView>with RouteAware {
 
     });
   }
-  void onLoadProfileData() {
-
-
-    // setState(() {
-    //   showLoaderView = true;
-    // });
-    Map <String,String> inputData = {
-
-    };
-
-    APIHelper.instance.getData(profileApi,inputData, (data) {
-
-      // setState(() {
-      //   showLoaderView = false;
-      // });
-
-      if(data.isNotEmpty){
-
-        List<UserProfile> userProfiles = data.map((json) => UserProfile.fromJson(json)).toList();
-        for (var profile in userProfiles) {
-          printInDebug('profile ID: ${profile.id}');
-          printInDebug('profile emp name: ${profile.empName}');
-          printInDebug('profile manager mob: ${profile.managerMobile}');
-
-        }
-
-        if(userProfiles.isNotEmpty) {
-          showDataOnUI(userProfiles.first);
-
-          userProfile = userProfiles;
-
-          syncUserProfileData(userProfiles);
-        }else{
-          printInDebug('data is empty');
-        }
-
-        // List <UserProfile> userProfile = [];
-
-
-
-      }
-
-    },(error){
-      // setState(() {
-      //   showLoaderView = false;
-      // });
-
-    }
-    );
-
-  }
-  Future<void> syncUserProfileData(   List <UserProfile> userProfile) async {
-    await DatabaseHelper.instance.replaceTableData<UserProfile>(keyTableUserProfile, userProfile, (userProfile) =>
-        userProfile.toMap());
-  }
 
   Future<void> getRoasterViewData() async {
 
@@ -2051,49 +2228,11 @@ class HomeViewState extends State<HomeView>with RouteAware {
       updateCurrentDayRoasterUI(roasterData);
       updateNextDaysRoasterUI(roasterData);
 
-    }else{
-      onLoadRoasterData();
+    }
+    else{
+     await onLoadRoasterData();
     }
   }
-
-
-  void onLoadRoasterData() {
-
-    Map <String,String> inputData = {};
-
-    APIHelper.instance.getData(userRosterApi,inputData, (data) {
-
-      if(data.isNotEmpty){
-
-        List<UserRoaster> roasters = data.map((json) => UserRoaster.fromJson(json)).toList();
-
-        userRoasters = roasters;
-
-        syncUserRoasterData(userRoasters);
-        updateCurrentDayRoasterUI(userRoasters);
-        updateNextDaysRoasterUI(userRoasters);
-
-
-      }
-
-    },(error){
-
-    }
-    );
-
-  }
-  Future<void> syncUserRoasterData(List <UserRoaster> userRoaster) async {
-
-    await DatabaseHelper.instance.updateOrDeleteTableData<UserRoaster>(
-        keyTableUserRoster,
-        userRoaster,
-        'id',
-        (userRoaster) => userRoaster.toMap()
-    );
-
-    getRoasterViewData();
-  }
-
   Future<List<UnitDutyPost>> getTodayRosterUnitShiftData() async {
 
     return unitDutyPosts.where(
@@ -2101,7 +2240,7 @@ class HomeViewState extends State<HomeView>with RouteAware {
     ).toList();
 
   }
-  void updateCurrentDayRoasterUI(List<UserRoaster> roasters) {
+  Future<void> updateCurrentDayRoasterUI(List<UserRoaster> roasters) async {
     String todayDate = DateFormat('yyyy-MM-dd').format(DateTime.now());
 
     // Filter roster data for today
@@ -2112,89 +2251,35 @@ class HomeViewState extends State<HomeView>with RouteAware {
 
 
     if (todayRoster.isNotEmpty) {
-       UserRoaster roaster = todayRoster.first;
-      setState(() {
+      final dutyCards = DutyCardMapper.fromUserRoaster(todayRoster);
+      final result = DutyCardProcessor.process(dutyCards);
 
-         dutyShiftName = roaster.shiftName;
-         siteName = roaster.siteName;
-         unitCode = roaster.unitCode;
-         postName = '${roaster.postName} -${roaster.qrId.substring(roaster.qrId.length - 4)}';
-         currentDutyStartTime = roaster.startTime;
-         postGeoLocation = roaster.geoLocation;
-
-      });
-
-       updateDutyInButton(roaster);
-       updateDutyOutButton(roaster);
-
-      //old flow commented
-       // startDutyInCheck(roaster);
-       // startDutyOutCheck(roaster);
-    }
-  }
-  void updateDutyInButton(UserRoaster roaster){
-
-    if(!todayDutyInMarked) {
-      final now = DateTime.now();
-      final dutyStartEnableTime = roaster.dutyStartEnableTime;
-      final dutyStartDisableTime = roaster.dutyStartDisableTime;
-
-      if(roaster.dutyStatus != null &&
-          (roaster.dutyStatus == keyAttendanceStatusDutyIn ||
-              roaster.dutyStatus == keyAttendanceStatusDutyOut)){
-        setState(() {todayDutyInMarked = true;});
-        dutyInBtnText = roaster.actStartTime != null
-            ? "${'duty_in'.tr()} ${DateFormat('h:mm a').format(roaster.actStartTime!).toUpperCase()}"
-            : 'duty_in'.tr();
-        disableDutyIn();
-      }
-      else if (dutyStartEnableTime != null &&
-          dutyStartDisableTime != null &&
-          now.isAfter(dutyStartEnableTime) &&
-          now.isBefore(dutyStartDisableTime)) {
-        enableDutyIn();
+      if (result.isValid) {
+        final cards = result.cards;
+        setState(() {
+          userDutyCard = cards;
+        });
+        for (var card in cards) {
+          debugPrint('${card.cardTitle} -> ${card.shiftName}');
+        }
       } else {
-        disableDutyIn();
-      }
-    }
-    else {
-      disableDutyIn();
-    }
-
-  }
-  void updateDutyOutButton(UserRoaster roaster) {
-    if (todayDutyInMarked && !todayDutyOutMarked) {
-
-      final now = DateTime.now();
-      final dutyStartEnableTime = roaster.dutyStartEnableTime;
-      final dutyEndDisableTime = roaster.dutyEndDisableTime;
-
-      if(roaster.dutyStatus != null && roaster.dutyStatus == keyAttendanceStatusDutyOut){
-        setState(() {todayDutyOutMarked = true;});
-        dutyOutBtnText = roaster.actEndTime != null
-            ? "${'duty_out'.tr()} ${DateFormat('h:mm a').format(roaster.actEndTime!).toUpperCase()}"
-            : 'duty_out'.tr();
-        disableDutyOut();
+        debugPrint('Error: ${result.error}');
       }
 
-    else if (dutyStartEnableTime != null &&
-          dutyEndDisableTime != null &&
-          now.isAfter(dutyStartEnableTime) &&
-          now.isBefore(dutyEndDisableTime)
-          && roaster.dutyStatus == keyAttendanceStatusDutyIn) {
+      final activeIndex = userDutyCard.indexWhere((c) => c.isCurrentOrAvailable == true);
+      if (activeIndex != -1) {
+        // ✅ Active Duty found → set as default
+        cardIndex = activeIndex;
+        WidgetsBinding.instance.addPostFrameCallback((_) {
+          cardPageController.jumpToPage(activeIndex);
+        });
+      }
 
-        enableDutyOut();
-      }
-      else {
-        disableDutyOut();
-      }
-    }
-    else {
-      disableDutyOut();
+
+    }else{
+     await onLoadRoasterData();
     }
   }
-
-
   void updateNextDaysRoasterUI(List<UserRoaster> roasters) {
     DateTime todayDate = DateTime.now();
 
@@ -2243,7 +2328,7 @@ class HomeViewState extends State<HomeView>with RouteAware {
     final filteredUnitShiftDetails = unitShiftDetailData.where((data) => data.deleted == 0).toList();
 
     final Set<String> shiftIds = {};
-    unitShiftDetails = filteredUnitShiftDetails.where((data) {
+    userShiftDetailsData = filteredUnitShiftDetails.where((data) {
       if (shiftIds.contains(data.shiftId)) {
         return false;
       } else {
@@ -2252,98 +2337,13 @@ class HomeViewState extends State<HomeView>with RouteAware {
       }
     }).toList();
 
-    if(userPostings.isNotEmpty && unitDutyPosts.isNotEmpty && unitShiftDetails.isNotEmpty) {
-      printInDebug('All duty related data fetched');
+    if(userPostingsData.isEmpty || unitDutyPostsData.isEmpty || unitShiftDetailData.isEmpty) {
+     await onLoadUserPostingData();
     }else{
-      onLoadUserPostingData();
+      printInDebug('All duty related data fetched');
     }
 
-
   }
-  void onLoadUserPostingData() {
-    // setState(() {
-    //   showLoaderView = true;
-    // });
-
-    Map <String, String> inputData = {
-    };
-
-    APIHelper.instance.getUserData(userPostingApi, inputData, (data) {
-
-      // setState(() {
-      //   showLoaderView = false;
-      // });
-
-      if (data.isNotEmpty) {
-        if (data.containsKey('UserPosting')) {
-          final List<dynamic> dataList = data['UserPosting'];
-          setState(() {
-            userPostings = dataList.map((json) => UserPosting.fromJson(json)).toList();
-          });
-          userPostings.forEach((profile) {
-            printInDebug('userPosting ID: ${profile.id}');
-            printInDebug('userPosting  name: ${profile.siteName}');
-          });
-
-          syncUserPostingData();
-
-        }
-        if (data.containsKey('UnitDutyPost')) {
-          final List<dynamic> dataList = data['UnitDutyPost'];
-          unitDutyPosts = dataList.map((json) => UnitDutyPost.fromJson(json)).toList();
-          for (var profile in unitDutyPosts) {
-            printInDebug('UnitDutyPost ID: ${profile.id}');
-            printInDebug('UnitDutyPost  name: ${profile.postName}');
-          }
-
-          syncUnitDutyPostData();
-        }
-        if (data.containsKey('UnitShiftDetail')) {
-          final List<dynamic> dataList = data['UnitShiftDetail'];
-          final unitShiftDetailData = dataList.map((json) => UnitShiftDetail.fromJson(json)).toList();
-          final filteredUnitShiftDetails = unitShiftDetailData.where((data) => data.deleted == 0).toList();
-
-          final Set<String> shiftIds = {};
-          unitShiftDetails = filteredUnitShiftDetails.where((data) {
-            if (shiftIds.contains(data.shiftId)) {
-              return false;
-            } else {
-              shiftIds.add(data.shiftId);
-              return true;
-            }
-          }).toList();
-          syncUnitShiftDetailData();
-        }
-
-      }
-    }, (error) {
-      // setState(() {
-      //   showLoaderView = false;
-      // });
-      setState(() {
-        // isAlertVisible = true;
-        // alertMessage = '$error';
-      });
-    });
-  }
-  Future<void> syncUnitShiftDetailData() async {
-    await DatabaseHelper.instance.replaceTableData<UnitShiftDetail>(keyTableUnitShiftDetail, unitShiftDetails, (unitShiftDetail) =>
-        unitShiftDetail.toMap());
-
-  }
-  Future<void> syncUnitDutyPostData() async {
-    await DatabaseHelper.instance.replaceTableData<UnitDutyPost>(keyTableUnitDutyPost, unitDutyPosts, (unitDutyPosts) =>
-        unitDutyPosts.toMap());
-
-  }
-  Future<void> syncUserPostingData() async {
-    await DatabaseHelper.instance.replaceTableData<UserPosting>(
-        keyTableUserPosting,
-        userPostings,
-        (userPosting) => userPosting.toMap());
-
-  }
-
 
   Future<void> getAttendanceTableData() async {
     final userAttendanceData = await DatabaseHelper.instance.getAllRecords<UserAttendance>(
@@ -2351,6 +2351,10 @@ class HomeViewState extends State<HomeView>with RouteAware {
           (map) => UserAttendance.fromMap(map),
     );
 
+    if(userAttendanceData.isEmpty){
+     await onLoadAttendanceData();
+      return;
+    }
     final undeletedAttendance = userAttendanceData
         .where((data) =>
         data.deleted == 0)
@@ -2361,77 +2365,8 @@ class HomeViewState extends State<HomeView>with RouteAware {
       updateDutyInOutAttendance(userAttendance);
       updateCalendarDataAttendance(_focusedDay);
     }
-    else{
-      // onLoadAttendanceData();
-    }
-
-    onLoadAttendanceData();
 
   }
-  void onLoadAttendanceData() {
-    // setState(() {
-    //   showLoaderView = true;
-    // });
-    Map <String,String> inputData = {
-
-    };
-
-    APIHelper.instance.getData(userAttendanceApi,inputData, (data) {
-
-      // setState(() {
-      //   showLoaderView = false;
-      // });
-
-      if(data.isNotEmpty){
-
-        List<UserAttendance> dataList = data.map((json) => UserAttendance.fromJson(json)).toList();
-        for (var data in dataList) {
-          printInDebug(' ID: ${data.id}');
-          printInDebug(' name: ${data.siteName}');
-        }
-
-        final undeletedAttendance = dataList
-            .where((data) =>
-        data.deleted == 0)
-            .toList();
-
-        if(undeletedAttendance.isNotEmpty){
-          userAttendance = undeletedAttendance;
-          updateDutyInOutAttendance(userAttendance);
-          updateCalendarDataAttendance(_focusedDay);
-        }
-
-        if(dataList.isNotEmpty) {
-
-          syncUserAttendanceData(dataList);
-
-        }
-      }
-
-    },(error){
-      // setState(() {
-      //   showLoaderView = false;
-      // });
-
-    }
-    );
-
-  }
-  Future<void> syncUserAttendanceData(   List <UserAttendance> userAttendance) async {
-    await DatabaseHelper.instance.updateOrDeleteTableData<UserAttendance>(
-        keyTableUserAttendance,
-        userAttendance,
-        'id',
-        (userAttendance) => userAttendance.toMap()
-    );
-
-    getRoasterViewData();
-
-  }
-
-
-
-  //this method need be checked
   void updateDutyInOutAttendance(List<UserAttendance> attendance) {
     DateTime todayDate = DateTime.now();
     DateTime startOfDay = DateTime(todayDate.year, todayDate.month, todayDate.day);
@@ -2461,12 +2396,7 @@ class HomeViewState extends State<HomeView>with RouteAware {
 
     if (todayAttendance.isNotEmpty) {
       todayUserAttendance = todayAttendance;
-      // setState(() {
-      //   todayDutyInMarked = true;
-      // });
 
-
-      // Accumulate total duration for all marked attendances
       Duration totalDutyDuration = Duration.zero;
 
       for (final userAttendance in todayAttendance) {
@@ -2485,35 +2415,25 @@ class HomeViewState extends State<HomeView>with RouteAware {
         final adjustedMinute = totalMinutes % 60; // Minutes
 
         // Format the result as HH:mm
+
         final dutyDuration =
             '${adjustedHour.toString().padLeft(2, '0')}: ${adjustedMinute.toString().padLeft(2, '0')}';
-        dutyInHourBanner = dutyDuration;
 
-        // // Update dutyIn button text
-        // dutyInBtnText = todayAttendance.isNotEmpty
-        //     ? "${'duty_in'.tr()} ${DateFormat('h:mm').format(todayAttendance.first.actStartTime)} ${DateFormat('a').format(todayAttendance.first.actStartTime).toUpperCase()}"
-        //     : 'duty_in'.tr();
+        setState(() {
+          todayDutyInMarked =  true;
+          dutyInHourBanner = dutyDuration;
+        });
+
       });
 
-      // disableDutyIn();
-      // stopDutyInCheck();
-      // enableDutyOut();
     }
+    else{
+      setState(() {
+        todayDutyInMarked =  false;
+        dutyInHourBanner = '';
+      });
 
-    // if (todayAttendance.isNotEmpty && todayAttendance.first.actEndTime != null) {
-    //   todayDutyOutMarked = true;
-    //   dutyOutBtnText =
-    //   "${'duty_out'.tr()} ${DateFormat('h:mm').format(todayAttendance.first.actEndTime!)} ${DateFormat('a').format(todayAttendance.first.actEndTime!).toUpperCase()}";
-    //   disableDutyOut();
-    //   stopDutyOutCheck();
-    // }else{
-    //   todayDutyOutMarked = false;
-    //   dutyOutBtnText = 'duty_out'.tr();
-    //   if(todayDutyInMarked) {
-    //     enableDutyOut();
-    //   }
-    //
-    // }
+    }
 
   }
 
@@ -2686,177 +2606,190 @@ class HomeViewState extends State<HomeView>with RouteAware {
     return leaveDaysCount;
   }
 
-  void startDutyInCheck(UserRoaster roaster) {
-    // Cancel any existing timer
-    dutyInTimer?.cancel();
 
-    // Start a single periodic timer to check duty conditions
-    dutyInTimer = Timer.periodic(Duration(milliseconds: 600), (Timer timer) {
-      updateDutyInRoaster(roaster);
-    });
-  }
-  void updateDutyInRoaster(UserRoaster roaster){
 
-    if(!todayDutyInMarked) {
-      Timer.periodic(Duration(milliseconds: 60), (Timer timer) {
-        final now = DateTime.now();
-        final dutyStartEnableTime = roaster.dutyStartEnableTime;
-        final dutyStartDisableTime = roaster.dutyStartDisableTime;
-
-        if (dutyStartEnableTime != null &&
-            dutyStartDisableTime != null &&
-            now.isAfter(dutyStartEnableTime) &&
-            now.isBefore(dutyStartDisableTime) &&
-            !todayDutyInMarked) {
-          enableDutyIn();
-        } else {
-          disableDutyIn();
-        }
+  Future<void> onTapDutyIn(String shiftId) async {
+    if(! await isGPSAndAppLocationEnabled()){
+      setState(() {
+        alertHeader = '';
+        alertMessage = 'no_gps'.tr();
+        showAlert = true;
+        cancelBtnTitle = '';
+        okBtnTitle =   'ok'.tr();
       });
+       openMySISAppSettings();
+      return;
     }
-    else {
-      disableDutyIn();
-      dutyInTimer?.cancel(); // Cancel the timer if conditions are not met
+    if(! await isWifiOrMobileDataConnected()){
+      setState(() {
+        alertHeader = '';
+        alertMessage = 'no_wi_fi'.tr();
+        showAlert = true;
+        cancelBtnTitle = '';
+        okBtnTitle =   'ok'.tr();
+      });
+       // openAppSettings() ;
+      return;
     }
 
-}
-  void stopDutyInCheck() {
-    // Cancel the timer when no longer needed
-    dutyInTimer?.cancel();
+
+    final shiftDetail = await getUnitShiftDetailsById(shiftId,keyAttendanceStatusDutyIn);
+
+    if (shiftDetail == null) {
+      return;
+    }
+
+    loadScanUnitShiftView(
+      keyAttendanceModeSelf,
+      keyAttendanceStatusDutyIn,
+      null,
+      shiftDetail,
+    );
   }
+  Future<void> onTapOtherDuty() async {
+    if(! await isGPSAndAppLocationEnabled()){
+      setState(() {
+        alertHeader = '';
+        alertMessage = 'no_gps'.tr();
+        showAlert = true;
+        cancelBtnTitle = '';
+        okBtnTitle =   'ok'.tr();
+      });
 
-  void startDutyOutCheck(UserRoaster roaster) {
-    dutyOutTimer?.cancel();
+      return;
+    }
+    if(! await isWifiOrMobileDataConnected()){
+      setState(() {
+        alertHeader = '';
+        alertMessage = 'no_wi_fi'.tr();
+        showAlert = true;
+        cancelBtnTitle = '';
+        okBtnTitle =   'ok'.tr();
+      });
+      return;
+    }
 
-    dutyOutTimer = Timer.periodic(Duration(milliseconds: 500), (Timer timer) {
-      updateDutyOutRoaster(roaster);
-    });
+    loadOthersDutyView();
+
   }
-  void updateDutyOutRoaster(UserRoaster roaster) {
-    if (todayDutyInMarked && !todayDutyOutMarked) {
+  Future<UnitShiftDetail?> getUnitShiftDetailsByIdNew(String shiftId, String attendanceStatus) async {
+    DateTime now = DateTime.now();
+    TimeOfDay currentTime = TimeOfDay(hour: now.hour, minute: now.minute);
 
-      final now = DateTime.now();
-      final dutyStartEnableTime = roaster.dutyStartEnableTime;
-      final dutyEndDisableTime = roaster.dutyEndDisableTime;
+    final matches = userShiftDetailsData.where((shift) {
+      final startTime = _parseTimeOfDay(shift.startTime);
+      final endTime = _parseTimeOfDay(shift.endTime);
 
-      if (dutyStartEnableTime != null &&
-          dutyEndDisableTime != null &&
-          now.isAfter(dutyStartEnableTime) &&
-          now.isBefore(dutyEndDisableTime) &&
-          todayDutyInMarked &&
-          !todayDutyOutMarked) {
-        enableDutyOut();
+      final shiftStartBeforeDuration = _parseShiftDuration(shift.shiftStartBefore);
+      final shiftEndAfterDuration = _parseShiftDuration(shift.dutyInBefore);
+
+      final adjustedStartTime = _adjustTimeOfDay(startTime, shiftStartBeforeDuration);
+      final adjustedEndTime = _adjustTimeOfDay(endTime, -shiftEndAfterDuration);
+
+      // --- Debug prints ---
+      debugPrint('--- Shift Debug ---');
+      debugPrint('shiftId: ${shift.shiftId}, comparing with: $shiftId');
+      debugPrint('StartTime: $startTime, EndTime: $endTime');
+      debugPrint('ShiftStartBefore: $shiftStartBeforeDuration, DutyInBefore: $shiftEndAfterDuration');
+      debugPrint('AdjustedStartTime: $adjustedStartTime, AdjustedEndTime: $adjustedEndTime');
+      debugPrint('CurrentTime: $currentTime');
+      debugPrint('IsTimeBetween: ${_isTimeBetween(currentTime, adjustedStartTime, adjustedEndTime)}');
+
+
+      return shift.shiftId == shiftId &&
+          _isTimeBetween(currentTime, adjustedStartTime, adjustedEndTime);
+    }).toList();
+
+    if (matches.isEmpty) {
+      if (attendanceStatus == keyAttendanceStatusDutyOut) {
+        showPopupAlert('alert'.tr(), 'other_mark_shift_not_allowed1'.tr());
       }
       else {
-        disableDutyOut();
+        showPopupAlert('alert'.tr(), 'no_shift_found'.tr());
       }
-    } else {
-      disableDutyOut();
-      dutyOutTimer?.cancel(); // Cancel the timer if conditions are not met
+      return null;
     }
-  }
-  void stopDutyOutCheck() {
-    // Cancel the timer when no longer needed
-    dutyOutTimer?.cancel();
-  }
-
-  void enableDutyIn(){
-    setState(() {
-      dutyInBgColor =  redColor3;
-      dutyInFontColor =  whiteColor;
-      dutyInShadowColor =  Colors.black.withOpacity(0.2);
-      isDutyInTapEnabled =  true;
-    });
-
-  }
-  void disableDutyIn(){
-
-    setState(() {
-      dutyInBgColor =  isDarkMode? greyColor5:greyColor1;
-      dutyInFontColor =    isDarkMode? greyColor7:greyColor4 ;
-      dutyInShadowColor =   Colors.transparent ;
-      isDutyInTapEnabled =  false ;
-    });
-
-  }
-  void enableDutyOut(){
-    setState(() {
-      isDutyOutTapEnabled = true;
-      dutyOutBgColor =   redColor3 ;
-      dutyOutFontColor =  whiteColor ;
-      dutyOutShadowColor =   Colors.black.withOpacity(0.2);
-    });
-
-
-  }
-  void disableDutyOut(){
-    setState(() {
-      isDutyOutTapEnabled = false;
-      dutyOutBgColor =  isDarkMode? greyColor5:greyColor1;
-      dutyOutFontColor =  isDarkMode? greyColor7:greyColor4;
-      dutyOutShadowColor =   Colors.transparent;
-    });
-
-  }
-
-  Future<bool> isWifiOrMobileDataConnected() async {
-    List<ConnectivityResult> connectivityResults = await Connectivity().checkConnectivity();
-    printInDebug("Connectivity Results: $connectivityResults");
-    return (connectivityResults.contains(ConnectivityResult.mobile) || connectivityResults.contains(ConnectivityResult.wifi));
-  }
-  void openMobileDataSettings() {
-    if (Theme.of(context).platform == TargetPlatform.android) {
-      final intent = AndroidIntent(
-        action: 'android.settings.DATA_ROAMING_SETTINGS',
-        flags: <int>[Flag.FLAG_ACTIVITY_NEW_TASK],
-      );
-      intent.launch();
-    } else {
-      openMobileDataSettingsiOS();
+    else{
+      return matches.first;
     }
-  }
-  void openMobileDataSettingsiOS() {
-    const platform = MethodChannel('app_settings_channel');
-    platform.invokeMethod('openSettings');
+
   }
 
-  Future<bool> isGPSEnabled() async {
-    return await Geolocator.isLocationServiceEnabled();
-  }
-  void openGPSSettings() {
-    if (Platform.isAndroid) {
-      final intent = AndroidIntent(
-        action: 'android.settings.LOCATION_SOURCE_SETTINGS',
-        flags: <int>[Flag.FLAG_ACTIVITY_NEW_TASK],
-      );
-      intent.launch();
-    } else if (Platform.isIOS) {
-      openGPSSettingsiOS();
+  Future<UnitShiftDetail?> getUnitShiftDetailsById(String shiftId, String attendanceStatus) async {
+    DateTime now = DateTime.now();
+    TimeOfDay currentTime = TimeOfDay(hour: now.hour, minute: now.minute);
+
+    final matches = userShiftDetailsData.where((shift) {
+      final startTime = _parseTimeOfDay(shift.startTime);
+      final endTime = _parseTimeOfDay(shift.endTime);
+
+      final shiftStartBeforeDuration = _parseShiftDuration(shift.shiftStartBefore);
+      final shiftEndAfterDuration = _parseShiftDuration(shift.dutyInBefore);
+
+      final adjustedStartTime = _adjustTimeOfDay(startTime, shiftStartBeforeDuration);
+      final adjustedEndTime = _adjustTimeOfDay(endTime, -shiftEndAfterDuration);
+
+      // --- Debug prints ---
+      debugPrint('--- Shift Debug ---');
+      debugPrint('shiftId: ${shift.shiftId}, comparing with: $shiftId');
+      debugPrint('StartTime: $startTime, EndTime: $endTime');
+      debugPrint('ShiftStartBefore: $shiftStartBeforeDuration, DutyInBefore: $shiftEndAfterDuration');
+      debugPrint('AdjustedStartTime: $adjustedStartTime, AdjustedEndTime: $adjustedEndTime');
+      debugPrint('CurrentTime: $currentTime');
+      debugPrint('IsTimeBetween: ${_isTimeBetween(currentTime, adjustedStartTime, adjustedEndTime)}');
+
+
+      return shift.shiftId == shiftId &&
+          _isTimeBetween(currentTime, adjustedStartTime, adjustedEndTime);
+    }).toList();
+
+    if (matches.isEmpty) {
+      if (attendanceStatus == keyAttendanceStatusDutyOut) {
+        showPopupAlert('alert'.tr(), 'other_mark_shift_not_allowed1'.tr());
+      }
+      else {
+        showPopupAlert('alert'.tr(), 'no_shift_found'.tr());
+      }
+      return null;
     }
-  }
-  void openGPSSettingsiOS() {
-    const platform = MethodChannel('app_settings_channel');
-    try {
-      platform.invokeMethod('openSettings');
-    } catch (e) {
-      print("Error opening iOS settings: $e");
+    else{
+      return matches.first;
     }
+
   }
+  Future<void> onTapDutyOut(String shiftId) async {
+    if(! await isGPSAndAppLocationEnabled()){
+      setState(() {
+        alertHeader = '';
+        alertMessage = 'no_gps'.tr();
+        showAlert = true;
+        cancelBtnTitle = '';
+        okBtnTitle =   'ok'.tr();
+      });
+      openMySISAppSettings();
+      return;
+    }
+    if(! await isWifiOrMobileDataConnected()){
+      setState(() {
+        alertHeader = '';
+        alertMessage = 'no_wi_fi'.tr();
+        showAlert = true;
+        cancelBtnTitle = '';
+        okBtnTitle =   'ok'.tr();
+      });
+      openMySISAppSettings() ;
+      return;
+    }
 
-  Future<void> onTapDutyIn() async {
-   if(! await isGPSEnabled()){
-     openGPSSettings();
-     return;
-   }
-   if(! await isWifiOrMobileDataConnected()){
-     openMobileDataSettings();
-     return;
-   }
+    final shiftDetail = await getUnitShiftDetailsById(shiftId,keyAttendanceStatusDutyOut);
 
-    loadScanUnitShiftView(keyAttendanceModeSelf,keyAttendanceStatusDutyIn,null);
+
+    if (shiftDetail == null) {
+      return;
+    }
+    loadScanUnitShiftView(keyAttendanceModeSelf,keyAttendanceStatusDutyOut,todayUserAttendance.first,shiftDetail);
   }
-
-  Future<void> loadScanUnitShiftView(String mode, String status, UserAttendance? todayAttendance) async{
+  Future<void> loadScanUnitShiftView(String mode, String status, UserAttendance? todayAttendance, UnitShiftDetail? selectedShiftDetail) async{
     todayUnitDutyPost = await getTodayRosterUnitShiftData();
   Navigator.push(
     context,
@@ -2865,44 +2798,14 @@ class HomeViewState extends State<HomeView>with RouteAware {
         userProfile: userProfile.first,
         attendanceMode: mode,
         unitDutyPosts: todayUnitDutyPost,
-        unitShiftDetails: unitShiftDetails,
+        unitShiftDetails: userShiftDetailsData,
         userPostings: userPostings,
         attendanceStatus: status,
         userAttendance: todayAttendance,
+        selectedShift: selectedShiftDetail,
       ),
     ),
   );
-}
-
-  Future<void> onTapOtherDuty() async {
-  if(! await isGPSEnabled()){
-    setState(() {
-      alertHeader = '';
-      alertMessage = 'no_gps'.tr();
-      showAlert = true;
-      cancelBtnTitle = '';
-      okBtnTitle =   'ok'.tr();
-    });
-
-    // openGPSSettings();
-    return;
-  }
-  if(! await isWifiOrMobileDataConnected()){
-    setState(() {
-      alertHeader = '';
-      alertMessage = 'no_wi_fi'.tr();
-      showAlert = true;
-      cancelBtnTitle = '';
-      okBtnTitle =   'ok'.tr();
-    });
-    // openMobileDataSettings();
-    return;
-  }
-
-
-
-  loadOthersDutyView();
-
 }
 
   void loadOthersDutyView(){
@@ -2913,7 +2816,7 @@ class HomeViewState extends State<HomeView>with RouteAware {
         userProfile: userProfile.first,
         attendanceMode: keyAttendanceModeOther,
         unitDutyPosts: unitDutyPosts,
-        unitShiftDetails: unitShiftDetails,
+        unitShiftDetails: userShiftDetailsData,
         userPostings: userPostings,
 
       ),
@@ -2969,6 +2872,36 @@ class HomeViewState extends State<HomeView>with RouteAware {
       cancelBtnTitle = cancelText;
 
     });
+  }
+  TimeOfDay _parseTimeOfDay(String timeString) {
+    List<String> parts = timeString.split(':');
+    return TimeOfDay(hour: int.parse(parts[0]), minute: int.parse(parts[1]));
+  }
+  TimeOfDay _adjustTimeOfDay(TimeOfDay time, Duration adjustmentDuration) {
+    final adjustmentMinutes = adjustmentDuration.inMinutes; // Convert Duration to int (minutes)
+    final totalMinutes = time.hour * 60 + time.minute - adjustmentMinutes;
+    final adjustedHour = (totalMinutes ~/ 60) % 24;
+    final adjustedMinute = totalMinutes % 60;
+    return TimeOfDay(hour: adjustedHour, minute: adjustedMinute);
+  }
+  bool _isTimeBetween(TimeOfDay current, TimeOfDay start, TimeOfDay end) {
+    final currentMinutes = current.hour * 60 + current.minute;
+    final startMinutes = start.hour * 60 + start.minute;
+    final endMinutes = end.hour * 60 + end.minute;
+
+    if (startMinutes <= endMinutes) {
+      return currentMinutes >= startMinutes && currentMinutes <= endMinutes;
+    } else {
+      return currentMinutes >= startMinutes || currentMinutes <= endMinutes;
+    }
+  }
+  Duration _parseShiftDuration(String shiftDuration) {
+    List<String> parts = shiftDuration.split(':');
+    return Duration(
+      hours: int.parse(parts[0]),
+      minutes: int.parse(parts[1]),
+      seconds: int.parse(parts[2]),
+    );
   }
 
 
@@ -3027,6 +2960,7 @@ class _WebViewScreenState extends State<WebViewScreen> {
                       displayZoomControls: false, // Hide zoom UI (Android)
                       useWideViewPort: true, // Ensure the content fits properly
                     ),
+
                     onWebViewCreated: (controller) {
                       // _injectJavaScript();
                       webViewController = controller;
@@ -3037,18 +2971,45 @@ class _WebViewScreenState extends State<WebViewScreen> {
                         },
                       );
                       controller.addJavaScriptHandler(
+
                         handlerName: "closePopup",
-                        callback: (args) {
+                        callback: (args) async {
+                          final String id = args.isNotEmpty ? args[0].toString() : "0";
+                          Map<String, dynamic> notificationData = {
+                            "id": id,
+                            "readStatus": 1,
+                            "dirtyFlag" : 1,
+                            "readDate": DateTime.now().toIso8601String(), // ✅ Convert to string
+                          };
+
+                          await updateUserNotificationWebViewTable(notificationData);
                           Navigator.pop(context);
                         },
                       );
                       controller.addJavaScriptHandler(
                         handlerName: "skipPopup",
                         callback: (args) {
+                          printInDebug('skio popup close');
+
                           Navigator.pop(context);
                         },
                       );
                     },
+                    // controller.addJavaScriptHandler(
+                    //   handlerName: "popClose",
+                    //   callback: (args) async {
+                    //     final String id = args.isNotEmpty ? args[0].toString() : "0";
+                    //
+                    //     // ✅ Update SQLite based on ID
+                    //     await NotificationHelper.markNotificationAsRead(
+                    //       id: int.parse(id),
+                    //       modifiedBy: appUserId,
+                    //     );
+                    //
+                    //     // ✅ Close WebView
+                    //     Navigator.pop(context);
+                    //   },
+                    // ),
                     onLoadStart: (controller, url) {
                       setState(() {
                         _isLoading = true;
@@ -3076,13 +3037,13 @@ class _WebViewScreenState extends State<WebViewScreen> {
 
   void createNotification(UserNotification notification){
 
-    Map <String, dynamic> notificationData = getUserNotification(notification);
+    Map <String, dynamic> notificationData = notification.toJson();
 
     UserNotification userNotification = UserNotification.fromJson(notificationData);
 
     List<UserNotification> data = [userNotification];
 
-    syncUserNotificationData(data);
+    syncUserNotificationWbViewData(data);
 
     List<dynamic> list = [notificationData];
 
@@ -3090,33 +3051,6 @@ class _WebViewScreenState extends State<WebViewScreen> {
 
   }
 
-  Map <String, dynamic> getUserNotification(UserNotification notification){
-
-    Map <String, dynamic> notificationMap = {
-    "id": notification.id,
-    "RegNo": regNo,
-    "MESSAGE_TYPE": notification.messageType,
-    "IS_HTML_BODY": notification.isHtmlBody,
-    "IS_HTML_PAGE": notification.isHtmlPage,
-    "IS_IMAGE_URL": notification.isImageUrl,
-    "TITLE": notification.title,
-    "MESSAGE": notification.message,
-    "ACTION_URL": notification.actionUrl,
-    "EXPIRY_DATE": notification.expiryDate,
-    "ENTITY_ID": notification.entityId,
-    "PARENT_ID": notification.parentId,
-    "PARENT_TYPE": notification.parentType,
-    "READ_STATUS": 1,
-    "READ_DATE": DateTime.now().toIso8601String(),
-    "POPUP_ALERT": notification.popupAlert,
-    "DELETED": notification.deleted,
-    "DATE_MODIFIED": notification.dateModified,
-     "DIRTY_FLAG": 1
-    };
-
-    return notificationMap;
-
-  }
 
   Future<void> uploadNotification(dynamic notification) async {
     APIHelper.instance.postAllData(userNotificationPostApi, notification, (responseData) {
@@ -3130,7 +3064,7 @@ class _WebViewScreenState extends State<WebViewScreen> {
             "id": data['ID'] ?? '',
             "dirtyFlag": 0,
           };
-          updateUserNotificationTable(notificationData);
+          updateUserNotificationWebViewTable(notificationData);
         }
       } else {
         printInDebug('Response data is empty.');
@@ -3143,7 +3077,9 @@ class _WebViewScreenState extends State<WebViewScreen> {
     );
   }
 
-  Future<void> updateUserNotificationTable(Map <String,dynamic> notification) async{
+  Future<void> updateUserNotificationWebViewTable(Map <String,dynamic> notification) async{
+    printInDebug('test popup close');
+
     await DatabaseHelper.instance.updateTableColumns(
         keyTableUserNotification,
         notification,
@@ -3152,7 +3088,7 @@ class _WebViewScreenState extends State<WebViewScreen> {
 
   }
 
-  Future<void> syncUserNotificationData(List<UserNotification> userNotification) async {
+  Future<void> syncUserNotificationWbViewData(List<UserNotification> userNotification) async {
 
       // Update multiple rows using a generic update function
       await DatabaseHelper.instance.updateTableData<UserNotification>(
@@ -3162,7 +3098,6 @@ class _WebViewScreenState extends State<WebViewScreen> {
             (data) => data.toMap(),
 
       );
-      printInDebug('Updated ${userNotification.length} records in $keyTableUserNotification');
 
     }
 
@@ -3208,28 +3143,6 @@ class _WebViewScreenState extends State<WebViewScreen> {
     } catch (e) {
       print("Error capturing screenshot: $e");
     }
-  }
-
-  void showPermissionDialog(BuildContext context) {
-    showDialog(
-      context: context,
-      builder: (context) => AlertDialog(
-        title: Text("Storage Permission Needed"),
-        content: Text("MySIS needs storage access to save files. Please allow permission in settings."),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.pop(context),
-            child: Text("Cancel"),
-          ),
-          TextButton(
-            onPressed: () async {
-              await openAppSettings(); // 🔹 Open App Settings for user
-            },
-            child: Text("Open Settings"),
-          ),
-        ],
-      ),
-    );
   }
 
 

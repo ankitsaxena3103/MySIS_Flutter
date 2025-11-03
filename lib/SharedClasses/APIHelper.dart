@@ -33,6 +33,7 @@ class APIHelper {
 
     final jsonString = jsonEncode(data);
     printInDebug('Request (JSON): $jsonString');
+    printInDebug('$url');
 
     try {
       final response = await http.post(

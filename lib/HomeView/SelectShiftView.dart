@@ -393,8 +393,6 @@ class SelectShiftViewState extends State<SelectShiftView>{
             ),
           ),
 
-
-
         ],
       ),
     );
@@ -481,6 +479,8 @@ class RadioButton extends StatelessWidget {
   final double textSize;
   final String name;
   final String time;
+  final String hrs;
+
 
   RadioButton({
     required this.id,
@@ -489,7 +489,9 @@ class RadioButton extends StatelessWidget {
     this.controlSize = 28,
     this.color = Colors.white,
     this.textSize = 14,
-    required this.name, required this.time,
+    required this.name,
+    required this.time,
+    required this.hrs,
   });
 
   @override
@@ -527,42 +529,82 @@ class RadioButton extends StatelessWidget {
 
           child:  Padding(
             padding:  EdgeInsets.all(pathS/4),
-            child: Row(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            child: Column(
               children: [
-                Container(
-                  width: pathS,
-                  child: Text(
-                    name,
-                    style: TextStyle(
-                      color: isDarkMode ? whiteColor:greyColor6,
-                      fontSize: size,
-                      fontWeight: FontWeight.w600,
-                      fontFamily: 'Roboto',
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: [
+                    Text(
+                      name,
+                      style: TextStyle(
+                        color: isDarkMode ? whiteColor:greyColor6,
+                        fontSize: size,
+                        fontWeight: FontWeight.w600,
+                        fontFamily: 'Roboto',
+                      ),
+                      textAlign: TextAlign.left,
                     ),
-                    textAlign: TextAlign.left,
-                  ),
+                    Container(
+                      alignment: Alignment.centerRight,
+                      child: Icon(
+                        selectedID == id ? Icons.radio_button_on: Icons.radio_button_off,
+                        size: controlSize,
+                        color: isDarkMode ? redColor1:redColor3,
+                      ),
+                    ),
+                  ],
                 ),
-                SizedBox(width: pathS/8),
-                Text(
-                  time,
-                  style: TextStyle(
-                    color: isDarkMode ? whiteColor:greyColor6,
-                    fontSize: size,
-                    fontWeight: FontWeight.w300,
-                  ),
-                  textAlign: TextAlign.center,
-                ),
-                SizedBox(width: pathS/8),
+                SizedBox(height: pathS/4),
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
 
-                Container(
-                  alignment: Alignment.centerRight,
-                  child: Icon(
-                    selectedID == id ? Icons.radio_button_on: Icons.radio_button_off,
-                    size: controlSize,
-                    color: isDarkMode ? redColor1:redColor3,
-                  ),
+                  children: [
+                    Text(
+                      'duty_timing'.tr(),
+                      style: TextStyle(
+                        color: isDarkMode ? whiteColor:greyColor6,
+                        fontSize: size,
+                        fontWeight: FontWeight.w300,
+                      ),
+                      textAlign: TextAlign.center,
+                    ),
+                    Text(
+                      time,
+                      style: TextStyle(
+                        color: isDarkMode ? whiteColor:greyColor6,
+                        fontSize: size,
+                        fontWeight: FontWeight.w500,
+                      ),
+                      textAlign: TextAlign.center,
+                    ),
+                  ],
                 ),
+                SizedBox(height: pathS/8),
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+
+                  children: [
+                    Text(
+                      'duty_hrs'.tr(),
+                      style: TextStyle(
+                        color: isDarkMode ? whiteColor:greyColor6,
+                        fontSize: size,
+                        fontWeight: FontWeight.w300,
+                      ),
+                      textAlign: TextAlign.center,
+                    ),
+                    Text(
+                      hrs,
+                      style: TextStyle(
+                        color: isDarkMode ? whiteColor:greyColor6,
+                        fontSize: size,
+                        fontWeight: FontWeight.w500,
+                      ),
+                      textAlign: TextAlign.center,
+                    ),
+                  ],
+                ),
+
               ],
             ),
           ),
@@ -570,7 +612,6 @@ class RadioButton extends StatelessWidget {
       ),
     );
   }
-
 
 
 }
@@ -593,8 +634,8 @@ class RadioButtonGroup extends StatelessWidget {
       children: items.asMap().map((index, item) {
         final indexNo = index;
         final name = item.shiftName;
-        final time = '${getFormattedDateTime(item.startTime, 'hh:mm:ss', 'hh:mm a')} - ${getFormattedDateTime(item.endTime, 'hh:mm:ss', 'hh:mm a')}';
-
+        final time = '${getFormattedTimeFromDate(item.startTime)} - ${getFormattedTimeFromDate(item.endTime,)}';
+        final hrs = '${item.dutyHrs} Hrs';
         return MapEntry(
           index,
           RadioButton(
@@ -603,6 +644,7 @@ class RadioButtonGroup extends StatelessWidget {
             selectedID: selectedId,
             name: name,
             time: time,
+            hrs: hrs,
           ),
         );
       }).values.toList(), // Convert MapEntry values to a list

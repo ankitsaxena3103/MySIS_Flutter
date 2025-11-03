@@ -12,8 +12,22 @@ import 'package:mysis/SharedClasses/ThemeProvider.dart';
 import 'package:provider/provider.dart';
 import 'package:mysis/UserAuthViews/EnterPINView.dart';
 import 'package:package_info_plus/package_info_plus.dart';
+import 'package:workmanager/workmanager.dart';
 
 import 'HomeView/route_observer.dart';
+import 'SharedClasses/ServerServices.dart';
+import 'UserAuthViews/PINLockScreen.dart';
+final GlobalKey<NavigatorState> navigatorKey = GlobalKey<NavigatorState>();
+
+@pragma('vm:entry-point')
+void callbackDispatcher() {
+
+  Workmanager().executeTask((task, inputData) async {
+    printInDebug("Background task: $task");
+    await ServerService.instance.loadServerData();
+    return Future.value(true);
+  });
+}
 
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -21,12 +35,14 @@ Future<void> main() async {
 
   HttpOverrides.global = MyHttpOverrides();
 
+  // Initialize Workmanager safely
+  await _initializeWorkmanager();
+
   runApp(
     MultiProvider(
       providers: [
-        ChangeNotifierProvider(create: (context) => ThemeProvider()),
-        ChangeNotifierProvider(create: (context) => LanguageProvider()),
-        // Add other providers if needed
+        ChangeNotifierProvider(create: (_) => ThemeProvider()),
+        ChangeNotifierProvider(create: (_) => LanguageProvider()),
       ],
       child: EasyLocalization(
         supportedLocales: Languages.supportedLocales,
@@ -38,21 +54,87 @@ Future<void> main() async {
   );
 }
 
-class MyApp extends StatelessWidget {
+Future<void> _initializeWorkmanager() async {
+  try {
+    await Workmanager().initialize(
+      callbackDispatcher,
+      isInDebugMode: true,
+    );
+    printInDebug('Workmanager initialized successfully');
+  } catch (e) {
+    printInDebug('Error initializing Workmanager: $e');
+  }
+}
+
+class MyApp extends StatefulWidget {
   const MyApp({super.key});
+
+  @override
+  State<MyApp> createState() => _MyAppState();
+}
+
+class _MyAppState extends State<MyApp> with WidgetsBindingObserver {
+  bool _isPinScreenOpen = true;
+
+  @override
+  void initState() {
+    super.initState();
+    WidgetsBinding.instance.addObserver(this);
+    Future.delayed(Duration(seconds: 10),() {
+      _isPinScreenOpen = false;
+    });
+  }
+
+  @override
+  void dispose() {
+    WidgetsBinding.instance.removeObserver(this);
+    super.dispose();
+  }
+
+  @override
+  void didChangeAppLifecycleState(AppLifecycleState state) {
+    if (state == AppLifecycleState.inactive && !_isPinScreenOpen) {
+      Future.delayed(Duration(milliseconds: 100), _showPinScreen);
+    }
+
+  }
+
+
+  Future<void> _showPinScreen() async {
+    if (_isPinScreenOpen) return;
+
+    final currentPin = await Preferences.getUserPreference(keyPIN) ?? '';
+    if (currentPin.isEmpty) return;
+
+    _isPinScreenOpen = true;
+
+    // ✅ Use the global navigator key instead of context
+    navigatorKey.currentState?.push(
+      MaterialPageRoute(
+        fullscreenDialog: true,
+        builder: (_) => PINLockScreen(currentPIN: currentPin),
+      ),
+    ).then((_) {
+      Future.delayed(Duration(seconds: 5),() {
+      _isPinScreenOpen = false;
+      });
+
+
+    });
+  }
 
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
-        localizationsDelegates: context.localizationDelegates,
-        supportedLocales: context.supportedLocales,
-        locale: context.locale,
-        navigatorObservers: [routeObserver],
-        home: MyHomePage()
+      navigatorKey: navigatorKey, // assign the key here
+      localizationsDelegates: context.localizationDelegates,
+      supportedLocales: context.supportedLocales,
+      locale: context.locale,
+      navigatorObservers: [routeObserver],
+      home: const MyHomePage(),
     );
   }
 }
-
 
 class MyHomePage extends StatelessWidget {
   const MyHomePage({super.key});
@@ -109,6 +191,7 @@ Future<bool> futureBuilderData() async {
   userName = await Preferences.getUserPreference(keyUserName) ?? '';
   regNo = await Preferences.getUserPreference(keyUserID) ?? '';
   phoneNo = await Preferences.getUserPreference(keyMobile) ?? '';
+  isUserBiometricEnabled = await Preferences.getUserPreferenceBool(keyBiometricEnabled)?? false;
 
 
   if (currentPin.isNotEmpty ) {

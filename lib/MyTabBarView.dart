@@ -6,7 +6,9 @@ import 'package:mysis/HomeView/HomeView.dart';
 import 'package:mysis/CommonViews/Utility.dart';
 import 'package:mysis/Menu/MenuItemView.dart';
 import 'package:mysis/Duty/DutyView.dart';
+import 'package:mysis/SharedClasses/ServerServices.dart';
 import 'package:provider/provider.dart';
+import 'package:workmanager/workmanager.dart';
 
 import 'SharedClasses/LanguageProvider.dart';
 import 'SharedClasses/ThemeProvider.dart';
@@ -19,7 +21,6 @@ class MyTabBarView extends StatefulWidget {
 class MyTabBarViewState extends State<MyTabBarView> {
   int tabSelectedIndex = 0;
   late List<Widget> tabs;
-  // late PersistentBottomSheetController bottomSheetController; // Declare a controller variable
   DateTime? lastBackPressTime;
 
   @override
@@ -35,8 +36,7 @@ class MyTabBarViewState extends State<MyTabBarView> {
       DutyView(),
       MenuItemView(
         onCloseBottomSheet: () {
-
-        }, onTabSelected: (int ) {
+        }, onTabSelected: (intVal ) {
 
       },
       ),
@@ -44,55 +44,38 @@ class MyTabBarViewState extends State<MyTabBarView> {
     setState(() {
       tabSelectedIndex = 0;
     });
+
+    _scheduleBackgroundTasks();
+    loadServerDataAtStart();
+
   }
 
+
+  void _scheduleBackgroundTasks() {
+    // Periodic task
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+
+      Workmanager().registerPeriodicTask(
+        "fetchDataTask",
+        "loadServerData",
+        frequency: Duration(minutes: 16),
+      );
+
+      Workmanager().registerOneOffTask(
+        "testNow",
+        "loadServerData",
+        initialDelay: Duration(seconds: 30),
+      );
+
+
+    });
+
+  }
+
+  Future<void> loadServerDataAtStart() async {
+    await ServerService.instance.loadServerData();
+  }
   @override
-  // Widget build(BuildContext context) {
-  //   calculateSizes(context);
-  //   return Scaffold(
-  //     body: tabs[tabSelectedIndex],
-  //     bottomNavigationBar: BottomNavigationBar(
-  //       backgroundColor: Color.fromRGBO(195, 50, 53, 1).withOpacity(1),
-  //
-  //       fixedColor: Colors.white,
-  //       unselectedItemColor: Colors.white70,
-  //       currentIndex: tabSelectedIndex,
-  //       items: const <BottomNavigationBarItem>[
-  //         BottomNavigationBarItem(
-  //           icon: Icon(Icons.home),
-  //           label: 'HOME',
-  //         ),
-  //         BottomNavigationBarItem(
-  //           icon: Icon(Icons.calendar_month),
-  //           label: 'DUTY',
-  //         ),
-  //         BottomNavigationBarItem(
-  //           icon: Icon(Icons.menu),
-  //           label: 'MENU ',
-  //         ),
-  //
-  //       ],
-  //
-  //       onTap: (index) {
-  //         setState(() {
-  //           tabSelectedIndex = index;
-  //         });
-  //         if(index == 0){
-  //
-  //         }
-  //         if(index == 1){
-  //
-  //         }
-  //
-  //         if(index == 2){
-  //
-  //         }
-  //       },
-  //     ),
-  //   );
-  // }
-
-
   Widget build(BuildContext context) {
     calculateSizes(context);
 

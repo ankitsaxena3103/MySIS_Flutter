@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:flutter/material.dart';
 import 'package:mysis/CommonViews/Utility.dart';
 import 'package:easy_localization/easy_localization.dart';
@@ -625,6 +627,10 @@ class SyncDataViewState extends State<SyncDataView> {
       await dbHelper.clearTable(keyTableUserProfile);
     }
 
+    if (tableName == null || tableName == keyTableUserNotification) {
+      await dbHelper.clearTable(keyTableUserNotification);
+    }
+
     if (tableName == null || tableName == keyTableUserPosting) {
       await dbHelper.clearTable(keyTableUserPosting);
     }
@@ -674,28 +680,45 @@ class SyncDataViewState extends State<SyncDataView> {
 
   Future<void> uploadData([String? tableName]) async {
     if (tableName == null || tableName == keyTableUserAttendance) {
-      await uploadTableDataToServer(
+      await uploadTableDataToServer<UserAttendance>(
         tableName: keyTableUserAttendance,
         idColumn: "id",
         apiUrl: userAttendancePostApi,
+        fromMap: (map) => UserAttendance.fromMap(map),
+        toMap: (item) => item.toJson(),
+      );
+    }
+
+    if (tableName == null || tableName == keyTableUserNotification) {
+      await uploadTableDataToServer<UserNotification>(
+        tableName: keyTableUserNotification,
+        idColumn: "id",
+        apiUrl: userNotificationPostApi,
+        fromMap: (map) => UserNotification.fromMap(map),
+        toMap: (item) => item.toJson(),
       );
     }
 
     if (tableName == null || tableName == keyTableUserLeave) {
-      await uploadTableDataToServer(
+      await uploadTableDataToServer<UserLeaves>(
         tableName: keyTableUserLeave,
         idColumn: "id",
         apiUrl: userLeavesPostApi,
+        fromMap: (map) => UserLeaves.fromMap(map),
+        toMap: (item) => item.toJson(),
       );
     }
 
     if (tableName == null || tableName == keyTableEscortDuty) {
-      await uploadTableDataToServer(
+      await uploadTableDataToServer<EscortDuty>(
         tableName: keyTableEscortDuty,
         idColumn: "id",
         apiUrl: escortDutyPostApi,
+        fromMap: (map) => EscortDuty.fromMap(map),
+        toMap: (item) =>item.toJson(),
       );
     }
+
   }
 
   Future<void> syncData([String? tableName])async {
@@ -704,6 +727,14 @@ class SyncDataViewState extends State<SyncDataView> {
         apiUrl: profileApi,
         tableName: keyTableUserProfile,
         fromJson: (json) => UserProfile.fromJson(json),
+        toMap: (data) => data.toMap(),
+      );
+    }
+    if (tableName == null || tableName == keyTableUserNotification) {
+      fetchAndSyncData<UserNotification>(
+        apiUrl: userNotificationApi,
+        tableName: keyTableUserNotification,
+        fromJson: (json) => UserNotification.fromJson(json),
         toMap: (data) => data.toMap(),
       );
     }
@@ -779,6 +810,7 @@ class SyncDataViewState extends State<SyncDataView> {
     // Allowed table names
     final allowedTables = {
       'UserProfile',
+      'UserNotification',
       'UserPosting',
       'UnitShiftDetail',
       'UnitDutyPost',
@@ -853,8 +885,13 @@ class SyncDataViewState extends State<SyncDataView> {
       setState(() {
         showLoaderView = true;
       });
-      Map<String, String> inputData = {};
+      String? maxDateModified = await DatabaseHelper.instance.getMaxDateModified(tableName);
 
+      printInDebug("Max dateModified for $tableName => $maxDateModified");
+
+      Map<String, String> inputData = {
+        "dateModified": maxDateModified ?? '',
+      };
       APIHelper.instance.getData(apiUrl, inputData, (data) async {
         if (data.isNotEmpty) {
           // Convert the response data to a list of objects
@@ -958,10 +995,12 @@ class SyncDataViewState extends State<SyncDataView> {
   }
 
 
-  Future<void> uploadTableDataToServer({
+  Future<void> uploadTableDataToServer<T>({
     required String tableName,
     required String idColumn,
     required String apiUrl,
+    required T Function(Map<String, dynamic>) fromMap,
+    required Map<String, dynamic> Function(T) toMap,
   }) async {
     final dirtyRows = await DatabaseHelper.instance.getDirtyRows(tableName);
 
@@ -970,13 +1009,21 @@ class SyncDataViewState extends State<SyncDataView> {
       return;
     }
 
+    // Convert dirty rows to JSON
+    List<Map<String, dynamic>> jsonData = dirtyRows
+        .map((row) => toMap(fromMap(row)))
+        .toList();
+
+    // Use a Completer to wait for callback
+    final completer = Completer<void>();
+
     APIHelper.instance.postAllData(
       apiUrl,
-      dirtyRows,
+      jsonData,
           (responseData) async {
         if (responseData.isNotEmpty) {
           for (var record in responseData) {
-            final idValue = record['ID']; // assumes API response has "ID"
+            final idValue = record[idColumn.toUpperCase()] ?? record[idColumn];
             if (idValue != null) {
               await DatabaseHelper.instance.markRowSynced(tableName, idColumn, idValue);
             }
@@ -984,11 +1031,16 @@ class SyncDataViewState extends State<SyncDataView> {
         } else {
           printInDebug("Empty response for $tableName");
         }
+        completer.complete(); // mark as finished
       },
           (error) {
         printInDebug("Error uploading $tableName: $error");
+        completer.completeError(error); // mark as failed
       },
     );
+
+    // Wait here until completer is completed
+    return completer.future;
   }
 
 

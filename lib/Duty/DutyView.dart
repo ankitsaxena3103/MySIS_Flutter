@@ -449,59 +449,76 @@ class DutyViewState extends State<DutyView> {
                                             child: TableCalendar(
                                               headerVisible: false,
                                               focusedDay: focusedDay,
-                                              rowHeight: pathS/1.5,
+                                              rowHeight: pathS / 1.5,
                                               firstDay: DateTime.now().subtract(Duration(days: 36500)),
                                               lastDay: DateTime.now().add(Duration(days: 36500)),
                                               calendarFormat: CalendarFormat.month,
                                               locale: selectedLocale,
                                               calendarBuilders: CalendarBuilders(
                                                 defaultBuilder: (context, day, events) {
-                                                  return Container(
-                                                    margin: EdgeInsets.all(pathS/12),
-                                                    decoration: BoxDecoration(
-                                                      color: getBackgroundColor(day),
-                                                      shape: calendarBoxShape,
-                                                    ),
-                                                    child: Center(
-                                                      child: Text(
-                                                        '${day.day}',
-                                                        style: TextStyle(
-                                                          color: calendarDayTextColor,
-                                                          fontWeight: FontWeight.w500,
-                                                          fontSize: pathS/6,
+                                                  // Get duty count for the day
+                                                  double dutyCount = getDutyCountForDay(day); // your custom method
+
+                                                  return Stack(
+                                                    alignment: Alignment.center,
+                                                    children: [
+                                                      Container(
+                                                        margin: EdgeInsets.all(pathS / 12),
+                                                        decoration: BoxDecoration(
+                                                          color: getBackgroundColor(day),
+                                                          shape: calendarBoxShape,
+                                                        ),
+                                                        child: Center(
+                                                          child: Text(
+                                                            '${day.day}',
+                                                            style: TextStyle(
+                                                              color: calendarDayTextColor,
+                                                              fontWeight: FontWeight.w500,
+                                                              fontSize: pathS / 6,
+                                                              fontFamily: 'Roboto',
+                                                            ),
+                                                          ),
                                                         ),
                                                       ),
-                                                    ),
+
+                                                      if (dutyCount > 1 )
+                                                        Positioned(
+                                                          top: 4,
+                                                          right: 4,
+                                                          child: Container(
+                                                            padding: EdgeInsets.symmetric(horizontal: 5, vertical: 0),
+                                                            decoration: BoxDecoration(
+                                                              color: Colors.white, // White background
+                                                              border: Border.all(color: redColor3, width: 1), // Red border
+                                                              borderRadius: BorderRadius.circular(8),
+                                                            ),
+                                                            child: Text(
+                                                              '$dutyCount',
+                                                              style: TextStyle(
+                                                                color: redColor3, // Red text
+                                                                fontSize: pathS / 8,
+                                                                fontWeight: FontWeight.w700,
+                                                                fontFamily: 'Roboto',
+                                                              ),
+                                                            ),
+                                                          ),
+                                                        ),
+                                                    ],
                                                   );
                                                 },
                                               ),
-
                                               daysOfWeekStyle: DaysOfWeekStyle(
-                                                // dowTextFormatter: (date, locale) => DateFormat.E(locale).format(date)[0],
-
-                                                weekdayStyle: TextStyle(
-                                                  color: isDarkMode ? whiteColor:greyColor6,
-                                                ),
-                                                weekendStyle: TextStyle(
-                                                  color: isDarkMode ? whiteColor:greyColor6,
-                                                ),
+                                                weekdayStyle: TextStyle(color: isDarkMode ? whiteColor : greyColor6),
+                                                weekendStyle: TextStyle(color: isDarkMode ? whiteColor : greyColor6),
                                               ),
-
                                               onDaySelected: (selectedDay, focusedDay) {
-                                                printInDebug('selectedDay = $selectedDay');
-                                                printInDebug('focusedDay = $focusedDay');
-
                                                 List<UserAttendance> selectedAttendance = getAttendanceForDate(selectedDay);
                                                 List<UserLeaves> selectedLeaves = getLeaveForDate(selectedDay);
-                                                if(selectedAttendance.isNotEmpty || selectedLeaves.isNotEmpty){
-                                                  onLoadDutyDetails(selectedDay, selectedAttendance,selectedLeaves);
+
+                                                if (selectedAttendance.isNotEmpty || selectedLeaves.isNotEmpty) {
+                                                  onLoadDutyDetails(selectedDay, selectedAttendance, selectedLeaves);
                                                 }
-
-
-
-
                                               },
-                                              // Other calendar properties...
                                             ),
 
                                           ),
@@ -554,6 +571,7 @@ class DutyViewState extends State<DutyView> {
                                   color: isDarkMode ? whiteColor:whiteColor,
                                   fontSize: pathS / 5.5,
                                   fontWeight: FontWeight.w600,
+                                  fontFamily: 'Roboto',
                                 ),
                               ),
                             ),
@@ -610,8 +628,7 @@ class DutyViewState extends State<DutyView> {
 
     List<UserAttendance> selectedDateAttendance = getAttendanceForDate(date);
     List<UserAttendance> selectedDateUnSyncedAttendance = selectedDateAttendance.isNotEmpty ? getUnSyncAttendanceForDate(selectedDateAttendance) : [];
-    List<UserAttendance> selectedDateShortAttendance = selectedDateAttendance.isNotEmpty ? getShortLeaveAttendanceForDate(selectedDateAttendance) : [];
-
+    // List<UserAttendance> selectedDateShortAttendance = selectedDateAttendance.isNotEmpty ? getShortLeaveAttendanceForDate(selectedDateAttendance) : [];
 
     List<UserLeaves> selectedDateLeave = userLeaves.isNotEmpty ?  getLeaveForDate(date) : [];
 
@@ -620,12 +637,18 @@ class DutyViewState extends State<DutyView> {
     List<UserLeaves> selectedDateApprovedLeave = selectedDateLeave.isNotEmpty ? getApprovedLeaveOnDate(selectedDateLeave) : [];
     List<UserLeaves> selectedDateWeeklyOffLeave = selectedDateLeave.isNotEmpty ? getWeeklyOffLeaveOnDate(selectedDateLeave) : [];
 
+    double dutyCount = getDutyCountForDay(date); // your custom method
 
-     if (selectedDateUnSyncedAttendance.isNotEmpty || selectedDateUnSyncedLeave.isNotEmpty) {
+
+    if (selectedDateUnSyncedAttendance.isNotEmpty || selectedDateUnSyncedLeave.isNotEmpty) {
        calendarDayTextColor  = brownColor;
         return unSyncedDataColor;
     }
-     else if (selectedDateAttendance.isNotEmpty) {
+    else if(dutyCount <1 && dutyCount > 0){
+      calendarDayTextColor  = redColor3;
+      return shortDutyColor;
+    }
+     else if (dutyCount >=1) {
       // Return red for days 1, 2, 3, 4
       // calendarBoxShape = BoxShape.rectangle;
       calendarDayTextColor  = greenColor6;
@@ -650,12 +673,12 @@ class DutyViewState extends State<DutyView> {
       calendarDayTextColor  = Colors.white;
       return fixedDutyOffColor;
     }
-    else if (selectedDateShortAttendance.isNotEmpty) {
-      // Return red for days 1, 2, 3, 4
-      // calendarBoxShape = BoxShape.rectangle;
-      calendarDayTextColor  = whiteColor;
-      return shortDutyColor;
-    }
+    // else if (selectedDateShortAttendance.isNotEmpty) {
+    //   // Return red for days 1, 2, 3, 4
+    //   // calendarBoxShape = BoxShape.rectangle;
+    //   calendarDayTextColor  = whiteColor;
+    //   return shortDutyColor;
+    // }
     else {
       // Return default color for other days
       calendarBoxShape = BoxShape.circle;
@@ -1188,6 +1211,16 @@ class DutyViewState extends State<DutyView> {
         showToastMessageView = false;
       });
     });
+  }
+
+  double getDutyCountForDay(DateTime day) {
+    List<UserAttendance> attendance = getAttendanceForDate(day);
+    if (attendance.isEmpty) return 0;
+    double total = 0;
+    for (var att in attendance) {
+      total += att.dutyCount; // or att.dutyFraction
+    }
+    return total;
   }
 
 }

@@ -651,9 +651,28 @@
   "apply_loan_alert": "Are you sure? You want to apply loan.",
   "GMD_se_bolo": "GMD se bolo",
   "no_wi_fi" : "Your mobile data is turned off. Please enable mobile data to mark your duty.",
-  "no_gps" : "Your GPS is turned off. Please enable GPS to mark your duty.",
+  "no_gps" : "Your Location is turned off. Please enable Location to mark your duty.",
+  "no_records_to_clear" : "No record to clear",
+  "missed_duty_txt" : "Missed Duty",
+  "available_duty_txt" : "Available Duty",
+  "completed_duty_txt" : "Completed Duty",
+  "next_duty_txt" : "Next Duty",
+  "duty_timing" : "Duty Timing",
+  "duty_hrs" : "Duty Hrs",
+  "no_shift_found" : "Shift not found to mark attendance",
+  "biometric_security" : "Fingerprint / Face Security",
+  "enable_biometric" : "Enable Fingerprint / Face",
+  "disable_biometric" : "Disable Fingerprint / Face",
+  "enabled_biometric" : "Fingerprint / Face enabled",
+  "disabled_biometric" : "Fingerprint / Face disabled",
+  "biometric_message" : "No need to enter pin. Use fingerprint / face instead?",
+  "enable" : "Enable",
+  "invalid_qrcode" : "Please scan a valid QR code",
 
-  "no_records_to_clear" : "No record to clear"
+  "internet_data_status" : "Mobile/Wi-fi Status",
+  "location_permission" : "Location Permission",
+  "precise_location" : "Precise Location"
+
 
 }
 

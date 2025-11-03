@@ -83,272 +83,201 @@ class ThanksDutyViewState extends State<ThanksDutyView>{
       begin: Alignment.topCenter,
       end: Alignment.bottomCenter,
     );
-    return Scaffold(
-      body: Stack(
-        alignment: Alignment.center,
-        children: [
+    return PopScope(
+      canPop: false,
+      child: Scaffold(
+        body: Stack(
+          alignment: Alignment.center,
+          children: [
 
-          Container(
-            width: logicalWidth,
-            height: logicalHeight,
-            decoration:  BoxDecoration(
-              shape: BoxShape.rectangle,
-              gradient: isDarkMode ? backgroundGradientDark : backgroundGradient ,
-            ),
-            child: Stack(
-              alignment: Alignment.center,
-              children: [
-                Positioned(
-                  top: MediaQuery.of(context).padding.top,
-                  right: paddingRight+pathS/3,
-                  child: GestureDetector(
-                    onTap: () {
-                      Navigator.pushAndRemoveUntil(
-                          context,
-                          MaterialPageRoute(
-                          builder: (context) => MyTabBarView(),
-                      ),
-                            (route) => false, // This removes all previous routes
-                      );
-                    },
-                    child: SizedBox(
-                      width: pathS / 3,
-                      height: pathS / 3,
-                      child: Image.asset(
-                        'assets/images/home/cross.png',
-                        color: isDarkMode ? whiteColor : greyColor6,
+            Container(
+              width: logicalWidth,
+              height: logicalHeight,
+              decoration:  BoxDecoration(
+                shape: BoxShape.rectangle,
+                gradient: isDarkMode ? backgroundGradientDark : backgroundGradient ,
+              ),
+              child: Stack(
+                alignment: Alignment.center,
+                children: [
+                  Positioned(
+                    top: MediaQuery.of(context).padding.top,
+                    right: paddingRight+pathS/3,
+                    child: GestureDetector(
+                      onTap: () {
+                        Navigator.pushAndRemoveUntil(
+                            context,
+                            MaterialPageRoute(
+                            builder: (context) => MyTabBarView(),
+                        ),
+                              (route) => false, // This removes all previous routes
+                        );
+                      },
+                      child: SizedBox(
+                        width: pathS / 3,
+                        height: pathS / 3,
+                        child: Image.asset(
+                          'assets/images/home/cross.png',
+                          color: isDarkMode ? whiteColor : greyColor6,
+                        ),
                       ),
                     ),
                   ),
-                ),
 
-                Column(
-                  mainAxisAlignment: MainAxisAlignment.start,
-                  children: [
+                  Column(
+                    mainAxisAlignment: MainAxisAlignment.start,
+                    children: [
 
-                    SizedBox(height: pathS/2+paddingTop),
-                    Text(
-                      'thanks'.tr(),
-                      style: TextStyle(
-                        color: isDarkMode ? whiteColor : greyColor6,
-                        fontSize: pathS / 2.8,
-                        fontWeight: FontWeight.w500,
-                        fontFamily: 'Roboto',
-                      ),
-                    ),
-                    Text(
-                      'mark_successfully'.tr(),
-                      style: TextStyle(
-                        color: isDarkMode ? greenColor5 : greenColor6,
-                        fontSize: pathS / 4,
-                        fontWeight: FontWeight.w500,
-                        fontFamily: 'Roboto',
-                      ),
-                    ),
-                    SizedBox(height: pathS/2),
-                    Container(
-                      alignment: Alignment.center,
-                      width: pathL *1.4,
-                      height: pathL*1.4 ,
-                      decoration: BoxDecoration(
-                        shape: BoxShape.circle,
-                        gradient: isDarkMode ? backgroundGradientDark : backgroundGradientGreen ,
-                        boxShadow: [
-                          BoxShadow(
-                            color: shadowColor, // Shadow color
-                            blurRadius: pathS/20, // Spread of the shadow
-                            // spreadRadius: pathS/15, // How far the shadow extends
-                            offset:  Offset(0, pathS/8),
-                          ),
-                        ],
-                      ),
-                      child: Padding(
-                        padding:  EdgeInsets.all(pathS/12),
-                        child: ClipOval(
-                          child:  Image.memory(
-                            base64Decode(widget.imageData),
-                            fit: BoxFit.cover,
-                            width: double.infinity,
-                            height: double.infinity,
-                          ),
-                        ),
-                      ),
-                    ),
-                    SizedBox(height: pathS/5),
-                    Text(
-                      widget.userProfile.empName,
-                      style: TextStyle(
-                        color: isDarkMode ? whiteColor : greyColor6,
-                        fontSize: pathS / 3.2,
-                        fontWeight: FontWeight.w500,
-                        fontFamily: 'Roboto'
-                      ),
-                    ),
-                    Text(
-                      widget.userProfile.serviceName,
-                      style: TextStyle(
-                        color: isDarkMode ? whiteColor : greyColor6,
-                        fontSize: pathS / 5,
-                        fontWeight: FontWeight.w500,
-                          fontFamily: 'Roboto'
-                      ),
-                    ),
-                    Text(
-                     widget.userProfile.symbol,
-                      style: TextStyle(
-                        color: isDarkMode ? whiteColor : greyColor6,
-                        fontSize: pathS / 6.5,
-                        fontWeight: FontWeight.w500,
-                        fontFamily: 'Roboto',
-                      ),
-                    ),
-                    SizedBox(height: pathS/3),
-
-                    Text(
-                      DateFormat('EEEE, d MMM', selectedLocale).format(DateTime.now()),
-                      style: TextStyle(
-                        color: isDarkMode ? whiteColor : greyColor6,
-                        fontSize: pathS / 4.3,
-                        fontWeight: FontWeight.w500,
+                      SizedBox(height: pathS/2+paddingTop),
+                      Text(
+                        'thanks'.tr(),
+                        style: TextStyle(
+                          color: isDarkMode ? whiteColor : greyColor6,
+                          fontSize: pathS / 2.8,
+                          fontWeight: FontWeight.w500,
                           fontFamily: 'Roboto',
+                        ),
                       ),
-                    ),
-                    SizedBox(height: pathS/3),
-                    Row(
-                      mainAxisAlignment: MainAxisAlignment.center,
-                      children: [
-                        Text(
-                          widget.unitShiftDetail.shiftName,
-                          style: TextStyle(
-                            color: isDarkMode ? whiteColor : greyColor6,
-                            fontSize: pathS / 5,
-                            fontWeight: FontWeight.w700,
-                            fontFamily: 'Roboto',
+                      Text(
+                        'mark_successfully'.tr(),
+                        style: TextStyle(
+                          color: isDarkMode ? greenColor5 : greenColor6,
+                          fontSize: pathS / 4,
+                          fontWeight: FontWeight.w500,
+                          fontFamily: 'Roboto',
+                        ),
+                      ),
+                      SizedBox(height: pathS/2),
+                      Container(
+                        alignment: Alignment.center,
+                        width: pathL *1.4,
+                        height: pathL*1.4 ,
+                        decoration: BoxDecoration(
+                          shape: BoxShape.circle,
+                          gradient: isDarkMode ? backgroundGradientDark : backgroundGradientGreen ,
+                          boxShadow: [
+                            BoxShadow(
+                              color: shadowColor, // Shadow color
+                              blurRadius: pathS/20, // Spread of the shadow
+                              // spreadRadius: pathS/15, // How far the shadow extends
+                              offset:  Offset(0, pathS/8),
+                            ),
+                          ],
+                        ),
+                        child: Padding(
+                          padding:  EdgeInsets.all(pathS/12),
+                          child: ClipOval(
+                            child:  Image.memory(
+                              base64Decode(widget.imageData),
+                              fit: BoxFit.cover,
+                              width: double.infinity,
+                              height: double.infinity,
+                            ),
                           ),
                         ),
-                        SizedBox(width: pathS/15),
-                        Text(
-                          getFormattedDateTime(widget.unitShiftDetail.startTime, 'hh:mm:ss', 'hh:mm a'),
-                          style: TextStyle(
-                            color: isDarkMode ? whiteColor : greyColor6,
-                            fontSize: pathS / 5.5,
-                            fontWeight: FontWeight.w300,
-                            fontFamily: 'Roboto',
-                          ),
+                      ),
+                      SizedBox(height: pathS/5),
+                      Text(
+                        widget.userProfile.empName,
+                        style: TextStyle(
+                          color: isDarkMode ? whiteColor : greyColor6,
+                          fontSize: pathS / 3.2,
+                          fontWeight: FontWeight.w500,
+                          fontFamily: 'Roboto'
                         ),
-                      ],
-                    ),
+                      ),
+                      Text(
+                        widget.userProfile.serviceName,
+                        style: TextStyle(
+                          color: isDarkMode ? whiteColor : greyColor6,
+                          fontSize: pathS / 5,
+                          fontWeight: FontWeight.w500,
+                            fontFamily: 'Roboto'
+                        ),
+                      ),
+                      Text(
+                       widget.userProfile.symbol,
+                        style: TextStyle(
+                          color: isDarkMode ? whiteColor : greyColor6,
+                          fontSize: pathS / 6.5,
+                          fontWeight: FontWeight.w500,
+                          fontFamily: 'Roboto',
+                        ),
+                      ),
+                      SizedBox(height: pathS/3),
 
-                    Text(
-                      widget.userPosting.siteName,
-                      style: TextStyle(
-                        color: isDarkMode ? whiteColor : greyColor6,
-                        fontSize: pathS / 5,
-                        fontWeight: FontWeight.w300,
-                        fontFamily: 'Roboto',
+                      Text(
+                        DateFormat('EEEE, d MMM', selectedLocale).format(DateTime.now()),
+                        style: TextStyle(
+                          color: isDarkMode ? whiteColor : greyColor6,
+                          fontSize: pathS / 4.3,
+                          fontWeight: FontWeight.w500,
+                            fontFamily: 'Roboto',
+                        ),
                       ),
-                    ),
-                    SizedBox(height: pathS/3),
-                    Padding(
-                      padding:  EdgeInsets.only(left: pathS/5,right: pathS/5),
-                      child: Column(
+                      SizedBox(height: pathS/3),
+                      Row(
                         mainAxisAlignment: MainAxisAlignment.center,
-                        crossAxisAlignment: CrossAxisAlignment.center,
                         children: [
-
-                          Row(
-                            mainAxisAlignment: MainAxisAlignment.center,
-                            crossAxisAlignment: CrossAxisAlignment.center,
-                            children: [
-                              Text(
-                                'post'.tr(),
-                                style: TextStyle(
-                                  color: isDarkMode ? whiteColor : greyColor6,
-                                  fontSize: pathS / 5.5,
-                                  fontWeight: FontWeight.w300,
-                                  fontFamily: 'Roboto',
-                                ),
-                              ),
-                              SizedBox(width: 2),
-                              Text(
-                                widget.unitDutyPost.address,
-                                style: TextStyle(
-                                  color: isDarkMode ? whiteColor : greyColor6,
-                                  fontSize: pathS / 5,
-                                  fontWeight: FontWeight.bold,
-                                  fontFamily: 'Roboto',
-                                ),
-                                textAlign: TextAlign.left,
-                              ),
-                            ],
+                          Text(
+                            widget.unitShiftDetail.shiftName,
+                            style: TextStyle(
+                              color: isDarkMode ? whiteColor : greyColor6,
+                              fontSize: pathS / 5,
+                              fontWeight: FontWeight.w700,
+                              fontFamily: 'Roboto',
+                            ),
                           ),
-
-                          Row(
-                            mainAxisAlignment: MainAxisAlignment.center,
-                            crossAxisAlignment: CrossAxisAlignment.center,
-                            children: [
-                              Text(
-                                'post_rank'.tr(),
-                                style: TextStyle(
-                                  color: isDarkMode ? whiteColor : greyColor6,
-                                  fontSize: pathS / 5.5,
-                                  fontWeight: FontWeight.w300,
-                                  fontFamily: 'Roboto',
-                                ),
-                              ),
-                              SizedBox(width: 2),
-                              Text(
-                                widget.unitDutyPost.postName,
-                                style: TextStyle(
-                                  color: isDarkMode ? whiteColor : greyColor6,
-                                  fontSize: pathS / 5.5,
-                                  fontWeight: FontWeight.bold,
-                                  fontFamily: 'Roboto',
-                                ),
-                              ),
-                            ],
+                          SizedBox(width: pathS/15),
+                          Text(
+                            getFormattedDateTime(widget.unitShiftDetail.startTime, 'hh:mm:ss', 'hh:mm a'),
+                            style: TextStyle(
+                              color: isDarkMode ? whiteColor : greyColor6,
+                              fontSize: pathS / 5.5,
+                              fontWeight: FontWeight.w300,
+                              fontFamily: 'Roboto',
+                            ),
                           ),
-
                         ],
                       ),
-                    ),
 
-
-                  ],
-                ),
-
-                Positioned(
-                  bottom: MediaQuery.of(context).padding.bottom + pathS/10,
-                    child: Column(
-                      children: [
-                        Container(
-                          width: 2*pathL,
-                          height: 1,
-                          color: isDarkMode ? greyColor5 : greyColor3,
+                      Text(
+                        widget.userPosting.siteName,
+                        style: TextStyle(
+                          color: isDarkMode ? whiteColor : greyColor6,
+                          fontSize: pathS / 5,
+                          fontWeight: FontWeight.w300,
+                          fontFamily: 'Roboto',
                         ),
-                        SizedBox(height: pathS/10),
-                        Row(
+                      ),
+                      SizedBox(height: pathS/3),
+                      Padding(
+                        padding:  EdgeInsets.only(left: pathS/5,right: pathS/5),
+                        child: Column(
                           mainAxisAlignment: MainAxisAlignment.center,
+                          crossAxisAlignment: CrossAxisAlignment.center,
                           children: [
 
                             Row(
+                              mainAxisAlignment: MainAxisAlignment.center,
+                              crossAxisAlignment: CrossAxisAlignment.center,
                               children: [
                                 Text(
-                                  'duty_in'.tr(),
+                                  'post'.tr(),
                                   style: TextStyle(
                                     color: isDarkMode ? whiteColor : greyColor6,
                                     fontSize: pathS / 5.5,
-                                    fontWeight: FontWeight.w500,
+                                    fontWeight: FontWeight.w300,
                                     fontFamily: 'Roboto',
                                   ),
                                 ),
-                                SizedBox(width: pathS/15),
+                                SizedBox(width: 2),
                                 Text(
-                                  '${DateFormat('h:mm').format(widget.userAttendance.actStartTime) } ${DateFormat('a').format(widget.userAttendance.actStartTime).toUpperCase()}',
+                                  widget.unitDutyPost.address,
                                   style: TextStyle(
                                     color: isDarkMode ? whiteColor : greyColor6,
-                                    fontSize: pathS / 5.5,
-                                    fontWeight: FontWeight.w500,
+                                    fontSize: pathS / 5,
+                                    fontWeight: FontWeight.bold,
                                     fontFamily: 'Roboto',
                                   ),
                                   textAlign: TextAlign.left,
@@ -356,25 +285,26 @@ class ThanksDutyViewState extends State<ThanksDutyView>{
                               ],
                             ),
 
-                            if(widget.userAttendance.actEndTime != null)Row(
+                            Row(
+                              mainAxisAlignment: MainAxisAlignment.center,
+                              crossAxisAlignment: CrossAxisAlignment.center,
                               children: [
-                                SizedBox(width: pathS/8),
                                 Text(
-                                  'duty_out'.tr(),
+                                  'post_rank'.tr(),
                                   style: TextStyle(
                                     color: isDarkMode ? whiteColor : greyColor6,
                                     fontSize: pathS / 5.5,
-                                    fontWeight: FontWeight.w500,
+                                    fontWeight: FontWeight.w300,
                                     fontFamily: 'Roboto',
                                   ),
                                 ),
-                                SizedBox(width: pathS/15),
+                                SizedBox(width: 2),
                                 Text(
-                                  '${DateFormat('h:mm').format(widget.userAttendance.actEndTime!) } ${DateFormat('a').format(widget.userAttendance.actEndTime!).toUpperCase()}',
+                                  widget.unitDutyPost.postName,
                                   style: TextStyle(
                                     color: isDarkMode ? whiteColor : greyColor6,
                                     fontSize: pathS / 5.5,
-                                    fontWeight: FontWeight.w500,
+                                    fontWeight: FontWeight.bold,
                                     fontFamily: 'Roboto',
                                   ),
                                 ),
@@ -383,49 +313,120 @@ class ThanksDutyViewState extends State<ThanksDutyView>{
 
                           ],
                         ),
+                      ),
 
-                        SizedBox(height: pathS/18),
 
-                        if(lat>0.0 && lng > 0.0)Row(
-                          mainAxisAlignment: MainAxisAlignment.center,
-                          children: [
-                            Text(
-                              'lat_lang'.tr(),
-                              style: TextStyle(
-                                color: isDarkMode ? whiteColor : greyColor6,
-                                fontSize: pathS / 5.5,
-                                fontWeight: FontWeight.w500,
-                                fontFamily: 'Roboto',
+                    ],
+                  ),
+
+                  Positioned(
+                    bottom: MediaQuery.of(context).padding.bottom + pathS/10,
+                      child: Column(
+                        children: [
+                          Container(
+                            width: 2*pathL,
+                            height: 1,
+                            color: isDarkMode ? greyColor5 : greyColor3,
+                          ),
+                          SizedBox(height: pathS/10),
+                          Row(
+                            mainAxisAlignment: MainAxisAlignment.center,
+                            children: [
+
+                              Row(
+                                children: [
+                                  Text(
+                                    'duty_in'.tr(),
+                                    style: TextStyle(
+                                      color: isDarkMode ? whiteColor : greyColor6,
+                                      fontSize: pathS / 5.5,
+                                      fontWeight: FontWeight.w500,
+                                      fontFamily: 'Roboto',
+                                    ),
+                                  ),
+                                  SizedBox(width: pathS/15),
+                                  Text(
+                                    '${DateFormat('h:mm').format(widget.userAttendance.actStartTime) } ${DateFormat('a').format(widget.userAttendance.actStartTime).toUpperCase()}',
+                                    style: TextStyle(
+                                      color: isDarkMode ? whiteColor : greyColor6,
+                                      fontSize: pathS / 5.5,
+                                      fontWeight: FontWeight.w500,
+                                      fontFamily: 'Roboto',
+                                    ),
+                                    textAlign: TextAlign.left,
+                                  ),
+                                ],
                               ),
-                            ),
-                            SizedBox(width: pathS/20),
-                            Text(
-                              '$lat,$lng',
-                              style: TextStyle(
-                                color: isDarkMode ? whiteColor : greyColor6,
-                                fontSize: pathS / 5.5,
-                                fontWeight: FontWeight.w500,
-                                fontFamily: 'Roboto',
+
+                              if(widget.userAttendance.actEndTime != null)Row(
+                                children: [
+                                  SizedBox(width: pathS/8),
+                                  Text(
+                                    'duty_out'.tr(),
+                                    style: TextStyle(
+                                      color: isDarkMode ? whiteColor : greyColor6,
+                                      fontSize: pathS / 5.5,
+                                      fontWeight: FontWeight.w500,
+                                      fontFamily: 'Roboto',
+                                    ),
+                                  ),
+                                  SizedBox(width: pathS/15),
+                                  Text(
+                                    '${DateFormat('h:mm').format(widget.userAttendance.actEndTime!) } ${DateFormat('a').format(widget.userAttendance.actEndTime!).toUpperCase()}',
+                                    style: TextStyle(
+                                      color: isDarkMode ? whiteColor : greyColor6,
+                                      fontSize: pathS / 5.5,
+                                      fontWeight: FontWeight.w500,
+                                      fontFamily: 'Roboto',
+                                    ),
+                                  ),
+                                ],
                               ),
-                              textAlign: TextAlign.left,
-                            ),
 
-                          ],
-                        ),
+                            ],
+                          ),
 
-                      ],
-                    )
-                ),
+                          SizedBox(height: pathS/18),
 
-                ToastMessageView(isVisible: showToastMessageView, message: toastMessage),
+                          if(lat>0.0 && lng > 0.0)Row(
+                            mainAxisAlignment: MainAxisAlignment.center,
+                            children: [
+                              Text(
+                                'lat_lang'.tr(),
+                                style: TextStyle(
+                                  color: isDarkMode ? whiteColor : greyColor6,
+                                  fontSize: pathS / 5.5,
+                                  fontWeight: FontWeight.w500,
+                                  fontFamily: 'Roboto',
+                                ),
+                              ),
+                              SizedBox(width: pathS/20),
+                              Text(
+                                '$lat,$lng',
+                                style: TextStyle(
+                                  color: isDarkMode ? whiteColor : greyColor6,
+                                  fontSize: pathS / 5.5,
+                                  fontWeight: FontWeight.w500,
+                                  fontFamily: 'Roboto',
+                                ),
+                                textAlign: TextAlign.left,
+                              ),
 
-              ],
+                            ],
+                          ),
+
+                        ],
+                      )
+                  ),
+
+                  ToastMessageView(isVisible: showToastMessageView, message: toastMessage),
+
+                ],
+              ),
             ),
-          ),
 
-
-
-        ],
+          ],
+        ),
       ),
     );
   }

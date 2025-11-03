@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'dart:convert';
 import 'dart:core';
 import 'dart:io';
@@ -399,45 +400,50 @@ class SubmitDutyViewState extends State<SubmitDutyView>{
                                 'txt_retake'.tr(),
                                 style: TextStyle(
                                   color: isDarkMode ? redColor1:redColor3,
-
                                   fontSize: pathS / 4.5,
                                   fontWeight: FontWeight.bold,
+                                  fontFamily: 'Roboto',
                                 ),
                               ),
                             ),
                           ),
                           SizedBox(width: pathS/3),
-                          GestureDetector(
-                            onTap: (){
-                              onTapSubmit();
+                          // GestureDetector(
+                          //   onTap: (){
+                          //     onTapSubmit();
+                          //
+                          //   },
+                          //   child: Container(
+                          //     width: pathL,
+                          //     height: pathS / 1.5,
+                          //     alignment: Alignment.center,
+                          //     decoration: BoxDecoration(
+                          //       color: redColor3,                          // border: Border.all(color: Colors.yellow, width: pathS/18),
+                          //       borderRadius: BorderRadius.circular(pathS/3),
+                          //       boxShadow: [
+                          //         BoxShadow(
+                          //           color: shadowColor, // Shadow color
+                          //           blurRadius: pathS/15, // Spread of the shadow
+                          //           // spreadRadius: pathS/15, // How far the shadow extends
+                          //           offset:  Offset(-pathS/15, pathS/15),
+                          //         ),
+                          //       ],
+                          //     ),
+                          //     child: Text(
+                          //       'submit'.tr(),
+                          //       style: TextStyle(
+                          //         color: whiteColor,
+                          //         fontSize: pathS / 4.5,
+                          //         fontWeight: FontWeight.bold,
+                          //       ),
+                          //     ),
+                          //   ),
+                          // ),
 
-                            },
-                            child: Container(
-                              width: pathL,
-                              height: pathS / 1.5,
-                              alignment: Alignment.center,
-                              decoration: BoxDecoration(
-                                color: redColor3,                          // border: Border.all(color: Colors.yellow, width: pathS/18),
-                                borderRadius: BorderRadius.circular(pathS/3),
-                                boxShadow: [
-                                  BoxShadow(
-                                    color: shadowColor, // Shadow color
-                                    blurRadius: pathS/15, // Spread of the shadow
-                                    // spreadRadius: pathS/15, // How far the shadow extends
-                                    offset:  Offset(-pathS/15, pathS/15),
-                                  ),
-                                ],
-                              ),
-                              child: Text(
-                                'submit'.tr(),
-                                style: TextStyle(
-                                  color: whiteColor,
-                                  fontSize: pathS / 4.5,
-                                  fontWeight: FontWeight.bold,
-                                ),
-                              ),
-                            ),
-                          ),
+                          SubmitButtonWithTimer(onTap: () {
+                            onTapSubmit();
+                          },),
+
                         ],
                       ),
 
@@ -497,7 +503,7 @@ class SubmitDutyViewState extends State<SubmitDutyView>{
 
   }
 
-  Future<void> capturePhoto() async {
+  Future<void> capturePhotoiOS() async {
 
     try {
       final picker = ImagePicker();
@@ -533,24 +539,27 @@ class SubmitDutyViewState extends State<SubmitDutyView>{
 
   Future<void> openCamera() async {
 
-    if (Platform.isIOS) {
-      capturePhoto();
-      return;
+    if (Platform.isAndroid) {
+      Navigator.push(
+        context,
+        MaterialPageRoute(
+          builder: (context) => CameraCaptureScreen(
+            onImageCaptured: (path, base64Img) {
+              setState(() {
+                imagePath = path;
+                imageData = base64Img;
+                attendanceImagePath = path;
+
+              });
+            },
+          ),
+        ),
+      );
+    }
+    else {
+      capturePhotoiOS();
     }
 
-    Navigator.push(
-      context,
-      MaterialPageRoute(
-        builder: (context) => CameraCaptureScreen(
-          onImageCaptured: (path, base64Img) {
-            setState(() {
-              imagePath = path;
-              imageData = base64Img;
-            });
-          },
-        ),
-      ),
-    );
   }
 
   void onTapSubmit(){
@@ -581,7 +590,7 @@ class SubmitDutyViewState extends State<SubmitDutyView>{
   Map <String, dynamic> getDutyInAttendance(){
 
     String newUuid = Uuid().v4();
-    uploadAttendanceImage(attendanceImagePath, newUuid,widget.attendanceStatus);
+    uploadAttendanceImage(attendanceImagePath, newUuid,'DutyInPhoto');
     List<String> parts = widget.unitShiftDetail.dutyHrs.split(":");
     int shiftMin =  (int.parse(parts[0]) * 60) + int.parse(parts[1]);
     String dutyDate = DateFormat('yyyy-MM-dd').format(DateTime.parse(widget.dutyDateTime));
@@ -595,6 +604,7 @@ class SubmitDutyViewState extends State<SubmitDutyView>{
       "SHIFT_ID": widget.unitShiftDetail.shiftId,
       "SHIFT_NAME": widget.unitShiftDetail.shiftName,
       "SHIFT_START_DATE": createDutyDate(widget.unitShiftDetail,DateTime.parse(widget.dutyDateTime)),
+      // "SHIFT_START_DATE": dutyDate,
       "SHIFT_START_TIME": DateTime.parse("$dutyDate ${widget.unitShiftDetail.startTime}").toIso8601String(),
       "SHIFT_END_TIME": DateTime.parse("$dutyDate ${widget.unitShiftDetail.endTime}").toIso8601String(),
       "ACT_START_TIME": widget.dutyDateTime,
@@ -629,7 +639,7 @@ class SubmitDutyViewState extends State<SubmitDutyView>{
 
     UserAttendance dutyInAttendance = widget.userAttendance!;
 
-    uploadAttendanceImage(attendanceImagePath, dutyInAttendance.id,dutyInAttendance.dutyStatus);
+    uploadAttendanceImage(attendanceImagePath, dutyInAttendance.id,'DutyOutPhoto');
     String formattedDutyDate = DateFormat('yyyy-MM-dd').format(DateTime.parse(widget.dutyDateTime));
     String formattedDutyStartDate = DateFormat('yyyy-MM-dd').format(dutyInAttendance.shiftStartDate);
 
@@ -706,9 +716,10 @@ class SubmitDutyViewState extends State<SubmitDutyView>{
 
   Future<void> uploadAttendanceImage(String filePath, String id, String dutyInOutType) async {
 
-    if(attendanceImagePath.isEmpty){
-      return;
-    }
+
+    // if(filePath.isEmpty){
+    //   return;
+    // }
 
     setState(() {
       showLoaderView = true;
@@ -728,6 +739,7 @@ class SubmitDutyViewState extends State<SubmitDutyView>{
         Map<String, dynamic> data = responseData;
 
         final String message = data['message'] ?? '';
+        printInDebug(message);
 
       }
       else {
@@ -897,7 +909,7 @@ class _CameraCaptureScreenState extends State<CameraCaptureScreen> {
     }
   }
 
-  Future<void> capturePhoto() async {
+  Future<void> capturePhotoAndroid() async {
     if (!mounted) return;
     if (_cameraController == null || !_cameraController!.value.isInitialized) return;
 
@@ -907,6 +919,7 @@ class _CameraCaptureScreenState extends State<CameraCaptureScreen> {
       final base64Image = base64Encode(bytes);
 
       widget.onImageCaptured(file.path, base64Image);
+
 
       WidgetsBinding.instance.addPostFrameCallback((_) {
         if (mounted) {
@@ -967,12 +980,88 @@ class _CameraCaptureScreenState extends State<CameraCaptureScreen> {
             child: Center(
               child: FloatingActionButton(
                 backgroundColor: Colors.white,
-                onPressed: capturePhoto,
+                onPressed: capturePhotoAndroid,
                 child: const Icon(Icons.camera_alt, color: Colors.black, size: 28),
               ),
             ),
           ),
         ],
+      ),
+    );
+  }
+}
+
+class SubmitButtonWithTimer extends StatefulWidget {
+  final VoidCallback onTap;
+
+  const SubmitButtonWithTimer({required this.onTap, super.key});
+
+  @override
+  State<SubmitButtonWithTimer> createState() => _SubmitButtonWithTimerState();
+}
+
+class _SubmitButtonWithTimerState extends State<SubmitButtonWithTimer> {
+  int remainingSeconds = 60; // Countdown start
+  Timer? _timer;
+
+  @override
+  void initState() {
+    super.initState();
+    startTimer();
+  }
+
+  void startTimer() {
+    _timer?.cancel(); // Cancel previous timer if any
+    remainingSeconds = 60;
+    _timer = Timer.periodic(const Duration(seconds: 1), (timer) {
+      if (remainingSeconds > 0) {
+        setState(() {
+          remainingSeconds--;
+        });
+      } else {
+        _timer?.cancel();
+      }
+    });
+  }
+
+  @override
+  void dispose() {
+    _timer?.cancel();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final isDisabled = remainingSeconds == 0;
+    return GestureDetector(
+      onTap: isDisabled ? null : widget.onTap,
+      child: Container(
+        width:  pathL,
+        height: pathS / 1.5,
+        alignment: Alignment.center,
+        decoration: BoxDecoration(
+          color: isDisabled ? isDarkMode ? greyColor8 : greyColor2 : redColor3,
+          borderRadius: BorderRadius.circular(pathS/3), // pathS/3
+          boxShadow: [
+            BoxShadow(
+              color: isDisabled? Colors.transparent:Colors.black.withOpacity(0.2), // shadowColor
+              blurRadius: 4, // pathS/15
+              offset: const Offset(-4, 4), // pathS/15
+            ),
+          ],
+        ),
+        child: Text(
+          isDisabled
+              ? 'submit'.tr()
+              : '${'submit'.tr()} ($remainingSeconds s)',
+          style:  TextStyle(
+            color: isDisabled ?  isDarkMode ? greyColor7 : greyColor3 : Colors.white,
+            fontSize: pathS / 4.5,
+            fontWeight: FontWeight.bold,
+            fontFamily: 'Roboto',
+
+          ),
+        ),
       ),
     );
   }

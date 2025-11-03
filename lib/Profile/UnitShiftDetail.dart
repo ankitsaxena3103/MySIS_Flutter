@@ -17,6 +17,8 @@ class UnitShiftDetail {
   final String dutyInBefore;
   final String shiftEndAfter;
   final DateTime updatedAt;
+  final int allowedMark;
+  final String notAllowedReason;
 
   UnitShiftDetail({
     required this.id,
@@ -36,6 +38,8 @@ class UnitShiftDetail {
     required this.shiftEndAfter,
     required this.dutyInBefore,
     required this.updatedAt,
+    this.allowedMark = 0,          // default
+    this.notAllowedReason = '',     // default
 
   });
 
@@ -135,6 +139,38 @@ class UnitShiftDetail {
       'shiftEndAfter': shiftEndAfter,
       'updatedAt':updatedAt.toIso8601String(),
     };
+  }
+
+  factory UnitShiftDetail.fromViewMap(Map<String, dynamic> map) {
+    return UnitShiftDetail(
+      id: map['id'] ?? '',
+      shiftId: map['shiftId'] ?? '',
+      postId: map['postId'] ?? '',
+      shiftName: map['shiftName'] ?? '',
+      unitCode: map['unitCode'] ?? '',
+      startTime: map['shiftStartTime'] ?? '',   // view column
+      endTime: map['shiftEndTime'] ?? '',       // view column
+      dutyHrs: map['dutyHrs'] ?? '',
+      startDate: map['startDate'] != null
+          ? DateTime.parse(map['startDate'])
+          : DateTime.now(),
+      endDate: map['endDate'] != null
+          ? DateTime.parse(map['endDate'])
+          : DateTime.now(),
+      activeDays: map['activeDays'] ?? '',
+      deleted: map['deleted'] ?? 0,
+      dateModified: map['dateModified'] != null
+          ? DateTime.parse(map['dateModified'])
+          : DateTime.now(),
+      shiftStartBefore: map['shiftStartBefore'] ?? '',
+      dutyInBefore: map['dutyInBefore'] ?? '',
+      shiftEndAfter: map['shiftEndAfter'] ?? '',
+      updatedAt: map['updatedAt'] != null
+          ? DateTime.parse(map['updatedAt'])
+          : DateTime.now(),
+      allowedMark: map['allowedMark'] ?? 1,
+      notAllowedReason: map['notAllowedReason'] ?? '',
+    );
   }
 
 }

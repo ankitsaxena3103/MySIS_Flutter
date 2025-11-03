@@ -1,15 +1,27 @@
 
 import 'dart:core';
+import 'dart:io';
 import 'dart:math';
 
+import 'package:android_intent_plus/android_intent.dart';
+import 'package:android_intent_plus/flag.dart';
+import 'package:connectivity_plus/connectivity_plus.dart';
+import 'package:device_info_plus/device_info_plus.dart';
 import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/foundation.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_phone_direct_caller/flutter_phone_direct_caller.dart';
 import 'package:geolocator/geolocator.dart';
+import 'package:local_auth/local_auth.dart';
 import 'package:package_info_plus/package_info_plus.dart';
 import 'package:url_launcher/url_launcher.dart';
 
+import 'Utility.dart' as AppSettings;
+
+final LocalAuthentication auth = LocalAuthentication();
+
+const String appToken = r"$2a$11$QGo3jefJUjhG1kwyJSDKV.q7emFNRSntKuQUgo7KKOEycVnWYX0tm";
 
 const String baseUrl = 'mysis.sisersys.com:8446';
 // const String authenticateApi = '/api/guardApp/Auth/isValidUser';
@@ -37,7 +49,7 @@ const String updateProfileApi = '/api/guardApp/Post/UpdateProfile';
 const String userAttendancePostApi = '/api/guardApp/Post/PostUserAttendance';
 const String userLeavesPostApi = '/api/guardApp/Post/PostUserLeaveRequest';
 const String escortDutyPostApi = 'api/guardApp/Post/PostEscortDutyRequest';
-const String userNotificationPostApi = '/api/guardApp/Post/PostUserNotification';
+const String userNotificationPostApi = '/api/guardApp/Post/UpdateUserNotificationStatus';
 const String postGuardReferalApi = '/api/guardApp/Post/PostGuardReferal';
 const String employeeRoasterApi = 'api/guardApp/Auth/EmployeeRosterDetail';
 
@@ -55,9 +67,12 @@ const String keyTableLeaveType = 'LeaveType';
 const String keyTableHelpMaster = 'HelpMaster';
 const String keyTableEscortDuty = 'EscortDuty';
 
+
+const keyDeviceModel= "deviceModel";
+const keyPlateformVersion = "plateformVersion";
+
 // const String keyTablePostGuardReferal = 'PostGuardReferal';
 
-const String appToken = r"$2a$11$QGo3jefJUjhG1kwyJSDKV.q7emFNRSntKuQUgo7KKOEycVnWYX0tm";
 
 const keyAttendanceModeSelf = 'DEVICE';
 const keyAttendanceModeOther = 'OTHER_DUTY';
@@ -96,6 +111,7 @@ String selectedLanguageCode = 'en';
 bool isMobileInternetOn = false;
 bool isMobileCarrierDetected = false;
 bool isGPSEnabled = false;
+bool isUserBiometricEnabled = false;
 
 
 late Size physicalScreenSize ;
@@ -156,6 +172,7 @@ const keyMobile = 'mobile';
 
 const keyTokenExpiryTime = "expiryTime";
 const keyIsForcedLogOut = "forceLogout";
+const keyBiometricEnabled = "isBiometric";
 
 
 
@@ -301,6 +318,29 @@ String getFormattedTime(String timeString, String format) {
 
 
 }
+
+
+String getFormattedTimeFromDate(String timeString) {
+  try {
+    // Check if timeString has date part
+    DateTime parsedTime;
+    if (timeString.contains(' ')) {
+      // e.g., "2025-10-26 08:00:00"
+      parsedTime = DateTime.parse(timeString);
+    } else {
+      // e.g., "08:00"
+      final DateFormat inputFormat = DateFormat('HH:mm');
+      parsedTime = inputFormat.parse(timeString);
+    }
+
+    // Format to "hh:mm a" => 08:00 AM
+    final DateFormat outputFormat = DateFormat('hh:mm a');
+    return outputFormat.format(parsedTime);
+  } catch (e) {
+    return timeString; // fallback if parsing fails
+  }
+}
+
 
 String getFormattedDateTime(String timeString, String inputFormat, String outputFormat) {
   String convertedTime = timeString;
@@ -451,6 +491,162 @@ const Color orangeColor1 = Color.fromRGBO(248, 116, 0, 1);
 
 
 
+Future<bool> isGPSAndAppLocationEnabled() async {
+  // Check if location services are enabled
+  bool serviceEnabled = await Geolocator.isLocationServiceEnabled();
+  if (!serviceEnabled) return false;
+
+  // Check app permission
+  LocationPermission permission = await Geolocator.checkPermission();
+
+  if (permission == LocationPermission.denied) {
+    permission = await Geolocator.requestPermission();
+    if (permission == LocationPermission.denied) return false;
+  }
+
+  if (permission == LocationPermission.deniedForever) return false;
+
+  return true; // GPS enabled and permission granted
+}
+
+void openMySISAppSettings() {
+  if (Platform.isAndroid) {
+    // Opens the app-specific settings page on Android
+    const platform = MethodChannel('app_settings_channel');
+    try {
+      platform.invokeMethod('openAppSettings');
+    } catch (e) {
+      print("Error opening Android app settings: $e");
+      // Fallback: open general settings
+      // AppSettings.openMySISAppSettings();
+    }
+  }
+  else if (Platform.isIOS) {
+
+    // Opens the app-specific settings page on iOS
+    const platform = MethodChannel('app_settings_channel');
+    try {
+      platform.invokeMethod('openSettings');
+    } catch (e) {
+      print("Error opening iOS settings: $e");
+    }
+  }
+}
 
 
+Future<bool> isWifiOrMobileDataConnected() async {
+  List<ConnectivityResult> connectivityResults = await Connectivity().checkConnectivity();
+  printInDebug("Connectivity Results: $connectivityResults");
+  return (connectivityResults.contains(ConnectivityResult.mobile) || connectivityResults.contains(ConnectivityResult.wifi));
+}
+// void openMobileDataSettings() {
+//   if (Theme.of(context).platform == TargetPlatform.android) {
+//     final intent = AndroidIntent(
+//       action: 'android.settings.DATA_ROAMING_SETTINGS',
+//       flags: <int>[Flag.FLAG_ACTIVITY_NEW_TASK],
+//     );
+//     intent.launch();
+//   } else {
+//     openMobileDataSettingsiOS();
+//   }
+// }
+void openMobileDataSettingsiOS() {
+  const platform = MethodChannel('app_settings_channel');
+  platform.invokeMethod('openSettings');
+}
+
+/// Returns location permission as a readable string
+Future<String> getLocationPermissionStatus() async {
+  // Check current permission
+  LocationPermission permission = await Geolocator.checkPermission();
+
+  switch (permission) {
+    case LocationPermission.always:
+      return "Always";
+    case LocationPermission.whileInUse:
+      return "When In Use";
+    case LocationPermission.denied:
+      return "Ask"; // The user can still be prompted
+    case LocationPermission.deniedForever:
+      return "Never"; // User permanently denied
+    default:
+      return "Unknown";
+  }
+}
+
+/// Returns true if precise location is enabled, false otherwise
+Future<bool> isPreciseLocationEnabled() async {
+  bool serviceEnabled = await Geolocator.isLocationServiceEnabled();
+  if (!serviceEnabled) return false;
+
+  // Request a location with high accuracy
+  LocationAccuracyStatus accuracyStatus = await Geolocator.getLocationAccuracy();
+
+  // On Android, LocationAccuracyStatus.precise means precise location is allowed
+  return accuracyStatus == LocationAccuracyStatus.precise;
+}
+
+Future<void> checkBiometricAvailability() async {
+  try {
+    bool canCheckBiometrics = await auth.canCheckBiometrics;
+    bool isDeviceSupported = await auth.isDeviceSupported();
+
+    printInDebug('Biometric Available: $canCheckBiometrics, Supported: $isDeviceSupported');
+
+    if (canCheckBiometrics && isDeviceSupported) {
+      authenticateWithTouchID();
+    } else {
+
+    }
+  } catch (e) {
+    printInDebug('Biometric check error: $e');
+
+  }
+}
+Future<void> authenticateWithTouchID() async {
+  try {
+    bool authenticated = await auth.authenticate(
+      localizedReason: "Authenticate using Touch ID",
+      options: const AuthenticationOptions(
+        biometricOnly: true,
+        stickyAuth: true,
+      ),
+    );
+
+    if(authenticated) {
+      ();
+    }
+    printInDebug('$authenticated');
+  } catch (e) {
+    printInDebug('auth error = $e');
+  }
+}
+Future<Map<String,String>> getDeviceDetail() async {
+  Map<String,String> deviceDetail = {};
+  DeviceInfoPlugin deviceInfo = DeviceInfoPlugin();
+
+  if (defaultTargetPlatform == TargetPlatform.android) {
+    AndroidDeviceInfo androidInfo = await deviceInfo.androidInfo;
+    deviceDetail[keyDeviceModel] = androidInfo.model ;
+    var release = androidInfo.version.release;
+    var sdkInt = androidInfo.version.sdkInt;
+    var manufacturer = androidInfo.manufacturer;
+    deviceDetail[keyPlateformVersion] = 'Android $release (SDK $sdkInt), $manufacturer' ;
+  }
+  if (defaultTargetPlatform == TargetPlatform.iOS) {
+    IosDeviceInfo iosInfo = await deviceInfo.iosInfo;
+    deviceDetail[keyDeviceModel] = iosInfo.model;
+    var systemName = iosInfo.systemName;
+    var version = iosInfo.systemVersion;
+    var name = iosInfo.name;
+    deviceDetail[keyPlateformVersion] ='$systemName $version, $name';
+  }
+  if (kIsWeb) {
+    WebBrowserInfo webBrowserInfo = await deviceInfo.webBrowserInfo;
+    deviceDetail[keyDeviceModel] = webBrowserInfo.userAgent ?? "";
+    deviceDetail[keyPlateformVersion] =webBrowserInfo.appVersion ?? "";
+  }
+
+  return deviceDetail;
+}
 

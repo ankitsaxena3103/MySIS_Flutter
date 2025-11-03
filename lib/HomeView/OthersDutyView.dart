@@ -10,6 +10,7 @@ import 'package:easy_localization/easy_localization.dart';
 import 'package:mysis/SharedClasses/ThemeProvider.dart';
 import 'package:provider/provider.dart';
 
+import '../CommonViews/AlertPopupView.dart';
 import '../Profile/UnitDutyPost.dart';
 import '../Profile/UnitShiftDetail.dart';
 import '../Profile/UserPosting.dart';
@@ -74,6 +75,11 @@ class OthersDutyViewState extends State<OthersDutyView> {
 
   DateTime _focusedDay = DateTime.now();
 
+  bool showAlert = false;
+  String alertHeader = '';
+  String alertMessage = '';
+  String cancelBtnTitle = '';
+  String okBtnTitle = 'ok'.tr();
 
 
   @override
@@ -159,19 +165,7 @@ class OthersDutyViewState extends State<OthersDutyView> {
                             GestureDetector(
                               onTap: (){
 
-                                Navigator.push(
-                                  context,
-                                  MaterialPageRoute(
-                                    builder: (context) => ScanCardView(
-                                        userProfile: widget.userProfile,
-                                        attendanceMode: widget.attendanceMode,
-                                      unitDutyPosts: widget.unitDutyPosts,
-                                      unitShiftDetails: widget.unitShiftDetails,
-                                      userPostings: widget.userPostings,
-                                      attendanceStatus: keyAttendanceStatusDutyIn,
-                                    ),
-                                  ),
-                                );
+                               onTapDutyIn();
 
                               },
                               child: Container(
@@ -204,21 +198,7 @@ class OthersDutyViewState extends State<OthersDutyView> {
 
                             GestureDetector(
                               onTap: (){
-                                Navigator.push(
-                                  context,
-                                  MaterialPageRoute(
-                                    builder: (context) => ScanCardView(
-                                      userProfile: widget.userProfile,
-                                      attendanceMode: widget.attendanceMode,
-                                      unitDutyPosts: widget.unitDutyPosts,
-                                      unitShiftDetails: widget.unitShiftDetails,
-                                      userPostings: widget.userPostings,
-                                      attendanceStatus: keyAttendanceStatusDutyOut,
-                                    ),
-                                  ),
-                                );
-
-
+                                onTapOtherDuty();
                               },
                               child: Container(
                                 width: pathL,
@@ -287,7 +267,21 @@ class OthersDutyViewState extends State<OthersDutyView> {
 
 
 
+                    Visibility(
+                      visible: showAlert,
+                      child: AlertPopupView(
+                          header: alertHeader,
+                          message: alertMessage,
+                          cancelBtn: cancelBtnTitle,
+                          okBtn: okBtnTitle,
+                          callBack: (value){
+                            setState(() {
+                              showAlert = false;
+                            });
 
+                          }
+                      ),
+                    ),
                     // LoaderView
                     LoaderView(isVisible: showLoaderView, message: 'Loading...'),
                   ],
@@ -301,7 +295,75 @@ class OthersDutyViewState extends State<OthersDutyView> {
     );
   }
 
+  Future<void> onTapDutyIn() async {
+    if(! await isGPSAndAppLocationEnabled()){
+      setState(() {
+        alertHeader = '';
+        alertMessage = 'no_gps'.tr();
+        showAlert = true;
+        cancelBtnTitle = '';
+        okBtnTitle =   'ok'.tr();
+      });
+      openMySISAppSettings();
+      return;
+    }
+    if(! await isWifiOrMobileDataConnected()){
+      setState(() {
+        alertHeader = '';
+        alertMessage = 'no_wi_fi'.tr();
+        showAlert = true;
+        cancelBtnTitle = '';
+        okBtnTitle =   'ok'.tr();
+      });
+      // openAppSettings() ;
+      return;
+    }
 
+    loadScanCardView(keyAttendanceStatusDutyIn);
+
+  }
+  Future<void> onTapOtherDuty() async {
+    if(! await isGPSAndAppLocationEnabled()){
+      setState(() {
+        alertHeader = '';
+        alertMessage = 'no_gps'.tr();
+        showAlert = true;
+        cancelBtnTitle = '';
+        okBtnTitle =   'ok'.tr();
+      });
+
+      return;
+    }
+    if(! await isWifiOrMobileDataConnected()){
+      setState(() {
+        alertHeader = '';
+        alertMessage = 'no_wi_fi'.tr();
+        showAlert = true;
+        cancelBtnTitle = '';
+        okBtnTitle =   'ok'.tr();
+      });
+      return;
+    }
+
+    loadScanCardView(keyAttendanceStatusDutyOut);
+
+  }
+
+  void loadScanCardView(String dutyInOut){
+    Navigator.push(
+      context,
+      MaterialPageRoute(
+        builder: (context) => ScanCardView(
+          userProfile: widget.userProfile,
+          attendanceMode: widget.attendanceMode,
+          unitDutyPosts: widget.unitDutyPosts,
+          unitShiftDetails: widget.unitShiftDetails,
+          userPostings: widget.userPostings,
+          attendanceStatus: dutyInOut,
+        ),
+      ),
+    );
+  }
   void initialSetup() {
   }
 

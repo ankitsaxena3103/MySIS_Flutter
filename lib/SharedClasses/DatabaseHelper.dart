@@ -26,23 +26,23 @@ class DatabaseHelper {
   // static final DatabaseHelper instance = DatabaseHelper._init();
 
   static Database? _database;
-
-  // DatabaseHelper._init();
-
   Future<Database> get database async {
     if (_database != null) return _database!;
 
     _database = await _initDB(keyDataBaseName);
     return _database!;
   }
-
   Future<Database> _initDB(String path) async {
     final dbPath = await getDatabasesPath();
     final pathToDatabase = join(dbPath, path);
 
-    return await openDatabase(pathToDatabase, version: 1, onCreate: _createDB);
+    return await openDatabase(
+      pathToDatabase,
+      version: 2, // 🔺 increase version number
+      onCreate: _createDB,
+      onUpgrade: _onUpgrade, // add migration handler
+    );
   }
-
 
   void _createDB(Database db, int version) async {
     // Create all tables
@@ -62,7 +62,6 @@ class DatabaseHelper {
     //  Create all views
     await _createViews(db);
   }
-
   Future<void> _createViews(Database db) async {
     await db.execute('''
     CREATE VIEW IF NOT EXISTS vwUnitShift AS
@@ -107,19 +106,19 @@ class DatabaseHelper {
     ORDER BY rosterDate
   ''');
 
-    await db.execute('DROP VIEW IF EXISTS vwRosterDetail');
+    // await db.execute('DROP VIEW IF EXISTS vwRosterDetail');
 
     await db.execute('''
-  CREATE VIEW vwRosterDetail AS
-  SELECT M.*, D.dutyStatus, D.actStartTime, D.actEndTime
-  FROM vwRoster M
-  LEFT OUTER JOIN UserAttendance D
-    ON M.regNo=D.regNo
-   AND M.unitCode=D.unitCode
-   AND M.shiftId=D.shiftId
-   AND M.rosterDate= strftime('%Y-%m-%d', D.shiftStartDate)
-   AND M.dutyPostId=D.dutyPostId
-  WHERE strftime('%Y-%m-%d', datetime('now')) >= date('now')
+      CREATE VIEW vwRosterDetail AS
+      SELECT M.*, D.dutyStatus, D.actStartTime, D.actEndTime
+      FROM vwRoster M
+      LEFT OUTER JOIN UserAttendance D
+        ON M.regNo=D.regNo
+       AND M.unitCode=D.unitCode
+       AND M.shiftId=D.shiftId
+       AND M.rosterDate= strftime('%Y-%m-%d', D.shiftStartDate)
+       AND M.dutyPostId=D.dutyPostId
+      WHERE strftime('%Y-%m-%d', datetime('now')) >= date('now')
 ''');
 
     //   await db.execute('''
@@ -137,6 +136,68 @@ class DatabaseHelper {
   //   //       BETWEEN strftime('%Y-%m-%d', datetime('now'))
   //   //           AND strftime('%Y-%m-%d', datetime('now', '1 day'))
   // ''');
+
+    await db.execute('''
+      Create View vwShiftForDate AS
+      select distinct
+      M.shiftId
+      , M.shiftName
+      , M.postId
+      ,M.dutyHrs
+      , PD.postName
+      , M.unitCode
+      , D.shiftStartDate
+      , D.shiftStartDate || ' ' || M.startTime shiftStartTime
+      , Datetime(D.shiftStartDate || ' ' || M.startTime, '+' || CAST(CAST(STRFTIME('%H', M.dutyHrs) AS INTEGER) * 60 + CAST(STRFTIME('%M', M.dutyHrs) AS INTEGER) as STRING) || ' minutes') shiftEndTime
+      , Datetime(D.shiftStartDate || ' ' || M.startTime, '-' || CAST(CAST(STRFTIME('%H', M.shiftStartBefore) AS INTEGER) * 60 + CAST(STRFTIME('%M', M.shiftStartBefore) AS INTEGER) as STRING) || ' minutes') dutyStartEnableTime
+      , Datetime(D.shiftStartDate || ' ' || M.startTime, '+' || CAST(CAST(STRFTIME('%H', M.dutyHrs) AS INTEGER) * 60 + CAST(STRFTIME('%M', M.dutyHrs) AS INTEGER) as STRING) || ' minutes'
+      , '-' || CAST(CAST(STRFTIME('%H', M.dutyInBefore) AS INTEGER) * 60 + CAST(STRFTIME('%M', M.dutyInBefore) AS INTEGER) as STRING) || ' minutes' ) dutyStartDisableTime
+      , Datetime(D.shiftStartDate || ' ' || M.startTime, '+' || CAST(CAST(STRFTIME('%H', M.dutyHrs) AS INTEGER) * 60 + CAST(STRFTIME('%M', M.dutyHrs) AS INTEGER) as STRING) || ' minutes'
+      , '+' || CAST(CAST(STRFTIME('%H', M.shiftEndAfter) AS INTEGER) * 60 + CAST(STRFTIME('%M', M.shiftEndAfter) AS INTEGER) as STRING) || ' minutes') dutyEndDisableTime
+      from UnitShiftDetail M
+      inner join UnitDutyPost PD on M.postId=PD.id
+      cross join(SELECT DATE('now') AS shiftStartDate Union Select DATE('now', '-1 day') AS Shiftdate union select DATE('now', '+1 day') AS Shiftdate) D
+      where M.deleted=0
+''');
+
+
+  }
+
+  Future<void> _onUpgrade(Database db, int oldVersion, int newVersion) async {
+    if (oldVersion < 2) {
+      // 🔹 Create or update your new view safely
+      await _upgradeViews(db);
+
+    }
+  }
+  Future<void> _upgradeViews(Database db) async {
+
+    await db.execute('DROP VIEW IF EXISTS vwShiftForDate');
+
+    await db.execute('''
+      CREATE VIEW vwShiftForDate AS
+      select distinct
+      M.shiftId
+      , M.shiftName
+      , M.postId
+      ,M.dutyHrs
+      , PD.postName
+      , M.unitCode
+      , D.shiftStartDate
+      , D.shiftStartDate || ' ' || M.startTime shiftStartTime
+      , Datetime(D.shiftStartDate || ' ' || M.startTime, '+' || CAST(CAST(STRFTIME('%H', M.dutyHrs) AS INTEGER) * 60 + CAST(STRFTIME('%M', M.dutyHrs) AS INTEGER) as STRING) || ' minutes') shiftEndTime
+      , Datetime(D.shiftStartDate || ' ' || M.startTime, '-' || CAST(CAST(STRFTIME('%H', M.shiftStartBefore) AS INTEGER) * 60 + CAST(STRFTIME('%M', M.shiftStartBefore) AS INTEGER) as STRING) || ' minutes') dutyStartEnableTime
+      , Datetime(D.shiftStartDate || ' ' || M.startTime, '+' || CAST(CAST(STRFTIME('%H', M.dutyHrs) AS INTEGER) * 60 + CAST(STRFTIME('%M', M.dutyHrs) AS INTEGER) as STRING) || ' minutes'
+      , '-' || CAST(CAST(STRFTIME('%H', M.dutyInBefore) AS INTEGER) * 60 + CAST(STRFTIME('%M', M.dutyInBefore) AS INTEGER) as STRING) || ' minutes' ) dutyStartDisableTime
+      , Datetime(D.shiftStartDate || ' ' || M.startTime, '+' || CAST(CAST(STRFTIME('%H', M.dutyHrs) AS INTEGER) * 60 + CAST(STRFTIME('%M', M.dutyHrs) AS INTEGER) as STRING) || ' minutes'
+      , '+' || CAST(CAST(STRFTIME('%H', M.shiftEndAfter) AS INTEGER) * 60 + CAST(STRFTIME('%M', M.shiftEndAfter) AS INTEGER) as STRING) || ' minutes') dutyEndDisableTime
+      from UnitShiftDetail M
+      inner join UnitDutyPost PD on M.postId=PD.id
+      cross join(SELECT DATE('now') AS shiftStartDate Union Select DATE('now', '-1 day') AS Shiftdate union select DATE('now', '+1 day') AS Shiftdate) D
+      where M.deleted=0
+''');
+
+
   }
 
   String generateCreateTableSQL(String tableName, Map<String, String> fields) {
@@ -147,12 +208,7 @@ class DatabaseHelper {
     return 'CREATE TABLE $tableName ($columns)';
   }
 
-
-  Future<void> insertTableData<T>(
-      String tableName,
-      List<T> items,
-      Map<String, dynamic> Function(T) toMap,
-      ) async {
+  Future<void> insertTableData<T>(String tableName, List<T> items, Map<String, dynamic> Function(T) toMap,) async {
     final db = await DatabaseHelper.instance.database;
 
     // Use a transaction to ensure atomicity
@@ -163,20 +219,16 @@ class DatabaseHelper {
       }
     });
   }
-
   Future<void> insertRecords<T>(String tableName, List<T> records, Map<String, dynamic> Function(T) toMap) async {
     final db = await instance.database;
     for (var record in records) {
       await db.insert(tableName, toMap(record));
     }
   }
-
   Future<int> insertRecord<T>(String tableName, T record, Map<String, dynamic> Function(T) toMap) async {
     final db = await instance.database;
     return await db.insert(tableName, toMap(record));
   }
-
-
   Future<Map<String, dynamic>?> getSingleRow(String tableName, String column, String value) async {
     final db = await instance.database;
 
@@ -195,14 +247,7 @@ class DatabaseHelper {
       return null;
     }
   }
-
-
-  /// Returns the number of rows affected by the update.
-  Future<int> updateTableColumns(
-      String tableName,
-      Map<String, dynamic> row,
-      String idField,
-      ) async {
+  Future<int> updateTableColumns(String tableName, Map<String, dynamic> row, String idField,) async {
     final db = await instance.database;
 
     // Extract the ID value from the row
@@ -216,14 +261,7 @@ class DatabaseHelper {
       whereArgs: [id],
     );
   }
-
-
-  Future<void> updateTableData<T>(
-      String tableName,
-      List<T> items,
-      String idField,
-      Map<String, dynamic> Function(T) toMap,
-      ) async {
+  Future<void> updateTableData<T>(String tableName, List<T> items, String idField, Map<String, dynamic> Function(T) toMap,) async {
     final db = await DatabaseHelper.instance.database;
 
     // Use a transaction for atomicity
@@ -245,15 +283,7 @@ class DatabaseHelper {
       }
     });
   }
-
-
-
-  Future<void> updateOrDeleteTableData<T>(
-      String tableName,
-      List<T> items,
-      String idField,
-      Map<String, dynamic> Function(T) toMap,
-      ) async {
+  Future<void> updateOrDeleteTableData<T>(String tableName, List<T> items, String idField, Map<String, dynamic> Function(T) toMap,) async {
     final db = await DatabaseHelper.instance.database;
 
     // Use a transaction for atomicity
@@ -261,6 +291,7 @@ class DatabaseHelper {
       for (final item in items) {
         // Convert each item to a map
         final row = toMap(item);
+        debugPrint('Saving row: $row');
 
         // Extract the ID value using the idField
         final id = row[idField];
@@ -285,7 +316,8 @@ class DatabaseHelper {
             // Log or handle the case where the record doesn't exist
             printInDebug('Record with ID $id marked as deleted but does not exist.');
           }
-        } else {
+        }
+        else {
           if (existingRecords.isNotEmpty) {
             // If the record exists, update it
             await txn.update(
@@ -302,16 +334,7 @@ class DatabaseHelper {
       }
     });
   }
-
-
-
-
-  Future<void> updateOrInsertTableData<T>(
-      String tableName,
-      List<T> items,
-      String idField,
-      Map<String, dynamic> Function(T) toMap,
-      ) async {
+  Future<void> updateOrInsertTableData<T>(String tableName, List<T> items, String idField, Map<String, dynamic> Function(T) toMap,) async {
     final db = await DatabaseHelper.instance.database;
 
     // Use a transaction for atomicity
@@ -345,7 +368,6 @@ class DatabaseHelper {
       }
     });
   }
-
   Future<void> replaceTableData<T>(String tableName, List<T> newData, Map<String, dynamic> Function(T) toMap,) async {
     final db = await DatabaseHelper.instance.database;
 
@@ -362,11 +384,7 @@ class DatabaseHelper {
       print('New rows inserted into $tableName');
     });
   }
-
-  Future<List<T>> getAllRecords<T>(
-      String tableName,
-      T Function(Map<String, dynamic>) fromMap,
-      ) async {
+  Future<List<T>> getAllRecords<T>(String tableName, T Function(Map<String, dynamic>) fromMap,) async {
 
     final db = await instance.database;
 
@@ -383,7 +401,6 @@ class DatabaseHelper {
 
     return data;
   }
-
   Future<int> deleteTableData(String tableName, String idField, dynamic idValue) async {
     final db = await instance.database;
 
@@ -393,9 +410,6 @@ class DatabaseHelper {
       whereArgs: [idValue],
     );
   }
-
-
-
   Future<List<Map<String, dynamic>>> getTableRecords() async {
     // Fetch all table names
     final db = await instance.database;
@@ -501,7 +515,6 @@ class DatabaseHelper {
       return false;
     }
   }
-
   Future<int> countMonthExtraDuties(String empId, int month, int year) async {
     final db = await instance.database;
 
@@ -521,7 +534,6 @@ class DatabaseHelper {
 
     return result.isNotEmpty ? result.first['total_extra_duty'] as int : 0;
   }
-
   Future<int> getTotalDutyMinutes(String empId, int date, int month, int year) async {
     final db = await instance.database;
 
@@ -565,7 +577,30 @@ class DatabaseHelper {
       whereArgs: [1],
     );
   }
+  Future<String?> getMaxDateModified(String tableName) async {
+    final db = await database;
 
+    // Check if the column exists in the table
+    final columnsResult = await db.rawQuery(
+        "PRAGMA table_info($tableName);"
+    );
+
+    final columnNames = columnsResult.map((c) => c['name'] as String).toList();
+    if (!columnNames.contains('dateModified')) {
+      printInDebug("Column dateModified does not exist in $tableName");
+      return null;
+    }
+
+    // Safe to query
+    final result = await db.rawQuery(
+        'SELECT MAX(dateModified) as maxDate FROM $tableName'
+    );
+
+    if (result.isNotEmpty && result.first['maxDate'] != null) {
+      return result.first['maxDate'] as String;
+    }
+    return null; // No rows
+  }
   Future<void> markRowSynced(String tableName, String idColumn, dynamic idValue) async {
     final db = await instance.database;
 
@@ -575,6 +610,42 @@ class DatabaseHelper {
       where: "$idColumn = ?",
       whereArgs: [idValue],
     );
+  }
+
+  Future<List<UnitShiftDetail>> getAllowedShifts() async {
+    final db = await instance.database;
+
+    final result = await db.rawQuery('''
+    SELECT 
+      M.*,
+      CASE WHEN D.id IS NULL THEN 1 ELSE 0 END AS allowedMark,
+      CASE WHEN D.id IS NULL THEN '' ELSE 'Already Marked' END AS notAllowedReason
+    FROM vwShiftForDate M
+    LEFT OUTER JOIN UserAttendance D
+      ON M.shiftId = D.shiftId
+      AND M.shiftStartDate = D.shiftStartDate
+      AND D.deleted = 0
+      AND D.isAbsent = 0
+    WHERE datetime('now') BETWEEN M.dutyStartEnableTime AND M.dutyStartDisableTime
+  ''');
+
+    final shifts = result.map((row) => UnitShiftDetail.fromViewMap(row)).toList();
+
+    printInDebug('Fetched ${shifts.length} shifts from vwShiftForDate');
+    for (var shift in shifts) {
+      debugPrint('📌 Shift ID: ${shift.shiftId}, '
+          'AllowedMark: ${shift.allowedMark}, '
+          'Reason: ${shift.notAllowedReason}, '
+          'Shift Name: ${shift.shiftName}, '
+          'Unit: ${shift.unitCode}'
+          'duty hrs: ${shift.dutyHrs}'
+          'duty start time: ${shift.startTime}'
+          'duty end time: ${shift.endTime}'
+
+      );
+    }
+
+    return shifts;
   }
 
 

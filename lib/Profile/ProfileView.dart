@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:local_auth/local_auth.dart';
 import 'package:mysis/CommonViews/Utility.dart';
 import 'package:mysis/Profile/ChangeMobileView.dart';
 import 'package:mysis/Profile/ContactSISView.dart';
@@ -11,6 +12,7 @@ import 'package:mysis/UserAuthViews/EnterPINView.dart';
 
 import '../CommonViews/LoaderView.dart';
 import '../SharedClasses/APIHelper.dart';
+import '../SharedClasses/Preferences.dart';
 import 'EditProfileImageView.dart';
 import 'UnitDutyPost.dart';
 import 'UnitShiftDetail.dart';
@@ -69,6 +71,10 @@ class ProfileViewState extends State<ProfileView>{
   List<UnitShiftDetail> unitShiftDetails = [];
 
   bool showUserShiftDetail = false;
+  final LocalAuthentication auth = LocalAuthentication();
+  String txtBiometric =  isUserBiometricEnabled ? 'disable_biometric'.tr() : 'enable_biometric'.tr();
+
+  Color colorBiometric =  isUserBiometricEnabled ? Colors.green : Colors.red;
 
 
   @override
@@ -592,6 +598,117 @@ class ProfileViewState extends State<ProfileView>{
                                       GestureDetector(
                                         onTap: (){
                                           onLoadNewPIN();
+                                        },
+
+                                        child: Container(
+
+                                          alignment: Alignment.center,
+                                          decoration: BoxDecoration(
+                                            color: isDarkMode ? redColor1 : redColor3,                          // border: Border.all(color: Colors.yellow, width: pathS/18),
+                                            // border: Border.all(color: Colors.yellow, width: pathS/18),
+                                            borderRadius: BorderRadius.circular(pathS/3),
+                                            boxShadow: [
+                                              BoxShadow(
+                                                color: Colors.black.withOpacity(0.1), // Shadow color
+                                                blurRadius: pathS/10, // Spread of the shadow
+                                                // spreadRadius: pathS/15, // How far the shadow extends
+                                                offset:  Offset(-pathS/12, pathS/12),
+                                              ),
+                                            ],
+                                          ),
+                                          child: Padding(
+                                            padding:  EdgeInsets.only(left: pathS/4,right: pathS/4,top: pathS/10,bottom: pathS/10),
+
+                                            child: Text(
+                                              'change'.tr().toUpperCase(),
+                                              style: TextStyle(
+                                                color: whiteColor,
+                                                fontSize: pathS / 5.5,
+                                                fontWeight: FontWeight.w400,
+                                                fontFamily: 'Roboto',
+                                              ),
+                                            ),
+                                          ),
+                                        ),
+                                      ),
+
+                                    ],
+                                  ),
+
+                                ),
+
+                              ],
+                            ),
+                          ),
+                        ),
+                      ),
+
+                      SizedBox(height: pathS/5),
+                      Container(
+                        width: screenWidth-2.5*marginValue,
+                        // height: pathS*1.3,
+                        decoration:  BoxDecoration(
+                          shape: BoxShape.rectangle,
+                          borderRadius: BorderRadius.circular(pathS/8),
+                          color: isDarkMode?greyColor8:whiteColor,
+                          boxShadow: [
+                            BoxShadow(
+                              color: Colors.black.withOpacity(0.1), // Shadow color
+                              blurRadius: pathS/10, // Spread of the shadow
+                              // spreadRadius: pathS/15, // How far the shadow extends
+                              offset:  Offset(-pathS/12, pathS/12),
+                            ),
+                          ],
+                        ),
+                        child: Padding(
+                          padding: EdgeInsets.only(left: pathS/4, top: pathS/4,bottom: pathS/4), // Adjust top and left as needed
+                          child: Align(
+                            alignment: Alignment.topLeft,
+                            child: Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                Text(
+                                  'biometric_security'.tr(),
+                                  style: TextStyle(
+                                    color: isDarkMode ?  whiteColor:greyColor7,
+                                    fontSize: pathS / 7,
+                                    fontWeight: FontWeight.w500,
+                                    fontFamily: 'Roboto',
+                                  ),
+                                  textAlign: TextAlign.start,
+                                ),
+                                Padding(
+                                  padding: EdgeInsets.only(right: pathS/4,top: pathS/20), // Adjust top and left as needed
+
+                                  child: Row(
+                                    children: [
+                                      SizedBox(
+                                        width: pathS / 3,
+                                        height: pathS / 3,
+                                        child: Icon(
+                                          Icons.fingerprint, // ✅ Biometric (fingerprint) icon
+                                          color: isDarkMode ? whiteColor : greyColor6,
+                                          size: pathS / 3,    // match size of previous image
+                                        ),
+                                      ),
+
+
+                                      SizedBox(width: pathS/5),
+                                      Text(
+                                        txtBiometric,
+                                        style: TextStyle(
+                                          color: isDarkMode ?  whiteColor:greyColor7,
+                                          fontSize: pathS / 5,
+                                          fontWeight: FontWeight.w700,
+                                          fontFamily: 'Roboto',
+                                        ),
+                                        textAlign: TextAlign.start,
+                                      ),
+                                      Spacer(),
+                                      GestureDetector(
+                                        onTap: (){
+
+                                          onTapChangeBiometric();
                                         },
 
                                         child: Container(
@@ -1385,7 +1502,68 @@ class ProfileViewState extends State<ProfileView>{
       ),
     );
   }
+  Future<void> onTapChangeBiometric() async {
+    if (!isUserBiometricEnabled) {
+      checkBiometricAvailability();
+    }
+    else {
+      isUserBiometricEnabled = false;
+      await Preferences.saveUserPreferenceBool(keyBiometricEnabled, false);
+      setState(() {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text('disabled_biometric'.tr())),
+        );
+        txtBiometric =  isUserBiometricEnabled ? 'disable_biometric'.tr() : 'enable_biometric'.tr();
+        // colorBiometric = Colors.red;
+      });
+    }
+  }
+  Future<void> checkBiometricAvailability() async {
+    try {
+      bool canCheckBiometrics = await auth.canCheckBiometrics;
+      bool isDeviceSupported = await auth.isDeviceSupported();
 
+      printInDebug('Biometric Available: $canCheckBiometrics, Supported: $isDeviceSupported');
+
+      if (canCheckBiometrics && isDeviceSupported) {
+        authenticateWithTouchID();
+      } else {
+
+      }
+    } catch (e) {
+      printInDebug('Biometric check error: $e');
+
+    }
+  }
+
+  Future<void> authenticateWithTouchID() async {
+    try {
+      bool authenticated = await auth.authenticate(
+        localizedReason: "Authenticate using Touch ID",
+        options: const AuthenticationOptions(
+          biometricOnly: true,
+          stickyAuth: true,
+        ),
+      );
+
+      if(authenticated) {
+
+        isUserBiometricEnabled = true;
+        Preferences.saveUserPreferenceBool(keyBiometricEnabled, true);
+
+        setState(() {
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(content: Text('enabled_biometric'.tr())),
+          );
+          txtBiometric =  isUserBiometricEnabled ? 'disable_biometric'.tr() : 'enable_biometric'.tr();
+        });
+
+      }
+      printInDebug('$authenticated');
+    } catch (e) {
+      printInDebug('auth error = $e');
+    }
+  }
   void onTapShowDetails(String unitCode){
 
     final selectedUnitDutyPosts = unitDutyPosts

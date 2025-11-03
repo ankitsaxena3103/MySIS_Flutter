@@ -44,6 +44,11 @@ class EnterPINViewState extends State<EnterPINView> {
   String alertHeader = '';
   String alertMessage = '';
 
+
+  bool showBiometricAlert = false;
+  String biometricAlertHeader = '';
+  String alertBiometricMessage = '';
+
   bool showToastMessageView = false;
   String toastMessage = '';
 
@@ -307,7 +312,14 @@ class EnterPINViewState extends State<EnterPINView> {
                         SizedBox(height: pathS/2),
                         GestureDetector(
                           onTap: (){
-                            onUserAuthenticatedLoadNext();
+
+                            final bool passwordMatched = BCrypt.checkpw(
+                              txtEnterPIN.text,
+                              widget.currentPIN,
+                            );
+                            if(passwordMatched) {
+                              onUserAuthenticatedLoadNext();
+                            }
 
                           },
                           child: Container(
@@ -399,6 +411,26 @@ class EnterPINViewState extends State<EnterPINView> {
                         },
                       ),
                     ),
+                    Visibility(
+                      visible: showBiometricAlert,
+                      child: AlertPopupView(
+                        header: biometricAlertHeader,
+                        message: alertBiometricMessage,
+                        cancelBtn: 'Cancel'.tr(),
+                        okBtn: 'enable'.tr(),
+                        callBack:(val){
+                          setState(() {
+                            showBiometricAlert = false;
+                          });
+                          if(val == 1) {
+                            enableBiometric();
+                          }
+                          else{
+                            loadHomeScreen();
+                          }
+                        },
+                      ),
+                    ),
                   ],
                 ),
               ),
@@ -436,10 +468,16 @@ class EnterPINViewState extends State<EnterPINView> {
   }
 
   void initialSetup() {
-    checkBiometricAvailability();
+    if(isUserBiometricEnabled) {
+      checkBiometricAvailability();
+    }else{
+      setState(() {
+        showKeypad = true;
+      });
+    }
     recallGetToken();
     setState(() {
-      lblErrorMsg = ''.tr();
+      lblErrorMsg = '';
     });
   }
 
@@ -494,7 +532,10 @@ class EnterPINViewState extends State<EnterPINView> {
           otpContainerColor = isDarkMode ? greyColorDark : greyColor5;
 
       });
-      onUserAuthenticatedLoadNext();
+      Future.delayed(Duration(milliseconds: 200), () {
+        onUserAuthenticatedLoadNext();
+      });
+
 
     }
     else{
@@ -510,9 +551,17 @@ class EnterPINViewState extends State<EnterPINView> {
     }
 
   }
-
-
   Future<void> onUserAuthenticatedLoadNext() async {
+
+    if(widget.calledValue == 0 && !isUserBiometricEnabled && await isBiometricAvailable() == true){
+      setState(() {
+        biometricAlertHeader = 'biometric_security'.tr();
+        alertBiometricMessage = 'biometric_message'.tr();
+        showBiometricAlert = true;
+      });
+      return;
+    }
+
 
     if(widget.calledValue <= 1 ){
       loadHomeScreen();
@@ -591,7 +640,6 @@ class EnterPINViewState extends State<EnterPINView> {
       });
     }
   }
-
   Future<void> authenticateWithTouchID() async {
     try {
       bool authenticated = await auth.authenticate(
@@ -606,6 +654,51 @@ class EnterPINViewState extends State<EnterPINView> {
         onUserAuthenticatedLoadNext();
       }
      printInDebug('$authenticated');
+    } catch (e) {
+      printInDebug('auth error = $e');
+    }
+  }
+
+  Future<bool> isBiometricAvailable() async {
+    try {
+      bool canCheckBiometrics = await auth.canCheckBiometrics;
+      bool isDeviceSupported = await auth.isDeviceSupported();
+
+      if (canCheckBiometrics && isDeviceSupported) {
+        return true;
+      }
+      else {
+        return false;
+      }
+    } catch (e) {
+      return false;
+    }
+  }
+
+  Future<void> enableBiometric() async {
+    try {
+      bool authenticated = await auth.authenticate(
+        localizedReason: "Authenticate using Touch ID",
+        options: const AuthenticationOptions(
+          biometricOnly: true,
+          stickyAuth: true,
+        ),
+      );
+
+      if(authenticated) {
+
+        isUserBiometricEnabled = true;
+        Preferences.saveUserPreferenceBool(keyBiometricEnabled, true);
+
+        setState(() {
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(content: Text('enabled_biometric'.tr())),
+          );
+        });
+
+        onUserAuthenticatedLoadNext();
+      }
+      printInDebug('$authenticated');
     } catch (e) {
       printInDebug('auth error = $e');
     }

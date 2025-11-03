@@ -13,12 +13,12 @@ class UserNotification {
   final int? parentId;
   final int? parentType;
   final bool readStatus;
+  final DateTime? readDate; // ✅ NEW FIELD
   final bool popupAlert;
   final int deleted;
   final DateTime dateModified;
   final DateTime updatedAt;
   final int dirtyFlag;
-
 
   UserNotification({
     required this.id,
@@ -35,18 +35,18 @@ class UserNotification {
     this.parentId,
     this.parentType,
     required this.readStatus,
+    this.readDate, // ✅ NEW FIELD
     required this.popupAlert,
     required this.deleted,
     required this.dateModified,
     required this.updatedAt,
     required this.dirtyFlag,
-
-
   });
 
+  // ---------- JSON (API) ----------
   factory UserNotification.fromJson(Map<String, dynamic> json) {
     return UserNotification(
-      id: json['id'] ?? 0, // Defaulting to 0 if null
+      id: json['id'] ?? 0,
       regNo: json['RegNo'] ?? '',
       messageType: json['MESSAGE_TYPE'] ?? 0,
       isHtmlBody: (json['IS_HTML_BODY'] ?? 0) == 1,
@@ -57,24 +57,24 @@ class UserNotification {
       actionUrl: json['ACTION_URL'] ?? '',
       expiryDate: json['EXPIRY_DATE'] != null
           ? DateTime.parse(json['EXPIRY_DATE'])
-          : DateTime.now(), // Fallback to current date if null
+          : DateTime.now(),
       entityId: json['ENTITY_ID'],
       parentId: json['PARENT_ID'],
       parentType: json['PARENT_TYPE'],
       readStatus: (json['READ_STATUS'] ?? 0) == 1,
+      readDate: json['READ_DATE'] != null
+          ? DateTime.tryParse(json['READ_DATE'])
+          : null, // ✅ parse or null
       popupAlert: (json['POPUP_ALERT'] ?? 0) == 1,
       deleted: (json['DELETED'] ?? 0),
       dateModified: json['DATE_MODIFIED'] != null
           ? DateTime.parse(json['DATE_MODIFIED'])
-          : DateTime.now(), // Fallback to current date if null
-      updatedAt: DateTime.now(), // Default value if not in the JSON
+          : DateTime.now(),
+      updatedAt: DateTime.now(),
       dirtyFlag: json['DIRTY_FLAG'] ?? 0,
-
-
     );
   }
 
-  // To JSON
   Map<String, dynamic> toJson() {
     return {
       'id': id,
@@ -91,6 +91,7 @@ class UserNotification {
       'PARENT_ID': parentId,
       'PARENT_TYPE': parentType,
       'READ_STATUS': readStatus ? 1 : 0,
+      'READ_DATE': readDate?.toIso8601String(), // ✅ NEW
       'POPUP_ALERT': popupAlert ? 1 : 0,
       'DELETED': deleted,
       'DATE_MODIFIED': dateModified.toIso8601String(),
@@ -98,6 +99,7 @@ class UserNotification {
     };
   }
 
+  // ---------- SQLite ----------
   factory UserNotification.fromMap(Map<String, dynamic> map) {
     return UserNotification(
       id: map['id'],
@@ -111,19 +113,22 @@ class UserNotification {
       actionUrl: map['actionUrl'],
       expiryDate: map['expiryDate'] != null
           ? DateTime.parse(map['expiryDate'])
-          : DateTime.now(), // Handle nullable DateTime
+          : DateTime.now(),
       entityId: map['entityId'],
       parentId: map['parentId'],
       parentType: map['parentType'],
       readStatus: map['readStatus'] == 1,
+      readDate: map['readDate'] != null && map['readDate'] != ''
+          ? DateTime.tryParse(map['readDate'])
+          : null, // ✅ NEW
       popupAlert: map['popupAlert'] == 1,
-      deleted: map['deleted'] ,
+      deleted: map['deleted'],
       dateModified: map['dateModified'] != null
           ? DateTime.parse(map['dateModified'])
-          : DateTime.now(), // Default to current time
+          : DateTime.now(),
       updatedAt: map['updatedAt'] != null
           ? DateTime.parse(map['updatedAt'])
-          : DateTime.now(), // Default to current time
+          : DateTime.now(),
       dirtyFlag: map['dirtyFlag'] ?? 0,
     );
   }
@@ -133,47 +138,48 @@ class UserNotification {
       'id': id,
       'regNo': regNo,
       'messageType': messageType,
-      'isHtmlBody': isHtmlBody ? 1 : 0, // Convert bool to int (1 for true, 0 for false)
+      'isHtmlBody': isHtmlBody ? 1 : 0,
       'isHtmlPage': isHtmlPage ? 1 : 0,
       'isImageUrl': isImageUrl ? 1 : 0,
       'title': title,
       'message': message,
       'actionUrl': actionUrl,
-      'expiryDate': expiryDate.toIso8601String(), // Convert DateTime to ISO8601 string
+      'expiryDate': expiryDate.toIso8601String(),
       'entityId': entityId,
       'parentId': parentId,
       'parentType': parentType,
-      'readStatus': readStatus ? 1 : 0, // Convert bool to int
+      'readStatus': readStatus ? 1 : 0,
+      'readDate': readDate?.toIso8601String(), // ✅ NEW
       'popupAlert': popupAlert ? 1 : 0,
-      'deleted': deleted ,
-      'dateModified': dateModified.toIso8601String(), // Convert DateTime to ISO8601 string
-      'updatedAt':updatedAt.toIso8601String(),
+      'deleted': deleted,
+      'dateModified': dateModified.toIso8601String(),
+      'updatedAt': updatedAt.toIso8601String(),
       'dirtyFlag': dirtyFlag,
-
     };
   }
 
+  // ---------- Table Schema ----------
   static const fields = {
-    'id': 'INTEGER PRIMARY KEY', // Unique identifier
+    'id': 'INTEGER PRIMARY KEY',
     'regNo': 'TEXT NOT NULL',
-    'messageType': 'INTEGER NOT NULL', // 1 = Notification type, 2 = Alert, etc.
-    'isHtmlBody': 'INTEGER NOT NULL', // 0 = false, 1 = true
-    'isHtmlPage': 'INTEGER NOT NULL', // 0 = false, 1 = true
-    'isImageUrl': 'INTEGER NOT NULL', // 0 = false, 1 = true
+    'messageType': 'INTEGER NOT NULL',
+    'isHtmlBody': 'INTEGER NOT NULL',
+    'isHtmlPage': 'INTEGER NOT NULL',
+    'isImageUrl': 'INTEGER NOT NULL',
     'title': 'TEXT NOT NULL',
     'message': 'TEXT NOT NULL',
-    'actionUrl': 'TEXT', // Optional URL for actions
-    'expiryDate': 'TEXT NOT NULL', // ISO8601 string format
-    'entityId': 'INTEGER', // Nullable foreign key
-    'parentId': 'INTEGER', // Nullable foreign key
-    'parentType': 'INTEGER', // Nullable type ID
-    'readStatus': 'INTEGER NOT NULL', // 0 = Unread, 1 = Read
-    'popupAlert': 'INTEGER NOT NULL', // 0 = Disabled, 1 = Enabled
-    'deleted': 'INTEGER NOT NULL', // 0 = Active, 1 = Deleted
-    'dateModified': 'TEXT NOT NULL', // ISO8601 string format
-    'updatedAt':'TEXT NOT NULL',
+    'actionUrl': 'TEXT',
+    'expiryDate': 'TEXT NOT NULL',
+    'entityId': 'INTEGER',
+    'parentId': 'INTEGER',
+    'parentType': 'INTEGER',
+    'readStatus': 'INTEGER NOT NULL',
+    'readDate': 'TEXT', // ✅ NEW COLUMN
+    'popupAlert': 'INTEGER NOT NULL',
+    'deleted': 'INTEGER NOT NULL',
+    'dateModified': 'TEXT NOT NULL',
+    'updatedAt': 'TEXT NOT NULL',
     'dirtyFlag': 'INTEGER NOT NULL',
   };
-
 }
 

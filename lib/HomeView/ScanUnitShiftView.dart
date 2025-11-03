@@ -30,6 +30,7 @@ class ScanUnitShiftView extends StatefulWidget {
   final List<UserPosting> userPostings;
   final String attendanceStatus;
   final UserAttendance? userAttendance;
+  final UnitShiftDetail? selectedShift;
 
   const ScanUnitShiftView(
       {
@@ -41,7 +42,7 @@ class ScanUnitShiftView extends StatefulWidget {
         required this.userPostings,
         required this.attendanceStatus,
          this.userAttendance,
-
+        this.selectedShift,
 
       });
   @override
@@ -109,8 +110,6 @@ class ScanUnitShiftViewState extends State<ScanUnitShiftView>{
     super.initState();
 
   }
-
-
 
 
   @override
@@ -323,11 +322,22 @@ class ScanUnitShiftViewState extends State<ScanUnitShiftView>{
                         controller: locationScannerController,
                         onDetect: (barcodeCapture) {
                           for (final barcode in barcodeCapture.barcodes) {
-                            debugPrint('Barcode found: ${barcode.rawValue}');
-                            getUnitPostData(barcode.rawValue!);
-                            break;
+                            final raw = barcode.rawValue;
+                            if (raw != null) {
+                              final qrCode = getQRCodeRawData(raw);
+                              if (qrCode != null) {
+                                debugPrint('Parsed QRCODE: $qrCode');
+                                getUnitPostData(qrCode);
+                              }
+                              else {
+                                showPopupAlert('alert'.tr(), 'invalid_qrcode'.tr());
+                                debugPrint('No QRCODE found in scanned text.');
+                              }
+                              break;
+                            }
                           }
                         },
+
                         fit: BoxFit.cover, // Ensure the scanner fills the container
                         placeholderBuilder: (context, constraints) {
                           return Center(
@@ -463,9 +473,6 @@ class ScanUnitShiftViewState extends State<ScanUnitShiftView>{
     );
   }
 
-  Future<void> _openSettings() async {
-    await openAppSettings();
-  }
 
   Future<void> updateEscortDutyUI() async {
 
@@ -514,39 +521,51 @@ class ScanUnitShiftViewState extends State<ScanUnitShiftView>{
     getUnitPostDataByUnit(escortDutyUnitCode);
   }
   Future<void> updateLocationData() async {
+    Position? position;
     try {
-      Position position = await Geolocator.getCurrentPosition(
-        locationSettings: LocationSettings(
-          accuracy: LocationAccuracy.best, // Adjust accuracy as needed
-          distanceFilter: 10, // Optional: Minimum distance between updates in meters
+      position = await Geolocator.getCurrentPosition(
+        locationSettings: const LocationSettings(
+          accuracy: LocationAccuracy.high,
+          timeLimit: Duration(seconds: 10),
         ),
       );
-
-      printInDebug('Latitude: ${position.latitude}, Longitude: ${position.longitude}');
-      deviceLatLong = '${position.latitude},${position.longitude}';
     } catch (e) {
-      printInDebug('Error: $e');
+      final lastKnown = await Geolocator.getLastKnownPosition();
+      if (lastKnown != null) {
+        final age = DateTime.now().difference(lastKnown.timestamp ?? DateTime.fromMillisecondsSinceEpoch(0));
+        if (age.inMinutes <= 5) {
+          position = lastKnown; // ✅ Accept only if ≤ 10 min old
+        } else {
+          printInDebug('⚠️ Last known location is too old: ${age.inMinutes} min');
+        }
+      }
+    }
+
+    if (position != null) {
+      printInDebug('✅ Using Lat: ${position.latitude}, Lng: ${position.longitude}');
+      deviceLatLong = '${position.latitude},${position.longitude}';
+    } else {
+      printInDebug('❌ No valid location within 10 minutes');
     }
   }
 
-  Future<void> scanBarcode() async {
-    final result = await Navigator.push(
-      context,
-      MaterialPageRoute(builder: (context) => const BarcodeScannerPage()),
+  String? getQRCodeRawData(String rawValue) {
+    final regex = RegExp(
+      r'qrcode\s*:\s*([A-Za-z0-9\-]+)',
+      caseSensitive: false, // ✅ make it case-insensitive
     );
 
-    if (result != null && result is String) {
-      getUnitPostData(result); // Use scanned result
-    }
+    final match = regex.firstMatch(rawValue);
+    return match?.group(1);
   }
-
   Future<void> getUnitPostData(String qrId) async {
 
    final unitDutyPost = widget.unitDutyPosts.where((post) => post.qrId == qrId).toList();
 
     if (unitDutyPost.isEmpty) {
       showPopupAlert('alert'.tr(), 'no_unit_duty_post'.tr());
-    } else {
+    }
+    else {
       selectedUnitDutyPost = unitDutyPost.first;
       getUserPosting(unitDutyPost.first.unitCode);
 
@@ -578,17 +597,18 @@ class ScanUnitShiftViewState extends State<ScanUnitShiftView>{
     else {
       selectedUserPosting = userPostings.first;
       if(widget.attendanceStatus == keyAttendanceStatusDutyIn) {
-        getUnitShiftDetails(userPostings.first.unitCode);
+        getUnitShiftDetailsDutyIn(userPostings.first.unitCode);
       }
 
       if(widget.attendanceStatus == keyAttendanceStatusDutyOut && widget.userAttendance != null) {
 
-        getUnitShiftDetailsById(widget.userAttendance!.shiftId);
+        getUnitShiftDetailsByIdDutyOut(widget.userAttendance!.shiftId);
 
       }
     }
   }
-  Future<void> getUnitShiftDetails(String unitCode) async {
+
+  Future<void> getUnitShiftDetailsDutyIn(String unitCode) async {
     DateTime now = DateTime.now();
     TimeOfDay currentTime = TimeOfDay(hour: now.hour, minute: now.minute);
 
@@ -643,69 +663,81 @@ class ScanUnitShiftViewState extends State<ScanUnitShiftView>{
       loadSelectShiftView();
     }
   }
-
-  Future<void> getUnitShiftDetails1(String unitCode) async {
-
+  Future<void> getUnitShiftDetailsDutyInNew(String unitCode) async {
     DateTime now = DateTime.now();
+
     TimeOfDay currentTime = TimeOfDay(hour: now.hour, minute: now.minute);
 
+    // Fetching extra duties count and total duty minutes done
+    int doubleDutyCount = await DatabaseHelper.instance.countMonthExtraDuties(
+        regNo, dutyDateTime.month, dutyDateTime.year);
 
-    int doubleDutyCount =  await DatabaseHelper.instance.countMonthExtraDuties(regNo, dutyDateTime.month,dutyDateTime.year);
+    int dutyDoneMints = await DatabaseHelper.instance.getTotalDutyMinutes(
+        regNo, dutyDateTime.day, dutyDateTime.month, dutyDateTime.year);
 
-    int dutyDoneMints =  await DatabaseHelper.instance.getTotalDutyMinutes(regNo,dutyDateTime.day, dutyDateTime.month,dutyDateTime.year);
+    bool dutyHrs12Allowed = true;
 
-    matchingShiftDetails = widget.unitShiftDetails.where((shift) {
+    // Restriction: No shifts allowed if doubleDutyCount >= 2 and total duty minutes >= 720
+    if (doubleDutyCount >= 2 && dutyDoneMints >= 720) {
+      showPopupAlert('alert'.tr(), 'other_mark_shift_not_allowed1'.tr());
+      return; // Stop execution if not allowed
+    }
 
-      TimeOfDay startTime = _parseTimeOfDay(shift.startTime);
-      TimeOfDay endTime = _parseTimeOfDay(shift.endTime);
+    // Restriction: 12-hour shifts not allowed if doubleDutyCount >= 2 and some duty minutes are already done
+    if (doubleDutyCount >= 2 && dutyDoneMints > 0 && dutyDoneMints < 720) {
+      dutyHrs12Allowed = false;
+    }
 
-      Duration shiftStartBeforeDuration = _parseShiftDuration(shift.shiftStartBefore);
-      Duration shiftEndAfterDuration = _parseShiftDuration(shift.dutyInBefore);
+    // Filter shifts based on time, unitCode, and duty hours condition
+    final allowedShifts = await DatabaseHelper.instance.getAllowedShifts();
 
-      TimeOfDay adjustedStartTime = _adjustTimeOfDay(startTime, shiftStartBeforeDuration);
-      TimeOfDay adjustedEndTime = _adjustTimeOfDay(endTime, shiftEndAfterDuration);
+    // matchingShiftDetails = allowedShifts.where((shift) {
+    //
+    //   // Convert shift.dutyHrs to double safely
+    //   double dutyHours = double.tryParse(shift.dutyHrs) ?? 0.0;
+    //
+    //   // Check if shift is within the allowed time range and unit
+    //   bool isValidUnit = shift.unitCode == unitCode;
+    //
+    //   // Restrict 12-hour shifts if dutyHrs12Allowed is false
+    //   bool isValidShift = dutyHrs12Allowed || dutyHours < 12.0;
+    //
+    //   return  isValidUnit && isValidShift;
+    // }).toList();
 
-      return shift.unitCode == unitCode
-          && _isTimeBetween(currentTime, adjustedStartTime, adjustedEndTime);
+    matchingShiftDetails = allowedShifts.where((shift) {
+      // TimeOfDay startTime = _parseTimeOfDay(shift.startTime);
+      // TimeOfDay endTime = _parseTimeOfDay(shift.endTime);
+      //
+      // Duration shiftStartBeforeDuration = _parseShiftDuration(shift.shiftStartBefore);
+      // Duration shiftEndAfterDuration = _parseShiftDuration(shift.dutyInBefore);
+      //
+      // TimeOfDay adjustedStartTime = _adjustTimeOfDay(startTime, shiftStartBeforeDuration);
+      // TimeOfDay adjustedEndTime = _adjustTimeOfDay(endTime, shiftEndAfterDuration);
+
+      // Convert shift.dutyHrs to double safely
+      double dutyHours = double.tryParse(shift.dutyHrs) ?? 0.0;
+
+      // Check if shift is within the allowed time range and unit
+      // bool isValidTime = _isTimeBetween(currentTime, adjustedStartTime, adjustedEndTime);
+      bool isValidUnit = shift.unitCode == unitCode;
+
+      // Restrict 12-hour shifts if dutyHrs12Allowed is false
+      bool isValidShift = dutyHrs12Allowed || dutyHours < 12.0;
+
+      return  isValidUnit && isValidShift;
     }).toList();
 
 
-      if (matchingShiftDetails.isEmpty) {
-         showPopupAlert('alert'.tr(), 'other_mark_shift_not_allowed1'.tr());
-      } else {
-        loadSelectShiftView();
-      }
-  }
-
-  Future<void> getUnitShiftDetailsByIdold(String shiftId) async {
-
-    DateTime now = DateTime.now();
-    TimeOfDay currentTime = TimeOfDay(hour: now.hour, minute: now.minute);
-
-    dutyInShiftDetail = widget.unitShiftDetails.firstWhere(
-          (shift) {
-        TimeOfDay startTime = _parseTimeOfDay(shift.startTime);
-        TimeOfDay endTime = _parseTimeOfDay(shift.endTime);
-
-        Duration shiftStartBeforeDuration = _parseShiftDuration(shift.shiftStartBefore);
-        Duration shiftEndAfterDuration = _parseShiftDuration(shift.dutyInBefore);
-
-        TimeOfDay adjustedStartTime = _adjustTimeOfDay(startTime, shiftStartBeforeDuration);
-        TimeOfDay adjustedEndTime = _adjustTimeOfDay(endTime, shiftEndAfterDuration);
-
-        return shift.shiftId == shiftId &&
-            _isTimeBetween(currentTime, adjustedStartTime, adjustedEndTime);
-      },
-    );
-
-    if (dutyInShiftDetail == null && widget.attendanceStatus == keyAttendanceStatusDutyOut) {
+    // Handle shift availability
+    if (matchingShiftDetails.isEmpty) {
       showPopupAlert('alert'.tr(), 'other_mark_shift_not_allowed1'.tr());
     } else {
-      loadSubmitDutyView();
+      loadSelectShiftView();
     }
   }
 
-  Future<void> getUnitShiftDetailsById(String shiftId) async {
+  Future<void> getUnitShiftDetailsByIdDutyOut(String shiftId) async {
     DateTime now = DateTime.now();
     TimeOfDay currentTime = TimeOfDay(hour: now.hour, minute: now.minute);
 
@@ -714,10 +746,10 @@ class ScanUnitShiftViewState extends State<ScanUnitShiftView>{
       final endTime = _parseTimeOfDay(shift.endTime);
 
       final shiftStartBeforeDuration = _parseShiftDuration(shift.shiftStartBefore);
-      final shiftEndAfterDuration = _parseShiftDuration(shift.dutyInBefore);
+      final shiftEndAfterDuration = _parseShiftDuration(shift.shiftEndAfter);
 
       final adjustedStartTime = _adjustTimeOfDay(startTime, shiftStartBeforeDuration);
-      final adjustedEndTime = _adjustTimeOfDay(endTime, shiftEndAfterDuration);
+      final adjustedEndTime = _adjustTimeOfDay(endTime, -shiftEndAfterDuration);
 
       return shift.shiftId == shiftId &&
           _isTimeBetween(currentTime, adjustedStartTime, adjustedEndTime);
@@ -733,7 +765,7 @@ class ScanUnitShiftViewState extends State<ScanUnitShiftView>{
     }
 
     dutyInShiftDetail = matches.first;
-    loadSubmitDutyView();
+    loadSubmitDutyView(dutyInShiftDetail);
   }
 
   Future<List<EscortDuty>> getApprovedEscortDuty(DateTime selectedDate) async {
@@ -802,9 +834,7 @@ class ScanUnitShiftViewState extends State<ScanUnitShiftView>{
     );
   }
 
-  bool checkDutyLocation(UnitDutyPost dutyPost, String currentLatLng, String retryCall){
-
-    printInDebug('test');
+  Future<bool> checkDutyLocation(UnitDutyPost dutyPost, String currentLatLng, String retryCall) async {
 
     bool locationVerified = false;
 
@@ -812,7 +842,8 @@ class ScanUnitShiftViewState extends State<ScanUnitShiftView>{
     double currentLat = double.parse(activeDayList[0]) ; // Latitude
     double currentLng = double.parse(activeDayList[1]); // Longitude
 
-    printInDebug('${dutyPost.isGeoFenceAllow}');
+    printInDebug('geo fence enabled = ${dutyPost.isGeoFenceAllow}');
+    printInDebug('your lat long = $currentLat, $currentLng');
 
     if(dutyPost.isGeoFenceAllow == 1){
       printInDebug('${dutyPost.isGeoFenceAllow}');
@@ -824,7 +855,7 @@ class ScanUnitShiftViewState extends State<ScanUnitShiftView>{
         }
         else{
           locationVerified = false;
-          String message = '${'your_location'.tr()}: $currentLatLng\n${'distance_from_post'.tr()}: $currentDistance ${'meter'.tr()}' ;
+          String message = await getLocationAlertMessage(currentLatLng, currentDistance);
           showLocationPopupAlert(
               'not_allow_range_location'.tr(),
               message,
@@ -838,9 +869,11 @@ class ScanUnitShiftViewState extends State<ScanUnitShiftView>{
       }
       else{
         locationVerified = false;
+        String message = await getLocationAlertMessage(currentLatLng, -1);
+
         showPopupAlert(
             'device_location'.tr(),
-            'not_allow_range_location'.tr(),
+          message,
             cancelText:dutyPost.ignoreBlankLocation == 1 ? 'ignore'.tr() : 'Cancel'.tr(),
             okText:'refresh'.tr(),
 
@@ -856,6 +889,24 @@ class ScanUnitShiftViewState extends State<ScanUnitShiftView>{
     return locationVerified;
 
   }
+
+  Future<String> getLocationAlertMessage(String currentLatLng, int currentDistance) async {
+    final distanceText = currentDistance == -1 ? '--' : '$currentDistance';
+    final internetStatus = await isWifiOrMobileDataConnected();
+    final permissionStatus = await getLocationPermissionStatus();
+    final preciseLocation = await isPreciseLocationEnabled();
+
+    String message = ''
+        '${'your_location'.tr()}: $currentLatLng\n'
+        '${'distance_from_post'.tr()}: $distanceText ${'meter'.tr()}\n'
+        '${'internet_data_status'.tr()}: $internetStatus\n'
+        '${'location_permission'.tr()}: $permissionStatus\n'
+        '${'precise_location'.tr()}: $preciseLocation\n';
+
+    return message;
+  }
+
+
   Future<void> onTapIgnoreAndSubmit() async {
 
     if(retryMethod == 'SelectShiftView'){
@@ -863,7 +914,7 @@ class ScanUnitShiftViewState extends State<ScanUnitShiftView>{
     }
 
     if(retryMethod == 'SubmitDutyView'){
-      loadSubmitDutyView(ignoreAndSubmit: true);
+      loadSubmitDutyView(dutyInShiftDetail,ignoreAndSubmit: true);
     }
 
 
@@ -877,13 +928,13 @@ class ScanUnitShiftViewState extends State<ScanUnitShiftView>{
 
     await updateLocationData();
 
-    Future.delayed(Duration(seconds: 2), (){
+    Future.delayed(Duration(seconds: 3), (){
         if(retryMethod == 'SelectShiftView'){
           loadSelectShiftView();
         }
 
         if(retryMethod == 'SubmitDutyView'){
-          loadSubmitDutyView();
+          loadSubmitDutyView(dutyInShiftDetail);
         }
 
         setState(() {
@@ -920,28 +971,73 @@ class ScanUnitShiftViewState extends State<ScanUnitShiftView>{
   }
 
 
-  void loadSelectShiftView({bool ignoreAndSubmit = false}){
+
+  Future<void> loadSelectShiftView({bool ignoreAndSubmit = false}) async {
 
     if(!ignoreAndSubmit) {
-      if (!checkDutyLocation(selectedUnitDutyPost, deviceLatLong, 'SelectShiftView')) {
+      if (! await checkDutyLocation(selectedUnitDutyPost, deviceLatLong, 'SelectShiftView')) {
         return;
       }
     }
 
+   loadShiftOrSubmitDuty(ignoreAndSubmit);
+
+  }
+
+  void loadShiftOrSubmitDuty(bool ignoreAndSubmit){
     locationScannerController.dispose();
+
+    if(widget.selectedShift == null) {
+      Navigator.push(
+        context,
+        MaterialPageRoute(
+          builder: (context) =>
+              SelectShiftView(
+                userProfile: widget.userProfile,
+                unitDutyPost: selectedUnitDutyPost,
+                unitShiftDetail: matchingShiftDetails,
+                userPosting: selectedUserPosting,
+                attendanceMode: attendanceMode,
+                attendanceStatus: widget.attendanceStatus,
+                latLong: deviceLatLong,
+                dutyDateTime: dutyDateTime.toIso8601String(),
+                userAttendance: widget.userAttendance,
+              ),
+        ),
+      )
+          .then((val) {
+        printInDebug('back from confirm profile');
+        setState(() {
+          locationScannerController = MobileScannerController();
+        });
+        locationScannerKey = UniqueKey(); // Force widget to reload
+      });
+    }else{
+      loadSubmitDutyView(widget.selectedShift,ignoreAndSubmit:ignoreAndSubmit);
+    }
+
+  }
+  Future<void> loadSubmitDutyView(UnitShiftDetail? selectedShift,{bool ignoreAndSubmit = false}) async {
+
+    if(!ignoreAndSubmit){
+     if(! await checkDutyLocation(selectedUnitDutyPost, deviceLatLong, 'SubmitDutyView')){
+      return;
+    }
+    }
     Navigator.push(
       context,
       MaterialPageRoute(
-        builder: (context) => SelectShiftView(
+        builder: (context) => SubmitDutyView(
           userProfile: widget.userProfile,
           unitDutyPost: selectedUnitDutyPost,
-          unitShiftDetail: matchingShiftDetails,
+          unitShiftDetail: selectedShift!,
           userPosting: selectedUserPosting,
-          attendanceMode: attendanceMode,
+          attendanceMode: widget.attendanceMode,
           attendanceStatus: widget.attendanceStatus,
           latLong: deviceLatLong,
-          dutyDateTime:  dutyDateTime.toIso8601String(),
+          dutyDateTime: dutyDateTime.toIso8601String(),
           userAttendance: widget.userAttendance,
+
         ),
       ),
     )
@@ -952,32 +1048,6 @@ class ScanUnitShiftViewState extends State<ScanUnitShiftView>{
       });
       locationScannerKey = UniqueKey(); // Force widget to reload
     });
-
-  }
-  void loadSubmitDutyView({bool ignoreAndSubmit = false}){
-
-    if(!ignoreAndSubmit){
-     if(!checkDutyLocation(selectedUnitDutyPost, deviceLatLong, 'SubmitDutyView')){
-      return;
-    }
-    }
-    Navigator.push(
-      context,
-      MaterialPageRoute(
-        builder: (context) => SubmitDutyView(
-          userProfile: widget.userProfile,
-          unitDutyPost: selectedUnitDutyPost,
-          unitShiftDetail: dutyInShiftDetail!,
-          userPosting: selectedUserPosting,
-          attendanceMode: widget.attendanceMode,
-          attendanceStatus: widget.attendanceStatus,
-          latLong: deviceLatLong,
-          dutyDateTime: dutyDateTime.toIso8601String(),
-          userAttendance: widget.userAttendance,
-
-        ),
-      ),
-    );
   }
 
 

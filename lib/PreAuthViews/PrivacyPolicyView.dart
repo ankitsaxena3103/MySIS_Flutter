@@ -1,4 +1,6 @@
+import 'package:android_intent_plus/android_intent.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:geolocator/geolocator.dart';
 import 'package:mysis/CommonViews/Utility.dart';
 import 'package:mysis/PreAuthViews/OnboardingPaginationView.dart';
@@ -348,6 +350,7 @@ class PrivacyPolicyViewState extends State<PrivacyPolicyView> {
 
 
   Future <void> onTapNext() async {
+
     bool isAllPermissionsGranted = await _requestAllPermissions();
 
     if (isAllPermissionsGranted) {
@@ -379,24 +382,47 @@ class PrivacyPolicyViewState extends State<PrivacyPolicyView> {
         if (!await _requestLocationPermission() || !await _requestContactPermission() || !await _requestContactPermission()) {
      // if (!await _requestLocationPermission()) {//this is temp
 
-      return false;
+      // return false;
     }
 
+    // await requestBatteryOptimization();
     // All permissions granted
     return true;
+  }
+
+  Future<void> requestBatteryOptimization() async {
+    final isIgnored = await isIgnoringBatteryOptimizations();
+    if (!isIgnored) {
+      // Show a dialog explaining why this is needed
+      // then open settings
+      const intent = AndroidIntent(
+        action: 'android.settings.IGNORE_BATTERY_OPTIMIZATION_SETTINGS',
+      );
+      intent.launch();
+    }
+
+
+  }
+
+
+  Future<bool> isIgnoringBatteryOptimizations() async {
+    const platform = MethodChannel('battery_optimization');
+    try {
+      final result = await platform.invokeMethod<bool>('isIgnoringBatteryOptimizations');
+      return result ?? false;
+    } on PlatformException {
+      return false;
+    }
   }
 
 
   Future<bool> _requestContactPermission() async {
     PermissionStatus status = await Permission.contacts.status;
-    print(status);
 
 
     if (status.isDenied) {
       // Request permission if denied
-      print(status);
       status = await Permission.contacts.request();
-      print(status);
 
       if (status.isDenied) {
         return false; // Permission denied temporarily
