@@ -71,9 +71,9 @@ class ServerService {
     final appInfo = await getPackageInfo();
     Map<String, String> inputData = {
       "run": "sync",
-      'app Version': '${appInfo.version}(${appInfo.buildNumber})',
-      'plateform version ':deviceDetails[keyPlateformVersion],
-      'Model': deviceDetails[keyDeviceModel],
+      // 'app Version': '${appInfo.version}(${appInfo.buildNumber})',
+      // 'plateform version ':deviceDetails[keyPlateformVersion],
+      // 'Model': deviceDetails[keyDeviceModel],
 
     };
 

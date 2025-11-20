@@ -39,8 +39,12 @@
 	<string>MySIS use Face ID to secure your app data.</string>
 	<key>NSLocalAuthenticationUsageDescription</key>
 	<string>MySIS need Touch ID/Face ID to authenticate you.</string>
+	<key>NSLocationAlwaysAndWhenInUseUsageDescription</key>
+	<string>MySIS uses location data in the background to verify your attendance and duty location even when the app is not actively open.</string>
 	<key>NSLocationWhenInUseUsageDescription</key>
 	<string>MySIS uses location data to verify the location from which Attendance is being marked and while on Duty. Permission is required while the app is in use.</string>
+	<key>NSMicrophoneUsageDescription</key>
+	<string>MySIS requires access to the microphone to record audio for certain features.</string>
 	<key>NSPhotoLibraryAddUsageDescription</key>
 	<string>MySIS need permission to save files to your device.</string>
 	<key>NSPhotoLibraryUsageDescription</key>
@@ -48,7 +52,16 @@
 	<key>UIApplicationSupportsIndirectInputEvents</key>
 	<true/>
 	<key>UIBackgroundModes</key>
-	<array/>
+	<array>
+		<string>fetch</string>
+		<string>remote-notification</string>
+	</array>
+	<key>UIBackgroundModes</key>
+    <array>
+        <string>remote-notification</string>
+    </array>
+        <key>NSUserTrackingUsageDescription</key>
+    <string>We use notifications to keep you updated.</string>
 	<key>UILaunchStoryboardName</key>
 	<string>LaunchScreen</string>
 	<key>UIMainStoryboardFile</key>
@@ -58,13 +71,5 @@
 		<string>UIInterfaceOrientationPortrait</string>
 		<string>UIInterfaceOrientationPortraitUpsideDown</string>
 	</array>
-	<key>NSLocationAlwaysAndWhenInUseUsageDescription</key>
-	<string>MySIS uses location data in the background to verify your attendance and duty location even when the app is not actively open.</string>
-	<key>NSMicrophoneUsageDescription</key>
-	<string>MySIS requires access to the microphone to record audio for certain features.</string>
-	<key>UIBackgroundModes</key>
-    <array>
-        <string>fetch</string>
-    </array>
 </dict>
 </plist>

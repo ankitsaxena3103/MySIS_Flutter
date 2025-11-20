@@ -1,4 +1,5 @@
 import 'package:bcrypt/bcrypt.dart';
+import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:local_auth/local_auth.dart';
@@ -62,6 +63,7 @@ class EnterPINViewState extends State<EnterPINView> {
 
   List<String> otpList = []; // List of 4 empty strings
  Color otpContainerColor = isDarkMode ? greyColorDark : greyColor5;
+  final FirebaseMessaging _fcm = FirebaseMessaging.instance;
 
 
   @override
@@ -468,6 +470,7 @@ class EnterPINViewState extends State<EnterPINView> {
   }
 
   void initialSetup() {
+    registerPushNotification();
     if(isUserBiometricEnabled) {
       checkBiometricAvailability();
     }else{
@@ -479,6 +482,15 @@ class EnterPINViewState extends State<EnterPINView> {
     setState(() {
       lblErrorMsg = '';
     });
+  }
+
+  Future <void>registerPushNotification()async {
+    // Request permissions (iOS/Web)
+    await _fcm.requestPermission();
+
+// Get FCM token
+    String? token = await _fcm.getToken();
+    printInDebug("FCM Token: $token");
   }
 
   Future<void> recallGetToken() async {

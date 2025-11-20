@@ -339,7 +339,7 @@ class ScanUnitShiftViewState extends State<ScanUnitShiftView>{
                         },
 
                         fit: BoxFit.cover, // Ensure the scanner fills the container
-                        placeholderBuilder: (context, constraints) {
+                        placeholderBuilder: (context) {
                           return Center(
                             child: Text(
                               'camera_init'.tr(),
@@ -352,7 +352,8 @@ class ScanUnitShiftViewState extends State<ScanUnitShiftView>{
                             ),
                           );
                         },
-                        errorBuilder: (context, error, child) {
+
+                        errorBuilder: (context, error) {
                           if (error is MobileScannerException &&
                               error.errorCode == MobileScannerErrorCode.permissionDenied) {
                             return Center(
@@ -406,6 +407,7 @@ class ScanUnitShiftViewState extends State<ScanUnitShiftView>{
                             ),
                           );
                         },
+
                       ),
                     ),
 

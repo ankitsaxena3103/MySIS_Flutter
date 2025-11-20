@@ -1,0 +1,32 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+<dict>
+	<key>API_KEY</key>
+	<string>AIzaSyA7G9BK8Yue_22BC_vpZiS6YQ0A1cI3wsk</string>
+	<key>GCM_SENDER_ID</key>
+	<string>312663527364</string>
+	<key>PLIST_VERSION</key>
+	<string>1</string>
+	<key>BUNDLE_ID</key>
+	<string>com.sisindia.mysis.guard</string>
+	<key>PROJECT_ID</key>
+	<string>sis-india</string>
+	<key>STORAGE_BUCKET</key>
+	<string>sis-india.firebasestorage.app</string>
+	<key>IS_ADS_ENABLED</key>
+	<false></false>
+	<key>IS_ANALYTICS_ENABLED</key>
+	<false></false>
+	<key>IS_APPINVITE_ENABLED</key>
+	<true></true>
+	<key>IS_GCM_ENABLED</key>
+	<true></true>
+	<key>IS_SIGNIN_ENABLED</key>
+	<true></true>
+	<key>GOOGLE_APP_ID</key>
+	<string>1:312663527364:ios:8825ea9584cd0f8ef81e91</string>
+	<key>DATABASE_URL</key>
+	<string>https://sis-india.firebaseio.com</string>
+</dict>
+</plist>

@@ -1,0 +1,40 @@
+{
+  "project_info": {
+    "project_number": "312663527364",
+    "firebase_url": "https://sis-india.firebaseio.com",
+    "project_id": "sis-india",
+    "storage_bucket": "sis-india.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:312663527364:android:3e166353a97da29af81e91",
+        "android_client_info": {
+          "package_name": "com.sisindia.mysis"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "312663527364-7gjfga1nj2op8363t94ucd7fgjmsc8c4.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyAv7Diq562oIWQBcSfWYseNIOkrfw3kF4Q"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "312663527364-7gjfga1nj2op8363t94ucd7fgjmsc8c4.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

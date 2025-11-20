@@ -1,6 +1,8 @@
 
 
 import 'dart:io';
+import 'package:firebase_core/firebase_core.dart';
+import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:flutter/material.dart';
 import 'package:mysis/SharedClasses/LanguageProvider.dart';
 import 'package:mysis/SharedClasses/Preferences.dart';
@@ -17,6 +19,7 @@ import 'package:workmanager/workmanager.dart';
 import 'HomeView/route_observer.dart';
 import 'SharedClasses/ServerServices.dart';
 import 'UserAuthViews/PINLockScreen.dart';
+import 'firebase_options.dart';
 final GlobalKey<NavigatorState> navigatorKey = GlobalKey<NavigatorState>();
 
 @pragma('vm:entry-point')
@@ -29,6 +32,10 @@ void callbackDispatcher() {
   });
 }
 
+Future<void> _firebaseMessagingBackgroundHandler(RemoteMessage message) async {
+  await Firebase.initializeApp();
+  printInDebug('Handling background message: ${message.messageId}');
+}
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
   await EasyLocalization.ensureInitialized();
@@ -37,6 +44,8 @@ Future<void> main() async {
 
   // Initialize Workmanager safely
   await _initializeWorkmanager();
+  await Firebase.initializeApp();
+  await Firebase.initializeApp(options: DefaultFirebaseOptions.currentPlatform,);
 
   runApp(
     MultiProvider(
@@ -80,6 +89,7 @@ class _MyAppState extends State<MyApp> with WidgetsBindingObserver {
   void initState() {
     super.initState();
     WidgetsBinding.instance.addObserver(this);
+
     Future.delayed(Duration(seconds: 10),() {
       _isPinScreenOpen = false;
     });

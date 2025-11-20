@@ -195,10 +195,10 @@ class ScanCardViewState extends State<ScanCardView>{
                     },
 
                     fit: BoxFit.cover, // Ensure the scanner fills the container
-                    placeholderBuilder: (context, constraints) {
+                    placeholderBuilder: (context) {
                       return Center(
                         child: Text(
-                            'camera_init'.tr(),
+                          'camera_init'.tr(),
                           style: TextStyle(
                             color: isDarkMode ? whiteColor : greyColor6,
                             fontSize: pathS / 5.5,
@@ -208,7 +208,8 @@ class ScanCardViewState extends State<ScanCardView>{
                         ),
                       );
                     },
-                    errorBuilder: (context, error, child) {
+
+                    errorBuilder: (context, error) {
                       if (error is MobileScannerException &&
                           error.errorCode == MobileScannerErrorCode.permissionDenied) {
                         return Center(
@@ -235,9 +236,9 @@ class ScanCardViewState extends State<ScanCardView>{
                                   }
                                 },
                                 child: Text(
-                                    'permission_ensure'.tr(),
+                                  'permission_ensure'.tr(),
                                   style: TextStyle(
-                                    color: isDarkMode ? redColor1:redColor3,
+                                    color: isDarkMode ? redColor1 : redColor3,
                                     fontSize: pathS / 5.5,
                                     fontWeight: FontWeight.w400,
                                     fontFamily: 'Roboto',
@@ -262,6 +263,7 @@ class ScanCardViewState extends State<ScanCardView>{
                         ),
                       );
                     },
+
 
                   ),
 

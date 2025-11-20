@@ -1,5 +1,6 @@
 import UIKit
 import Flutter
+import FirebaseCore // ✅ required for FirebaseApp.configure()
 
 @main
 @objc class AppDelegate: FlutterAppDelegate {
@@ -22,7 +23,7 @@ import Flutter
             }
         }
     }
-
+    FirebaseApp.configure()
     GeneratedPluginRegistrant.register(with: self)
     return super.application(application, didFinishLaunchingWithOptions: launchOptions)
   }
