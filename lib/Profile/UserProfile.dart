@@ -69,38 +69,46 @@ class UserProfile {
     required this.updatedAt,
   });
 
+  Map<String, dynamic> toJson() {
+    String? formatDate(DateTime? date) {
+      return date?.toIso8601String();
+    }
 
-  // Map<String, dynamic> toJson() {
-  //   return {
-  //     'REGNO': regNo,
-  //     'ID': id,
-  //     'EMP_NAME': empName,
-  //     'Gender': gender,
-  //     'RANK': rank,
-  //     'UNIT_CODE': unitCode,
-  //     'UNIT_ID': unitId,
-  //     'BRANCH_CODE': branchCode,
-  //     'BRANCH_NAME': branchName,
-  //     'DATE_OF_BIRTH': dateOfBirth.toIso8601String(),
-  //     'JOINING_DATE': joiningDate.toIso8601String(),
-  //     'MOBILE': mobile,
-  //     'EMAIL': email,
-  //     'Qualification': qualification,
-  //     'Experience': experience,
-  //     'HEIGHT': height,
-  //     'WEIGHT': weight,
-  //     'AGE': age,
-  //     'BankIfscCode': bankIfscCode,
-  //     'AccountNo': accountNo,
-  //     'BankName': bankName,
-  //     'BankAddress': bankAddress,
-  //     'PROFILE_IMAGE_URL': profileImageUrl,
-  //     'ESI_NO': esiNo,
-  //     'UAN_NO': uanNo,
-  //     'BankLogo' : bankLogo,
-  //     'SERVICE_NAME' : serviceName,
-  //   };
-  // }
+    return {
+      'REGNO': regNo,
+      'ID': id,
+      'EMP_NAME': empName,
+      'Gender': gender,
+      'RANK': rank,
+      'UNIT_CODE': unitCode,
+      'UNIT_ID': unitId,
+      'BRANCH_CODE': branchCode,
+      'BRANCH_NAME': branchName,
+      'DATE_OF_BIRTH': formatDate(dateOfBirth),
+      'JOINING_DATE': formatDate(joiningDate),
+      'MOBILE': mobile,
+      'EMAIL': email,
+      'Qualification': qualification,
+      'Experience': experience,
+      'HEIGHT': height,
+      'WEIGHT': weight,
+      'AGE': age,
+      'BankIfscCode': bankIfscCode,
+      'AccountNo': accountNo,
+      'BankName': bankName,
+      'BankAddress': bankAddress,
+      'PROFILE_IMAGE_URL': profileImageUrl,
+      'ESI_NO': esiNo,
+      'UAN_NO': uanNo,
+      'BankLogo': bankLogo,
+      'SERVICE_NAME': serviceName,
+      'SYMBOL': symbol,
+      'ManagerRegNo': managerRegNo,
+      'ManagerName': managerName,
+      'ManagerMobile': managerMobile,
+      'DATE_MODIFIED': formatDate(dateModified),
+    };
+  }
 
 
   factory UserProfile.fromJson(Map<String, dynamic> json) {
@@ -151,7 +159,6 @@ class UserProfile {
       updatedAt: DateTime.now(), // Default value if not in the JSON
     );
   }
-
 
   // Create an instance of UserProfile from a Map
   factory UserProfile.fromMap(Map<String, dynamic> map) {
@@ -276,6 +283,8 @@ class UserProfile {
 
     };
   }
+
+
 
 }
 

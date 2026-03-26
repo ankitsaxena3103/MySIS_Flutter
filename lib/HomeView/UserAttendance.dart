@@ -1,3 +1,5 @@
+import 'package:easy_localization/easy_localization.dart';
+
 class UserAttendance {
   final String id;
   final String regNo;
@@ -170,7 +172,9 @@ class UserAttendance {
       'DUTY_POST_NAME': dutyPostName,
       'SHIFT_ID': shiftId,
       'SHIFT_NAME': shiftName,
-      'SHIFT_START_DATE': shiftStartDate.toIso8601String(),
+      // 'SHIFT_START_DATE': shiftStartDate.toIso8601String(),
+      'SHIFT_START_DATE': DateFormat('yyyy-MM-dd').format(shiftStartDate),
+
       'SHIFT_START_TIME': shiftStartTime.toIso8601String(),
       'SHIFT_END_TIME': shiftEndTime.toIso8601String(),
       'ACT_START_TIME': actStartTime.toIso8601String(),

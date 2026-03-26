@@ -3,8 +3,6 @@ import 'dart:core';
 import 'dart:io';
 import 'dart:math';
 
-import 'package:android_intent_plus/android_intent.dart';
-import 'package:android_intent_plus/flag.dart';
 import 'package:connectivity_plus/connectivity_plus.dart';
 import 'package:device_info_plus/device_info_plus.dart';
 import 'package:easy_localization/easy_localization.dart';
@@ -17,13 +15,15 @@ import 'package:local_auth/local_auth.dart';
 import 'package:package_info_plus/package_info_plus.dart';
 import 'package:url_launcher/url_launcher.dart';
 
-import 'Utility.dart' as AppSettings;
 
 final LocalAuthentication auth = LocalAuthentication();
 
 const String appToken = r"$2a$11$QGo3jefJUjhG1kwyJSDKV.q7emFNRSntKuQUgo7KKOEycVnWYX0tm";
 
 const String baseUrl = 'mysis.sisersys.com:8446';
+// const String baseUrl = 'mydtss.sisersys.com:8447';
+// const String baseUrl = 'mysisco.sisersys.com:8449';
+
 // const String authenticateApi = '/api/guardApp/Auth/isValidUser';
 const String profileApi = '/api/guardApp/Auth/UserProfile';
 const String tokenApi = '/api/guardApp/GenerateToken';
@@ -53,7 +53,7 @@ const String userNotificationPostApi = '/api/guardApp/Post/UpdateUserNotificatio
 const String postGuardReferalApi = '/api/guardApp/Post/PostGuardReferal';
 const String employeeRoasterApi = 'api/guardApp/Auth/EmployeeRosterDetail';
 
-const keyDataBaseName = 'mysis_database.db';
+const keyDataBaseName = 'mydtss_database.db';
 const keyTableUserProfile = 'UserProfile';
 const keyTableUserPosting = 'UserPosting';
 const keyTableUnitShiftDetail = 'UnitShiftDetail';
@@ -112,6 +112,8 @@ bool isMobileInternetOn = false;
 bool isMobileCarrierDetected = false;
 bool isGPSEnabled = false;
 bool isUserBiometricEnabled = false;
+
+bool isForeground = false;
 
 
 late Size physicalScreenSize ;
@@ -225,12 +227,11 @@ Future<void> sendSMS(String phoneNumber, String message) async {
 }
 
 void shareOnWhatsApp_old(String appLink) async {
-  String content = 'MySIS App:';
+  String content = 'MyDTSS App:';
   // SocialShare.shareWhatsapp(content);
 }
 
 void shareOnWhatsApp(String appLink) async {
-  // final text = Uri.encodeComponent('MySIS App:\n$appLink');
   final url = 'https://wa.me/$appLink?text=Hello';
 
   if (await canLaunchUrl(Uri.parse(url))) {
@@ -242,8 +243,8 @@ void shareOnWhatsApp(String appLink) async {
 
 
 PackageInfo packageInfo = PackageInfo(
-  appName: 'MySIS',
-  packageName: 'com.sisindia.mysis',
+  appName: 'MyDTSS',
+  packageName: 'com.sisindia.mydtss',
   version: '1',
   buildNumber: '1',
   buildSignature: 'Unknown',
@@ -518,7 +519,7 @@ void openMySISAppSettings() {
     } catch (e) {
       print("Error opening Android app settings: $e");
       // Fallback: open general settings
-      // AppSettings.openMySISAppSettings();
+      // AppSettings.openMyDTSSAppSettings();
     }
   }
   else if (Platform.isIOS) {

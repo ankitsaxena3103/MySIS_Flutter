@@ -1,4 +1,6 @@
 
+import 'dart:async';
+
 import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
@@ -6,14 +8,17 @@ import 'package:mysis/HomeView/HomeView.dart';
 import 'package:mysis/CommonViews/Utility.dart';
 import 'package:mysis/Menu/MenuItemView.dart';
 import 'package:mysis/Duty/DutyView.dart';
-import 'package:mysis/SharedClasses/ServerServices.dart';
 import 'package:provider/provider.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 import 'package:workmanager/workmanager.dart';
 
 import 'SharedClasses/LanguageProvider.dart';
+import 'SharedClasses/ServerServices.dart';
 import 'SharedClasses/ThemeProvider.dart';
 
 class MyTabBarView extends StatefulWidget {
+  const MyTabBarView({super.key});
+
   @override
   MyTabBarViewState createState() => MyTabBarViewState();
 }
@@ -45,35 +50,39 @@ class MyTabBarViewState extends State<MyTabBarView> {
       tabSelectedIndex = 0;
     });
 
-    _scheduleBackgroundTasks();
-    loadServerDataAtStart();
-
+    loadScheduler();
+    saveServerDataAtStart();
   }
 
+Future<void> loadScheduler() async {
+  await  scheduleBackgroundTasksOnce();
+}
 
-  void _scheduleBackgroundTasks() {
-    // Periodic task
-    WidgetsBinding.instance.addPostFrameCallback((_) {
+  Future<void> scheduleBackgroundTasksOnce() async {
+    final prefs = await SharedPreferences.getInstance();
+    final scheduled = prefs.getBool('bg_tasks_scheduled') ?? false;
 
-      Workmanager().registerPeriodicTask(
-        "fetchDataTask",
-        "loadServerData",
-        frequency: Duration(minutes: 16),
-      );
+    // if(kDebugMode){
+    //   Workmanager().registerOneOffTask(
+    //     "testNow",
+    //     "loadServerData",
+    //     initialDelay: Duration(seconds: 60),
+    //   );
+    // }
 
-      Workmanager().registerOneOffTask(
-        "testNow",
-        "loadServerData",
-        initialDelay: Duration(seconds: 30),
-      );
+    // if (scheduled) return;
 
-
-    });
-
+    await Workmanager().registerPeriodicTask(
+      "fetchDataTask",
+      "loadServerData",
+      frequency: const Duration(minutes: 30),
+      existingWorkPolicy: ExistingPeriodicWorkPolicy.keep,
+    );
+    await prefs.setBool('bg_tasks_scheduled', true);
   }
 
-  Future<void> loadServerDataAtStart() async {
-    await ServerService.instance.loadServerData();
+  Future<void> saveServerDataAtStart() async {
+    await ServerService.instance.saveServerData();
   }
   @override
   Widget build(BuildContext context) {

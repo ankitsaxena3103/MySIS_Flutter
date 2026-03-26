@@ -1,6 +1,7 @@
+import 'dart:io';
+
 import 'package:bcrypt/bcrypt.dart';
 import 'package:firebase_messaging/firebase_messaging.dart';
-import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:local_auth/local_auth.dart';
 import 'package:mysis/CommonViews/CustomNumericKeypad.dart';
@@ -491,7 +492,42 @@ class EnterPINViewState extends State<EnterPINView> {
 // Get FCM token
     String? token = await _fcm.getToken();
     printInDebug("FCM Token: $token");
+    await saveFCMToken(token!);
   }
+
+  Future<void> saveFCMToken(String token) async {
+    // setState(() {
+    //   showLoaderView = true;
+    // });
+
+    String tokenKey = Platform.isIOS ? 'FCM_IOS_KEY' : 'FCM_ANDROID_KEY';
+    Map <String,String> inputData = {
+      tokenKey: token
+    };
+
+    APIHelper.instance.patchData(updateProfileApi, inputData, (responseData) {
+      if (responseData.isNotEmpty) {
+        printInDebug('token saved');
+
+      }
+      else {
+        // Handle empty response
+        printInDebug('Response data is empty.');
+      }
+
+      // setState(() {showLoaderView = false;});
+
+    },
+          (error) {
+        // Handle error
+        // setState(() {
+        //   showLoaderView = false;
+        // });
+        printInDebug('Error: $error');
+      },
+    );
+  }
+
 
   Future<void> recallGetToken() async {
 
@@ -557,7 +593,11 @@ class EnterPINViewState extends State<EnterPINView> {
         nextShadowColor = Colors.transparent;
         lblErrorMsg =  enteredPIN.length == 4 ? 'repeat_not_match'.tr() : '';
         otpContainerColor = isDarkMode ? greyColorDark : greyColor5;
-
+        showKeypad = true;
+        if(enteredPIN.length == 4) {
+          otpList = [];
+          txtEnterPIN.text = '';
+        }
       });
 
     }

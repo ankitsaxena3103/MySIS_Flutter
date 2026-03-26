@@ -43,6 +43,29 @@ class UnitShiftDetail {
 
   });
 
+  Map<String, dynamic> toJson() {
+    String? formatDate(DateTime? date) => date?.toIso8601String();
+
+    return {
+      'ID': id,
+      'SHIFT_ID': shiftId,
+      'POST_ID': postId,
+      'SHIFT_NAME': shiftName,
+      'UNIT_CODE': unitCode,
+      'START_TIME': startTime,
+      'END_TIME': endTime,
+      'DUTY_HRS': dutyHrs,
+      'START_DATE': formatDate(startDate),
+      'END_DATE': formatDate(endDate),
+      'ACTIVE_DAYS': activeDays,
+      'DELETED': deleted,
+      'DATE_MODIFIED': formatDate(dateModified),
+      'SHIFT_START_BEFORE': shiftStartBefore,
+      'SHIFT_END_AFTER': shiftEndAfter,
+      'DUTY_IN_BEFORE': dutyInBefore,
+    };
+  }
+
   // Convert JSON into a UnitShiftDetail object
   factory UnitShiftDetail.fromJson(Map<String, dynamic> json) {
     return UnitShiftDetail(

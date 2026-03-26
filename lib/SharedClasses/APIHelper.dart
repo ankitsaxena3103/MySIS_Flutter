@@ -42,6 +42,12 @@ class APIHelper {
         body: jsonEncode(body),
       );
 
+      printInDebug('================ API RESPONSE ================');
+      printInDebug('URL: $url');
+      printInDebug('Status Code: ${response.statusCode}');
+      printInDebug('Headers: ${response.headers}');
+      printInDebug('Raw Body: ${response.body}');
+      printInDebug('==============================================');
       if (response.statusCode == 200) {
         // Successful request, handle the response here
         printInDebug('Response: ${response.body}');
@@ -436,6 +442,8 @@ class APIHelper {
 
     final jsonString = jsonEncode(data);
     printInDebug('Request (JSON): $jsonString');
+    printInDebug('Request with token): $token');
+    printInDebug('Request url): $token');
 
     try {
       final response = await http.patch(

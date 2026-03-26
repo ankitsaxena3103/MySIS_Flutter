@@ -69,11 +69,15 @@ class DutyViewState extends State<DutyView> {
   bool showToastMessageView = false;
   String toastMessage = '';
 
+  bool showSyncAllBtn = false;
+
 
   @override
   void initState() {
-    initialSetup();
+
     super.initState();
+    initialSetup();
+
   }
 
   @override
@@ -164,6 +168,7 @@ class DutyViewState extends State<DutyView> {
 
                                         });
                                         updateDataRelatedFags(focusedDay);
+                                        updateSyncAllBtn(focusedDay);
                                       },
                                       child:  SizedBox(
                                         width: pathS/5,
@@ -199,6 +204,8 @@ class DutyViewState extends State<DutyView> {
 
                                         });
                                         updateDataRelatedFags(focusedDay);
+                                        updateSyncAllBtn(focusedDay);
+
                                       },
                                       child:  SizedBox(
                                         width: pathS/5,
@@ -543,10 +550,12 @@ class DutyViewState extends State<DutyView> {
                       bottom: MediaQuery.of(context).padding.bottom + pathS/5  ,
                       child: GestureDetector(
                         onTap: (){
-                          onTapSync();
+                          // onTapSync();
+                         onTapSyncAll();
                         },
                         child: Visibility(
-                          visible: isNotSyncedData,
+                          // visible: isNotSyncedData,
+                          visible:   showSyncAllBtn,
                           child: Container(
                             // width: pathL*1.3,
                             // height: pathS / 1.5,
@@ -592,11 +601,17 @@ class DutyViewState extends State<DutyView> {
     );
   }
 
-  void initialSetup() {
+  Future<void> initialSetup() async {
+
     getAttendanceTableData();
 
     getLeaveTypeTableData();
     getUserLeaveTableData();
+
+    Future.delayed(Duration(milliseconds: 300),(){
+    updateSyncAllBtn(focusedDay);
+
+    });
 
   }
 
@@ -620,8 +635,25 @@ class DutyViewState extends State<DutyView> {
 
   }
 
+  Future<void> updateSyncAllBtn(DateTime dateTime) async {
+    List<UserAttendance> syncAllAttendanceData = await getAttendanceForMonth(dateTime);
+
+    if(syncAllAttendanceData.isNotEmpty){
+      setState(() {
+        showSyncAllBtn = true;
+      });
+    }
+    else{
+      setState(() {
+        showSyncAllBtn = false;
+      });
+    }
+
+
+  }
+
   Color getBackgroundColor(DateTime date) {
-    printInDebug('calender $date');
+    // printInDebug('calender $date');
     calendarDayTextColor = isDarkMode ? whiteColor : greyColor6;
     calendarBoxShape = BoxShape.circle;
 
@@ -1050,6 +1082,23 @@ class DutyViewState extends State<DutyView> {
 
 
   }
+  Future<void> onTapSyncAll() async {
+    final userAttendance = await getAttendanceForMonth(focusedDay);
+
+    List<Map<String, dynamic>> syncAllAttendance =
+    userAttendance.map((e) => e.toJson()).toList();
+
+    if (kDebugMode) {
+      print(syncAllAttendance.length);
+    }
+
+    if(syncAllAttendance.isNotEmpty) {
+      uploadAttendance(syncAllAttendance);
+    }
+
+
+  }
+
   Future<void> uploadAttendance(dynamic attendance) async {
 
     setState(() {
@@ -1075,7 +1124,7 @@ class DutyViewState extends State<DutyView> {
           };
           updateUserAttendanceTable(attendance);
 
-          onTapLeaveSync();
+          // onTapLeaveSync();
 
         }
       }
@@ -1197,6 +1246,18 @@ class DutyViewState extends State<DutyView> {
 
 
     return unSyncLeaves;
+
+  }
+
+  Future<List<UserAttendance>> getAttendanceForMonth(DateTime dateTime) async {
+
+    // Filter the records based on the conditions
+    final focusedMonthAttendance = userAttendance.where((attendance) {
+      return attendance.shiftStartDate.year == dateTime.year &&
+          attendance.shiftStartDate.month == dateTime.month ;
+    }).toList();
+
+    return focusedMonthAttendance;
 
   }
 

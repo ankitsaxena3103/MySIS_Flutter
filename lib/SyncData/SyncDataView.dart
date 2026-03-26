@@ -8,7 +8,6 @@ import 'package:mysis/GeneralQuestions/HelpMaster.dart';
 import 'package:mysis/Leaves/LeaveType.dart';
 import 'package:mysis/Leaves/UserLeaves.dart';
 import 'package:mysis/Notifications/UserNotification.dart';
-import 'package:mysis/Profile/ContactSIS.dart';
 import 'package:mysis/Profile/UnitDutyPost.dart';
 import 'package:mysis/SharedClasses/DatabaseHelper.dart';
 
@@ -48,9 +47,15 @@ class SyncDataViewState extends State<SyncDataView> {
 
   @override
   void initState()  {
-     fetchAndShowTableRecords();
+
+    initialSetup();
     super.initState();
   }
+
+  Future<void> initialSetup() async {
+ await fetchAndShowTableRecords();
+
+}
 
   @override
   void dispose() {
@@ -805,7 +810,12 @@ class SyncDataViewState extends State<SyncDataView> {
     tableRecords = [];
     allTablesToClear.clear();
 
+    debugPrint("START fetch tables");
+
+
     final allTablesData = await DatabaseHelper.instance.getTableRecords();
+
+    debugPrint("FETCH COMPLETED");
 
     // Allowed table names
     final allowedTables = {
@@ -822,8 +832,6 @@ class SyncDataViewState extends State<SyncDataView> {
       'HelpMaster',
       //'GeneralRules'//need to add once created
     };
-
-
 
     // Filter only allowed tables
     final filteredTables = allTablesData.where((tableRecord) {
@@ -896,7 +904,6 @@ class SyncDataViewState extends State<SyncDataView> {
         if (data.isNotEmpty) {
           // Convert the response data to a list of objects
           List<T> dataList = data.map<T>((json) => fromJson(json)).toList();
-
           // Sync the data with the database
           await DatabaseHelper.instance.updateOrDeleteTableData<T>(
             tableName,
@@ -904,12 +911,12 @@ class SyncDataViewState extends State<SyncDataView> {
             'id', // Assuming 'id' is the primary key for all tables
             toMap,
           );
+
           fetchAndShowTableRecords();
           printInDebug('Data synced for $tableName');
-          setState(() {
-            showLoaderView = false;
-          });
         }
+        setState(() {showLoaderView = false;});
+
       }, (error) {
         printInDebug('Error fetching data for $tableName: $error');
         setState(() {
@@ -924,15 +931,20 @@ class SyncDataViewState extends State<SyncDataView> {
     }
   }
 
-  void fetchAndSyncUserPostingData() {
+  Future<void> fetchAndSyncUserPostingData() async {
     setState(() {
       showLoaderView = true;
     });
 
-    Map <String, String> inputData = {
+    String? maxDateModified = await DatabaseHelper.instance.getMaxDateModified(keyTableUserPosting);
+
+    printInDebug("Max dateModified for $keyTableUserPosting => $maxDateModified");
+
+    Map<String, String> inputData = {
+      "dateModified": maxDateModified ?? '',
     };
 
-    APIHelper.instance.getUserData(userPostingApi, inputData, (data) {
+    APIHelper.instance.getUserData(userPostingApi, inputData, (data) async {
 
       setState(() {
         showLoaderView = false;
@@ -944,7 +956,7 @@ class SyncDataViewState extends State<SyncDataView> {
          final userPostings = dataList.map((json) => UserPosting.fromJson(json)).toList();
 
 
-          syncUserPostingData(userPostings);
+         await syncUserPostingData(userPostings);
 
         }
         if (data.containsKey('UnitDutyPost')) {
@@ -959,11 +971,11 @@ class SyncDataViewState extends State<SyncDataView> {
         final  unitShiftDetails = dataList.map((json) => UnitShiftDetail.fromJson(json)).toList();
 
 
-          syncUnitShiftDetailData(unitShiftDetails);
+         await  syncUnitShiftDetailData(unitShiftDetails);
 
 
         }
-        fetchAndShowTableRecords();
+       await fetchAndShowTableRecords();
 
       }
     }, (error) {
@@ -994,7 +1006,6 @@ class SyncDataViewState extends State<SyncDataView> {
 
   }
 
-
   Future<void> uploadTableDataToServer<T>({
     required String tableName,
     required String idColumn,
@@ -1017,10 +1028,7 @@ class SyncDataViewState extends State<SyncDataView> {
     // Use a Completer to wait for callback
     final completer = Completer<void>();
 
-    APIHelper.instance.postAllData(
-      apiUrl,
-      jsonData,
-          (responseData) async {
+    APIHelper.instance.postAllData(apiUrl, jsonData, (responseData) async {
         if (responseData.isNotEmpty) {
           for (var record in responseData) {
             final idValue = record[idColumn.toUpperCase()] ?? record[idColumn];
@@ -1042,10 +1050,6 @@ class SyncDataViewState extends State<SyncDataView> {
     // Wait here until completer is completed
     return completer.future;
   }
-
-
-
-
 
   void showToastView(String message) {
     setState(() {

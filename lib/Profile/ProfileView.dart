@@ -31,6 +31,8 @@ class ProfileViewState extends State<ProfileView>{
   String imagePath = '';
 
   String userName = '';
+  String userReg = '';
+
   String degination = '';
   String description = '';
 
@@ -73,9 +75,10 @@ class ProfileViewState extends State<ProfileView>{
   bool showUserShiftDetail = false;
   final LocalAuthentication auth = LocalAuthentication();
   String txtBiometric =  isUserBiometricEnabled ? 'disable_biometric'.tr() : 'enable_biometric'.tr();
-
   Color colorBiometric =  isUserBiometricEnabled ? Colors.green : Colors.red;
 
+  bool  isProfileDataFetched = false;
+  bool  isPostingDataFetched = false;
 
   @override
   void initState() {
@@ -84,8 +87,8 @@ class ProfileViewState extends State<ProfileView>{
     getProfileTableData();
     getPostingTableData();
 
-    onLoadData();
-    onLoadUserPostingData();
+    // onLoadProfileData();
+    // onLoadUserPostingData();
 
   }
 
@@ -97,6 +100,19 @@ class ProfileViewState extends State<ProfileView>{
 
   @override
   Widget build(BuildContext context) {
+    final List<UserPosting> sortedPostings = List<UserPosting>.from(userPostings)
+      ..sort((a, b) {
+        // Base unit first
+        if (a.isPrimary != b.isPrimary) {
+          return b.isPrimary.compareTo(a.isPrimary);
+        }
+
+        // Others sorted by siteName
+        return a.siteName.toLowerCase().compareTo(
+          b.siteName.toLowerCase(),
+        );
+      });
+
     return Scaffold(
       body: Stack(
         alignment: Alignment.center,
@@ -210,6 +226,17 @@ class ProfileViewState extends State<ProfileView>{
                                       ),
                                       textAlign: TextAlign.center,
                                     ),
+                                    Text(
+                                      userReg,
+                                      style: TextStyle(
+                                        color: isDarkMode ?  whiteColor:greyColor6,
+                                        fontSize: pathS / 6.5,
+                                        fontWeight: FontWeight.w500,
+                                        fontFamily: 'Roboto',
+                                      ),
+                                      textAlign: TextAlign.center,
+                                    ),
+
                                     SizedBox(height: pathS/10),
                                     Text(
                                       degination,
@@ -410,12 +437,13 @@ class ProfileViewState extends State<ProfileView>{
 
                       Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
-                        children: userPostings.asMap().entries.map((entry) {
+
+                        children: sortedPostings.asMap().entries.map((entry) {
                           final int index = entry.key; // Extract the index
                           final posting = entry.value; // Extract the posting
                           return Column(
                             children: [
-                              buildUserPostingContainer(posting,index, userProfile.length),
+                              buildUserPostingContainer(posting,index, sortedPostings.length),
                               if(index == 0)SizedBox(height: pathS/8),
                               Container(
                                 color: isDarkMode ? greyColorDark:greyColor1,
@@ -1314,7 +1342,6 @@ class ProfileViewState extends State<ProfileView>{
             ),
           ),
 
-
           LoaderView(isVisible: showLoaderView, message: 'checking'.tr()),
 
         ],
@@ -1571,10 +1598,28 @@ class ProfileViewState extends State<ProfileView>{
     )
         .toList();
 
+    // final selectedUnitShiftDetails = unitShiftDetails
+    //     .where((data) => data.unitCode == unitCode && data.deleted == 0
+    // )
+    //     .toList();
+
+    int timeToSeconds(String time) {
+      final parts = time.split(':');
+      final h = int.parse(parts[0]);
+      final m = int.parse(parts[1]);
+      final s = int.parse(parts[2]);
+      return h * 3600 + m * 60 + s;
+    }
+
     final selectedUnitShiftDetails = unitShiftDetails
-        .where((data) => data.unitCode == unitCode && data.deleted == 0
-    )
-        .toList();
+        .where((data) =>
+    data.unitCode == unitCode && data.deleted == 0)
+        .toList()
+      ..sort((a, b) {
+        return timeToSeconds(a.startTime)
+            .compareTo(timeToSeconds(b.startTime));
+      });
+
 
     final selectedUserPostings = userPostings
         .where((data) => data.unitCode == unitCode && data.deleted == 0
@@ -1582,8 +1627,7 @@ class ProfileViewState extends State<ProfileView>{
         .toList();
 
     onLoadUserShiftDetailView(selectedUnitDutyPosts,selectedUnitShiftDetails,selectedUserPostings);
-
-
+    
   }
   void onLoadUserShiftDetailView(List<UnitDutyPost> unitDutyPosts, List<UnitShiftDetail> unitShiftDetails, List<UserPosting> userPostings ){
 
@@ -1601,17 +1645,27 @@ class ProfileViewState extends State<ProfileView>{
     );
   }
   Future<void> getProfileTableData() async {
-  final userProfiles = await DatabaseHelper.instance.getAllRecords<UserProfile>(
+    printInDebug('profile fatch start');
+
+    final userProfiles = await DatabaseHelper.instance.getAllRecords<UserProfile>(
     keyTableUserProfile,
         (map) => UserProfile.fromMap(map),
   );
 
-  for (var profile in userProfiles) {
-    printInDebug('profile ID: ${profile.id}');
-    printInDebug('profile emp name: ${profile.empName}');
-  }
+  printInDebug('profile fatched');
 
-  showDataOnUI(userProfiles.first);
+  // for (var profile in userProfiles) {
+  //   printInDebug('profile ID: ${profile.id}');
+  //   printInDebug('profile emp name: ${profile.empName}');
+  // }
+
+  if(userProfiles.isNotEmpty) {
+    printInDebug('profile fatched');
+    showDataOnUI(userProfiles.first);
+  }else if(!isProfileDataFetched){
+    isProfileDataFetched = true;
+    await onLoadProfileData();
+  }
 
 }
   void showDataOnUI(UserProfile userProfile){
@@ -1622,6 +1676,7 @@ class ProfileViewState extends State<ProfileView>{
       imagePath = userProfile.profileImageUrl;
 
       userName = userProfile.empName;
+      userReg = userProfile.regNo;
       degination = userProfile.serviceName;
 
 
@@ -1674,16 +1729,11 @@ class ProfileViewState extends State<ProfileView>{
 
     });
   }
-  Future<void> getPostingTableData() async {
+  Future<void> getPostingTableData_old() async {
     final userPosting = await DatabaseHelper.instance.getAllRecords<UserPosting>(
       keyTableUserPosting,
           (map) => UserPosting.fromMap(map),
     );
-
-    for (var profile in userPosting) {
-      printInDebug('posting ID: ${profile.id}');
-      printInDebug('site name: ${profile.siteName}');
-    }
 
     setState(() {
       userPostings = userPosting;
@@ -1691,7 +1741,48 @@ class ProfileViewState extends State<ProfileView>{
 
 
   }
-  void onLoadData() {
+  Future<void> getPostingTableData() async {
+
+    final userPostingsData = await DatabaseHelper.instance.getAllRecords<UserPosting>(
+      keyTableUserPosting,
+          (map) => UserPosting.fromMap(map),
+    );
+    userPostings = userPostingsData.where(
+            (data) => data.deleted == 0).toList();
+
+    final unitDutyPostsData = await DatabaseHelper.instance.getAllRecords<UnitDutyPost>(
+      keyTableUnitDutyPost,
+          (map) => UnitDutyPost.fromMap(map),
+    );
+    unitDutyPosts = unitDutyPostsData.where(
+            (data) => data.deleted == 0).toList();
+
+    final unitShiftDetailData = await DatabaseHelper.instance.getAllRecords<UnitShiftDetail>(
+      keyTableUnitShiftDetail,
+          (map) => UnitShiftDetail.fromMap(map),
+    );
+    final filteredUnitShiftDetails = unitShiftDetailData.where((data) => data.deleted == 0).toList();
+
+    final Set<String> shiftIds = {};
+    unitShiftDetails = filteredUnitShiftDetails.where((data) {
+      if (shiftIds.contains(data.shiftId)) {
+        return false;
+      } else {
+        shiftIds.add(data.shiftId);
+        return true;
+      }
+    }).toList();
+
+    if((userPostingsData.isEmpty || unitDutyPostsData.isEmpty || unitShiftDetailData.isEmpty) && !isPostingDataFetched){
+      isPostingDataFetched = true;
+      await onLoadUserPostingData();
+    }else{
+      printInDebug('All duty related data fetched');
+    }
+
+  }
+
+  Future<void> onLoadProfileData() async {
 
 
     // setState(() {
@@ -1701,7 +1792,7 @@ class ProfileViewState extends State<ProfileView>{
 
     };
 
-    APIHelper.instance.getData(profileApi,inputData, (data) {
+    APIHelper.instance.getData(profileApi,inputData, (data) async {
 
       // setState(() {
       //   showLoaderView = false;
@@ -1719,7 +1810,7 @@ class ProfileViewState extends State<ProfileView>{
 
         userProfile = userProfiles;
 
-        syncUserProfileData();
+        await syncUserProfileData();
 
       }
 
@@ -1732,7 +1823,8 @@ class ProfileViewState extends State<ProfileView>{
     );
 
   }
-  void onLoadUserPostingData() {
+  Future<void> onLoadUserPostingData() async{
+
     // setState(() {
     //   showLoaderView = true;
     // });
@@ -1740,7 +1832,7 @@ class ProfileViewState extends State<ProfileView>{
     Map <String, String> inputData = {
     };
 
-    APIHelper.instance.getUserData(userPostingApi, inputData, (data) {
+    APIHelper.instance.getUserData(userPostingApi, inputData, (data) async {
 
       // setState(() {
       //   showLoaderView = false;
@@ -1752,33 +1844,19 @@ class ProfileViewState extends State<ProfileView>{
           setState(() {
             userPostings = dataList.map((json) => UserPosting.fromJson(json)).toList();
           });
-          userPostings.forEach((profile) {
-            printInDebug('userPosting ID: ${profile.id}');
-            printInDebug('userPosting  name: ${profile.siteName}');
-          });
 
-          syncUserPostingData();
+          await syncUserPostingData();
 
         }
         if (data.containsKey('UnitDutyPost')) {
           final List<dynamic> dataList = data['UnitDutyPost'];
           unitDutyPosts = dataList.map((json) => UnitDutyPost.fromJson(json)).toList();
-          unitDutyPosts.forEach((profile) {
-            printInDebug('UnitDutyPost ID: ${profile.id}');
-            printInDebug('UnitDutyPost  name: ${profile.postName}');
-          });
-
-          syncUnitDutyPostData();
+         await syncUnitDutyPostData();
         }
         if (data.containsKey('UnitShiftDetail')) {
           final List<dynamic> dataList = data['UnitShiftDetail'];
           unitShiftDetails = dataList.map((json) => UnitShiftDetail.fromJson(json)).toList();
-          unitShiftDetails.forEach((profile) {
-            printInDebug('UnitShiftDetail ID: ${profile.id}');
-            printInDebug('UnitShiftDetail  name: ${profile.shiftName}');
-          });
-
-          syncUnitShiftDetailData();
+          await syncUnitShiftDetailData();
 
 
         }

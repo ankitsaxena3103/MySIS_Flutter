@@ -2,15 +2,12 @@
 import 'dart:async';
 import 'dart:io';
 
-import 'package:android_intent_plus/android_intent.dart';
-import 'package:android_intent_plus/flag.dart';
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:connectivity_plus/connectivity_plus.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_html/flutter_html.dart';
 import 'package:flutter_inappwebview/flutter_inappwebview.dart';
-import 'package:geolocator/geolocator.dart';
 import 'package:mysis/HomeView/ScanUnitShiftView.dart';
 import 'package:mysis/HomeView/UserAttendance.dart';
 import 'package:mysis/HomeView/UserRoaster.dart';
@@ -22,8 +19,6 @@ import 'package:mysis/CommonViews/Utility.dart';
 import 'package:easy_localization/easy_localization.dart';
 import 'package:mysis/SharedClasses/ThemeProvider.dart';
 import 'package:path_provider/path_provider.dart';
-import 'package:permission_handler/permission_handler.dart';
-import 'package:permission_handler/permission_handler.dart' as AppSettings;
 import 'package:provider/provider.dart';
 import 'package:url_launcher/url_launcher.dart';
 
@@ -36,6 +31,7 @@ import '../Profile/UserProfile.dart';
 import '../SharedClasses/APIHelper.dart';
 import '../SharedClasses/DatabaseHelper.dart';
 import '../SharedClasses/NetworkConnectivity.dart';
+import '../SharedClasses/ServerServices.dart';
 import 'Model/DutyCard.dart';
 import 'OthersDutyView.dart';
 
@@ -64,7 +60,7 @@ class HomeViewState extends State<HomeView>with RouteAware {
   String assetsImagePath = "assets/images/dashboard-icons/profile-icon.png";
   String exclamationImage = isDarkMode ? "assets/images/dashboard-icons/exclamation-icon.png" : "assets/images/dashboard-icons/exclamation-red.png";
   String imagePath = '';
-  bool todayDutyInMarked = true;
+  bool todayDutyInMarked = false;
   // bool todayDutyOutMarked = false;
 
   String dutyInHourBanner = '';
@@ -127,7 +123,6 @@ class HomeViewState extends State<HomeView>with RouteAware {
   List<UnitDutyPost> unitDutyPosts = [];
   List<UnitShiftDetail> userShiftDetailsData = [];
 
-
   List <UserLeaves> userLeaves = [];
   List<UserNotification> userNotifications = [];
 
@@ -147,6 +142,9 @@ class HomeViewState extends State<HomeView>with RouteAware {
   int cardIndex = 0;
   int cardSelectedIndex = 0;
 
+  late final StreamSubscription<bool> syncSub;
+
+
   @override
   void didChangeDependencies() {
     super.didChangeDependencies();
@@ -156,7 +154,7 @@ class HomeViewState extends State<HomeView>with RouteAware {
   @override
   void didPopNext() {
     // Called when returning to HomeScreen from any pushed screen
-    initialSetup(); // fetch latest data
+    getLocalDataAndUpdateUI(); // fetch latest data
   }
   @override
   void dispose() {
@@ -166,16 +164,28 @@ class HomeViewState extends State<HomeView>with RouteAware {
     super.dispose();
   }
   @override
-  void initState() {
+  void initState()  {
     cardPageController = PageController(initialPage: cardSelectedIndex);
     _pageController = PageController(initialPage: 0);
 
-    super.initState();
-    initialSetup();
+    loadServerData();
+     getLocalDataAndUpdateUI();
     connection.myStream.listen((_source) {
       source = _source;
       onConnectionChange();
     });
+
+    syncSub = ServerService.instance.onSyncCompleted.listen((success) {
+      if (!mounted) return;
+
+      if (success) {
+        debugPrint('[UI] Sync completed → refreshing UI');
+       getLocalDataAndUpdateUI();
+
+      }
+    });
+    super.initState();
+
   }
 
   @override
@@ -815,6 +825,17 @@ class HomeViewState extends State<HomeView>with RouteAware {
                                                           ),
                                                           textAlign: TextAlign.center,
                                                         ),
+                                                        Text(
+                                                          regNo,
+                                                          style: TextStyle(
+                                                            color: isDarkMode ?  whiteColor:greyColor6,
+                                                            fontSize: pathS / 6.5,
+                                                            fontWeight: FontWeight.w500,
+                                                            fontFamily: 'Roboto',
+                                                          ),
+                                                          textAlign: TextAlign.center,
+                                                        ),
+
                                                         SizedBox(height: pathS/10),
                                                         Text(
                                                           designation,
@@ -1448,24 +1469,25 @@ class HomeViewState extends State<HomeView>with RouteAware {
     Color dutyOutBgColor     = isDutyOutTapEnabled ? redColor3 : (isDarkMode ? greyColor5 : greyColor1);
     Color dutyOutFontColor   = isDutyOutTapEnabled ? whiteColor : (isDarkMode ? greyColor7 : greyColor4);
     Color dutyOutShadowColor = isDutyOutTapEnabled ? Colors.black.withOpacity(0.2) : Colors.transparent;
-    debugPrint('''
-        ---- Duty Card Info ----
-        
-        Shift Name         : $dutyShiftName
-        Site Name          : $siteName
-        Unit Code          : $unitCode
-        Post Name          : $postName
-        Duty In Button     : $dutyInBtnText (Enabled: $isDutyInTapEnabled)
-        Duty Out Button    : $dutyOutBtnText (Enabled: $isDutyOutTapEnabled)
-        Post Geo Location  : $postGeoLocation
-        Duty Start Time : $currentDutyStartTime
-        Duty end Time : ${card.shiftEndTime}
-        Duty start Enable  time : ${card.dutyStartEnableTime}
-         Duty start Disable  time : ${card.dutyStartDisableTime}
-         Duty end Disable  time : ${card.dutyEndDisableTime}
 
-        -------------------------
-       ''');
+    // debugPrint('''
+    //     ---- Duty Card Info ----
+    //
+    //     Shift Name         : $dutyShiftName
+    //     Site Name          : $siteName
+    //     Unit Code          : $unitCode
+    //     Post Name          : $postName
+    //     Duty In Button     : $dutyInBtnText (Enabled: $isDutyInTapEnabled)
+    //     Duty Out Button    : $dutyOutBtnText (Enabled: $isDutyOutTapEnabled)
+    //     Post Geo Location  : $postGeoLocation
+    //     Duty Start Time : $currentDutyStartTime
+    //     Duty end Time : ${card.shiftEndTime}
+    //     Duty start Enable  time : ${card.dutyStartEnableTime}
+    //      Duty start Disable  time : ${card.dutyStartDisableTime}
+    //      Duty end Disable  time : ${card.dutyEndDisableTime}
+    //
+    //     -------------------------
+    //    ''');
 
 
     return Container(
@@ -1774,7 +1796,7 @@ class HomeViewState extends State<HomeView>with RouteAware {
     );
   }
 
-  Future<void> initialSetup() async {
+  Future<void> getLocalDataAndUpdateUI() async {
 
     await getNotificationTableData();
     await getRoasterViewData();
@@ -1785,13 +1807,7 @@ class HomeViewState extends State<HomeView>with RouteAware {
 
   }
 
-  Future<void> loadServerData() async {
-    await onLoadNotificationData();
-    await onLoadAttendanceData();
-    await onLoadRoasterData();
-    await onLoadUserPostingData();
-    await onLoadProfileData();
-  }
+
   void onConnectionChange(){
 
     bool isConnected = true;
@@ -1817,15 +1833,26 @@ class HomeViewState extends State<HomeView>with RouteAware {
       });
     }
 
-
   }
 
+  Future<void> loadServerData() async {
+    await onLoadNotificationData();
+    await onLoadAttendanceData();
+    await onLoadProfileData();
+    await onLoadUserPostingData();
+    await onLoadRoasterData();
+    await onLoadLeavesData();
+  }
   Future<void>  onLoadNotificationData() async{
     // setState(() {
     //   showLoaderView = true;
     // });
-    Map <String,String> inputData = {
+    String? maxDateModified = await DatabaseHelper.instance.getMaxDateModified(keyTableUserPosting);
 
+    printInDebug("Max dateModified for $keyTableUserPosting => $maxDateModified");
+
+    Map<String, String> inputData = {
+      "dateModified": maxDateModified ?? '',
     };
 
     APIHelper.instance.getData(userNotificationApi,inputData, (data) async {
@@ -1853,8 +1880,12 @@ class HomeViewState extends State<HomeView>with RouteAware {
     // setState(() {
     //   showLoaderView = true;
     // });
-    Map <String,String> inputData = {
+    String? maxDateModified = await DatabaseHelper.instance.getMaxDateModified(keyTableUserPosting);
 
+    printInDebug("Max dateModified for $keyTableUserPosting => $maxDateModified");
+
+    Map<String, String> inputData = {
+      "dateModified": maxDateModified ?? '',
     };
 
     APIHelper.instance.getData(userAttendanceApi,inputData, (data) async {
@@ -1904,11 +1935,15 @@ class HomeViewState extends State<HomeView>with RouteAware {
     // setState(() {
     //   showLoaderView = true;
     // });
-    Map <String,String> inputData = {
+    String? maxDateModified = await DatabaseHelper.instance.getMaxDateModified(keyTableUserPosting);
 
+    printInDebug("Max dateModified for $keyTableUserPosting => $maxDateModified");
+
+    Map<String, String> inputData = {
+      "dateModified": maxDateModified ?? '',
     };
 
-    APIHelper.instance.getData(profileApi,inputData, (data) {
+    APIHelper.instance.getData(profileApi,inputData, (data) async {
 
       // setState(() {
       //   showLoaderView = false;
@@ -1929,7 +1964,7 @@ class HomeViewState extends State<HomeView>with RouteAware {
           //
           // userProfile = userProfiles;
 
-          syncUserProfileData(userProfiles);
+         await syncUserProfileData(userProfiles);
         }else{
           printInDebug('data is empty');
         }
@@ -1954,11 +1989,16 @@ class HomeViewState extends State<HomeView>with RouteAware {
     //   showLoaderView = true;
     // });
 
-    Map <String, String> inputData = {
+    String? maxDateModified = await DatabaseHelper.instance.getMaxDateModified(keyTableUserPosting);
 
+    printInDebug("Max dateModified for $keyTableUserPosting => $maxDateModified");
+
+    Map<String, String> inputData = {
+      "dateModified": maxDateModified ?? '',
     };
 
-    APIHelper.instance.getUserData(userPostingApi, inputData, (data) {
+
+    APIHelper.instance.getUserData(userPostingApi, inputData, (data) async {
 
       // setState(() {
       //   showLoaderView = false;
@@ -1976,23 +2016,27 @@ class HomeViewState extends State<HomeView>with RouteAware {
           final List<dynamic> dataList = data['UnitDutyPost'];
           final unitDutyPosts = dataList.map((json) => UnitDutyPost.fromJson(json)).toList();
 
-          syncUnitDutyPostData(unitDutyPosts);
+         await syncUnitDutyPostData(unitDutyPosts);
         }
         if (data.containsKey('UnitShiftDetail')) {
           final List<dynamic> dataList = data['UnitShiftDetail'];
           final unitShiftDetailData = dataList.map((json) => UnitShiftDetail.fromJson(json)).toList();
           final filteredUnitShiftDetails = unitShiftDetailData.where((data) => data.deleted == 0).toList();
+          print('UnitShiftDetail......unitShiftDetailData...${unitShiftDetailData.length}');
+          print('UnitShiftDetail......filteredUnitShiftDetails...${filteredUnitShiftDetails.length}');
 
-          final Set<String> shiftIds = {};
-          userShiftDetailsData = filteredUnitShiftDetails.where((data) {
-            if (shiftIds.contains(data.shiftId)) {
-              return false;
-            } else {
-              shiftIds.add(data.shiftId);
-              return true;
-            }
-          }).toList();
-          syncUnitShiftDetailData(userShiftDetailsData);
+          // final Set<String> shiftIds = {};
+          // userShiftDetailsData = filteredUnitShiftDetails.where((data) {
+          //   if (shiftIds.contains(data.shiftId)) {
+          //     return false;
+          //   } else {
+          //     shiftIds.add(data.shiftId);
+          //     return true;
+          //   }
+          // }).toList();
+          // print('UnitShiftDetail......unitShiftDetailData...${unitShiftDetailData.length}');
+
+          syncUnitShiftDetailData(filteredUnitShiftDetails);
         }
 
       }
@@ -2008,9 +2052,15 @@ class HomeViewState extends State<HomeView>with RouteAware {
   }
   Future<void> onLoadRoasterData() async {
 
-    Map <String,String> inputData = {};
+    String? maxDateModified = await DatabaseHelper.instance.getMaxDateModified(keyTableUserPosting);
 
-    APIHelper.instance.getData(userRosterApi,inputData, (data) {
+    printInDebug("Max dateModified for $keyTableUserPosting => $maxDateModified");
+
+    Map<String, String> inputData = {
+      "dateModified": maxDateModified ?? '',
+    };
+
+    APIHelper.instance.getData(userRosterApi,inputData, (data) async {
 
       if(data.isNotEmpty){
 
@@ -2018,7 +2068,7 @@ class HomeViewState extends State<HomeView>with RouteAware {
 
         // userRoasters = roasters;
 
-        syncUserRoasterData(roasters);
+       await syncUserRoasterData(roasters);
         // updateNextDaysRoasterUI(userRoasters);
 
 
@@ -2093,6 +2143,7 @@ class HomeViewState extends State<HomeView>with RouteAware {
 
     await getRoasterViewData();
   }
+
   Future<void> getNotificationTableData() async {
     List<UserNotification> userNotificationTableData = await DatabaseHelper.instance.getAllRecords<UserNotification>(
       keyTableUserNotification,
@@ -2166,19 +2217,19 @@ class HomeViewState extends State<HomeView>with RouteAware {
           (map) => UserProfile.fromMap(map),
     );
 
-    for (var data in userProfiles) {
-      printInDebug('userProfiles Data');
-      data.toMap().forEach((i, j) {
-        printInDebug('$i : $j');
-      });
-
-    }
+    // for (var data in userProfiles) {
+    //   printInDebug('userProfiles Data');
+    //   data.toMap().forEach((i, j) {
+    //     printInDebug('$i : $j');
+    //   });
+    //
+    // }
 
    if( userProfiles.isNotEmpty){
      userProfile = userProfiles;
      showProfileDataOnUI(userProfiles.first);
    }else{
-     await onLoadProfileData();
+     // await onLoadProfileData();
    }
 
   }
@@ -2230,7 +2281,7 @@ class HomeViewState extends State<HomeView>with RouteAware {
 
     }
     else{
-     await onLoadRoasterData();
+     // await onLoadRoasterData();
     }
   }
   Future<List<UnitDutyPost>> getTodayRosterUnitShiftData() async {
@@ -2248,14 +2299,35 @@ class HomeViewState extends State<HomeView>with RouteAware {
         .where((roster) => roster.rosterDate == todayDate && roster.deleted == 0
     )
         .toList();
+print('updateCurrentDayRoasterUI......todayRoster...${todayRoster.length}');
+    if (todayRoster.isEmpty) {
+      setState(() {
+        userDutyCard = [];
+        cardIndex = 0;
+      });
+
+
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        if (cardPageController.hasClients) {
+          cardPageController.jumpToPage(0);
+        }
+      });
+
+      return;
+    }
 
 
     if (todayRoster.isNotEmpty) {
       final dutyCards = DutyCardMapper.fromUserRoaster(todayRoster);
+      print('updateCurrentDayRoasterUI......dutyCards...${dutyCards.length}');
+
       final result = DutyCardProcessor.process(dutyCards);
+      print('updateCurrentDayRoasterUI......result...${result.cards.length}');
 
       if (result.isValid) {
         final cards = result.cards;
+        print('updateCurrentDayRoasterUI......userDutyCard...${cards.length}');
+
         setState(() {
           userDutyCard = cards;
         });
@@ -2276,10 +2348,12 @@ class HomeViewState extends State<HomeView>with RouteAware {
       }
 
 
-    }else{
-     await onLoadRoasterData();
+    }
+    else{
+     // await onLoadRoasterData();
     }
   }
+
   void updateNextDaysRoasterUI(List<UserRoaster> roasters) {
     DateTime todayDate = DateTime.now();
 
@@ -2293,16 +2367,19 @@ class HomeViewState extends State<HomeView>with RouteAware {
         .toList();
 
     // Sort the filtered rosters in ascending order by rosterDate
-    monthlyRosters.sort((a, b) {
-      DateTime dateA = DateTime.parse(a.rosterDate);
-      DateTime dateB = DateTime.parse(b.rosterDate);
-      return dateA.compareTo(dateB); // Ascending order
-    });
 
-    print("Monthly Rosters greater than today (sorted):");
+    setState(() {
+      monthlyRosters.sort((a, b) {
+        DateTime dateA = DateTime.parse(a.rosterDate);
+        DateTime dateB = DateTime.parse(b.rosterDate);
+        return dateA.compareTo(dateB); // Ascending order
+      });
+    });
+    printInDebug("Monthly Rosters greater than today (sorted):");
     for (var roster in monthlyRosters) {
-      print(roster.rosterDate);
+      printInDebug(roster.rosterDate);
     }
+
   }
 
   Future<void> getPostingTableData() async {
@@ -2338,7 +2415,7 @@ class HomeViewState extends State<HomeView>with RouteAware {
     }).toList();
 
     if(userPostingsData.isEmpty || unitDutyPostsData.isEmpty || unitShiftDetailData.isEmpty) {
-     await onLoadUserPostingData();
+     // await onLoadUserPostingData();
     }else{
       printInDebug('All duty related data fetched');
     }
@@ -2352,7 +2429,7 @@ class HomeViewState extends State<HomeView>with RouteAware {
     );
 
     if(userAttendanceData.isEmpty){
-     await onLoadAttendanceData();
+     // await onLoadAttendanceData();
       return;
     }
     final undeletedAttendance = userAttendanceData
@@ -2384,7 +2461,8 @@ class HomeViewState extends State<HomeView>with RouteAware {
       data.shiftStartDate.isAtSameMomentAs(latestDutyInDate) &&
           data.deleted == 0)
           .toList();
-    } else if (attendance.any((data) => data.dutyStatus == keyAttendanceStatusDutyOut && data.deleted == 0)) {
+    }
+    else if (attendance.any((data) => data.dutyStatus == keyAttendanceStatusDutyOut && data.deleted == 0)) {
       // Get all records for the current date where deleted == 0
       todayAttendance = attendance
           .where((data) =>
@@ -2443,13 +2521,13 @@ class HomeViewState extends State<HomeView>with RouteAware {
           (map) => UserLeaves.fromMap(map),
     );
 
-    for (var data in userLeavesList) {
-      printInDebug('Leaves Data');
-      data.toMap().forEach((i, j) {
-        printInDebug('$i : $j');
-      });
-
-    }
+    // for (var data in userLeavesList) {
+    //   printInDebug('Leaves Data');
+    //   data.toMap().forEach((i, j) {
+    //     printInDebug('$i : $j');
+    //   });
+    //
+    // }
 
 
     final leaves = userLeavesList
@@ -2462,12 +2540,12 @@ class HomeViewState extends State<HomeView>with RouteAware {
       updateCalendarDataLeaves(_focusedDay);
     }
     else{
-      onLoadLeavesData();
+      // onLoadLeavesData();
     }
 
 
   }
-  void onLoadLeavesData() {
+  Future<void> onLoadLeavesData() async{
 
 
     // setState(() {

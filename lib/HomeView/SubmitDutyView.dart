@@ -822,8 +822,15 @@ class SubmitDutyViewState extends State<SubmitDutyView>{
     });
   }
   String? createDutyDate(UnitShiftDetail shiftDetail,DateTime dutyMarkDateTime) {
+    print('createDutyDate....startTime....${shiftDetail.startTime}');
+    print('createDutyDate.....endTime...${shiftDetail.endTime}');
+    print('createDutyDate.....shiftStartBefore...${shiftDetail.shiftStartBefore}');
+    print('createDutyDate.....dutyInBefore...${shiftDetail.dutyInBefore}');
+    print('createDutyDate.....dutyMarkDateTime...${dutyMarkDateTime}');
+
     final startParts = shiftDetail.startTime.split(':').map(int.parse).toList();
     final endParts = shiftDetail.endTime.split(':').map(int.parse).toList();
+    bool isNightShift = endParts[0] < startParts[0];
 
     DateTime baseDate = DateTime(dutyMarkDateTime.year, dutyMarkDateTime.month, dutyMarkDateTime.day);
 
@@ -832,8 +839,14 @@ class SubmitDutyViewState extends State<SubmitDutyView>{
         .subtract(shiftStartDuration);
 
     final dutyInDuration = _parseDuration(shiftDetail.dutyInBefore);
-    final dutyEndTimeToday = baseDate.add(Duration(hours: endParts[0], minutes: endParts[1], seconds: endParts[2]))
+
+    DateTime dutyEndTimeToday = baseDate.add(Duration(hours: endParts[0], minutes: endParts[1], seconds: endParts[2]))
         .subtract(dutyInDuration);
+    if (isNightShift) {
+      dutyEndTimeToday = dutyEndTimeToday.add(const Duration(days: 1));
+    }
+    print('createDutyDate.....dutyStartTimeToday...${dutyStartTimeToday}');
+    print('createDutyDate.....dutyEndTimeToday...${dutyEndTimeToday}');
 
     if (dutyMarkDateTime.isAfter(dutyStartTimeToday) && dutyMarkDateTime.isBefore(dutyEndTimeToday)) {
 
@@ -853,13 +866,14 @@ class SubmitDutyViewState extends State<SubmitDutyView>{
     final dutyEndTimeTomorrow = dutyEndTimeToday.add(const Duration(days: 1));
 
     if (dutyMarkDateTime.isAfter(dutyStartTimeTomorrow) && dutyMarkDateTime.isBefore(dutyEndTimeTomorrow)) {
-    return DateFormat('yyyy-MM-dd').format(baseDate.add(const Duration(days: 1))); // Attendance for yesterday
+      return DateFormat('yyyy-MM-dd').format(baseDate.add(const Duration(days: 1))); // Attendance for yesterday
     }
 
     // If none of the windows match, return null
     printInDebug('Duty marking window is not valid.');
     return null;
   }
+
   Duration _parseDuration(String durationString) {
     final parts = durationString.split(':').map(int.parse).toList();
     return Duration(hours: parts[0], minutes: parts[1], seconds: parts[2]);

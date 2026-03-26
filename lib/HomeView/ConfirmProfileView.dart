@@ -43,6 +43,8 @@ class ConfirmProfileViewState extends State<ConfirmProfileView>{
   String profileImage = "assets/images/dashboard-icons/profile-icon.png";
   String profileUrl = '';
   String name  = '';
+  String regNo  = '';
+
   String position  = '';
 
 
@@ -160,6 +162,17 @@ class ConfirmProfileViewState extends State<ConfirmProfileView>{
                       ),
                     ),
                     Text(
+                      regNo,
+                      style: TextStyle(
+                        color: isDarkMode ? whiteColor:greyColor6,
+                        fontSize: pathS / 5,
+                        fontWeight: FontWeight.w500,
+                        fontFamily: 'Roboto',
+                      ),
+                    ),
+                    SizedBox(height: 8),
+
+                    Text(
                       position,
                       style: TextStyle(
                         color: isDarkMode ? whiteColor:greyColor6,
@@ -276,6 +289,7 @@ class ConfirmProfileViewState extends State<ConfirmProfileView>{
 
     profileUrl = widget.userProfile.profileImageUrl;
     name = widget.userProfile.empName;
+    regNo = widget.userProfile.regNo;
     position = widget.userProfile.symbol;
 
   }

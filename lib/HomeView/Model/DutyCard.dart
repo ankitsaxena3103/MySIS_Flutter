@@ -98,12 +98,15 @@ class DutyCardProcessor {
     // validation: only one active
     final activeCards =
     sorted.where((c) => c.actStartTime != null && c.actEndTime == null).toList();
-    if (activeCards.length > 1) {
-      return ProcessResult(
-          false,
-          'Invalid data: More than one active duty without ACT_END_TIME.',
-          sorted);
-    }
+    // sorted.where((c) => c.actStartTime != null ).toList();
+    print('updateCurrentDayRoasterUI......activeCards...${activeCards.length}');
+
+    // if (activeCards.length > 1) {
+    //   return ProcessResult(
+    //       false,
+    //       'Invalid data: More than one active duty without ACT_END_TIME.',
+    //       sorted);
+    // }
 
     // 1) Active Duty
     if (activeCards.length == 1) {

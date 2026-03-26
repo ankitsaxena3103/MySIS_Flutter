@@ -23,11 +23,12 @@ class DatabaseHelper {
   static final DatabaseHelper _instance = DatabaseHelper._();
   // Getter for the instance
   static DatabaseHelper get instance => _instance;
-  // static final DatabaseHelper instance = DatabaseHelper._init();
 
   static Database? _database;
+
   Future<Database> get database async {
-    if (_database != null) return _database!;
+
+    if (_database != null && _database!.isOpen) return _database!;
 
     _database = await _initDB(keyDataBaseName);
     return _database!;
@@ -36,12 +37,20 @@ class DatabaseHelper {
     final dbPath = await getDatabasesPath();
     final pathToDatabase = join(dbPath, path);
 
-    return await openDatabase(
+    final db = await openDatabase(
       pathToDatabase,
-      version: 2, // 🔺 increase version number
+      version: 2,
       onCreate: _createDB,
-      onUpgrade: _onUpgrade, // add migration handler
+      onUpgrade: _onUpgrade,
     );
+
+    // // 🔥 ALWAYS apply pragmas
+    await db.rawQuery('PRAGMA journal_mode=WAL');
+    await db.rawQuery('PRAGMA synchronous=NORMAL');
+    // await db.rawQuery('PRAGMA foreign_keys=ON');
+
+
+    return db;
   }
 
   void _createDB(Database db, int version) async {
@@ -219,16 +228,49 @@ class DatabaseHelper {
       }
     });
   }
-  Future<void> insertRecords<T>(String tableName, List<T> records, Map<String, dynamic> Function(T) toMap) async {
+  Future<void> insertRecords<T>(
+      String tableName,
+      List<T> records,
+      Map<String, dynamic> Function(T) toMap,
+      ) async {
     final db = await instance.database;
-    for (var record in records) {
-      await db.insert(tableName, toMap(record));
-    }
+
+    await db.transaction((txn) async {
+      for (final record in records) {
+        await txn.insert(
+          tableName,
+          toMap(record),
+          conflictAlgorithm: ConflictAlgorithm.replace,
+        );
+      }
+    });
   }
-  Future<int> insertRecord<T>(String tableName, T record, Map<String, dynamic> Function(T) toMap) async {
+
+  Future<int> insertRecordOld<T>(String tableName, T record, Map<String, dynamic> Function(T) toMap) async {
     final db = await instance.database;
     return await db.insert(tableName, toMap(record));
   }
+
+  Future<int> insertRecord<T>(
+      String tableName,
+      T record,
+      Map<String, dynamic> Function(T) toMap,
+      ) async {
+    final db = await instance.database;
+
+    int id = 0;
+
+    await db.transaction((txn) async {
+      id = await txn.insert(
+        tableName,
+        toMap(record),
+        conflictAlgorithm: ConflictAlgorithm.replace,
+      );
+    });
+
+    return id;
+  }
+
   Future<Map<String, dynamic>?> getSingleRow(String tableName, String column, String value) async {
     final db = await instance.database;
 
@@ -283,6 +325,82 @@ class DatabaseHelper {
       }
     });
   }
+  Future<void> updateOrInsertTableData<T>(String tableName, List<T> items, String idField, Map<String, dynamic> Function(T) toMap,) async {
+    final db = await DatabaseHelper.instance.database;
+
+    // Use a transaction for atomicity
+    await db.transaction((txn) async {
+      for (final item in items) {
+        // Convert each item to a map
+        final row = toMap(item);
+
+        // Extract the ID value using the idField
+        final id = row[idField];
+
+        // Check if the row exists
+        final existingRows = await txn.query(
+          tableName,
+          where: '$idField = ?',
+          whereArgs: [id],
+        );
+
+        if (existingRows.isNotEmpty) {
+          // Row exists: Perform update
+          await txn.update(
+            tableName,
+            row,
+            where: '$idField = ?',
+            whereArgs: [id],
+          );
+        } else {
+          // Row does not exist: Perform insert
+          await txn.insert(tableName, row);
+        }
+      }
+    });
+  }
+
+  //need to check these 2 methods for db lock
+  Future<void> replaceTableData<T>(String tableName, List<T> newData, Map<String, dynamic> Function(T) toMap,) async {
+    final db = await DatabaseHelper.instance.database;
+
+    // Start a database transaction for atomicity
+    await db.transaction((txn) async {
+      // Delete all rows from the table
+      await txn.delete(tableName);
+      printInDebug('All rows deleted from $tableName');
+
+      // Insert new rows into the table
+      for (var item in newData) {
+        await txn.insert(tableName, toMap(item));
+      }
+      printInDebug('New rows inserted into $tableName');
+    });
+  }
+  Future<void> replaceTableDataSync<T>(
+      String tableName,
+      List<T> newData,
+      Map<String, dynamic> Function(T) toMap,
+      ) async {
+    final db = await DatabaseHelper.instance.database;
+
+    await db.transaction((txn) async {
+      // 1. Clear the table
+      await txn.delete(tableName);
+
+      // 2. Prepare all inserts in a single batch
+      final batch = txn.batch();
+      for (var item in newData) {
+        batch.insert(tableName, toMap(item));
+      }
+
+      // 3. Execute everything at once
+      // noResult: true makes it even faster by not returning IDs
+      await batch.commit(noResult: true);
+    });
+
+    printInDebug('Sync completed for $tableName');
+  }
   Future<void> updateOrDeleteTableData<T>(String tableName, List<T> items, String idField, Map<String, dynamic> Function(T) toMap,) async {
     final db = await DatabaseHelper.instance.database;
 
@@ -334,56 +452,8 @@ class DatabaseHelper {
       }
     });
   }
-  Future<void> updateOrInsertTableData<T>(String tableName, List<T> items, String idField, Map<String, dynamic> Function(T) toMap,) async {
-    final db = await DatabaseHelper.instance.database;
 
-    // Use a transaction for atomicity
-    await db.transaction((txn) async {
-      for (final item in items) {
-        // Convert each item to a map
-        final row = toMap(item);
 
-        // Extract the ID value using the idField
-        final id = row[idField];
-
-        // Check if the row exists
-        final existingRows = await txn.query(
-          tableName,
-          where: '$idField = ?',
-          whereArgs: [id],
-        );
-
-        if (existingRows.isNotEmpty) {
-          // Row exists: Perform update
-          await txn.update(
-            tableName,
-            row,
-            where: '$idField = ?',
-            whereArgs: [id],
-          );
-        } else {
-          // Row does not exist: Perform insert
-          await txn.insert(tableName, row);
-        }
-      }
-    });
-  }
-  Future<void> replaceTableData<T>(String tableName, List<T> newData, Map<String, dynamic> Function(T) toMap,) async {
-    final db = await DatabaseHelper.instance.database;
-
-    // Start a database transaction for atomicity
-    await db.transaction((txn) async {
-      // Delete all rows from the table
-      await txn.delete(tableName);
-      print('All rows deleted from $tableName');
-
-      // Insert new rows into the table
-      for (var item in newData) {
-        await txn.insert(tableName, toMap(item));
-      }
-      print('New rows inserted into $tableName');
-    });
-  }
   Future<List<T>> getAllRecords<T>(String tableName, T Function(Map<String, dynamic>) fromMap,) async {
 
     final db = await instance.database;
@@ -410,7 +480,7 @@ class DatabaseHelper {
       whereArgs: [idValue],
     );
   }
-  Future<List<Map<String, dynamic>>> getTableRecords() async {
+  Future<List<Map<String, dynamic>>> getTableRecordsOld() async {
     // Fetch all table names
     final db = await instance.database;
 
@@ -461,6 +531,60 @@ class DatabaseHelper {
     }
 
     return tableRecords;
+  }
+
+  Future<List<Map<String, dynamic>>> getTableRecords() async {
+    final db = await instance.database;
+
+    return await db.transaction((txn) async {
+      final List<Map<String, dynamic>> tables = await txn.rawQuery(
+          "SELECT name FROM sqlite_master WHERE type='table' AND name NOT LIKE 'sqlite_%'"
+      );
+
+      List<Map<String, dynamic>> tableRecords = [];
+
+      for (final table in tables) {
+        final tableName = table['name'] as String;
+
+        final totalRecords = Sqflite.firstIntValue(
+          await txn.rawQuery("SELECT COUNT(*) FROM $tableName"),
+        ) ?? 0;
+
+        final columns = await txn.rawQuery("PRAGMA table_info($tableName)");
+
+        final hasDirtyFlag =
+        columns.any((c) => c['name'] == 'dirtyFlag');
+
+        final hasUpdatedAt =
+        columns.any((c) => c['name'] == 'updatedAt');
+
+        int unsynced = 0;
+        if (hasDirtyFlag) {
+          unsynced = Sqflite.firstIntValue(
+            await txn.rawQuery(
+              "SELECT COUNT(*) FROM $tableName WHERE dirtyFlag = 1",
+            ),
+          ) ?? 0;
+        }
+
+        String? latestUpdate;
+        if (hasUpdatedAt) {
+          final res = await txn.rawQuery(
+            "SELECT MAX(updatedAt) AS latestUpdate FROM $tableName",
+          );
+          latestUpdate = res.first['latestUpdate']?.toString();
+        }
+
+        tableRecords.add({
+          'tableName': tableName,
+          'totalRecords': totalRecords,
+          'unsyncedRecords': hasDirtyFlag ? unsynced : null,
+          'latestUpdateTime': hasUpdatedAt ? latestUpdate : null,
+        });
+      }
+
+      return tableRecords;
+    });
   }
 
 
@@ -555,7 +679,22 @@ class DatabaseHelper {
   Future<List<UserRoaster>> fetchRosterFromView() async {
     final db = await instance.database;
     final result = await db.query('vwRosterDetail');
-    final rosters = result.map((row) => UserRoaster.fromMap(row)).toList();
+    final seenKeys = <String>{};
+
+    final rosters1 = result.map((row) => UserRoaster.fromMap(row)).toList();
+
+    final rosters =  rosters1.where((item) {
+      final key =
+          '${item.shiftName}|${item.shiftStartTime?.toIso8601String()}|${item.shiftEndTime?.toIso8601String()}';
+
+      if (seenKeys.contains(key)) {
+        return false; // duplicate → remove
+      } else {
+        seenKeys.add(key);
+        return true; // unique → keep
+      }
+    }).toList();
+    print('updateCurrentDayRoasterUI......fetchRosterFromView...${rosters.length}');
 
     printInDebug('vwRosterDetail');
     for (var roster in rosters) {
@@ -563,12 +702,16 @@ class DatabaseHelper {
           'Site: ${roster.siteName}, '
           'Shift: ${roster.shiftName}, '
           'Start: ${roster.shiftStartTime}, '
-          'End: ${roster.shiftEndTime}');
+          'End: ${roster.shiftEndTime}'
+          'actEnd: ${roster.actEndTime}'
+          'actStartTime: ${roster.actStartTime}'
+
+      );
     }
     return rosters;
   }
 
-  Future<List<Map<String, dynamic>>> getDirtyRows(String tableName) async {
+  Future<List<Map<String, dynamic>>> getDirtyRowsOld(String tableName) async {
     final db = await instance.database;
 
     return await db.query(
@@ -577,7 +720,19 @@ class DatabaseHelper {
       whereArgs: [1],
     );
   }
-  Future<String?> getMaxDateModified(String tableName) async {
+  Future<List<Map<String, dynamic>>> getDirtyRows(String tableName) async {
+    final db = await instance.database;
+
+    return await db.transaction((txn) async {
+      return await txn.query(
+        tableName,
+        where: 'dirtyFlag = ?',
+        whereArgs: [1],
+      );
+    });
+  }
+
+  Future<String?> getMaxDateModifiedOld(String tableName) async {
     final db = await database;
 
     // Check if the column exists in the table
@@ -601,6 +756,35 @@ class DatabaseHelper {
     }
     return null; // No rows
   }
+  Future<String?> getMaxDateModified(
+      String tableName, {
+        DatabaseExecutor? executor,
+      }) async {
+    final db = executor ?? await database;
+
+    final columnsResult = await db.rawQuery(
+      'PRAGMA table_info($tableName)',
+    );
+
+    final columnNames =
+    columnsResult.map((c) => c['name'] as String).toList();
+
+    if (!columnNames.contains('dateModified')) {
+      printInDebug("Column dateModified does not exist in $tableName");
+      return null;
+    }
+
+    final result = await db.rawQuery(
+      'SELECT MAX(dateModified) AS maxDate FROM $tableName',
+    );
+
+    if (result.isNotEmpty && result.first['maxDate'] != null) {
+      return result.first['maxDate'] as String;
+    }
+
+    return null;
+  }
+
   Future<void> markRowSynced(String tableName, String idColumn, dynamic idValue) async {
     final db = await instance.database;
 
@@ -648,5 +832,7 @@ class DatabaseHelper {
     return shifts;
   }
 
-
 }
+
+
+

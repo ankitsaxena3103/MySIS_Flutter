@@ -23,12 +23,12 @@ class LeaveViewState extends State<LeaveView>{
 bool noData = false;
 
 List <UserLeaves> userLeaves = [];
-
+bool isLeaveDateFetched = false;
   @override
   void initState() {
 
-    getLeaveTypeTableData();
-    onLoadUserLeavesData();
+    getUserLeaveTableData();
+    // onLoadUserLeavesData();
     super.initState();
 
   }
@@ -221,9 +221,9 @@ Future<void> getLeaveTypeTableData() async {
         (map) => LeaveType.fromMap(map),
   );
 
-  if(leave.isEmpty){
-    onLoadLeaveData();
-  }
+  // if(leave.isEmpty){
+  //   onLoadLeaveData();
+  // }
 
 }
 void onLoadLeaveData() {
@@ -279,11 +279,13 @@ Future<void> getUserLeaveTableData() async {
 
       if(leaves.isNotEmpty){
         userLeaves = leaves;
+      }else if(!isLeaveDateFetched){
+        isLeaveDateFetched = true;
+        await onLoadUserLeavesData();
       }
 
-      onLoadUserLeavesData();
 }
-void onLoadUserLeavesData() {
+Future<void> onLoadUserLeavesData() async{
 
 
   // setState(() {
@@ -293,7 +295,7 @@ void onLoadUserLeavesData() {
 
   };
 
-  APIHelper.instance.getData(userLeavesApi,inputData, (data) {
+  APIHelper.instance.getData(userLeavesApi,inputData, (data) async {
 
     // setState(() {
     //   showLoaderView = false;
@@ -312,7 +314,7 @@ void onLoadUserLeavesData() {
       }
 
       if(userLeavesData.isNotEmpty){
-        syncUserLeavesData(userLeavesData);
+        await syncUserLeavesData(userLeavesData);
 
       }
 

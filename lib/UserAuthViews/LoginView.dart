@@ -22,7 +22,6 @@ import 'EnterPINView.dart';
 import 'SetPINView.dart';
 import 'package:flutter/services.dart';
 
-
 class LoginView extends StatefulWidget {
   const LoginView({super.key});
 
@@ -44,8 +43,7 @@ class LoginViewState extends State<LoginView> {
   bool showToastMessageView = false;
   String toastMessage = '';
 
-
-  String lblSignIn =  'sign_in'.tr();
+  String lblSignIn = 'sign_in'.tr();
   Color nextBgColor = Color.fromRGBO(51, 51, 51, 0.2);
   Color nextFontColor = Color.fromRGBO(51, 51, 51, 0.6);
   Color nextShadowColor = Colors.transparent;
@@ -62,8 +60,6 @@ class LoginViewState extends State<LoginView> {
   String lblUserIdHintText = 'ex_mobile'.tr();
 
   late LanguageProvider languageProvider;
-
-
 
   @override
   void initState() {
@@ -93,14 +89,12 @@ class LoginViewState extends State<LoginView> {
                 alignment: Alignment.center,
                 decoration: BoxDecoration(
                   gradient: backgroundGradient,
-
                 ),
                 child: Stack(
                   alignment: Alignment.center,
                   children: [
-
                     Positioned(
-                      top: paddingTop+pathS/8,
+                      top: paddingTop + pathS / 8,
                       right: 0,
                       child: Container(
                         width: pathS / 1.45,
@@ -115,9 +109,8 @@ class LoginViewState extends State<LoginView> {
                       ),
                     ),
                     Positioned(
-                      top: paddingTop+pathS/8,
+                      top: paddingTop + pathS / 8,
                       left: -0,
-
                       child: Container(
                         width: pathL,
                         height: pathS / 1.5,
@@ -130,7 +123,6 @@ class LoginViewState extends State<LoginView> {
                         ),
                       ),
                     ),
-
                     Column(
                       mainAxisAlignment: MainAxisAlignment.center,
                       children: [
@@ -140,7 +132,8 @@ class LoginViewState extends State<LoginView> {
                           decoration: const BoxDecoration(
                             shape: BoxShape.rectangle,
                             image: DecorationImage(
-                              image: AssetImage("assets/images/icons/SIS-App-icon.png"),
+                              image: AssetImage(
+                                  "assets/images/icons/SIS-App-icon.png"),
                               fit: BoxFit.cover,
                             ),
                           ),
@@ -230,18 +223,20 @@ class LoginViewState extends State<LoginView> {
                         // ),
                         SizedBox(height: pathS / 6),
                         Container(
-                          width: screenWidth-2.5*marginValue,
+                          width: screenWidth - 2.5 * marginValue,
                           // height: pathL/1.2,
-                          decoration:  BoxDecoration(
+                          decoration: BoxDecoration(
                             shape: BoxShape.rectangle,
-                            borderRadius: BorderRadius.circular(pathS/8),
+                            borderRadius: BorderRadius.circular(pathS / 8),
                             color: Colors.white,
                             boxShadow: [
                               BoxShadow(
-                                color: Colors.black.withOpacity(0.1), // Shadow color
-                                blurRadius: pathS/10, // Spread of the shadow
+                                color: Colors.black.withOpacity(0.1),
+                                // Shadow color
+                                blurRadius: pathS / 10,
+                                // Spread of the shadow
                                 // spreadRadius: pathS/15, // How far the shadow extends
-                                offset:  Offset(-pathS/12, pathS/12),
+                                offset: Offset(-pathS / 12, pathS / 12),
                               ),
                             ],
                           ),
@@ -249,11 +244,17 @@ class LoginViewState extends State<LoginView> {
                             alignment: Alignment.topLeft,
                             children: [
                               Padding(
-                                padding: EdgeInsets.only(left: pathS/3, top: pathS/3,bottom: pathS/3,right: pathS/4), // Adjust top and left as needed
+                                padding: EdgeInsets.only(
+                                    left: pathS / 3,
+                                    top: pathS / 3,
+                                    bottom: pathS / 3,
+                                    right: pathS / 4),
+                                // Adjust top and left as needed
                                 child: Align(
                                   alignment: Alignment.topLeft,
                                   child: Column(
-                                    crossAxisAlignment: CrossAxisAlignment.start,
+                                    crossAxisAlignment:
+                                        CrossAxisAlignment.start,
                                     children: [
                                       Text(
                                         lblUserIdHintMsg,
@@ -265,20 +266,20 @@ class LoginViewState extends State<LoginView> {
                                         ),
                                         textAlign: TextAlign.center,
                                       ),
-
                                       SimpleUnderLineTextField(
                                         isDarkMode: isDarkMode,
                                         txtUserId: txtUserId,
-                                        onUserIdChange: (data  ) {
-
+                                        onUserIdChange: (data) {
                                           onUserIdChange(data);
-
-                                      }, lineBorderColor: lineBorderColor,),
+                                        },
+                                        lineBorderColor: lineBorderColor,
+                                      ),
                                       SizedBox(height: pathS / 8),
                                       Text(
                                         lblUserIdHintText,
                                         style: TextStyle(
-                                          color: Color.fromRGBO(51, 51, 51, 0.7),
+                                          color:
+                                              Color.fromRGBO(51, 51, 51, 0.7),
                                           fontSize: pathS / 6.5,
                                           fontWeight: FontWeight.w500,
                                           fontFamily: 'Roboto',
@@ -292,47 +293,45 @@ class LoginViewState extends State<LoginView> {
                             ],
                           ),
                         ),
-                        SizedBox(height: pathS/5),
+                        SizedBox(height: pathS / 5),
                         SizedBox(
-                          width: screenWidth-4*marginValue,
-                          child:Text(
+                          width: screenWidth - 4 * marginValue,
+                          child: Text(
                             lblErrorMsg,
                             style: TextStyle(
                               color: redColor2,
                               fontSize: pathS / 6,
                               fontWeight: FontWeight.w500,
                               fontFamily: 'Roboto',
-
                             ),
                             textAlign: TextAlign.left,
                           ),
                         ),
 
                         SizedBox(height: pathS),
-
-
-
                       ],
                     ),
-
                     Positioned(
-                      bottom: paddingBottom+pathS/2,
-
+                      bottom: paddingBottom + pathS / 2,
                       child: GestureDetector(
-                        onTap: isTapEnabled ? onTapLogin : null, // Disable tap if isTapEnabled is false
+                        onTap: isTapEnabled ? onTapLogin : null,
+                        // Disable tap if isTapEnabled is false
                         child: Container(
                           width: pathL,
                           height: pathS / 1.5,
                           alignment: Alignment.center,
                           decoration: BoxDecoration(
-                            color: nextBgColor,                          // border: Border.all(color: Colors.yellow, width: pathS/18),
-                            borderRadius: BorderRadius.circular(pathS/3),
+                            color: nextBgColor,
+                            // border: Border.all(color: Colors.yellow, width: pathS/18),
+                            borderRadius: BorderRadius.circular(pathS / 3),
                             boxShadow: [
                               BoxShadow(
-                                color: nextShadowColor, // Shadow color
-                                blurRadius: pathS/10, // Spread of the shadow
+                                color: nextShadowColor,
+                                // Shadow color
+                                blurRadius: pathS / 10,
+                                // Spread of the shadow
                                 // spreadRadius: pathS/15, // How far the shadow extends
-                                offset:  Offset(-pathS/12, pathS/12),
+                                offset: Offset(-pathS / 12, pathS / 12),
                               ),
                             ],
                           ),
@@ -348,8 +347,6 @@ class LoginViewState extends State<LoginView> {
                         ),
                       ),
                     ),
-
-
                     LoaderView(isVisible: showLoaderView, message: ''),
                     Visibility(
                       visible: isAlertVisible,
@@ -368,7 +365,8 @@ class LoginViewState extends State<LoginView> {
                           cancelButtonTitle: 'OK',
                           okButtonTitle: ''),
                     ),
-                    ToastMessageView(isVisible: showToastMessageView, message: toastMessage),
+                    ToastMessageView(
+                        isVisible: showToastMessageView, message: toastMessage),
                   ],
                 ),
               ),
@@ -377,16 +375,16 @@ class LoginViewState extends State<LoginView> {
         );
       },
     );
-
   }
 
   void initialSetup() {}
 
   void onUserIdChange(String userid) {
-
     final mobileNoRegExp = RegExp(r'^\d{10}$'); // 10-digit mobile number
-    final sisIdRegExp = RegExp(r'^SIS\d{7}$'); // SIS followed by exactly 7 numeric characters
-    final otherIdRegExp = RegExp(r'^(?!SIS)[A-Z]{3}\d{6}$'); // Exclude SIS and match 3 uppercase letters followed by 6 digits
+    final sisIdRegExp =
+        RegExp(r'^DTS\d{7}$'); // SIS followed by exactly 7 numeric characters
+    final otherIdRegExp = RegExp(
+        r'^(?!SIS)[A-Z]{3}\d{6}$'); // Exclude SIS and match 3 uppercase letters followed by 6 digits
 
     if (mobileNoRegExp.hasMatch(userid) ||
         sisIdRegExp.hasMatch(userid) ||
@@ -398,8 +396,9 @@ class LoginViewState extends State<LoginView> {
         lineBorderColor = Color.fromRGBO(51, 51, 51, 0.5);
         lblErrorMsg = '';
         isTapEnabled = true; // Enable tap
-
-        FocusScope.of(context).unfocus();
+        if (userid.length >= 10) {
+          FocusScope.of(context).unfocus();
+        }
       });
     } else {
       setState(() {
@@ -413,14 +412,17 @@ class LoginViewState extends State<LoginView> {
     }
   }
 
-
   Future<String> getAppInfo() async {
     // Get app version
     PackageInfo packageInfo = await PackageInfo.fromPlatform();
     String appVersion = packageInfo.version;
 
     // Get device type and OS version
-    String deviceType = Platform.isAndroid ? "Android" : Platform.isIOS ? "iOS" : "Web";
+    String deviceType = Platform.isAndroid
+        ? "Android"
+        : Platform.isIOS
+            ? "iOS"
+            : "Web";
     String osVersion = Platform.operatingSystemVersion;
 
     // Get device ID
@@ -437,89 +439,83 @@ class LoginViewState extends State<LoginView> {
       return androidInfo.id; // Returns a unique device ID for Android
     } else if (Platform.isIOS) {
       IosDeviceInfo iosInfo = await deviceInfo.iosInfo;
-      return iosInfo.identifierForVendor ?? ""; // Returns a unique device ID for iOS
+      return iosInfo.identifierForVendor ??
+          ""; // Returns a unique device ID for iOS
     } else {
       return ""; // For unsupported platforms like Web
     }
   }
+
   Future<void> onTapLogin() async {
-    String appInfoSendToServer =  appToken;
+    String appInfoSendToServer = appToken;
     if (txtUserId.text.isEmpty) {
       showToastView("enter_mobile_no");
       return;
     }
 
+    setState(() {
+      showLoaderView = true;
+    });
+    Map<String, String> inputData = {
+      "UserName": txtUserId.text,
+      "AppToken": appInfoSendToServer,
+      "BypassOTPScreen": "0",
+      "Enable_OTPEntry": "1"
+    };
+
+    APIHelper.instance.getData(requestLoginApi, inputData, (data) {
       setState(() {
-        showLoaderView = true;
+        showLoaderView = false;
       });
-      Map <String,String> inputData = {
-        "UserName": txtUserId.text,
-        "AppToken" : appInfoSendToServer,
-        "BypassOTPScreen" : "0",
-        "Enable_OTPEntry" : "1"
-      };
+      if (data.isNotEmpty) {
+        Map<String, dynamic> userData = data.first as Map<String, dynamic>;
 
-      APIHelper.instance.getData(requestLoginApi,inputData, (data) {
+        userName = userData['Name'] ?? '';
+        regNo = userData['RegNo'] ?? 0;
+        designation = userData['Designation'] ?? '';
+        phoneNo = userData['MobileNo'] ?? '';
 
-        setState(() {
-          showLoaderView = false;
-        });
-        if(data.isNotEmpty){
+        String pin = userData['PIN'] ?? '';
+        String languageCode = userData['Language'] ?? '';
 
-          Map<String, dynamic> userData = data.first as Map<String, dynamic>;
+        String otpId = userData['OtpId'] ?? '';
+        int isOTPRequired = userData['BypassOTPScreen'] ?? 0;
+        int otpTimer = userData['OTP_Validity'] ?? 0;
+        bool enableOTPEntry = (userData['Enable_OTPEntry'] ?? 0) == 1;
 
-          userName = userData['Name'] ?? '';
-          regNo = userData['RegNo'] ?? 0;
-          designation = userData['Designation'] ?? '';
-          phoneNo = userData['MobileNo'] ?? '';
+        String pwd = userData['Password'] ?? '';
 
-         String pin = userData['PIN'] ?? '';
-          String languageCode = userData['Language'] ?? '';
+        Preferences.saveUserPreference(keyUserName, userName);
+        Preferences.saveUserPreference(keyUserID, regNo);
+        Preferences.saveUserPreference(keyPwd, pwd);
+        Preferences.saveUserPreference(keyMobile, phoneNo);
+        Preferences.saveUserPreference(keyPIN, pin);
 
-          String otpId = userData['OtpId'] ?? '';
-          int isOTPRequired = userData['BypassOTPScreen'] ?? 0;
-          int otpTimer = userData['OTP_Validity'] ?? 0;
-          bool enableOTPEntry = (userData['Enable_OTPEntry'] ?? 0 ) == 1;
+        updateLanguage(languageCode);
 
-          String pwd = userData['Password'] ?? '';
+        loadNextScreen(enableOTPEntry, otpId, otpTimer, pin, phoneNo, regNo);
 
-          Preferences.saveUserPreference(keyUserName, userName);
-          Preferences.saveUserPreference(keyUserID, regNo);
-          Preferences.saveUserPreference(keyPwd, pwd);
-          Preferences.saveUserPreference(keyMobile, phoneNo);
-          Preferences.saveUserPreference(keyPIN, pin);
-
-
-          updateLanguage(languageCode);
-
-          loadNextScreen(enableOTPEntry, otpId,otpTimer,pin,phoneNo,regNo);
-
-          if(otpId.isNotEmpty && pwd.isNotEmpty){
-            getToken(regNo, pwd);
-          }
-
-
+        if (otpId.isNotEmpty && pwd.isNotEmpty) {
+          getToken(regNo, pwd);
         }
-
-      },(error){
-        setState(() {
-          showLoaderView = false;
-        });
-        printInDebug('error received');
-
-        loadAlertScreen(error['ErrorMessage'] ?? '');
-
       }
-      );
+    }, (error) {
+      setState(() {
+        showLoaderView = false;
+      });
+      printInDebug('error received');
 
+      loadAlertScreen(error['ErrorMessage'] ?? '');
+    });
   }
 
   void getToken(String userId, String pwd) {
     APIHelper.instance.getToken(userId, pwd);
   }
 
-  void loadNextScreen(bool enableOtpEntry, String otpId,int timerVal, String pin, String mobileNo,String regNo) {
-    if(otpId.isNotEmpty){
+  void loadNextScreen(bool enableOtpEntry, String otpId, int timerVal,
+      String pin, String mobileNo, String regNo) {
+    if (otpId.isNotEmpty) {
       Navigator.push(
         context,
         MaterialPageRoute(
@@ -534,20 +530,17 @@ class LoginViewState extends State<LoginView> {
           ),
         ),
       );
-    }else{
+    } else {
       String? currentPIN = pin;
-      if(currentPIN != null && currentPIN!.isNotEmpty ){
+      if (currentPIN != null && currentPIN!.isNotEmpty) {
         Preferences.saveUserPreference(keyPIN, pin);
         Navigator.push(
           context,
           MaterialPageRoute(
-            builder: (context) => EnterPINView(
-              currentPIN: pin
-            ),
+            builder: (context) => EnterPINView(currentPIN: pin),
           ),
         );
-      }
-      else {
+      } else {
         Navigator.push(
           context,
           MaterialPageRoute(
@@ -555,15 +548,15 @@ class LoginViewState extends State<LoginView> {
               calledValue: 0,
               mobile: mobileNo,
               regNo: regNo,
-
             ),
           ),
         );
       }
     }
   }
+
   void loadAlertScreen(String message) {
-    if(message.isNotEmpty){
+    if (message.isNotEmpty) {
       Navigator.push(
         context,
         MaterialPageRoute(
@@ -573,33 +566,31 @@ class LoginViewState extends State<LoginView> {
     }
   }
 
-  void updateLanguage(String langCode){
-
+  void updateLanguage(String langCode) {
     printInDebug(langCode);
-    if(langCode == 'en'){
+    if (langCode == 'en') {
       selectedLocale = 'en-US';
       selectedLanguageCode = 'en';
 
       languageProvider.setLanguage(selectedLanguageCode, 'US');
-
-    }else   if(langCode == 'hi'){
+    } else if (langCode == 'hi') {
       selectedLocale = 'hi-IN';
       selectedLanguageCode = 'hi';
-    }else   if(langCode == 'kn'){
+    } else if (langCode == 'kn') {
       selectedLocale = 'kn-IN';
       selectedLanguageCode = 'kn';
-    }else   if(langCode == 'mr'){
+    } else if (langCode == 'mr') {
       selectedLocale = 'mr-IN';
       selectedLanguageCode = 'mr';
-    }else   if(langCode == 'ta'){
+    } else if (langCode == 'ta') {
       selectedLocale = 'ta-IN';
       selectedLanguageCode = 'ta';
-    }else   if(langCode == 'te'){
+    } else if (langCode == 'te') {
       selectedLocale = 'te-IN';
       selectedLanguageCode = 'te';
     }
-
   }
+
   void showToastView(String message) {
     setState(() {
       showToastMessageView = true;
@@ -613,5 +604,3 @@ class LoginViewState extends State<LoginView> {
     });
   }
 }
-
-

@@ -145,6 +145,40 @@ class UserRoaster {
     return null;
   }
 
+  Map<String, dynamic> toJson() {
+    String? formatDate(DateTime? date) => date?.toIso8601String();
+
+
+    return {
+      'ID': id,
+      'ROSTER_ID': rosterId,
+      'UNIT_CODE': unitCode,
+      'SITE_NAME': siteName,
+      'SHIFT_ID': shiftId,
+      'SHIFT_NAME': shiftName,
+      'ROSTER_DATE': rosterDate,
+      'START_TIME': startTime?.toString(),
+      'END_TIME': endTime?.toString(),
+      'DUTY_HRS': dutyHrs?.toString(),
+      'SHIFT_START_TIME': formatDate(shiftStartTime),
+      'SHIFT_END_TIME': formatDate(shiftEndTime),
+      'DUTY_START_ENABLE_TIME': formatDate(dutyStartEnableTime),
+      'DUTY_START_DISABLE_TIME': formatDate(dutyStartDisableTime),
+      'DUTY_END_DISABLE_TIME': formatDate(dutyEndDisableTime),
+      'DELETED': deleted,
+      'DATE_MODIFIED': formatDate(dateModified),
+      'REGNO': regNo,
+      'DUTY_POST_ID': dutyPostId,
+      'POST_NAME': postName,
+      'QR_ID': qrId,
+      'DUTY_POST_ADDRESS': dutyPostAddress,
+      'GEO_FENCE_RANGE': geoFenceRange,
+      'IS_GEO_FENCE_ALLOW': isGeoFenceAllow,
+      'GEO_LOCATION': geoLocation,
+      'DUTY_RANK_CODE': dutyRankCode,
+      'DUTY_RANK_NAME': dutyRankName,
+    };
+  }
 
 factory UserRoaster.fromJson(Map<String, dynamic> json) {
     return UserRoaster(
