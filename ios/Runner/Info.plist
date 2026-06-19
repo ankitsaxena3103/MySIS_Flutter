@@ -19,11 +19,13 @@
 	<key>CFBundlePackageType</key>
 	<string>APPL</string>
 	<key>CFBundleShortVersionString</key>
-	<string>1.0.1</string>
+	<string>$(FLUTTER_BUILD_NAME)</string>
 	<key>CFBundleSignature</key>
 	<string>????</string>
 	<key>CFBundleVersion</key>
 	<string>$(FLUTTER_BUILD_NUMBER)</string>
+	<key>ITSAppUsesNonExemptEncryption</key>
+	<false/>
 	<key>LSApplicationQueriesSchemes</key>
 	<array>
 		<string>App-Prefs</string>
@@ -49,8 +51,6 @@
 	<string>MySIS need permission to save files to your device.</string>
 	<key>NSPhotoLibraryUsageDescription</key>
 	<string>MySIS need access to your photo library to save the downloaded PDF.</string>
-	<key>NSUserTrackingUsageDescription</key>
-	<string>We use notifications to keep you updated.</string>
 	<key>UIApplicationSupportsIndirectInputEvents</key>
 	<true/>
 	<key>UIBackgroundModes</key>

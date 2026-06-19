@@ -451,10 +451,9 @@ class EnterManuallyViewState extends State<EnterManuallyView> {
     debugPrint('USERID="$userid" LENGTH=${userid.length}');
 
     final mobileNoRegExp = RegExp(r'^\d{10}$'); // 10-digit mobile number
-    final sisIdRegExp =
-        RegExp(r'^DTS\d{7}$'); // SIS followed by exactly 7 numeric characters
-    final otherIdRegExp = RegExp(
-        r'^(?!SIS)[A-Z]{3}\d{6}$'); // Exclude SIS and match 3 uppercase letters followed by 6 digits
+    final sisIdRegExp = RegExp(r'^SIS\d{7}$'); // SIS followed by exactly 7 numeric characters
+    final otherIdRegExp = RegExp(r'^(?!SIS)[A-Z]{3}\d{6}$'); // Exclude SIS and match 3 uppercase letters followed by 6 digits
+
 
     if (mobileNoRegExp.hasMatch(userid) ||
         sisIdRegExp.hasMatch(userid) ||
