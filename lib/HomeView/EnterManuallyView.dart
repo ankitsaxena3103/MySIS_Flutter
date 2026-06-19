@@ -451,10 +451,9 @@ class EnterManuallyViewState extends State<EnterManuallyView> {
     debugPrint('USERID="$userid" LENGTH=${userid.length}');
 
     final mobileNoRegExp = RegExp(r'^\d{10}$'); // 10-digit mobile number
-    final sisIdRegExp =
-        RegExp(r'^DTS\d{7}$'); // SIS followed by exactly 7 numeric characters
-    final otherIdRegExp = RegExp(
-        r'^(?!SIS)[A-Z]{3}\d{6}$'); // Exclude SIS and match 3 uppercase letters followed by 6 digits
+    final sisIdRegExp = RegExp(r'^SIS\d{7}$'); // SIS followed by exactly 7 numeric characters
+    final otherIdRegExp = RegExp(r'^(?!SIS)[A-Z]{3}\d{6}$'); // Exclude SIS and match 3 uppercase letters followed by 6 digits
+
 
     if (mobileNoRegExp.hasMatch(userid) ||
         sisIdRegExp.hasMatch(userid) ||
@@ -466,9 +465,9 @@ class EnterManuallyViewState extends State<EnterManuallyView> {
         lineBorderColor = Color.fromRGBO(51, 51, 51, 0.5);
         lblErrorMsg = '';
         isTapEnabled = true; // Enable tap
-        if (userid.length >= 10) {
-          FocusScope.of(context).unfocus();
-        }
+        // if (userid.length >= 10) {
+        //   FocusScope.of(context).unfocus();
+        // }
       });
     } else {
       setState(() {
@@ -483,11 +482,11 @@ class EnterManuallyViewState extends State<EnterManuallyView> {
   }
 
   void onUserIdChange(String userid) {
+
     final mobileNoRegExp = RegExp(r'^\d{10}$'); // 10-digit mobile number
-    final sisIdRegExp =
-        RegExp(r'^DTS\d{7}$'); // SIS followed by exactly 7 numeric characters
-    final otherIdRegExp = RegExp(
-        r'^(?!SIS)[A-Z]{3}\d{6}$'); // Exclude SIS and match 3 uppercase letters followed by 6 digits
+    final sisIdRegExp = RegExp(r'^SIS\d{7}$'); // SIS followed by exactly 7 numeric characters
+    final otherIdRegExp = RegExp(r'^(?!SIS)[A-Z]{3}\d{6}$'); // Exclude SIS and match 3 uppercase letters followed by 6 digits
+
 
     if (mobileNoRegExp.hasMatch(userid) ||
         sisIdRegExp.hasMatch(userid) ||
@@ -499,9 +498,11 @@ class EnterManuallyViewState extends State<EnterManuallyView> {
         lblErrorMsg = '';
         lineBorderColor = isDarkMode ? greyColorDark : greyColor5;
         isTapEnabled = true; // Enable tap
-        if (userid.length >= 10) {
-          FocusScope.of(context).unfocus();
-        }
+        FocusScope.of(context).unfocus();
+
+        // if (userid.length >= 10) {
+        //   FocusScope.of(context).unfocus();
+        // }
       });
     } else {
       setState(() {

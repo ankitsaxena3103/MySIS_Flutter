@@ -86,7 +86,7 @@ class DutyLeaveDetailViewState extends State<DutyLeaveDetailView>{
                     onTap: (){
                       Navigator.pop(context);
                     },
-                    child: Row(
+                    child:   Row(
                       children: [
                         Container(
                           width: pathS/5,
