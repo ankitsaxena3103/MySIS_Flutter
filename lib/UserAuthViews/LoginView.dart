@@ -382,11 +382,12 @@ class LoginViewState extends State<LoginView> {
   void onUserIdChange(String userid) {
 
     final mobileNoRegExp = RegExp(r'^\d{10}$'); // 10-digit mobile number
-    final sisIdRegExp = RegExp(r'^SIS\d{7}$'); // SIS followed by exactly 7 numeric characters
-    final otherIdRegExp = RegExp(r'^(?!SIS)[A-Z]{3}\d{6}$'); // Exclude SIS and match 3 uppercase letters followed by 6 digits
+    // final sisIdRegExp = RegExp(r'^SIS\d{7}$'); // SIS followed by exactly 7 numeric characters
+    // final otherIdRegExp = RegExp(r'^(?!SIS)[A-Z]{3}\d{6}$'); // Exclude SIS and match 3 uppercase letters followed by 6 digits
+    final otherIdRegExp = RegExp(r'^[A-Z]{3}\d{6,7}$'); // Exclude SIS and match 3 uppercase letters followed by 6 digits
 
     if (mobileNoRegExp.hasMatch(userid) ||
-        sisIdRegExp.hasMatch(userid) ||
+        // sisIdRegExp.hasMatch(userid) ||
         otherIdRegExp.hasMatch(userid)) {
       setState(() {
         nextBgColor = Color.fromRGBO(195, 50, 30, 1);

@@ -446,50 +446,51 @@ class EnterManuallyViewState extends State<EnterManuallyView> {
     );
   }
 
-  void onUserIdChange1(String userid) {
-    print('onUserIdChange1....userid.....$userid');
-    debugPrint('USERID="$userid" LENGTH=${userid.length}');
-
-    final mobileNoRegExp = RegExp(r'^\d{10}$'); // 10-digit mobile number
-    final sisIdRegExp = RegExp(r'^SIS\d{7}$'); // SIS followed by exactly 7 numeric characters
-    final otherIdRegExp = RegExp(r'^(?!SIS)[A-Z]{3}\d{6}$'); // Exclude SIS and match 3 uppercase letters followed by 6 digits
-
-
-    if (mobileNoRegExp.hasMatch(userid) ||
-        sisIdRegExp.hasMatch(userid) ||
-        otherIdRegExp.hasMatch(userid)) {
-      setState(() {
-        nextBgColor = Color.fromRGBO(195, 50, 30, 1);
-        nextFontColor = Colors.white;
-        nextShadowColor = Colors.black.withOpacity(0.2);
-        lineBorderColor = Color.fromRGBO(51, 51, 51, 0.5);
-        lblErrorMsg = '';
-        isTapEnabled = true; // Enable tap
-        // if (userid.length >= 10) {
-        //   FocusScope.of(context).unfocus();
-        // }
-      });
-    } else {
-      setState(() {
-        nextBgColor = Color.fromRGBO(51, 51, 51, 0.2);
-        nextFontColor = Color.fromRGBO(51, 51, 51, 0.6);
-        nextShadowColor = Colors.transparent;
-        lineBorderColor = Color.fromRGBO(255, 0, 0, 1);
-        lblErrorMsg = 'enter_mobile_no'.tr();
-        isTapEnabled = false; // Disable tap
-      });
-    }
-  }
+  // void onUserIdChange1(String userid) {
+  //   print('onUserIdChange1....userid.....$userid');
+  //   debugPrint('USERID="$userid" LENGTH=${userid.length}');
+  //
+  //   final mobileNoRegExp = RegExp(r'^\d{10}$'); // 10-digit mobile number
+  //   final sisIdRegExp = RegExp(r'^SIS\d{7}$'); // SIS followed by exactly 7 numeric characters
+  //   final otherIdRegExp = RegExp(r'^(?!SIS)[A-Z]{3}\d{6}$'); // Exclude SIS and match 3 uppercase letters followed by 6 digits
+  //
+  //
+  //   if (mobileNoRegExp.hasMatch(userid) ||
+  //       sisIdRegExp.hasMatch(userid) ||
+  //       otherIdRegExp.hasMatch(userid)) {
+  //     setState(() {
+  //       nextBgColor = Color.fromRGBO(195, 50, 30, 1);
+  //       nextFontColor = Colors.white;
+  //       nextShadowColor = Colors.black.withOpacity(0.2);
+  //       lineBorderColor = Color.fromRGBO(51, 51, 51, 0.5);
+  //       lblErrorMsg = '';
+  //       isTapEnabled = true; // Enable tap
+  //       // if (userid.length >= 10) {
+  //       //   FocusScope.of(context).unfocus();
+  //       // }
+  //     });
+  //   } else {
+  //     setState(() {
+  //       nextBgColor = Color.fromRGBO(51, 51, 51, 0.2);
+  //       nextFontColor = Color.fromRGBO(51, 51, 51, 0.6);
+  //       nextShadowColor = Colors.transparent;
+  //       lineBorderColor = Color.fromRGBO(255, 0, 0, 1);
+  //       lblErrorMsg = 'enter_mobile_no'.tr();
+  //       isTapEnabled = false; // Disable tap
+  //     });
+  //   }
+  // }
 
   void onUserIdChange(String userid) {
 
     final mobileNoRegExp = RegExp(r'^\d{10}$'); // 10-digit mobile number
-    final sisIdRegExp = RegExp(r'^SIS\d{7}$'); // SIS followed by exactly 7 numeric characters
-    final otherIdRegExp = RegExp(r'^(?!SIS)[A-Z]{3}\d{6}$'); // Exclude SIS and match 3 uppercase letters followed by 6 digits
+    // final sisIdRegExp = RegExp(r'^SIS\d{6,7}$'); // SIS followed by exactly 7 numeric characters
+    // final otherIdRegExp = RegExp(r'^(?!SIS)[A-Z]{3}\d{6}$'); // Exclude SIS and match 3 uppercase letters followed by 6 digits
+    final otherIdRegExp = RegExp(r'^[A-Z]{3}\d{6,7}$'); // Exclude SIS and match 3 uppercase letters followed by 6 digits
 
 
     if (mobileNoRegExp.hasMatch(userid) ||
-        sisIdRegExp.hasMatch(userid) ||
+        // sisIdRegExp.hasMatch(userid) ||
         otherIdRegExp.hasMatch(userid)) {
       setState(() {
         nextBgColor = isDarkMode ? redColor1 : redColor3;
