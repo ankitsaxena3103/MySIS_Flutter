@@ -4,6 +4,7 @@ import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:mysis/CommonViews/Utility.dart';
 import 'package:easy_localization/easy_localization.dart';
+import 'package:mysis/KoshLoan/koshdialoggetstartedconsent.dart';
 import 'package:mysis/Notifications/NotificationsView.dart';
 import 'package:mysis/SharedClasses/ThemeProvider.dart';
 import 'package:mysis/SyncData/SyncDataView.dart';
@@ -677,12 +678,48 @@ class MenuItemViewState extends State<MenuItemView> {
 
                                 SizedBox(width: horizontalGap),
 
+                                // // Sarvam Loan
+                                // GestureDetector(
+                                //   behavior: HitTestBehavior.opaque,
+                                //   onTap: () {
+                                //     widget.onCloseBottomSheet();
+                                //     onLoadSarvamLoanView();
+                                //   },
+                                //   child: Container(
+                                //     width: screenWidth / 3,
+                                //     padding: const EdgeInsets.symmetric(vertical: 8),
+                                //     child: Column(
+                                //       mainAxisSize: MainAxisSize.min,
+                                //       children: [
+                                //         Image.asset(
+                                //           'assets/images/dashboard-icons/sarvam_logo.png',
+                                //           width: iconSize,
+                                //           height: iconSize,
+                                //           color: isDarkMode ? whiteColor : greyColor6,
+                                //         ),
+                                //         SizedBox(height: iconTextGap),
+                                //         Text(
+                                //           'loan_by_sarvam'.tr(),
+                                //           style: TextStyle(
+                                //             color: isDarkMode ? whiteColor : greyColor6,
+                                //             fontSize: pathS / 5,
+                                //             fontWeight: FontWeight.w500,
+                                //             fontFamily: 'Roboto',
+                                //           ),
+                                //           textAlign: TextAlign.center,
+                                //         ),
+                                //       ],
+                                //     ),
+                                //   ),
+                                // ),
+
+
                                 // Sarvam Loan
                                 GestureDetector(
                                   behavior: HitTestBehavior.opaque,
                                   onTap: () {
                                     widget.onCloseBottomSheet();
-                                    onLoadSarvamLoanView();
+                                    onLoadKoshDialogGetStartedConsent();
                                   },
                                   child: Container(
                                     width: screenWidth / 3,
@@ -691,14 +728,14 @@ class MenuItemViewState extends State<MenuItemView> {
                                       mainAxisSize: MainAxisSize.min,
                                       children: [
                                         Image.asset(
-                                          'assets/images/dashboard-icons/sarvam_logo.png',
+                                          'assets/images/KoshImage/Earn with Kosh.png',
                                           width: iconSize,
                                           height: iconSize,
                                           color: isDarkMode ? whiteColor : greyColor6,
                                         ),
                                         SizedBox(height: iconTextGap),
                                         Text(
-                                          'loan_by_sarvam'.tr(),
+                                          'Earn with Kosh'.tr(),
                                           style: TextStyle(
                                             color: isDarkMode ? whiteColor : greyColor6,
                                             fontSize: pathS / 5,
@@ -711,6 +748,8 @@ class MenuItemViewState extends State<MenuItemView> {
                                     ),
                                   ),
                                 ),
+
+
 
                                 SizedBox(width: horizontalGap),
 
@@ -962,14 +1001,17 @@ class MenuItemViewState extends State<MenuItemView> {
     );
   }
 
-  void onLoadSarvamLoanView(){
-    Navigator.push(
-      context,
-      MaterialPageRoute(
-        builder: (context) => SarvamLoanView(),
-      ),
+  void onLoadKoshDialogGetStartedConsent() {
+    showDialog(
+      context: context,
+      barrierDismissible: false,
+      barrierColor: Colors.black.withOpacity(0.50),
+      builder: (context) {
+        return const KoshDialogGetStartedConsent();
+      },
     );
   }
+
   void onLoadEscortDutyView(){
     Navigator.push(
       context,

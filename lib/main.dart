@@ -2,6 +2,11 @@ import 'dart:io';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:flutter/material.dart';
+import 'package:mysis/KoshLoan/KoshAlternateWhatsappDialog.dart';
+import 'package:mysis/KoshLoan/KoshBottomSheet.dart';
+import 'package:mysis/KoshLoan/ReferAndEarnScreen.dart';
+import 'package:mysis/KoshLoan/koshdialoggetstartedconsent.dart';
+import 'package:mysis/KoshLoan/KoshSuccessScreen.dart';
 import 'package:mysis/SharedClasses/LanguageProvider.dart';
 import 'package:mysis/SharedClasses/Preferences.dart';
 import 'package:mysis/Language/SelectLanguageView.dart';
@@ -9,6 +14,7 @@ import 'package:mysis/CommonViews/Utility.dart';
 import 'package:easy_localization/easy_localization.dart';
 import 'package:mysis/SharedClasses/languages.dart';
 import 'package:mysis/SharedClasses/ThemeProvider.dart';
+import 'package:mysis/main.dart';
 import 'package:provider/provider.dart';
 import 'package:mysis/UserAuthViews/EnterPINView.dart';
 import 'package:package_info_plus/package_info_plus.dart';
@@ -36,6 +42,7 @@ Future<void> _firebaseMessagingBackgroundHandler(RemoteMessage message) async {
   await Firebase.initializeApp();
   printInDebug('Handling background message: ${message.messageId}');
 }
+
 
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -125,7 +132,6 @@ class _MyAppState extends State<MyApp> with WidgetsBindingObserver {
 
     _isPinScreenOpen = true;
 
-    // ✅ Use the global navigator key instead of context
     navigatorKey.currentState
         ?.push(
       MaterialPageRoute(
@@ -144,12 +150,11 @@ class _MyAppState extends State<MyApp> with WidgetsBindingObserver {
   Widget build(BuildContext context) {
     return MaterialApp(
       navigatorKey: navigatorKey,
-      // assign the key here
       localizationsDelegates: context.localizationDelegates,
       supportedLocales: context.supportedLocales,
       locale: context.locale,
       navigatorObservers: [routeObserver],
-      home: const MyHomePage(),
+      home: const KoshDialogGetStartedConsent(),
     );
   }
 }

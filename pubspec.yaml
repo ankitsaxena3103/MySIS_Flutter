@@ -130,6 +130,7 @@ flutter:
     - assets/images/notifications/
     - assets/images/sync/
     - assets/images/sulabhLoan/
+    - assets/images/KoshImage/
 
 
   # For details regarding fonts from package dependencies,
