@@ -124,6 +124,7 @@ class ChangeMobileOTPViewState extends State<ChangeMobileOTPView> {
                   ),
                 ),
 
+
                 Column(
                   mainAxisAlignment: MainAxisAlignment.center,
                   children: [
@@ -282,6 +283,7 @@ class ChangeMobileOTPViewState extends State<ChangeMobileOTPView> {
                           ),
                         ],
                       ),
+
                     ),
                     SizedBox(height: pathS/5),
                     Container(
@@ -453,11 +455,11 @@ class ChangeMobileOTPViewState extends State<ChangeMobileOTPView> {
 
         lblErrorMsg = 'txt_incorrect_otp'.tr();
 
+
       });
-
     }
-
   }
+
 
   void updateOTPList(int value) {
 
