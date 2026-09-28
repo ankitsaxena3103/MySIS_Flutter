@@ -11,7 +11,6 @@ class KoshAlternateWhatsappDialog extends StatefulWidget {
       _AlternateWhatsappDialogState();
 }
 
-
 class _AlternateWhatsappDialogState extends State<KoshAlternateWhatsappDialog> {
   final TextEditingController phoneController = TextEditingController();
 
@@ -53,8 +52,8 @@ class _AlternateWhatsappDialogState extends State<KoshAlternateWhatsappDialog> {
             Container(
               height: 58,
               width: 58,
-              decoration:  BoxDecoration(
-                  color: AppColors.pink75,
+              decoration: BoxDecoration(
+                color: AppColors.pink75,
                 shape: BoxShape.circle,
               ),
               child: Padding(
@@ -98,11 +97,9 @@ class _AlternateWhatsappDialogState extends State<KoshAlternateWhatsappDialog> {
                     style: TextStyle(
                       fontFamily: 'Inter',
                       fontSize: 15,
-
                       color: Colors.black87,
                     ),
                   ),
-
                   const SizedBox(width: 12),
                   Container(
                     height: 28,
@@ -157,7 +154,6 @@ class _AlternateWhatsappDialogState extends State<KoshAlternateWhatsappDialog> {
                         isChecked = value ?? false;
                       });
                     },
-
                   ),
                 ),
                 const SizedBox(width: 8),

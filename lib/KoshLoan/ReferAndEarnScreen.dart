@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:mysis/KoshLoan/KoshBottomSheet.dart';
+import 'package:mysis/KoshLoan/demo%20api/ConvertedApi.dart';
+import 'package:mysis/KoshLoan/demo%20api/Converted_model/ConvertedleadModel.dart';
 import 'package:mysis/KoshLoan/walletapi.dart';
 import 'package:mysis/KoshLoan/walletmodel.dart';
 import 'package:mysis/constants/app_colors.dart';
@@ -20,10 +22,39 @@ class _ReferAndEarnScreenState extends State<ReferAndEarnScreen> {
   bool isWalletLoading = true;
   String? walletError;
 
+  ConvertedLeadModel? convertedLead;
+  bool isConvertedLoading = true;
+  String? convertedError;
+
+  @override
   @override
   void initState() {
     super.initState();
     loadWallet();
+    loadConvertedLeads();
+  }
+
+  Future<void> loadConvertedLeads() async {
+    try {
+      final data = await ConvertedApi().getConvertedLeadModel();
+
+      if (!mounted) return;
+
+      setState(() {
+        convertedLead = data;
+        isConvertedLoading = false;
+        convertedError = null;
+      });
+    } catch (e) {
+      print("Converted Leads API Error: $e");
+
+      if (!mounted) return;
+
+      setState(() {
+        isConvertedLoading = false;
+        convertedError = e.toString();
+      });
+    }
   }
 
   Future<void> loadWallet() async {
@@ -600,9 +631,58 @@ class _ReferAndEarnScreenState extends State<ReferAndEarnScreen> {
   }
 
   Widget _convertedLeadsContent() {
+    if (isConvertedLoading) {
+      return const Padding(
+        padding: EdgeInsets.only(top: 30),
+        child: Center(
+          child: CircularProgressIndicator(
+            color: Colors.red,
+          ),
+        ),
+      );
+    }
+
+    if (convertedError != null) {
+      return Center(
+        child: Column(
+          children: [
+            const Text(
+              "Failed to load converted leads",
+              style: TextStyle(
+                fontSize: 16,
+                color: Colors.red,
+              ),
+            ),
+            const SizedBox(height: 10),
+            ElevatedButton(
+              onPressed: () {
+                setState(() {
+                  isConvertedLoading = true;
+                  convertedError = null;
+                });
+
+                loadConvertedLeads();
+              },
+              child: const Text("Retry"),
+            ),
+          ],
+        ),
+      );
+    }
+
+    if (convertedLead == null) {
+      return const Center(
+        child: Text("No converted leads found"),
+      );
+    }
+
+    final loans = convertedLead!.loans;
+
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
+// ================= LOAN SUMMARY =================
+
         Container(
           width: double.infinity,
           padding: const EdgeInsets.symmetric(
@@ -621,12 +701,12 @@ class _ReferAndEarnScreenState extends State<ReferAndEarnScreen> {
             children: [
               _loanSummaryRow(
                 "Your Loans",
-                "₹0",
+                "${convertedLead!.yourLoans}",
               ),
               const SizedBox(height: 8),
               _loanSummaryRow(
                 "Amount disbursed",
-                "₹0",
+                "₹${convertedLead!.amountDisbursed}",
               ),
             ],
           ),
@@ -634,10 +714,11 @@ class _ReferAndEarnScreenState extends State<ReferAndEarnScreen> {
 
         const SizedBox(height: 17),
 
-        // ================= SELECT FILTER =================
+// ================= FILTER =================
+
         GestureDetector(
           onTap: () {
-            // Filter action
+// Filter action
           },
           child: Row(
             children: const [
@@ -662,40 +743,36 @@ class _ReferAndEarnScreenState extends State<ReferAndEarnScreen> {
 
         const SizedBox(height: 20),
 
-        // ================= LOAN CARD 1 =================
-        _loanCard(
-          loanId: "1060135",
-          status: "group_proposed",
-          amount: "20,000",
-          comment: "",
-        ),
+// ================= EMPTY STATE =================
 
-        const SizedBox(height: 18),
+        if (loans.isEmpty)
+          const Center(
+            child: Padding(
+              padding: EdgeInsets.only(top: 20),
+              child: Text(
+                "No converted loans found",
+                style: TextStyle(
+                  fontSize: 15,
+                  color: Colors.grey,
+                ),
+              ),
+            ),
+          ),
 
-        // ================= LOAN CARD 2 =================
-        _loanCard(
-          loanId: "1060135",
-          status: "group_proposed",
-          amount: "20,000",
-          comment: "",
-        ),
+// ================= LOAN LIST =================
 
-        const SizedBox(height: 18),
-
-        // ================= LOAN CARD 3 =================
-        _loanCard(
-          loanId: "1060135",
-          status: "group_proposed",
-          amount: "20,000",
-          comment: "",
-        ),
-        const SizedBox(height: 18),
-
-        _loanCard(
-          loanId: "1150135",
-          status: "group_proposed",
-          amount: "20,000",
-          comment: "",
+        ...loans.map(
+          (loan) => Padding(
+            padding: const EdgeInsets.only(bottom: 18),
+            child: _loanCard(
+              loanId: loan.loanId,
+              status: loan.loanStatusText.isNotEmpty
+                  ? loan.loanStatusText
+                  : loan.loanStatus,
+              amount: "₹${loan.loanAmount}",
+              comment: loan.comment,
+            ),
+          ),
         ),
       ],
     );

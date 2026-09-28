@@ -109,6 +109,7 @@ class _KoshDialogGetStartedConsentState
                 });
               },
             ),
+
             const SizedBox(height: 5),
             _checkBoxRow(
               value: termsConsent,
