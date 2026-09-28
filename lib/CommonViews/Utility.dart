@@ -135,7 +135,11 @@ late double marginValue;
 
 late double pathL ;
 late double pathS;
+ const String koshBaseUrl = "https://kosh.bkosh.com";
 
+ const String koshEnv = 'uat'; // e.g. "prod" / "staging"
+ final String KOSH_USERNAME = "sis_india";
+ final String KOSH_PASSWORD = "sis_india@kosh";
 
 void calculateSizes(BuildContext context){
 
@@ -175,8 +179,9 @@ const keyMobile = 'mobile';
 const keyTokenExpiryTime = "expiryTime";
 const keyIsForcedLogOut = "forceLogout";
 const keyBiometricEnabled = "isBiometric";
+const KOSH_TOKEN = "KOSH_TOKEN";
 
-
+const String KoshBorrower = "borrower";
 
 List<TextStyle> PINTextStyle(Color color, int fieldCount) {
   return List.generate(

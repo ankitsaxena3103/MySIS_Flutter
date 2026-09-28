@@ -198,24 +198,25 @@ class KoshSuccessScreen extends StatelessWidget {
                   height: 60,
                   child: ElevatedButton(
                     onPressed: () async {
-                      const packageName = 'com.kosh';
-
-                      final koshUrl = Uri.parse('kosh://');
-                      final playStoreUrl = Uri.parse(
-                        'https://play.google.com/store/apps/details?id=$packageName',
-                      );
-
-                      if (await canLaunchUrl(koshUrl)) {
-                        await launchUrl(
-                          koshUrl,
-                          mode: LaunchMode.externalApplication,
-                        );
-                      } else {
-                        await launchUrl(
-                          playStoreUrl,
-                          mode: LaunchMode.externalApplication,
-                        );
-                      }
+                      openAppOrPlayStore();
+                      // const packageName = 'com.kosh';
+                      //
+                      // final koshUrl = Uri.parse('kosh://');
+                      // final playStoreUrl = Uri.parse(
+                      //   'https://play.google.com/store/apps/details?id=$packageName',
+                      // );
+                      //
+                      // if (await canLaunchUrl(koshUrl)) {
+                      //   await launchUrl(
+                      //     koshUrl,
+                      //     mode: LaunchMode.externalApplication,
+                      //   );
+                      // } else {
+                      //   await launchUrl(
+                      //     playStoreUrl,
+                      //     mode: LaunchMode.externalApplication,
+                      //   );
+                      // }
                     },
 
                     style: ElevatedButton.styleFrom(
@@ -252,11 +253,12 @@ class KoshSuccessScreen extends StatelessWidget {
                 const SizedBox(height: 13),
                 GestureDetector(
                   onTap: () {
-                    Navigator.push(
-                        context,
-                        MaterialPageRoute(
-                          builder: (context) => const ReferAndEarnScreen(),
-                        ));
+                    Navigator.of(context).pop();
+                    // Navigator.push(
+                    //     context,
+                    //     MaterialPageRoute(
+                    //       builder: (context) => const ReferAndEarnScreen(),
+                    //     ));
                   },
                   child: const Text(
                     "Maybe Later",
@@ -359,5 +361,40 @@ class KoshSuccessScreen extends StatelessWidget {
         ),
       ),
     );
+  }
+
+  Future<void> openAppOrPlayStore() async {
+    const packageName = 'com.kosh';
+
+    final playStoreUri = Uri.parse(
+      'market://details?id=$packageName',
+    );
+
+    final webUri = Uri.parse(
+      'https://play.google.com/store/apps/details?id=$packageName',
+    );
+
+    // Try to open the app
+    final appUri = Uri.parse(
+      'intent://$packageName#Intent;scheme=$packageName;package=$packageName;end',
+    );
+
+    try {
+      if (await canLaunchUrl(appUri)) {
+        await launchUrl(appUri);
+      } else if (await canLaunchUrl(playStoreUri)) {
+        await launchUrl(playStoreUri);
+      } else {
+        await launchUrl(
+          webUri,
+          mode: LaunchMode.externalApplication,
+        );
+      }
+    } catch (e) {
+      await launchUrl(
+        webUri,
+        mode: LaunchMode.externalApplication,
+      );
+    }
   }
 }
