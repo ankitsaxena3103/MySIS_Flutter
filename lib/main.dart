@@ -154,7 +154,7 @@ class _MyAppState extends State<MyApp> with WidgetsBindingObserver {
       supportedLocales: context.supportedLocales,
       locale: context.locale,
       navigatorObservers: [routeObserver],
-      home: const KoshDialogGetStartedConsent(),
+      home:  MyHomePage(),
     );
   }
 }

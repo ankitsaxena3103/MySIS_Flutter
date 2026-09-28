@@ -1,7 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:mysis/KoshLoan/KoshSuccessScreen.dart';
+import 'package:mysis/KoshLoan/repo/kosh_base_api_client.dart';
 import 'package:mysis/constants/app_colors.dart';
+
+import '../CommonViews/Utility.dart';
+import '../SharedClasses/Preferences.dart';
 
 class KoshAlternateWhatsappDialog extends StatefulWidget {
   const KoshAlternateWhatsappDialog({super.key});
@@ -11,9 +15,9 @@ class KoshAlternateWhatsappDialog extends StatefulWidget {
       _AlternateWhatsappDialogState();
 }
 
-
 class _AlternateWhatsappDialogState extends State<KoshAlternateWhatsappDialog> {
   final TextEditingController phoneController = TextEditingController();
+  final koshClient = KoshBaseApiClient();
 
   bool isChecked = false;
 
@@ -27,12 +31,34 @@ class _AlternateWhatsappDialogState extends State<KoshAlternateWhatsappDialog> {
     super.dispose();
   }
 
-  void continuePressed() {
+  void continuePressed() async {
     if (!isValid) return;
+    String loggedInUserNumber =
+        await Preferences.getUserPreference(keyMobile) ?? '';
 
-    String phoneNumber = phoneController.text;
+    String alternateNumber = phoneController.text;
+    if (alternateNumber.length >= 10) {
+// 2. Create a CRM record (uses the stored token automatically)
+      await koshClient.createRecord(
+        KoshBorrower,
+        loggedInUserNumber,
+        alternateNumber ?? '',
+        onSuccess: (response) => {
+          print('Record created: $response'),
+          Navigator.of(context).pop(),
+          Navigator.of(context).pop(),
+          Navigator.push(
+              context,
+              MaterialPageRoute(
+                builder: (context) => const KoshSuccessScreen(),
+              ))
+        },
 
-    Navigator.pop(context, phoneNumber);
+        onError: (message, statusCode) => print('Error $statusCode: $message'),
+      );
+    }
+
+    // Navigator.pop(context, phoneNumber);
   }
 
   @override
@@ -53,8 +79,8 @@ class _AlternateWhatsappDialogState extends State<KoshAlternateWhatsappDialog> {
             Container(
               height: 58,
               width: 58,
-              decoration:  BoxDecoration(
-                  color: AppColors.pink75,
+              decoration: BoxDecoration(
+                color: AppColors.pink75,
                 shape: BoxShape.circle,
               ),
               child: Padding(
@@ -98,11 +124,9 @@ class _AlternateWhatsappDialogState extends State<KoshAlternateWhatsappDialog> {
                     style: TextStyle(
                       fontFamily: 'Inter',
                       fontSize: 15,
-
                       color: Colors.black87,
                     ),
                   ),
-
                   const SizedBox(width: 12),
                   Container(
                     height: 28,
@@ -157,7 +181,6 @@ class _AlternateWhatsappDialogState extends State<KoshAlternateWhatsappDialog> {
                         isChecked = value ?? false;
                       });
                     },
-
                   ),
                 ),
                 const SizedBox(width: 8),
@@ -212,11 +235,7 @@ class _AlternateWhatsappDialogState extends State<KoshAlternateWhatsappDialog> {
                     height: 48,
                     child: OutlinedButton(
                       onPressed: () {
-                        Navigator.push(
-                            context,
-                            MaterialPageRoute(
-                              builder: (context) => const KoshSuccessScreen(),
-                            ));
+                       Navigator.of(context).pop();
                       },
                       style: OutlinedButton.styleFrom(
                         backgroundColor: Colors.white,
@@ -246,5 +265,23 @@ class _AlternateWhatsappDialogState extends State<KoshAlternateWhatsappDialog> {
         ),
       ),
     );
+  }
+
+  @override
+  void initState() {
+    super.initState();
+    getUserLoggedInContactNumber();
+  }
+  Future<String> getUserLoggedInContactNumber() async {
+
+    final phoneNumber =
+        await Preferences.getUserPreference(keyMobile) ?? '';
+
+    setState(() {
+      phoneController.text = phoneNumber;
+      isChecked = true;
+    });
+    print('dfhhdgghjgdhjjhg${phoneController.text}');
+    return await Preferences.getUserPreference(keyMobile) ?? '';
   }
 }
