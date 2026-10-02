@@ -28,218 +28,39 @@ class _ReferAndEarnScreenState extends State<ReferAndEarnScreen> {
   bool isWalletLoading = true;
   String? walletError;
 
+  ConvertedLeadModel? convertedLead;
+  bool isConvertedLoading = true;
+  String? convertedError;
+
+  @override
   @override
   void initState() {
     super.initState();
-    _createToken();
-    // loadWallet();
+    loadWallet();
+    loadConvertedLeads();
   }
 
-  Future<void> _createToken() async {
-    print("API Called");
-    String? kosh_Token = await Preferences.getUserPreference(KOSH_TOKEN);
-    print("API Called..kosh_Token$kosh_Token");
+  Future<void> loadConvertedLeads() async {
+    try {
+      final data = await ConvertedApi().getConvertedLeadModel();
 
-    await koshClient.createToken(
-      KOSH_USERNAME,
-      KOSH_PASSWORD,
-      onSuccess: (response) {
-        print('Logged in. Access token: ${koshClient.accessToken}');
-      },
-      onError: (message, statusCode) {
-        print('Login failed ($statusCode): $message');
-      },
-    );
-    String userLoggedInContactNo =
-        await Preferences.getUserPreference(keyMobile) ?? '';
-    print(' userLoggedInContactNo ($userLoggedInContactNo)');
+      if (!mounted) return;
 
-    await koshClient.findPersonByUser(
-      userLoggedInContactNo,
-      onSuccess: (response) async {
-        print('findPersonByUser...RESPONSE: ${response}');
+      setState(() {
+        convertedLead = data;
+        isConvertedLoading = false;
+        convertedError = null;
+      });
+    } catch (e) {
+      print("Converted Leads API Error: $e");
 
-        final bool success = response['success'] as bool? ?? false;
-        final Map<String, dynamic> data =
-            response['data'] as Map<String, dynamic>? ?? {};
+      if (!mounted) return;
 
-        final String username =
-            await Preferences.getUserPreference(keyMobile) ?? '';
-        String? token = data[username] as String?;
-        userToken = (data[username] as String?)??'';
-print('findPersonByUser.....userToken$userToken');
-        if (userToken == null || userToken!.isEmpty) {
-          showInvalidUserDialog(
-            context,
-            onContinue: () {
-
-            },
-            onCancel: () {
-              Navigator.of(context)
-                  .pop(); // or your "finish activity" equivalent
-            },
-          );
-
-        } else {
-          setState(() {
-            userToken = data[username] as String;
-          });
-          // fetchWallet();
-        }
-      },
-      onError: (message, statusCode) {
-        print('Login failed ($statusCode): $message');
-      },
-    );
-  }
-
-  void referFriend() async {
-    String loggedInUserNumber =
-        await Preferences.getUserPreference(keyMobile) ?? '';
-
-    String referContactNumber = mobileController.text;
-    if (referContactNumber.length >= 10) {
-// 2. Create a CRM record (uses the stored token automatically)
-      await koshClient.createReferralRecord(
-        KoshBorrower,
-        referContactNumber,
-        loggedInUserNumber ?? '',
-        onSuccess: (response) => {
-          print('Record createReferralRecord: $response'),
-          setState(() {
-            showToastMessageView = true;
-          }),
-          Future.delayed(Duration(seconds: 3), () {
-            setState(() {
-              showToastMessageView = false;
-            });
-          })
-        },
-        onError: (message, statusCode) => print('Error $statusCode: $message'),
-      );
+      setState(() {
+        isConvertedLoading = false;
+        convertedError = e.toString();
+      });
     }
-
-    // Navigator.pop(context, phoneNumber);
-  }
-
-  Future<void> showInvalidUserDialog(
-    BuildContext context, {
-    required VoidCallback onContinue, // e.g. () => registerKoshLoan(context)
-    required VoidCallback
-        onCancel, // e.g. () => Navigator.pop(context) / finish equivalent
-  }) {
-    return showDialog(
-      context: context,
-      barrierDismissible: false, // matches setCancelable(false) initially
-      builder: (dialogContext) {
-        return PopScope(
-          canPop: true,
-          // dialog.setCancelable(true) was set later, so back button can dismiss
-          child: Dialog(
-            backgroundColor: Colors.transparent,
-            insetPadding: const EdgeInsets.symmetric(horizontal: 20),
-            child: Card(
-              elevation: 10,
-              color: Colors.white,
-              shape: RoundedRectangleBorder(
-                borderRadius: BorderRadius.circular(15),
-              ),
-              child: Padding(
-                padding: const EdgeInsets.all(28),
-                child: Column(
-                  mainAxisSize: MainAxisSize.min,
-                  children: [
-                    // Warning icon circle
-                    Container(
-                      width: 52,
-                      height: 52,
-                      decoration: BoxDecoration(
-                        color: const Color(0xFFFFE5E8),
-                        // light red bg, adjust to your bg_warning_circle
-                        shape: BoxShape.circle,
-                      ),
-                      child: const Icon(
-                        Icons.warning_rounded,
-                        color: Color(0xFFFF1F2D),
-                        size: 26,
-                      ),
-                    ),
-
-                    const SizedBox(height: 16),
-
-                    // Title
-                    const Text(
-                      'You are not registered for a Kosh Loan. Click Continue to proceed with registration.',
-                      textAlign: TextAlign.center,
-                      style: TextStyle(
-                        color: Colors.black,
-                        fontSize: 13,
-                        fontWeight: FontWeight.bold,
-                      ),
-                    ),
-
-                    const SizedBox(height: 22),
-
-                    // Continue button
-                    SizedBox(
-                      width: double.infinity,
-                      height: 46,
-                      child: ElevatedButton(
-                        style: ElevatedButton.styleFrom(
-                          backgroundColor: const Color(0xFFFF1F2D),
-                          foregroundColor: Colors.white,
-                          shape: RoundedRectangleBorder(
-                            borderRadius: BorderRadius.circular(8),
-                          ),
-                          elevation: 0,
-                        ),
-                        onPressed: () {
-                          onContinue();
-                          Navigator.of(dialogContext).pop();
-                        },
-                        child: const Text(
-                          'Continue to Kosh Loan',
-                          style: TextStyle(
-                            fontSize: 14,
-                            fontWeight: FontWeight.bold,
-                          ),
-                        ),
-                      ),
-                    ),
-
-                    const SizedBox(height: 10),
-
-                    // Cancel button
-                    SizedBox(
-                      width: double.infinity,
-                      height: 46,
-                      child: OutlinedButton(
-                        style: OutlinedButton.styleFrom(
-                          foregroundColor: const Color(0xFF111111),
-                          backgroundColor: Colors.grey.shade100,
-                          shape: RoundedRectangleBorder(
-                            borderRadius: BorderRadius.circular(8),
-                          ),
-                          side: BorderSide.none,
-                        ),
-                        onPressed: () {
-                          onCancel();
-                          Navigator.of(dialogContext).pop();
-                        },
-                        child: const Text(
-                          'Cancel',
-                          style: TextStyle(fontSize: 14),
-                        ),
-                      ),
-                    ),
-                  ],
-                ),
-              ),
-            ),
-          ),
-        );
-      },
-    );
   }
 
   Future<void> loadWallet() async {
@@ -825,9 +646,58 @@ print('findPersonByUser.....userToken$userToken');
   }
 
   Widget _convertedLeadsContent() {
+    if (isConvertedLoading) {
+      return const Padding(
+        padding: EdgeInsets.only(top: 30),
+        child: Center(
+          child: CircularProgressIndicator(
+            color: Colors.red,
+          ),
+        ),
+      );
+    }
+
+    if (convertedError != null) {
+      return Center(
+        child: Column(
+          children: [
+            const Text(
+              "Failed to load converted leads",
+              style: TextStyle(
+                fontSize: 16,
+                color: Colors.red,
+              ),
+            ),
+            const SizedBox(height: 10),
+            ElevatedButton(
+              onPressed: () {
+                setState(() {
+                  isConvertedLoading = true;
+                  convertedError = null;
+                });
+
+                loadConvertedLeads();
+              },
+              child: const Text("Retry"),
+            ),
+          ],
+        ),
+      );
+    }
+
+    if (convertedLead == null) {
+      return const Center(
+        child: Text("No converted leads found"),
+      );
+    }
+
+    final loans = convertedLead!.loans;
+
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
+// ================= LOAN SUMMARY =================
+
         Container(
           width: double.infinity,
           padding: const EdgeInsets.symmetric(
@@ -846,12 +716,12 @@ print('findPersonByUser.....userToken$userToken');
             children: [
               _loanSummaryRow(
                 "Your Loans",
-                "₹0",
+                "${convertedLead!.yourLoans}",
               ),
               const SizedBox(height: 8),
               _loanSummaryRow(
                 "Amount disbursed",
-                "₹0",
+                "₹${convertedLead!.amountDisbursed}",
               ),
             ],
           ),
@@ -859,10 +729,11 @@ print('findPersonByUser.....userToken$userToken');
 
         const SizedBox(height: 17),
 
-        // ================= SELECT FILTER =================
+// ================= FILTER =================
+
         GestureDetector(
           onTap: () {
-            // Filter action
+// Filter action
           },
           child: Row(
             children: const [
@@ -887,40 +758,36 @@ print('findPersonByUser.....userToken$userToken');
 
         const SizedBox(height: 20),
 
-        // ================= LOAN CARD 1 =================
-        _loanCard(
-          loanId: "1060135",
-          status: "group_proposed",
-          amount: "20,000",
-          comment: "",
-        ),
+// ================= EMPTY STATE =================
 
-        const SizedBox(height: 18),
+        if (loans.isEmpty)
+          const Center(
+            child: Padding(
+              padding: EdgeInsets.only(top: 20),
+              child: Text(
+                "No converted loans found",
+                style: TextStyle(
+                  fontSize: 15,
+                  color: Colors.grey,
+                ),
+              ),
+            ),
+          ),
 
-        // ================= LOAN CARD 2 =================
-        _loanCard(
-          loanId: "1060135",
-          status: "group_proposed",
-          amount: "20,000",
-          comment: "",
-        ),
+// ================= LOAN LIST =================
 
-        const SizedBox(height: 18),
-
-        // ================= LOAN CARD 3 =================
-        _loanCard(
-          loanId: "1060135",
-          status: "group_proposed",
-          amount: "20,000",
-          comment: "",
-        ),
-        const SizedBox(height: 18),
-
-        _loanCard(
-          loanId: "1150135",
-          status: "group_proposed",
-          amount: "20,000",
-          comment: "",
+        ...loans.map(
+          (loan) => Padding(
+            padding: const EdgeInsets.only(bottom: 18),
+            child: _loanCard(
+              loanId: loan.loanId,
+              status: loan.loanStatusText.isNotEmpty
+                  ? loan.loanStatusText
+                  : loan.loanStatus,
+              amount: "₹${loan.loanAmount}",
+              comment: loan.comment,
+            ),
+          ),
         ),
       ],
     );

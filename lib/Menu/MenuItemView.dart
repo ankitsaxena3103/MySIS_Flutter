@@ -1121,6 +1121,7 @@ class MenuItemViewState extends State<MenuItemView> {
       ),
     );
   }
+
   void onLoadLanguageView(){
     Navigator.push(
       context,
@@ -1129,6 +1130,7 @@ class MenuItemViewState extends State<MenuItemView> {
       ),
     );
   }
+
   void onLoadSalaryView(){
 
     Navigator.push(
