@@ -1,10 +1,14 @@
+import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/material.dart';
 import 'package:mysis/KoshLoan/KoshBottomSheet.dart';
-import 'package:mysis/KoshLoan/demo%20api/ConvertedApi.dart';
-import 'package:mysis/KoshLoan/demo%20api/Converted_model/ConvertedleadModel.dart';
+import 'package:mysis/KoshLoan/repo/kosh_base_api_client.dart';
 import 'package:mysis/KoshLoan/walletapi.dart';
 import 'package:mysis/KoshLoan/walletmodel.dart';
 import 'package:mysis/constants/app_colors.dart';
+
+import '../CommonViews/ToastMessageView.dart';
+import '../CommonViews/Utility.dart';
+import '../SharedClasses/Preferences.dart';
 
 class ReferAndEarnScreen extends StatefulWidget {
   const ReferAndEarnScreen({super.key});
@@ -15,7 +19,9 @@ class ReferAndEarnScreen extends StatefulWidget {
 
 class _ReferAndEarnScreenState extends State<ReferAndEarnScreen> {
   final TextEditingController mobileController = TextEditingController();
-
+  final koshClient = KoshBaseApiClient();
+  bool showToastMessageView = false;
+  String userToken = '';
   int selectedTab = 0;
 
   walletmodel? wallet;
@@ -91,254 +97,263 @@ class _ReferAndEarnScreenState extends State<ReferAndEarnScreen> {
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      backgroundColor: Colors.white,
-      body: SafeArea(
-        child: SingleChildScrollView(
-          child: Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 26),
-            child: Column(
-              children: [
-                // ================= TOP LOGOS =================
-                SizedBox(
-                  height: 70,
-                  child: Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                    crossAxisAlignment: CrossAxisAlignment.center,
-                    children: [
-                      // LEFT LOGO
-                      Image.asset(
-                        "assets/images/icons/SIS-logo.png",
-                        width: 125,
-                        height: 55,
-                        fit: BoxFit.contain,
-                      ),
-
-                      // RIGHT LOGO
-                      Image.asset(
-                        "assets/images/icons/icon.png",
-                        width: 90,
-                        height: 55,
-                        fit: BoxFit.contain,
-                      ),
-                    ],
-                  ),
-                ),
-
-                // ================= TOP HEADER =================
-                SizedBox(
-                  height: 50,
-                  child: Stack(
-                    alignment: Alignment.center,
-                    children: [
-                      // Back Button
-                      Align(
-                        alignment: Alignment.centerLeft,
-                        child: IconButton(
-                          padding: EdgeInsets.only(right: 35),
-                          icon: const Icon(
-                            Icons.arrow_back_ios_new,
-                            size: 18,
-                            fontWeight: FontWeight.w900,
+    return Stack(
+      children: [
+        Scaffold(
+          backgroundColor: Colors.white,
+          body: SafeArea(
+            child: SingleChildScrollView(
+              child: Padding(
+                padding: const EdgeInsets.symmetric(horizontal: 26),
+                child: Column(
+                  children: [
+                    // ================= TOP LOGOS =================
+                    SizedBox(
+                      height: 70,
+                      child: Row(
+                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                        crossAxisAlignment: CrossAxisAlignment.center,
+                        children: [
+                          // LEFT LOGO
+                          Image.asset(
+                            "assets/images/icons/SIS-logo.png",
+                            width: 125,
+                            height: 55,
+                            fit: BoxFit.contain,
                           ),
-                          onPressed: () {
-                            Navigator.pop(context);
-                          },
-                        ),
-                      ),
 
-                      const Text(
-                        "Refer And Earn",
-                        style: TextStyle(
-                          fontSize: 20,
-                          fontWeight: FontWeight.bold,
-                          color: Colors.black,
-                        ),
-                      ),
-                    ],
-                  ),
-                ),
-
-                // ================= SUB TITLE =================
-                const Text(
-                  "Refer friends. Earn rewards. Redeem anytime",
-                  style: TextStyle(
-                    fontSize: 16,
-                    fontWeight: FontWeight.w500,
-                    color: Colors.black54,
-                  ),
-                ),
-
-                const SizedBox(height: 28),
-
-                // ================= LABEL =================
-                const Align(
-                  alignment: Alignment.centerLeft,
-                  child: Padding(
-                    padding: EdgeInsets.only(left: 2),
-                    child: Text(
-                      "Please provide the mobile number you'd like to refer",
-                      style: TextStyle(
-                        color: Colors.black54,
-                        fontSize: 15,
+                          // RIGHT LOGO
+                          Image.asset(
+                            "assets/images/icons/icon.png",
+                            width: 90,
+                            height: 55,
+                            fit: BoxFit.contain,
+                          ),
+                        ],
                       ),
                     ),
-                  ),
-                ),
 
-                const SizedBox(height: 9),
+                    // ================= TOP HEADER =================
+                    SizedBox(
+                      height: 50,
+                      child: Stack(
+                        alignment: Alignment.center,
+                        children: [
+                          // Back Button
+                          Align(
+                            alignment: Alignment.centerLeft,
+                            child: IconButton(
+                              padding: EdgeInsets.only(right: 35),
+                              icon: const Icon(
+                                Icons.arrow_back_ios_new,
+                                size: 18,
+                                // fontWeight: FontWeight.w900,
+                              ),
+                              onPressed: () {
+                                Navigator.pop(context);
+                              },
+                            ),
+                          ),
 
-// ================= REFER BUTTON =================
-                SizedBox(
-                  height: 40,
-                  child: TextField(
-                    controller: mobileController,
-                    keyboardType: TextInputType.phone,
-                    maxLength: 10,
-                    textAlignVertical: TextAlignVertical.center,
-                    style: const TextStyle(
-                      fontSize: 14,
-                      color: Colors.black,
-                    ),
-                    onChanged: (value) {
-                      setState(() {});
-                    },
-                    decoration: InputDecoration(
-                      counterText: "",
-                      isDense: true,
-
-                      // Text ko properly center rakhega
-                      contentPadding: const EdgeInsets.symmetric(
-                        horizontal: 12,
-                        vertical: 10,
-                      ),
-
-                      hintText: "Enter Your Phone Number",
-                      hintStyle: const TextStyle(
-                        fontSize: 14,
-                        color: Colors.grey,
-                      ),
-
-                      border: OutlineInputBorder(
-                        borderRadius: BorderRadius.circular(4),
-                        borderSide: const BorderSide(
-                          color: Colors.grey,
-                          width: 1,
-                        ),
-                      ),
-
-                      enabledBorder: OutlineInputBorder(
-                        borderRadius: BorderRadius.circular(4),
-                        borderSide: const BorderSide(
-                          color: Colors.grey,
-                          width: 1,
-                        ),
-                      ),
-
-                      focusedBorder: OutlineInputBorder(
-                        borderRadius: BorderRadius.circular(7),
-                        borderSide: const BorderSide(
-                          color: Colors.grey,
-                          width: 1,
-                        ),
+                          const Text(
+                            "Refer And Earn",
+                            style: TextStyle(
+                              fontSize: 20,
+                              fontWeight: FontWeight.bold,
+                              color: Colors.black,
+                            ),
+                          ),
+                        ],
                       ),
                     ),
-                  ),
-                ),
 
-                const SizedBox(height: 9),
-
-// ================= REFER BUTTON =================
-                SizedBox(
-                  width: double.infinity,
-                  height: 50,
-                  child: ElevatedButton(
-                    onPressed: isMobileValid
-                        ? () {
-                            print(
-                              "Refer: ${mobileController.text}",
-                            );
-                          }
-                        : null,
-                    style: ElevatedButton.styleFrom(
-                      elevation: 0,
-                      backgroundColor: Colors.red,
-                      disabledBackgroundColor: AppColors.blueGrey50,
-                      disabledForegroundColor: Colors.white,
-                      shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(7),
-                      ),
-                    ),
-                    child: const Text(
-                      "Refer",
+                    // ================= SUB TITLE =================
+                    const Text(
+                      "Refer friends. Earn rewards. Redeem anytime",
                       style: TextStyle(
                         fontSize: 16,
-                        color: Colors.white,
                         fontWeight: FontWeight.w500,
+                        color: Colors.black54,
                       ),
                     ),
-                  ),
-                ),
 
-                const SizedBox(height: 17),
+                    const SizedBox(height: 28),
 
-                // ================= SEE HOW IT WORKS =================
-                GestureDetector(
-                  onTap: () {
-                    Navigator.push(
-                        context,
-                        MaterialPageRoute(
-                          builder: (context) => const KoshBottomSheet(),
-                        ));
-                  },
-                  child: const Text(
-                    "See how it works",
-                    style: TextStyle(
-                      fontSize: 16,
-                      color: Colors.black,
-                      fontWeight: FontWeight.w400,
-                      decoration: TextDecoration.underline,
+                    // ================= LABEL =================
+                    const Align(
+                      alignment: Alignment.centerLeft,
+                      child: Padding(
+                        padding: EdgeInsets.only(left: 2),
+                        child: Text(
+                          "Please provide the mobile number you'd like to refer",
+                          style: TextStyle(
+                            color: Colors.black54,
+                            fontSize: 15,
+                          ),
+                        ),
+                      ),
                     ),
-                  ),
-                ),
 
-                const SizedBox(height: 22),
+                    const SizedBox(height: 9),
 
-                // ================= TABS =================
-                Row(
-                  children: [
-                    _buildTab(
-                      title: "Wallet",
-                      index: 0,
+// ================= REFER BUTTON =================
+                    SizedBox(
+                      height: 40,
+                      child: TextField(
+                        controller: mobileController,
+                        keyboardType: TextInputType.phone,
+                        maxLength: 10,
+                        textAlignVertical: TextAlignVertical.center,
+                        style: const TextStyle(
+                          fontSize: 14,
+                          color: Colors.black,
+                        ),
+                        onChanged: (value) {
+                          setState(() {});
+                        },
+                        decoration: InputDecoration(
+                          counterText: "",
+                          isDense: true,
+
+                          // Text ko properly center rakhega
+                          contentPadding: const EdgeInsets.symmetric(
+                            horizontal: 12,
+                            vertical: 10,
+                          ),
+
+                          hintText: "Enter Your Phone Number",
+                          hintStyle: const TextStyle(
+                            fontSize: 14,
+                            color: Colors.grey,
+                          ),
+
+                          border: OutlineInputBorder(
+                            borderRadius: BorderRadius.circular(4),
+                            borderSide: const BorderSide(
+                              color: Colors.grey,
+                              width: 1,
+                            ),
+                          ),
+
+                          enabledBorder: OutlineInputBorder(
+                            borderRadius: BorderRadius.circular(4),
+                            borderSide: const BorderSide(
+                              color: Colors.grey,
+                              width: 1,
+                            ),
+                          ),
+
+                          focusedBorder: OutlineInputBorder(
+                            borderRadius: BorderRadius.circular(7),
+                            borderSide: const BorderSide(
+                              color: Colors.grey,
+                              width: 1,
+                            ),
+                          ),
+                        ),
+                      ),
                     ),
-                    const SizedBox(width: 10),
-                    _buildTab(
-                      title: "Converted Leads",
-                      index: 1,
+
+                    const SizedBox(height: 9),
+
+// ================= REFER BUTTON =================
+                    SizedBox(
+                      width: double.infinity,
+                      height: 50,
+                      child: ElevatedButton(
+                        onPressed: isMobileValid
+                            ? () {
+                                print(
+                                  "Refer: ${mobileController.text}",
+                                );
+                                referFriend();
+                              }
+                            : null,
+                        style: ElevatedButton.styleFrom(
+                          elevation: 0,
+                          backgroundColor: Colors.red,
+                          disabledBackgroundColor: AppColors.blueGrey50,
+                          disabledForegroundColor: Colors.white,
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(7),
+                          ),
+                        ),
+                        child: const Text(
+                          "Refer",
+                          style: TextStyle(
+                            fontSize: 16,
+                            color: Colors.white,
+                            fontWeight: FontWeight.w500,
+                          ),
+                        ),
+                      ),
                     ),
-                    const SizedBox(
-                      width: 9,
-                      height: 9,
+
+                    const SizedBox(height: 17),
+
+                    // ================= SEE HOW IT WORKS =================
+                    GestureDetector(
+                      onTap: () {
+                        Navigator.push(
+                            context,
+                            MaterialPageRoute(
+                              builder: (context) => const KoshBottomSheet(),
+                            ));
+                      },
+                      child: const Text(
+                        "See how it works",
+                        style: TextStyle(
+                          fontSize: 16,
+                          color: Colors.black,
+                          fontWeight: FontWeight.w400,
+                          decoration: TextDecoration.underline,
+                        ),
+                      ),
                     ),
-                    _buildTab(
-                      title: "Leads",
-                      index: 2,
+
+                    const SizedBox(height: 22),
+
+                    // ================= TABS =================
+                    Row(
+                      children: [
+                        _buildTab(
+                          title: "Wallet",
+                          index: 0,
+                        ),
+                        const SizedBox(width: 10),
+                        _buildTab(
+                          title: "Converted Leads",
+                          index: 1,
+                        ),
+                        const SizedBox(
+                          width: 9,
+                          height: 9,
+                        ),
+                        _buildTab(
+                          title: "Leads",
+                          index: 2,
+                        ),
+                      ],
                     ),
+
+                    const SizedBox(height: 30),
+
+                    if (selectedTab == 0) _walletContent(),
+
+                    if (selectedTab == 1) _convertedLeadsContent(),
+
+                    if (selectedTab == 2) _leadsContent(),
                   ],
                 ),
-
-                const SizedBox(height: 30),
-
-                if (selectedTab == 0) _walletContent(),
-
-                if (selectedTab == 1) _convertedLeadsContent(),
-
-                if (selectedTab == 2) _leadsContent(),
-              ],
+              ),
             ),
           ),
         ),
-      ),
+        ToastMessageView(
+          isVisible: showToastMessageView,
+          message: "Successfully referred",
+        ),
+      ],
     );
   }
 
@@ -979,7 +994,7 @@ Widget _leadRow({
     decoration: const BoxDecoration(
       border: Border(
         bottom: BorderSide(
-          color: Colors.grey75,
+          color: Colors.red,
           // color: Color(0xFFE5E5E5),
           width: 1,
         ),

@@ -4,6 +4,7 @@ import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:mysis/CommonViews/Utility.dart';
 import 'package:easy_localization/easy_localization.dart';
+import 'package:mysis/KoshLoan/ReferAndEarnScreen.dart';
 import 'package:mysis/KoshLoan/koshdialoggetstartedconsent.dart';
 import 'package:mysis/Notifications/NotificationsView.dart';
 import 'package:mysis/SharedClasses/ThemeProvider.dart';
@@ -616,9 +617,9 @@ class MenuItemViewState extends State<MenuItemView> {
                                 GestureDetector(
                                   behavior: HitTestBehavior.opaque,
                                   onTap: () {
-                                    ScaffoldMessenger.of(context).showSnackBar(
-                                      SnackBar(content: Text('coming_soon'.tr())),
-                                    );
+                                    // widget.onCloseBottomSheet();
+                                    onLoadKoshLoan();
+                                    // widget.onTabSelected(1);
                                   },
                                   child: Container(
                                     width: screenWidth / 3,
@@ -633,36 +634,17 @@ class MenuItemViewState extends State<MenuItemView> {
                                             clipBehavior: Clip.none,
                                             children: [
                                               Image.asset(
-                                                'assets/images/dashboard-icons/akr.png',
+                                                'assets/images/KoshImage/kosh_loan_menu_icon.png',
                                                 width: iconSize,
                                                 height: iconSize,
                                                 color: isDarkMode ? whiteColor : greyColor6,
-                                              ),
-                                              Positioned(
-                                                top: -4,
-                                                right: -4,
-                                                child: Container(
-                                                  padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
-                                                  decoration: BoxDecoration(
-                                                    color: Colors.redAccent,
-                                                    borderRadius: BorderRadius.circular(12),
-                                                  ),
-                                                  child: Text(
-                                                    'coming_soon'.tr(),
-                                                    style: const TextStyle(
-                                                      color: Colors.white,
-                                                      fontSize: 8,
-                                                      fontWeight: FontWeight.bold,
-                                                    ),
-                                                  ),
-                                                ),
                                               ),
                                             ],
                                           ),
                                         ),
                                         SizedBox(height: iconTextGap),
                                         Text(
-                                          'akr'.tr(),
+                                          'kosh_loan'.tr(),
                                           style: TextStyle(
                                             color: isDarkMode ? whiteColor : greyColor6,
                                             fontSize: pathS / 5,
@@ -719,7 +701,7 @@ class MenuItemViewState extends State<MenuItemView> {
                                   behavior: HitTestBehavior.opaque,
                                   onTap: () {
                                     widget.onCloseBottomSheet();
-                                    onLoadKoshDialogGetStartedConsent();
+                                    onLoadKoshReferContent();
                                   },
                                   child: Container(
                                     width: screenWidth / 3,
@@ -789,6 +771,186 @@ class MenuItemViewState extends State<MenuItemView> {
                                 ),
                               ],
                             ),
+                            // Row(
+                            //   mainAxisAlignment: MainAxisAlignment.center,
+                            //   children: [
+                            //     // AKR - Coming Soon
+                            //     GestureDetector(
+                            //       behavior: HitTestBehavior.opaque,
+                            //       onTap: () {
+                            //         ScaffoldMessenger.of(context).showSnackBar(
+                            //           SnackBar(content: Text('coming_soon'.tr())),
+                            //         );
+                            //       },
+                            //       child: Container(
+                            //         width: screenWidth / 3,
+                            //         padding: const EdgeInsets.symmetric(vertical: 8),
+                            //         child: Column(
+                            //           mainAxisSize: MainAxisSize.min,
+                            //           children: [
+                            //             SizedBox(
+                            //               width: iconSize,
+                            //               height: iconSize,
+                            //               child: Stack(
+                            //                 clipBehavior: Clip.none,
+                            //                 children: [
+                            //                   Image.asset(
+                            //                     'assets/images/dashboard-icons/akr.png',
+                            //                     width: iconSize,
+                            //                     height: iconSize,
+                            //                     color: isDarkMode ? whiteColor : greyColor6,
+                            //                   ),
+                            //                   Positioned(
+                            //                     top: -4,
+                            //                     right: -4,
+                            //                     child: Container(
+                            //                       padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
+                            //                       decoration: BoxDecoration(
+                            //                         color: Colors.redAccent,
+                            //                         borderRadius: BorderRadius.circular(12),
+                            //                       ),
+                            //                       child: Text(
+                            //                         'coming_soon'.tr(),
+                            //                         style: const TextStyle(
+                            //                           color: Colors.white,
+                            //                           fontSize: 8,
+                            //                           fontWeight: FontWeight.bold,
+                            //                         ),
+                            //                       ),
+                            //                     ),
+                            //                   ),
+                            //                 ],
+                            //               ),
+                            //             ),
+                            //             SizedBox(height: iconTextGap),
+                            //             Text(
+                            //               'akr'.tr(),
+                            //               style: TextStyle(
+                            //                 color: isDarkMode ? whiteColor : greyColor6,
+                            //                 fontSize: pathS / 5,
+                            //                 fontWeight: FontWeight.w500,
+                            //                 fontFamily: 'Roboto',
+                            //               ),
+                            //               textAlign: TextAlign.center,
+                            //             ),
+                            //           ],
+                            //         ),
+                            //       ),
+                            //     ),
+                            //
+                            //     SizedBox(width: horizontalGap),
+                            //
+                            //     // // Sarvam Loan
+                            //     // GestureDetector(
+                            //     //   behavior: HitTestBehavior.opaque,
+                            //     //   onTap: () {
+                            //     //     widget.onCloseBottomSheet();
+                            //     //     onLoadSarvamLoanView();
+                            //     //   },
+                            //     //   child: Container(
+                            //     //     width: screenWidth / 3,
+                            //     //     padding: const EdgeInsets.symmetric(vertical: 8),
+                            //     //     child: Column(
+                            //     //       mainAxisSize: MainAxisSize.min,
+                            //     //       children: [
+                            //     //         Image.asset(
+                            //     //           'assets/images/dashboard-icons/sarvam_logo.png',
+                            //     //           width: iconSize,
+                            //     //           height: iconSize,
+                            //     //           color: isDarkMode ? whiteColor : greyColor6,
+                            //     //         ),
+                            //     //         SizedBox(height: iconTextGap),
+                            //     //         Text(
+                            //     //           'loan_by_sarvam'.tr(),
+                            //     //           style: TextStyle(
+                            //     //             color: isDarkMode ? whiteColor : greyColor6,
+                            //     //             fontSize: pathS / 5,
+                            //     //             fontWeight: FontWeight.w500,
+                            //     //             fontFamily: 'Roboto',
+                            //     //           ),
+                            //     //           textAlign: TextAlign.center,
+                            //     //         ),
+                            //     //       ],
+                            //     //     ),
+                            //     //   ),
+                            //     // ),
+                            //
+                            //
+                            //     // Sarvam Loan
+                            //     GestureDetector(
+                            //       behavior: HitTestBehavior.opaque,
+                            //       onTap: () {
+                            //         widget.onCloseBottomSheet();
+                            //         onLoadKoshDialogGetStartedConsent();
+                            //       },
+                            //       child: Container(
+                            //         width: screenWidth / 3,
+                            //         padding: const EdgeInsets.symmetric(vertical: 8),
+                            //         child: Column(
+                            //           mainAxisSize: MainAxisSize.min,
+                            //           children: [
+                            //             Image.asset(
+                            //               'assets/images/KoshImage/Earn with Kosh.png',
+                            //               width: iconSize,
+                            //               height: iconSize,
+                            //               color: isDarkMode ? whiteColor : greyColor6,
+                            //             ),
+                            //             SizedBox(height: iconTextGap),
+                            //             Text(
+                            //               'Earn with Kosh'.tr(),
+                            //               style: TextStyle(
+                            //                 color: isDarkMode ? whiteColor : greyColor6,
+                            //                 fontSize: pathS / 5,
+                            //                 fontWeight: FontWeight.w500,
+                            //                 fontFamily: 'Roboto',
+                            //               ),
+                            //               textAlign: TextAlign.center,
+                            //             ),
+                            //           ],
+                            //         ),
+                            //       ),
+                            //     ),
+                            //
+                            //
+                            //
+                            //     SizedBox(width: horizontalGap),
+                            //
+                            //     // Escort Duty
+                            //     GestureDetector(
+                            //       behavior: HitTestBehavior.opaque,
+                            //       onTap: () {
+                            //         widget.onCloseBottomSheet();
+                            //         onLoadEscortDutyView();
+                            //       },
+                            //       child: Container(
+                            //         width: screenWidth / 3,
+                            //         padding: const EdgeInsets.symmetric(vertical: 8),
+                            //         child: Column(
+                            //           mainAxisSize: MainAxisSize.min,
+                            //           children: [
+                            //             Image.asset(
+                            //               'assets/images/dashboard-icons/escort-duty.png',
+                            //               width: iconSize,
+                            //               height: iconSize,
+                            //               color: isDarkMode ? whiteColor : greyColor6,
+                            //             ),
+                            //             SizedBox(height: iconTextGap),
+                            //             Text(
+                            //               'Escort_Duty'.tr(),
+                            //               style: TextStyle(
+                            //                 color: isDarkMode ? whiteColor : greyColor6,
+                            //                 fontSize: pathS / 5,
+                            //                 fontWeight: FontWeight.w500,
+                            //                 fontFamily: 'Roboto',
+                            //               ),
+                            //               textAlign: TextAlign.center,
+                            //             ),
+                            //           ],
+                            //         ),
+                            //       ),
+                            //     ),
+                            //   ],
+                            // ),
 
 
                           ],
@@ -1003,13 +1165,13 @@ class MenuItemViewState extends State<MenuItemView> {
     );
   }
 
-  void onLoadKoshDialogGetStartedConsent() {
+  void onLoadKoshReferContent() {
     showDialog(
       context: context,
       barrierDismissible: false,
       barrierColor: Colors.black.withOpacity(0.50),
       builder: (context) {
-        return const KoshDialogGetStartedConsent();
+        return  ReferAndEarnScreen();
       },
     );
   }
@@ -1021,6 +1183,23 @@ class MenuItemViewState extends State<MenuItemView> {
         builder: (context) => EscortDutyView(),
       ),
     );
+  }
+  void onLoadKoshLoan(){
+
+    showDialog(
+      context: context,
+      barrierDismissible: false,
+      barrierColor: Colors.black.withOpacity(0.50),
+      builder: (context) {
+        return KoshDialogGetStartedConsent();
+      },
+    );
+    // Navigator.push(
+    //   context,
+    //   MaterialPageRoute(
+    //     builder: (context) => KoshDialogGetStartedConsent(),
+    //   ),
+    // );
   }
 
 }
