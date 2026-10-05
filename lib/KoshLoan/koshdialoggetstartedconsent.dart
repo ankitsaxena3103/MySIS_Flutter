@@ -79,7 +79,7 @@ class _KoshDialogGetStartedConsentState
                 vertical: 10,
               ),
               decoration: BoxDecoration(
-                color: Colors.red,
+                color: Color(0xFFFFF0F0),
                 borderRadius: BorderRadius.circular(7),
               ),
               child: Column(
