@@ -1,9 +1,13 @@
 import 'package:flutter/material.dart';
 import 'package:mysis/KoshLoan/KoshAlternateWhatsappDialog.dart';
+import 'package:mysis/KoshLoan/repo/kosh_base_api_client.dart';
+import 'package:mysis/SharedClasses/Preferences.dart';
 import 'package:mysis/constants/app_colors.dart';
 
+import '../CommonViews/Utility.dart';
+
 class KoshDialogGetStartedConsent extends StatefulWidget {
-  const KoshDialogGetStartedConsent({super.key});
+   KoshDialogGetStartedConsent({super.key});
 
   @override
   State<KoshDialogGetStartedConsent> createState() =>
@@ -14,6 +18,7 @@ class _KoshDialogGetStartedConsentState
     extends State<KoshDialogGetStartedConsent> {
   bool loanConsent = false;
   bool termsConsent = false;
+  final koshClient = KoshBaseApiClient();
 
   @override
   Widget build(BuildContext context) {
@@ -58,8 +63,8 @@ class _KoshDialogGetStartedConsentState
             const SizedBox(height: 12),
             const Text(
               'To check your loan eligibility, kosh needs your '
-              'permission to securely fetch the following '
-              'information from your employer',
+                  'permission to securely fetch the following '
+                  'information from your employer',
               textAlign: TextAlign.center,
               style: TextStyle(
                 fontSize: 15,
@@ -74,7 +79,7 @@ class _KoshDialogGetStartedConsentState
                 vertical: 10,
               ),
               decoration: BoxDecoration(
-                color: Colors.grey75,
+                color: Color(0xFFFFF0F0),
                 borderRadius: BorderRadius.circular(7),
               ),
               child: Column(
@@ -127,14 +132,24 @@ class _KoshDialogGetStartedConsentState
               child: ElevatedButton(
                 onPressed: isValid
                     ? () {
-                        Navigator.push(
-                          context,
-                          MaterialPageRoute(
-                            builder: (context) =>
-                                const KoshAlternateWhatsappDialog(),
-                          ),
-                        );
-                      }
+                  Navigator.of(context).pop();
+                  showDialog(
+                    context: context,
+                    barrierDismissible: false,
+                    barrierColor: Colors.black.withOpacity(0.50),
+                    builder: (context) {
+                      return KoshAlternateWhatsappDialog();
+                    },
+                  );
+
+                  // Navigator.push(
+                  //   context,
+                  //   MaterialPageRoute(
+                  //     builder: (context) =>
+                  //     const KoshAlternateWhatsappDialog(),
+                  //   ),
+                  // );
+                }
                     : null,
                 style: ElevatedButton.styleFrom(
                   elevation: 0,
@@ -246,4 +261,28 @@ class _KoshDialogGetStartedConsentState
       ],
     );
   }
+
+  @override
+  void initState() {
+    super.initState();
+
+    _createToken();
+  }
+  Future<void> _createToken() async {
+    print("API Called");
+    String? kosh_Token= await Preferences.getUserPreference(KOSH_TOKEN);
+    print("API Called..kosh_Token$kosh_Token");
+
+    await koshClient.createToken(
+      KOSH_USERNAME,
+      KOSH_PASSWORD,
+      onSuccess: (response) {
+        print('Logged in. Access token: ${koshClient.accessToken}');
+      },
+      onError: (message, statusCode) {
+        print('Login failed ($statusCode): $message');
+      },
+    );
+  }
 }
+

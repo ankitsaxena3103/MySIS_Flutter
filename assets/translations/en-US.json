@@ -671,7 +671,8 @@
 
   "internet_data_status" : "Mobile/Wi-fi Status",
   "location_permission" : "Location Permission",
-  "precise_location" : "Precise Location"
+  "precise_location" : "Precise Location",
+  "kosh_loan": "Kosh Loan"
 
 
 }

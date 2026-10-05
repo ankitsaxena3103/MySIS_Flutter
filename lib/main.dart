@@ -3,11 +3,8 @@ import 'package:firebase_core/firebase_core.dart';
 import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:flutter/material.dart';
 import 'package:mysis/DutyVerification/AttendanceConsentScreen/AttendanceConsentScreen.dart';
-import 'package:mysis/DutyVerification/DutySummaryScreen/DutySummaryScreen.dart';
 import 'package:mysis/DutyVerification/Duty_verification.dart';
 import 'package:mysis/DutyVerification/Missing_Claim.dart';
-import 'package:mysis/DutyVerification/RaiseComplaintScreen/RaiseComplaint.dart';
-import 'package:mysis/DutyVerification/SelectShiftScreen.dart';
 import 'package:mysis/KoshLoan/KoshAlternateWhatsappDialog.dart';
 import 'package:mysis/KoshLoan/KoshBottomSheet.dart';
 import 'package:mysis/KoshLoan/ReferAndEarnScreen.dart';
@@ -37,6 +34,7 @@ final GlobalKey<NavigatorState> navigatorKey = GlobalKey<NavigatorState>();
 @pragma('vm:entry-point')
 void callbackDispatcher() {
   Workmanager().executeTask((task, inputData) async {
+
     await ServerService.instance.loadServerData();
 
     return Future.value(true);
@@ -47,6 +45,7 @@ Future<void> _firebaseMessagingBackgroundHandler(RemoteMessage message) async {
   await Firebase.initializeApp();
   printInDebug('Handling background message: ${message.messageId}');
 }
+
 
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -158,7 +157,7 @@ class _MyAppState extends State<MyApp> with WidgetsBindingObserver {
       supportedLocales: context.supportedLocales,
       locale: context.locale,
       navigatorObservers: [routeObserver],
-      home: const DutyVerificationScreen(),
+      home:  AttendanceConsentScreen(),
     );
   }
 }

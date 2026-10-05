@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:mysis/DutyVerification/Duty_verification.dart';
 
 import 'package:mysis/DutyVerification/SelectPostScreen.dart';
 import 'package:mysis/DutyVerification/SelectShiftScreen.dart';
@@ -486,8 +487,8 @@ class _MissingClaimScreenState extends State<MissingClaimScreen> {
             ),
 
             const SizedBox(width: 12),
-
             // TEXT
+
 
             Expanded(
               child: Column(
@@ -687,22 +688,52 @@ class _MissingClaimScreenState extends State<MissingClaimScreen> {
       height: 52,
       child: ElevatedButton.icon(
         onPressed: () {
-          if (selectedReason == null) {
+
+          if (unit == null) {
             ScaffoldMessenger.of(context).showSnackBar(
               const SnackBar(
-                content: Text(
-                  "Please choose reason for claim",
-                ),
+                content: Text("Please choose unit"),
               ),
             );
-
             return;
           }
 
-          // Submit logic
-        },
+          if(shift== null) {
+            ScaffoldMessenger.of(context).showSnackBar(
+              const SnackBar(content: Text("Please choose Shift"),
+              )
+            );
 
-        // 🔥 LEFT SIDE ICON
+          }
+
+
+          if(post == null) {
+            ScaffoldMessenger.of(context).showSnackBar(
+              const SnackBar(content: Text("Pleasen choose Post"),
+              )
+            );
+          }
+          if(selectedReason == null) {
+            ScaffoldMessenger.of(context).showSnackBar(
+                const SnackBar(content: Text("Please choose reason for claim"),
+                )
+            );
+          return;
+          // Submit logic
+        }
+        Navigator.push(
+        context,
+        MaterialPageRoute(
+          builder: (context) => DutyVerificationScreen(),
+        ),
+      );
+    },
+
+
+
+
+
+      // 🔥 LEFT SIDE ICON
         icon: Icon(
           Icons.send_outlined,
           size: 20,
