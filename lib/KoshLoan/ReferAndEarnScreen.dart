@@ -1,12 +1,8 @@
 import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/material.dart';
 import 'package:mysis/KoshLoan/KoshBottomSheet.dart';
-
-import 'package:mysis/KoshLoan/demo%20api/ConvertedApi.dart';
 import 'package:mysis/KoshLoan/demo%20api/Converted_model/ConvertedleadModel.dart';
-
 import 'package:mysis/KoshLoan/repo/kosh_base_api_client.dart';
-
 import 'package:mysis/KoshLoan/walletapi.dart';
 import 'package:mysis/KoshLoan/walletmodel.dart';
 import 'package:mysis/constants/app_colors.dart';
@@ -43,34 +39,34 @@ class _ReferAndEarnScreenState extends State<ReferAndEarnScreen> {
     super.initState();
 
     loadWallet();
-    loadConvertedLeads();
+    // loadConvertedLeads();
   }
 
-  Future<void> loadConvertedLeads() async {
-    try {
-      final data = await ConvertedApi().getConvertedLeadModel();
-
-      if (!mounted) return;
-
-      setState(() {
-        convertedLead = data;
-        isConvertedLoading = false;
-        convertedError = null;
-      });
-    } catch (e) {
-      print("Converted Leads API Error: $e");
-
-      if (!mounted) return;
-
-      setState(() {
-        isConvertedLoading = false;
-        convertedError = e.toString();
-      });
-    }
-
-    _createToken();
-    // loadWallet();
-  }
+  // Future<void> loadConvertedLeads() async {
+  //   try {
+  //     final data = await ConvertedApi().getConvertedLeadModel();
+  //
+  //     if (!mounted) return;
+  //
+  //     setState(() {
+  //       convertedLead = data;
+  //       isConvertedLoading = false;
+  //       convertedError = null;
+  //     });
+  //   } catch (e) {
+  //     print("Converted Leads API Error: $e");
+  //
+  //     if (!mounted) return;
+  //
+  //     setState(() {
+  //       isConvertedLoading = false;
+  //       convertedError = e.toString();
+  //     });
+  //   }
+  //
+  //   _createToken();
+  //   // loadWallet();
+  // }
 
   Future<void> _createToken() async {
     print("API Called");
@@ -892,7 +888,7 @@ print('findPersonByUser.....userToken$userToken');
                   convertedError = null;
                 });
 
-                loadConvertedLeads();
+                // loadConvertedLeads();
               },
               child: const Text("Retry"),
             ),
