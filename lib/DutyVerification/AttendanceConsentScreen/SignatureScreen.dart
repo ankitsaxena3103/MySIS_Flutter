@@ -130,15 +130,20 @@ class _SignatureScreenState extends State<SignatureScreen> {
                   },
 
                   onPanUpdate: (details) {
+                    final position = details.localPosition;
 
-                    setState(() {
-
-                      _points.add(
-                        details.localPosition,
-                      );
-
-                    });
-
+                    if (position.dx >= 0 &&
+                        position.dx <= context.size!.width &&
+                        position.dy >= 0 &&
+                        position.dy <= context.size!.height) {
+                      setState(() {
+                        _points.add(position);
+                      });
+                    } else {
+                      setState(() {
+                        _points.add(null);
+                      });
+                    }
                   },
 
                   onPanEnd: (details) {
@@ -237,6 +242,15 @@ class SignaturePainter extends CustomPainter {
       Canvas canvas,
       Size size,
       ) {
+
+    canvas.clipRect(
+      Rect.fromLTWH(
+        0,
+        0,
+        size.width,
+        size.height,
+      ),
+    );
 
     final paint = Paint()
       ..color = Colors.black

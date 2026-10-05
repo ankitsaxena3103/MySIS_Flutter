@@ -1,6 +1,7 @@
 import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/material.dart';
 import 'package:mysis/KoshLoan/KoshBottomSheet.dart';
+import 'package:mysis/KoshLoan/demo%20api/Converted_model/ConvertedleadModel.dart';
 import 'package:mysis/KoshLoan/repo/kosh_base_api_client.dart';
 import 'package:mysis/KoshLoan/walletapi.dart';
 import 'package:mysis/KoshLoan/walletmodel.dart';
@@ -36,31 +37,242 @@ class _ReferAndEarnScreenState extends State<ReferAndEarnScreen> {
   @override
   void initState() {
     super.initState();
+
     loadWallet();
-    loadConvertedLeads();
+    // loadConvertedLeads();
   }
 
-  Future<void> loadConvertedLeads() async {
-    try {
-      final data = await ConvertedApi().getConvertedLeadModel();
+  // Future<void> loadConvertedLeads() async {
+  //   try {
+  //     final data = await ConvertedApi().getConvertedLeadModel();
+  //
+  //     if (!mounted) return;
+  //
+  //     setState(() {
+  //       convertedLead = data;
+  //       isConvertedLoading = false;
+  //       convertedError = null;
+  //     });
+  //   } catch (e) {
+  //     print("Converted Leads API Error: $e");
+  //
+  //     if (!mounted) return;
+  //
+  //     setState(() {
+  //       isConvertedLoading = false;
+  //       convertedError = e.toString();
+  //     });
+  //   }
+  //
+  //   _createToken();
+  //   // loadWallet();
+  // }
 
-      if (!mounted) return;
+  Future<void> _createToken() async {
+    print("API Called");
+    String? kosh_Token = await Preferences.getUserPreference(KOSH_TOKEN);
+    print("API Called..kosh_Token$kosh_Token");
 
-      setState(() {
-        convertedLead = data;
-        isConvertedLoading = false;
-        convertedError = null;
-      });
-    } catch (e) {
-      print("Converted Leads API Error: $e");
+    await koshClient.createToken(
+      KOSH_USERNAME,
+      KOSH_PASSWORD,
+      onSuccess: (response) {
+        print('Logged in. Access token: ${koshClient.accessToken}');
+      },
+      onError: (message, statusCode) {
+        print('Login failed ($statusCode): $message');
+      },
+    );
+    String userLoggedInContactNo =
+        await Preferences.getUserPreference(keyMobile) ?? '';
+    print(' userLoggedInContactNo ($userLoggedInContactNo)');
 
-      if (!mounted) return;
+    await koshClient.findPersonByUser(
+      userLoggedInContactNo,
+      onSuccess: (response) async {
+        print('findPersonByUser...RESPONSE: ${response}');
 
-      setState(() {
-        isConvertedLoading = false;
-        convertedError = e.toString();
-      });
+        final bool success = response['success'] as bool? ?? false;
+        final Map<String, dynamic> data =
+            response['data'] as Map<String, dynamic>? ?? {};
+
+        final String username =
+            await Preferences.getUserPreference(keyMobile) ?? '';
+        String? token = data[username] as String?;
+        userToken = (data[username] as String?)??'';
+print('findPersonByUser.....userToken$userToken');
+        if (userToken == null || userToken!.isEmpty) {
+          showInvalidUserDialog(
+            context,
+            onContinue: () {
+
+            },
+            onCancel: () {
+              Navigator.of(context)
+                  .pop(); // or your "finish activity" equivalent
+            },
+          );
+
+        } else {
+          setState(() {
+            userToken = data[username] as String;
+          });
+          // fetchWallet();
+        }
+      },
+      onError: (message, statusCode) {
+        print('Login failed ($statusCode): $message');
+      },
+    );
+  }
+
+  void referFriend() async {
+    String loggedInUserNumber =
+        await Preferences.getUserPreference(keyMobile) ?? '';
+
+    String referContactNumber = mobileController.text;
+    if (referContactNumber.length >= 10) {
+// 2. Create a CRM record (uses the stored token automatically)
+      await koshClient.createReferralRecord(
+        KoshBorrower,
+        referContactNumber,
+        loggedInUserNumber ?? '',
+        onSuccess: (response) => {
+          print('Record createReferralRecord: $response'),
+          setState(() {
+            showToastMessageView = true;
+          }),
+          Future.delayed(Duration(seconds: 3), () {
+            setState(() {
+              showToastMessageView = false;
+            });
+          })
+        },
+        onError: (message, statusCode) => print('Error $statusCode: $message'),
+      );
     }
+
+    // Navigator.pop(context, phoneNumber);
+  }
+
+  Future<void> showInvalidUserDialog(
+    BuildContext context, {
+    required VoidCallback onContinue, // e.g. () => registerKoshLoan(context)
+    required VoidCallback
+        onCancel, // e.g. () => Navigator.pop(context) / finish equivalent
+  }) {
+    return showDialog(
+      context: context,
+      barrierDismissible: false, // matches setCancelable(false) initially
+      builder: (dialogContext) {
+        return PopScope(
+          canPop: true,
+          // dialog.setCancelable(true) was set later, so back button can dismiss
+          child: Dialog(
+            backgroundColor: Colors.transparent,
+            insetPadding: const EdgeInsets.symmetric(horizontal: 20),
+            child: Card(
+              elevation: 10,
+              color: Colors.white,
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(15),
+              ),
+              child: Padding(
+                padding: const EdgeInsets.all(28),
+                child: Column(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    // Warning icon circle
+                    Container(
+                      width: 52,
+                      height: 52,
+                      decoration: BoxDecoration(
+                        color: const Color(0xFFFFE5E8),
+                        // light red bg, adjust to your bg_warning_circle
+                        shape: BoxShape.circle,
+                      ),
+                      child: const Icon(
+                        Icons.warning_rounded,
+                        color: Color(0xFFFF1F2D),
+                        size: 26,
+                      ),
+                    ),
+
+                    const SizedBox(height: 16),
+
+                    // Title
+                    const Text(
+                      'You are not registered for a Kosh Loan. Click Continue to proceed with registration.',
+                      textAlign: TextAlign.center,
+                      style: TextStyle(
+                        color: Colors.black,
+                        fontSize: 13,
+                        fontWeight: FontWeight.bold,
+                      ),
+                    ),
+
+                    const SizedBox(height: 22),
+
+                    // Continue button
+                    SizedBox(
+                      width: double.infinity,
+                      height: 46,
+                      child: ElevatedButton(
+                        style: ElevatedButton.styleFrom(
+                          backgroundColor: const Color(0xFFFF1F2D),
+                          foregroundColor: Colors.white,
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(8),
+                          ),
+                          elevation: 0,
+                        ),
+                        onPressed: () {
+                          onContinue();
+                          Navigator.of(dialogContext).pop();
+                        },
+                        child: const Text(
+                          'Continue to Kosh Loan',
+                          style: TextStyle(
+                            fontSize: 14,
+                            fontWeight: FontWeight.bold,
+                          ),
+                        ),
+                      ),
+                    ),
+
+                    const SizedBox(height: 10),
+
+                    // Cancel button
+                    SizedBox(
+                      width: double.infinity,
+                      height: 46,
+                      child: OutlinedButton(
+                        style: OutlinedButton.styleFrom(
+                          foregroundColor: const Color(0xFF111111),
+                          backgroundColor: Colors.grey.shade100,
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(8),
+                          ),
+                          side: BorderSide.none,
+                        ),
+                        onPressed: () {
+                          onCancel();
+                          Navigator.of(dialogContext).pop();
+                        },
+                        child: const Text(
+                          'Cancel',
+                          style: TextStyle(fontSize: 14),
+                        ),
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            ),
+          ),
+        );
+      },
+    );
   }
 
   Future<void> loadWallet() async {
@@ -676,7 +888,7 @@ class _ReferAndEarnScreenState extends State<ReferAndEarnScreen> {
                   convertedError = null;
                 });
 
-                loadConvertedLeads();
+                // loadConvertedLeads();
               },
               child: const Text("Retry"),
             ),

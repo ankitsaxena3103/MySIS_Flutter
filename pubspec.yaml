@@ -74,6 +74,9 @@ dependencies:
   workmanager: ^0.9.0+3
   firebase_messaging: ^16.0.4
   firebase_core: ^4.2.1
+  record: ^6.1.2
+  audioplayers: ^6.5.0
+
 
 
 dev_dependencies:
