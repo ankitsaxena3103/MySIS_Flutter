@@ -4,6 +4,7 @@ import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:mysis/CommonViews/Utility.dart';
 import 'package:easy_localization/easy_localization.dart';
+import 'package:mysis/DutyVerification/DutySummaryModule/DutySummaryScreen.dart';
 import 'package:mysis/KoshLoan/ReferAndEarnScreen.dart';
 import 'package:mysis/KoshLoan/koshdialoggetstartedconsent.dart';
 import 'package:mysis/Notifications/NotificationsView.dart';
@@ -67,59 +68,57 @@ class MenuItemViewState extends State<MenuItemView> {
         return Material(
           child: Scaffold(
             body: Container(
-                width: MediaQuery.of(context).size.width,
-                height: MediaQuery.of(context).size.height,
-                alignment: Alignment.center,
-                decoration: BoxDecoration(
-                  gradient: isDarkMode ? backgroundGradientDark : backgroundGradient,
-                  // color: isDarkMode ? greyColor6 : greyColor
+              width: double.infinity,
+              height: double.infinity,
+              alignment: Alignment.center,
+              decoration: BoxDecoration(
+                gradient: isDarkMode
+                    ? backgroundGradientDark
+                    : backgroundGradient,
+              ),
+              child: Padding(
+                padding: EdgeInsets.only(bottom: paddingBottom),
+                child: Column(
+                  children: [
 
-                ),
-                child: Padding(
-                  padding: EdgeInsets.only( bottom: paddingBottom),
-                  child: Stack(
-                    children: [
-                      Padding(
-                        padding: EdgeInsets.only( bottom: pathL),
-                        child:  Column(
-                          mainAxisAlignment: MainAxisAlignment.end,
+                    // =========================================================
+                    // MENU AREA
+                    // =========================================================
+                    Expanded(
+                      child: SingleChildScrollView(
+                        physics: const BouncingScrollPhysics(),
+                        padding: EdgeInsets.only(
+                          top: pathL / 2,
+                          bottom: pathL,
+                          left: 4,
+                          right: 4,
+                        ),
+                        child: Column(
                           children: [
+
+                            // =================================================
+                            // ROW 1
+                            // Home | Duty | Profile
+                            // =================================================
                             Row(
-                              mainAxisAlignment: MainAxisAlignment.center,
+                              crossAxisAlignment: CrossAxisAlignment.start,
                               children: [
+
                                 // Home
-                                GestureDetector(
-                                  behavior: HitTestBehavior.opaque,
-                                  onTap: () {
-                                    widget.onCloseBottomSheet();
-                                    widget.onTabSelected(0);
-                                  },
-                                  child: Container(
-                                    width: screenWidth / 3,
-                                    padding: const EdgeInsets.symmetric(vertical: 8),
-                                    child: Column(
-                                      mainAxisSize: MainAxisSize.min,
-                                      children: [
-                                        SizedBox(
-                                          width: iconSize,
-                                          height: iconSize,
-                                          child: Image.asset(
-                                            'assets/images/dashboard-icons/home.png',
-                                            color: isDarkMode ? whiteColor : greyColor6,
-                                          ),
-                                        ),
-                                        SizedBox(height: iconTextGap),
-                                        Text(
-                                          'home'.tr(),
-                                          style: TextStyle(
-                                            color: isDarkMode ? whiteColor : greyColor6,
-                                            fontSize: pathS / 5,
-                                            fontWeight: FontWeight.w500,
-                                            fontFamily: 'Roboto',
-                                          ),
-                                          textAlign: TextAlign.center,
-                                        ),
-                                      ],
+                                Expanded(
+                                  child: GestureDetector(
+                                    behavior: HitTestBehavior.opaque,
+                                    onTap: () {
+                                      widget.onCloseBottomSheet();
+                                      widget.onTabSelected(0);
+                                    },
+                                    child: _menuItem(
+                                      icon: 'assets/images/dashboard-icons/home.png',
+                                      title: 'home'.tr(),
+                                      iconSize: iconSize,
+                                      iconTextGap: iconTextGap,
+                                      pathS: pathS,
+                                      isDarkMode: isDarkMode,
                                     ),
                                   ),
                                 ),
@@ -127,38 +126,20 @@ class MenuItemViewState extends State<MenuItemView> {
                                 SizedBox(width: horizontalGap),
 
                                 // Duty
-                                GestureDetector(
-                                  behavior: HitTestBehavior.opaque,
-                                  onTap: () {
-                                    widget.onCloseBottomSheet();
-                                    widget.onTabSelected(1);
-                                  },
-                                  child: Container(
-                                    width: screenWidth / 3,
-                                    padding: const EdgeInsets.symmetric(vertical: 8),
-                                    child: Column(
-                                      mainAxisSize: MainAxisSize.min,
-                                      children: [
-                                        SizedBox(
-                                          width: iconSize,
-                                          height: iconSize,
-                                          child: Image.asset(
-                                            'assets/images/dashboard-icons/duty.png',
-                                            color: isDarkMode ? whiteColor : greyColor6,
-                                          ),
-                                        ),
-                                        SizedBox(height: iconTextGap),
-                                        Text(
-                                          'txt_duty'.tr(),
-                                          style: TextStyle(
-                                            color: isDarkMode ? whiteColor : greyColor6,
-                                            fontSize: pathS / 5,
-                                            fontWeight: FontWeight.w500,
-                                            fontFamily: 'Roboto',
-                                          ),
-                                          textAlign: TextAlign.center,
-                                        ),
-                                      ],
+                                Expanded(
+                                  child: GestureDetector(
+                                    behavior: HitTestBehavior.opaque,
+                                    onTap: () {
+                                      widget.onCloseBottomSheet();
+                                      widget.onTabSelected(1);
+                                    },
+                                    child: _menuItem(
+                                      icon: 'assets/images/dashboard-icons/duty.png',
+                                      title: 'txt_duty'.tr(),
+                                      iconSize: iconSize,
+                                      iconTextGap: iconTextGap,
+                                      pathS: pathS,
+                                      isDarkMode: isDarkMode,
                                     ),
                                   ),
                                 ),
@@ -166,38 +147,20 @@ class MenuItemViewState extends State<MenuItemView> {
                                 SizedBox(width: horizontalGap),
 
                                 // Profile
-                                GestureDetector(
-                                  behavior: HitTestBehavior.opaque,
-                                  onTap: () {
-                                    widget.onCloseBottomSheet();
-                                    onLoadProfileView();
-                                  },
-                                  child: Container(
-                                    width: screenWidth / 3,
-                                    padding: const EdgeInsets.symmetric(vertical: 8),
-                                    child: Column(
-                                      mainAxisSize: MainAxisSize.min,
-                                      children: [
-                                        SizedBox(
-                                          width: iconSize,
-                                          height: iconSize,
-                                          child: Image.asset(
-                                            'assets/images/dashboard-icons/user.png',
-                                            color: isDarkMode ? whiteColor : greyColor6,
-                                          ),
-                                        ),
-                                        SizedBox(height: iconTextGap),
-                                        Text(
-                                          'profile'.tr(),
-                                          style: TextStyle(
-                                            color: isDarkMode ? whiteColor : greyColor6,
-                                            fontSize: pathS / 5,
-                                            fontWeight: FontWeight.w500,
-                                            fontFamily: 'Roboto',
-                                          ),
-                                          textAlign: TextAlign.center,
-                                        ),
-                                      ],
+                                Expanded(
+                                  child: GestureDetector(
+                                    behavior: HitTestBehavior.opaque,
+                                    onTap: () {
+                                      widget.onCloseBottomSheet();
+                                      onLoadProfileView();
+                                    },
+                                    child: _menuItem(
+                                      icon: 'assets/images/dashboard-icons/user.png',
+                                      title: 'profile'.tr(),
+                                      iconSize: iconSize,
+                                      iconTextGap: iconTextGap,
+                                      pathS: pathS,
+                                      isDarkMode: isDarkMode,
                                     ),
                                   ),
                                 ),
@@ -205,42 +168,31 @@ class MenuItemViewState extends State<MenuItemView> {
                             ),
 
                             SizedBox(height: verticalGap),
+
+                            // =================================================
+                            // ROW 2
+                            // Notification | Leaves | Sync
+                            // =================================================
                             Row(
-                              mainAxisAlignment: MainAxisAlignment.center,
+                              crossAxisAlignment: CrossAxisAlignment.start,
                               children: [
+
                                 // Notification
-                                GestureDetector(
-                                  behavior: HitTestBehavior.opaque,
-                                  onTap: () {
-                                    widget.onCloseBottomSheet();
-                                    onLoadNotificationView();
-                                  },
-                                  child: Container(
-                                    width: screenWidth / 3,
-                                    padding: const EdgeInsets.symmetric(vertical: 8),
-                                    child: Column(
-                                      mainAxisSize: MainAxisSize.min,
-                                      children: [
-                                        SizedBox(
-                                          width: iconSize,
-                                          height: iconSize,
-                                          child: Image.asset(
-                                            'assets/images/dashboard-icons/notification.png',
-                                            color: isDarkMode ? whiteColor : greyColor6,
-                                          ),
-                                        ),
-                                        SizedBox(height: iconTextGap),
-                                        Text(
-                                          'notification'.tr(),
-                                          style: TextStyle(
-                                            color: isDarkMode ? whiteColor : greyColor6,
-                                            fontSize: pathS / 5,
-                                            fontWeight: FontWeight.w500,
-                                            fontFamily: 'Roboto',
-                                          ),
-                                          textAlign: TextAlign.center,
-                                        ),
-                                      ],
+                                Expanded(
+                                  child: GestureDetector(
+                                    behavior: HitTestBehavior.opaque,
+                                    onTap: () {
+                                      widget.onCloseBottomSheet();
+                                      onLoadNotificationView();
+                                    },
+                                    child: _menuItem(
+                                      icon:
+                                      'assets/images/dashboard-icons/notification.png',
+                                      title: 'notification'.tr(),
+                                      iconSize: iconSize,
+                                      iconTextGap: iconTextGap,
+                                      pathS: pathS,
+                                      isDarkMode: isDarkMode,
                                     ),
                                   ),
                                 ),
@@ -248,38 +200,21 @@ class MenuItemViewState extends State<MenuItemView> {
                                 SizedBox(width: horizontalGap),
 
                                 // Leaves
-                                GestureDetector(
-                                  behavior: HitTestBehavior.opaque,
-                                  onTap: () {
-                                    widget.onCloseBottomSheet();
-                                    onLoadLeaveView();
-                                  },
-                                  child: Container(
-                                    width: screenWidth / 3,
-                                    padding: const EdgeInsets.symmetric(vertical: 8),
-                                    child: Column(
-                                      mainAxisSize: MainAxisSize.min,
-                                      children: [
-                                        SizedBox(
-                                          width: iconSize,
-                                          height: iconSize,
-                                          child: Image.asset(
-                                            'assets/images/dashboard-icons/leaves.png',
-                                            color: isDarkMode ? whiteColor : greyColor6,
-                                          ),
-                                        ),
-                                        SizedBox(height: iconTextGap),
-                                        Text(
-                                          'txt_leaves'.tr(),
-                                          style: TextStyle(
-                                            color: isDarkMode ? whiteColor : greyColor6,
-                                            fontSize: pathS / 5,
-                                            fontWeight: FontWeight.w500,
-                                            fontFamily: 'Roboto',
-                                          ),
-                                          textAlign: TextAlign.center,
-                                        ),
-                                      ],
+                                Expanded(
+                                  child: GestureDetector(
+                                    behavior: HitTestBehavior.opaque,
+                                    onTap: () {
+                                      widget.onCloseBottomSheet();
+                                      onLoadLeaveView();
+                                    },
+                                    child: _menuItem(
+                                      icon:
+                                      'assets/images/dashboard-icons/leaves.png',
+                                      title: 'txt_leaves'.tr(),
+                                      iconSize: iconSize,
+                                      iconTextGap: iconTextGap,
+                                      pathS: pathS,
+                                      isDarkMode: isDarkMode,
                                     ),
                                   ),
                                 ),
@@ -287,38 +222,21 @@ class MenuItemViewState extends State<MenuItemView> {
                                 SizedBox(width: horizontalGap),
 
                                 // Sync
-                                GestureDetector(
-                                  behavior: HitTestBehavior.opaque,
-                                  onTap: () {
-                                    widget.onCloseBottomSheet();
-                                    onLoadSyncDataView();
-                                  },
-                                  child: Container(
-                                    width: screenWidth / 3,
-                                    padding: const EdgeInsets.symmetric(vertical: 8),
-                                    child: Column(
-                                      mainAxisSize: MainAxisSize.min,
-                                      children: [
-                                        SizedBox(
-                                          width: iconSize,
-                                          height: iconSize,
-                                          child: Image.asset(
-                                            'assets/images/dashboard-icons/circular-refresh.png',
-                                            color: isDarkMode ? whiteColor : greyColor6,
-                                          ),
-                                        ),
-                                        SizedBox(height: iconTextGap),
-                                        Text(
-                                          'txt_sync'.tr(),
-                                          style: TextStyle(
-                                            color: isDarkMode ? whiteColor : greyColor6,
-                                            fontSize: pathS / 5,
-                                            fontWeight: FontWeight.w500,
-                                            fontFamily: 'Roboto',
-                                          ),
-                                          textAlign: TextAlign.center,
-                                        ),
-                                      ],
+                                Expanded(
+                                  child: GestureDetector(
+                                    behavior: HitTestBehavior.opaque,
+                                    onTap: () {
+                                      widget.onCloseBottomSheet();
+                                      onLoadSyncDataView();
+                                    },
+                                    child: _menuItem(
+                                      icon:
+                                      'assets/images/dashboard-icons/circular-refresh.png',
+                                      title: 'txt_sync'.tr(),
+                                      iconSize: iconSize,
+                                      iconTextGap: iconTextGap,
+                                      pathS: pathS,
+                                      isDarkMode: isDarkMode,
                                     ),
                                   ),
                                 ),
@@ -326,83 +244,76 @@ class MenuItemViewState extends State<MenuItemView> {
                             ),
 
                             SizedBox(height: verticalGap),
+
+                            // =================================================
+                            // ROW 3
+                            // FAQ | GMD | Language
+                            // =================================================
                             Row(
-                              mainAxisAlignment: MainAxisAlignment.center,
+                              crossAxisAlignment: CrossAxisAlignment.start,
                               children: [
+
                                 // FAQ
-                                GestureDetector(
-                                  behavior: HitTestBehavior.opaque,
-                                  onTap: () {
-                                    widget.onCloseBottomSheet();
-                                    onLoadGeneralQAView();
-                                  },
-                                  child: Container(
-                                    width: screenWidth / 3,
-                                    padding: const EdgeInsets.symmetric(vertical: 8),
-                                    child: Column(
-                                      mainAxisSize: MainAxisSize.min,
-                                      children: [
-                                        SizedBox(
-                                          width: iconSize,
-                                          height: iconSize,
-                                          child: Image.asset(
-                                            'assets/images/dashboard-icons/faqs.png',
-                                            color: isDarkMode ? whiteColor : greyColor6,
-                                          ),
-                                        ),
-                                        SizedBox(height: iconTextGap),
-                                        Text(
-                                          'faq'.tr(),
-                                          style: TextStyle(
-                                            color: isDarkMode ? whiteColor : greyColor6,
-                                            fontSize: pathS / 5,
-                                            fontWeight: FontWeight.w500,
-                                            fontFamily: 'Roboto',
-                                          ),
-                                          textAlign: TextAlign.center,
-                                        ),
-                                      ],
+                                Expanded(
+                                  child: GestureDetector(
+                                    behavior: HitTestBehavior.opaque,
+                                    onTap: () {
+                                      widget.onCloseBottomSheet();
+                                      onLoadGeneralQAView();
+                                    },
+                                    child: _menuItem(
+                                      icon:
+                                      'assets/images/dashboard-icons/faqs.png',
+                                      title: 'faq'.tr(),
+                                      iconSize: iconSize,
+                                      iconTextGap: iconTextGap,
+                                      pathS: pathS,
+                                      isDarkMode: isDarkMode,
                                     ),
                                   ),
                                 ),
 
                                 SizedBox(width: horizontalGap),
 
-                                GestureDetector(
-                                  behavior: HitTestBehavior.opaque,
-                                  onTap: () {
-                                    widget.onCloseBottomSheet();
-                                    onLoadERCView();
-                                  },
-                                  child: SizedBox(
-                                    width: screenWidth / 3,
-                                    // padding: const EdgeInsets.symmetric(vertical: 5),
+                                // GMD
+                                Expanded(
+                                  child: GestureDetector(
+                                    behavior: HitTestBehavior.opaque,
+                                    onTap: () {
+                                      widget.onCloseBottomSheet();
+                                      onLoadERCView();
+                                    },
                                     child: Column(
                                       mainAxisSize: MainAxisSize.min,
                                       children: [
+
                                         Container(
                                           width: iconSize,
                                           height: iconSize,
                                           decoration: BoxDecoration(
-                                            shape: BoxShape.circle, // makes it circular
+                                            shape: BoxShape.circle,
                                             border: Border.all(
-                                              color: isDarkMode ? Colors.white : Colors.grey, // border color
-                                              width: 1, // border thickness
+                                              color: isDarkMode
+                                                  ? Colors.white
+                                                  : Colors.grey,
+                                              width: 1,
                                             ),
                                           ),
-                                          padding: EdgeInsets.all(1), // optional padding inside the circle
+                                          padding: const EdgeInsets.all(1),
                                           child: Image.asset(
                                             'assets/images/dashboard-icons/gmd.png',
-                                            // color: isDarkMode ? Colors.white : Colors.grey[800], // optional tint
                                             fit: BoxFit.contain,
                                           ),
                                         ),
 
                                         SizedBox(height: iconTextGap),
+
                                         Text(
                                           'GMD_se_bolo'.tr(),
                                           style: TextStyle(
-                                            color: isDarkMode ? whiteColor : greyColor6,
+                                            color: isDarkMode
+                                                ? whiteColor
+                                                : greyColor6,
                                             fontSize: pathS / 5,
                                             fontWeight: FontWeight.w500,
                                             fontFamily: 'Roboto',
@@ -417,38 +328,21 @@ class MenuItemViewState extends State<MenuItemView> {
                                 SizedBox(width: horizontalGap),
 
                                 // Language
-                                GestureDetector(
-                                  behavior: HitTestBehavior.opaque,
-                                  onTap: () {
-                                    widget.onCloseBottomSheet();
-                                    onLoadLanguageView();
-                                  },
-                                  child: Container(
-                                    width: screenWidth / 3,
-                                    padding: const EdgeInsets.symmetric(vertical: 8),
-                                    child: Column(
-                                      mainAxisSize: MainAxisSize.min,
-                                      children: [
-                                        SizedBox(
-                                          width: iconSize,
-                                          height: iconSize,
-                                          child: Image.asset(
-                                            'assets/images/dashboard-icons/language.png',
-                                            color: isDarkMode ? whiteColor : greyColor6,
-                                          ),
-                                        ),
-                                        SizedBox(height: iconTextGap),
-                                        Text(
-                                          'language'.tr(),
-                                          style: TextStyle(
-                                            color: isDarkMode ? whiteColor : greyColor6,
-                                            fontSize: pathS / 5,
-                                            fontWeight: FontWeight.w500,
-                                            fontFamily: 'Roboto',
-                                          ),
-                                          textAlign: TextAlign.center,
-                                        ),
-                                      ],
+                                Expanded(
+                                  child: GestureDetector(
+                                    behavior: HitTestBehavior.opaque,
+                                    onTap: () {
+                                      widget.onCloseBottomSheet();
+                                      onLoadLanguageView();
+                                    },
+                                    child: _menuItem(
+                                      icon:
+                                      'assets/images/dashboard-icons/language.png',
+                                      title: 'language'.tr(),
+                                      iconSize: iconSize,
+                                      iconTextGap: iconTextGap,
+                                      pathS: pathS,
+                                      isDarkMode: isDarkMode,
                                     ),
                                   ),
                                 ),
@@ -456,90 +350,83 @@ class MenuItemViewState extends State<MenuItemView> {
                             ),
 
                             SizedBox(height: verticalGap),
+
+                            // =================================================
+                            // ROW 4
+                            // Salary | General Rules | G2G
+                            // =================================================
                             Row(
-                              mainAxisAlignment: MainAxisAlignment.center,
+                              crossAxisAlignment: CrossAxisAlignment.start,
                               children: [
-                                GestureDetector(
-                                  behavior: HitTestBehavior.opaque,
-                                  onTap: () {
-                                    widget.onCloseBottomSheet();
-                                    onLoadSalaryView();
-                                  },
-                                  child: Container(
-                                    width: screenWidth / 3,
-                                    padding: const EdgeInsets.symmetric(vertical: 8),
-                                    child: Column(
-                                      mainAxisSize: MainAxisSize.min,
-                                      children: [
-                                        SizedBox(
-                                          width: iconSize,
-                                          height: iconSize,
-                                          child: Stack(
-                                            clipBehavior: Clip.none,
-                                            children: [
-                                              Image.asset(
-                                                'assets/images/dashboard-icons/salary.png',
-                                                color: isDarkMode ? whiteColor : greyColor6,
-                                                width: iconSize,
-                                                height: iconSize,
-                                              ),
-                                            ],
-                                          ),
-                                        ),
-                                        SizedBox(height: iconTextGap),
-                                        Text(
-                                          'salary'.tr(),
-                                          style: TextStyle(
-                                            color: isDarkMode ? whiteColor : greyColor6,
-                                            fontSize: pathS / 5,
-                                            fontWeight: FontWeight.w500,
-                                            fontFamily: 'Roboto',
-                                          ),
-                                          textAlign: TextAlign.center,
-                                        ),
-                                      ],
+
+                                // Salary
+                                Expanded(
+                                  child: GestureDetector(
+                                    behavior: HitTestBehavior.opaque,
+                                    onTap: () {
+                                      widget.onCloseBottomSheet();
+                                      onLoadSalaryView();
+                                    },
+                                    child: _menuItem(
+                                      icon:
+                                      'assets/images/dashboard-icons/salary.png',
+                                      title: 'salary'.tr(),
+                                      iconSize: iconSize,
+                                      iconTextGap: iconTextGap,
+                                      pathS: pathS,
+                                      isDarkMode: isDarkMode,
                                     ),
                                   ),
                                 ),
 
                                 SizedBox(width: horizontalGap),
 
-                                GestureDetector(
-                                  behavior: HitTestBehavior.opaque,
-                                  onTap: () {
-                                    ScaffoldMessenger.of(context).showSnackBar(
-                                      SnackBar(content: Text('coming_soon'.tr())),
-                                    );
-                                    return;
-                                    widget.onCloseBottomSheet();
-                                    onLoadGeneralRuleView();
-                                  },
-                                  child: Container(
-                                    width: screenWidth / 3,
-                                    padding: const EdgeInsets.symmetric(vertical: 8),
+                                // General Rules
+                                Expanded(
+                                  child: GestureDetector(
+                                    behavior: HitTestBehavior.opaque,
+                                    onTap: () {
+                                      ScaffoldMessenger.of(context).showSnackBar(
+                                        SnackBar(
+                                          content: Text(
+                                            'coming_soon'.tr(),
+                                          ),
+                                        ),
+                                      );
+                                    },
                                     child: Column(
                                       mainAxisSize: MainAxisSize.min,
                                       children: [
+
                                         SizedBox(
                                           width: iconSize,
                                           height: iconSize,
                                           child: Stack(
                                             clipBehavior: Clip.none,
                                             children: [
+
                                               Image.asset(
                                                 'assets/images/dashboard-icons/documents.png',
                                                 width: iconSize,
                                                 height: iconSize,
-                                                color: isDarkMode ? whiteColor : greyColor6,
+                                                color: isDarkMode
+                                                    ? whiteColor
+                                                    : greyColor6,
                                               ),
+
                                               Positioned(
                                                 top: -4,
                                                 right: -4,
                                                 child: Container(
-                                                  padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
+                                                  padding:
+                                                  const EdgeInsets.symmetric(
+                                                    horizontal: 6,
+                                                    vertical: 2,
+                                                  ),
                                                   decoration: BoxDecoration(
                                                     color: Colors.redAccent,
-                                                    borderRadius: BorderRadius.circular(12),
+                                                    borderRadius:
+                                                    BorderRadius.circular(12),
                                                   ),
                                                   child: Text(
                                                     'coming_soon'.tr(),
@@ -554,11 +441,15 @@ class MenuItemViewState extends State<MenuItemView> {
                                             ],
                                           ),
                                         ),
+
                                         SizedBox(height: iconTextGap),
+
                                         Text(
                                           'general_rules'.tr(),
                                           style: TextStyle(
-                                            color: isDarkMode ? whiteColor : greyColor6,
+                                            color: isDarkMode
+                                                ? whiteColor
+                                                : greyColor6,
                                             fontSize: pathS / 5,
                                             fontWeight: FontWeight.w500,
                                             fontFamily: 'Roboto',
@@ -573,36 +464,21 @@ class MenuItemViewState extends State<MenuItemView> {
                                 SizedBox(width: horizontalGap),
 
                                 // G2G
-                                GestureDetector(
-                                  behavior: HitTestBehavior.opaque,
-                                  onTap: () {
-                                    widget.onCloseBottomSheet();
-                                    onLoadG2GView();
-                                  },
-                                  child: Container(
-                                    width: screenWidth / 3,
-                                    padding: const EdgeInsets.symmetric(vertical: 8),
-                                    child: Column(
-                                      mainAxisSize: MainAxisSize.min,
-                                      children: [
-                                        Image.asset(
-                                          'assets/images/dashboard-icons/g2g.png',
-                                          width: iconSize,
-                                          height: iconSize,
-                                          color: isDarkMode ? whiteColor : greyColor6,
-                                        ),
-                                        SizedBox(height: iconTextGap),
-                                        Text(
-                                          'g2g'.tr(),
-                                          style: TextStyle(
-                                            color: isDarkMode ? whiteColor : greyColor6,
-                                            fontSize: pathS / 5,
-                                            fontWeight: FontWeight.w500,
-                                            fontFamily: 'Roboto',
-                                          ),
-                                          textAlign: TextAlign.center,
-                                        ),
-                                      ],
+                                Expanded(
+                                  child: GestureDetector(
+                                    behavior: HitTestBehavior.opaque,
+                                    onTap: () {
+                                      widget.onCloseBottomSheet();
+                                      onLoadG2GView();
+                                    },
+                                    child: _menuItem(
+                                      icon:
+                                      'assets/images/dashboard-icons/g2g.png',
+                                      title: 'g2g'.tr(),
+                                      iconSize: iconSize,
+                                      iconTextGap: iconTextGap,
+                                      pathS: pathS,
+                                      isDarkMode: isDarkMode,
                                     ),
                                   ),
                                 ),
@@ -610,156 +486,241 @@ class MenuItemViewState extends State<MenuItemView> {
                             ),
 
                             SizedBox(height: verticalGap),
+
+                            // =================================================
+                            // ROW 5
+                            // Kosh Loan | Earn with Kosh | Escort Duty
+                            // =================================================
                             Row(
-                              mainAxisAlignment: MainAxisAlignment.center,
+                              crossAxisAlignment: CrossAxisAlignment.start,
                               children: [
-                                // AKR - Coming Soon
-                                GestureDetector(
-                                  behavior: HitTestBehavior.opaque,
-                                  onTap: () {
-                                    // widget.onCloseBottomSheet();
-                                    onLoadKoshLoan();
-                                    // widget.onTabSelected(1);
-                                  },
-                                  child: Container(
-                                    width: screenWidth / 3,
-                                    padding: const EdgeInsets.symmetric(vertical: 8),
-                                    child: Column(
-                                      mainAxisSize: MainAxisSize.min,
-                                      children: [
-                                        SizedBox(
-                                          width: iconSize,
-                                          height: iconSize,
-                                          child: Stack(
-                                            clipBehavior: Clip.none,
-                                            children: [
-                                              Image.asset(
-                                                'assets/images/KoshImage/kosh_loan_menu_icon.png',
-                                                width: iconSize,
-                                                height: iconSize,
-                                                color: isDarkMode ? whiteColor : greyColor6,
-                                              ),
-                                            ],
-                                          ),
-                                        ),
-                                        SizedBox(height: iconTextGap),
-                                        Text(
-                                          'kosh_loan'.tr(),
-                                          style: TextStyle(
-                                            color: isDarkMode ? whiteColor : greyColor6,
-                                            fontSize: pathS / 5,
-                                            fontWeight: FontWeight.w500,
-                                            fontFamily: 'Roboto',
-                                          ),
-                                          textAlign: TextAlign.center,
-                                        ),
-                                      ],
+
+                                // Kosh Loan
+                                Expanded(
+                                  child: GestureDetector(
+                                    behavior: HitTestBehavior.opaque,
+                                    onTap: () {
+                                      onLoadKoshLoan();
+                                    },
+                                    child: _menuItem(
+                                      icon:
+                                      'assets/images/KoshImage/kosh_loan_menu_icon.png',
+                                      title: 'kosh_loan'.tr(),
+                                      iconSize: iconSize,
+                                      iconTextGap: iconTextGap,
+                                      pathS: pathS,
+                                      isDarkMode: isDarkMode,
                                     ),
                                   ),
                                 ),
 
                                 SizedBox(width: horizontalGap),
 
-                                // // Sarvam Loan
-                                // GestureDetector(
-                                //   behavior: HitTestBehavior.opaque,
-                                //   onTap: () {
-                                //     widget.onCloseBottomSheet();
-                                //     onLoadSarvamLoanView();
-                                //   },
-                                //   child: Container(
-                                //     width: screenWidth / 3,
-                                //     padding: const EdgeInsets.symmetric(vertical: 8),
-                                //     child: Column(
-                                //       mainAxisSize: MainAxisSize.min,
-                                //       children: [
-                                //         Image.asset(
-                                //           'assets/images/dashboard-icons/sarvam_logo.png',
-                                //           width: iconSize,
-                                //           height: iconSize,
-                                //           color: isDarkMode ? whiteColor : greyColor6,
-                                //         ),
-                                //         SizedBox(height: iconTextGap),
-                                //         Text(
-                                //           'loan_by_sarvam'.tr(),
-                                //           style: TextStyle(
-                                //             color: isDarkMode ? whiteColor : greyColor6,
-                                //             fontSize: pathS / 5,
-                                //             fontWeight: FontWeight.w500,
-                                //             fontFamily: 'Roboto',
-                                //           ),
-                                //           textAlign: TextAlign.center,
-                                //         ),
-                                //       ],
-                                //     ),
-                                //   ),
-                                // ),
-
-
-                                // Sarvam Loan
-                                GestureDetector(
-                                  behavior: HitTestBehavior.opaque,
-                                  onTap: () {
-                                    widget.onCloseBottomSheet();
-                                    onLoadKoshReferContent();
-                                  },
-                                  child: Container(
-                                    width: screenWidth / 3,
-                                    padding: const EdgeInsets.symmetric(vertical: 8),
-                                    child: Column(
-                                      mainAxisSize: MainAxisSize.min,
-                                      children: [
-                                        Image.asset(
-                                          'assets/images/KoshImage/Earn with Kosh.png',
-                                          width: iconSize,
-                                          height: iconSize,
-                                          color: isDarkMode ? whiteColor : greyColor6,
-                                        ),
-                                        SizedBox(height: iconTextGap),
-                                        Text(
-                                          'Earn with Kosh'.tr(),
-                                          style: TextStyle(
-                                            color: isDarkMode ? whiteColor : greyColor6,
-                                            fontSize: pathS / 5,
-                                            fontWeight: FontWeight.w500,
-                                            fontFamily: 'Roboto',
-                                          ),
-                                          textAlign: TextAlign.center,
-                                        ),
-                                      ],
+                                // Earn with Kosh
+                                Expanded(
+                                  child: GestureDetector(
+                                    behavior: HitTestBehavior.opaque,
+                                    onTap: () {
+                                      widget.onCloseBottomSheet();
+                                      onLoadKoshReferContent();
+                                    },
+                                    child: _menuItem(
+                                      icon:
+                                      'assets/images/KoshImage/Earn with Kosh.png',
+                                      title: 'Earn with Kosh'.tr(),
+                                      iconSize: iconSize,
+                                      iconTextGap: iconTextGap,
+                                      pathS: pathS,
+                                      isDarkMode: isDarkMode,
                                     ),
                                   ),
                                 ),
-
-
 
                                 SizedBox(width: horizontalGap),
 
                                 // Escort Duty
-                                GestureDetector(
-                                  behavior: HitTestBehavior.opaque,
-                                  onTap: () {
-                                    widget.onCloseBottomSheet();
-                                    onLoadEscortDutyView();
-                                  },
-                                  child: Container(
-                                    width: screenWidth / 3,
-                                    padding: const EdgeInsets.symmetric(vertical: 8),
-                                    child: Column(
+                                Expanded(
+                                  child: GestureDetector(
+                                    behavior: HitTestBehavior.opaque,
+                                    onTap: () {
+                                      widget.onCloseBottomSheet();
+                                      onLoadEscortDutyView();
+                                    },
+                                    child: _menuItem(
+                                      icon:
+                                      'assets/images/dashboard-icons/escort-duty.png',
+                                      title: 'Escort_Duty'.tr(),
+                                      iconSize: iconSize,
+                                      iconTextGap: iconTextGap,
+                                      pathS: pathS,
+                                      isDarkMode: isDarkMode,
+                                    ),
+                                  ),
+                                ),
+                              ],
+                            ),
+
+                            SizedBox(height: verticalGap),
+
+                            // =================================================
+                            // ROW 6
+                            // Duty Verification
+                            // =================================================
+                            Row(
+                              children: [
+
+                                Expanded(
+                                  child: GestureDetector(
+                                    behavior: HitTestBehavior.opaque,
+                                    onTap: () {
+                                      onLoadDutyVerification();
+                                    },
+                                    child: _menuItem(
+                                      icon:
+                                      'assets/images/ic_duty_verification_clipboard.png',
+                                      title: 'Duty Verification',
+                                      iconSize: iconSize,
+                                      iconTextGap: iconTextGap,
+                                      pathS: pathS,
+                                      isDarkMode: isDarkMode,
+                                    ),
+                                  ),
+                                ),
+
+                                // Empty space
+                                Expanded(
+                                  child: const SizedBox(),
+                                ),
+
+                                Expanded(
+                                  child: const SizedBox(),
+                                ),
+                              ],
+                            ),
+
+                            // Extra bottom space before footer
+                            SizedBox(height: pathS / 2),
+                          ],
+                        ),
+                      ),
+                    ),
+
+                    // =========================================================
+                    // FIXED BOTTOM SECTION
+                    // App Version + Dark Mode
+                    // =========================================================
+                    Column(
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+
+                        // App Version
+                        Text(
+                          'app_version'.tr(),
+                          style: TextStyle(
+                            color: isDarkMode
+                                ? whiteColor
+                                : greyColor6,
+                            fontSize: pathS / 5.5,
+                            fontWeight: FontWeight.w600,
+                            fontFamily: 'Roboto',
+                          ),
+                          textAlign: TextAlign.center,
+                        ),
+
+                        Text(
+                          '${packageInfo.version}',
+                          style: TextStyle(
+                            color: isDarkMode
+                                ? whiteColor
+                                : greyColor6,
+                            fontSize: pathS / 5.5,
+                            fontWeight: FontWeight.w600,
+                            fontFamily: 'Roboto',
+                          ),
+                          textAlign: TextAlign.center,
+                        ),
+
+                        SizedBox(height: verticalGap / 2),
+
+                        // Divider
+                        Container(
+                          width: double.infinity,
+                          height: 1,
+                          color: isDarkMode
+                              ? greyColorDark
+                              : greyColor2,
+                        ),
+
+                        // Dark Mode
+                        Padding(
+                          padding: EdgeInsets.only(
+                            top: pathS / 4,
+                            bottom: pathS / 4,
+                          ),
+                          child: Row(
+                            mainAxisAlignment: MainAxisAlignment.center,
+                            children: [
+
+                              Text(
+                                'dark_mode'.tr(),
+                                style: TextStyle(
+                                  color: isDarkMode
+                                      ? whiteColor
+                                      : greyColor6,
+                                  fontSize: pathS / 5.5,
+                                  fontWeight: FontWeight.w600,
+                                  fontFamily: 'Roboto',
+                                ),
+                                textAlign: TextAlign.center,
+                              ),
+
+                              SizedBox(width: pathS / 5),
+
+                              GestureDetector(
+                                onTap: () {
+                                  themeProvider.toggleTheme();
+                                },
+                                child: Container(
+                                  decoration: BoxDecoration(
+                                    shape: BoxShape.rectangle,
+                                    borderRadius:
+                                    BorderRadius.circular(pathS / 4),
+                                    color: whiteColor,
+                                  ),
+                                  child: Padding(
+                                    padding: EdgeInsets.only(
+                                      left: pathS / 10,
+                                      right: pathS / 8,
+                                      top: pathS / 20,
+                                      bottom: pathS / 20,
+                                    ),
+                                    child: Row(
                                       mainAxisSize: MainAxisSize.min,
                                       children: [
-                                        Image.asset(
-                                          'assets/images/dashboard-icons/escort-duty.png',
-                                          width: iconSize,
-                                          height: iconSize,
-                                          color: isDarkMode ? whiteColor : greyColor6,
+
+                                        Container(
+                                          height: pathS / 4,
+                                          width: pathS / 4,
+                                          decoration: const BoxDecoration(
+                                            shape: BoxShape.circle,
+                                            image: DecorationImage(
+                                              image: AssetImage(
+                                                "assets/images/dashboard-icons/mode-red.png",
+                                              ),
+                                              fit: BoxFit.cover,
+                                            ),
+                                          ),
                                         ),
-                                        SizedBox(height: iconTextGap),
+
+                                        SizedBox(width: pathS / 20),
+
                                         Text(
-                                          'Escort_Duty'.tr(),
+                                          isDarkMode
+                                              ? 'off'.tr().toUpperCase()
+                                              : 'on'.tr().toUpperCase(),
                                           style: TextStyle(
-                                            color: isDarkMode ? whiteColor : greyColor6,
-                                            fontSize: pathS / 5,
+                                            color: greyColor7,
+                                            fontSize: pathS / 6,
                                             fontWeight: FontWeight.w500,
                                             fontFamily: 'Roboto',
                                           ),
@@ -769,296 +730,15 @@ class MenuItemViewState extends State<MenuItemView> {
                                     ),
                                   ),
                                 ),
-                              ],
-                            ),
-                            // Row(
-                            //   mainAxisAlignment: MainAxisAlignment.center,
-                            //   children: [
-                            //     // AKR - Coming Soon
-                            //     GestureDetector(
-                            //       behavior: HitTestBehavior.opaque,
-                            //       onTap: () {
-                            //         ScaffoldMessenger.of(context).showSnackBar(
-                            //           SnackBar(content: Text('coming_soon'.tr())),
-                            //         );
-                            //       },
-                            //       child: Container(
-                            //         width: screenWidth / 3,
-                            //         padding: const EdgeInsets.symmetric(vertical: 8),
-                            //         child: Column(
-                            //           mainAxisSize: MainAxisSize.min,
-                            //           children: [
-                            //             SizedBox(
-                            //               width: iconSize,
-                            //               height: iconSize,
-                            //               child: Stack(
-                            //                 clipBehavior: Clip.none,
-                            //                 children: [
-                            //                   Image.asset(
-                            //                     'assets/images/dashboard-icons/akr.png',
-                            //                     width: iconSize,
-                            //                     height: iconSize,
-                            //                     color: isDarkMode ? whiteColor : greyColor6,
-                            //                   ),
-                            //                   Positioned(
-                            //                     top: -4,
-                            //                     right: -4,
-                            //                     child: Container(
-                            //                       padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
-                            //                       decoration: BoxDecoration(
-                            //                         color: Colors.redAccent,
-                            //                         borderRadius: BorderRadius.circular(12),
-                            //                       ),
-                            //                       child: Text(
-                            //                         'coming_soon'.tr(),
-                            //                         style: const TextStyle(
-                            //                           color: Colors.white,
-                            //                           fontSize: 8,
-                            //                           fontWeight: FontWeight.bold,
-                            //                         ),
-                            //                       ),
-                            //                     ),
-                            //                   ),
-                            //                 ],
-                            //               ),
-                            //             ),
-                            //             SizedBox(height: iconTextGap),
-                            //             Text(
-                            //               'akr'.tr(),
-                            //               style: TextStyle(
-                            //                 color: isDarkMode ? whiteColor : greyColor6,
-                            //                 fontSize: pathS / 5,
-                            //                 fontWeight: FontWeight.w500,
-                            //                 fontFamily: 'Roboto',
-                            //               ),
-                            //               textAlign: TextAlign.center,
-                            //             ),
-                            //           ],
-                            //         ),
-                            //       ),
-                            //     ),
-                            //
-                            //     SizedBox(width: horizontalGap),
-                            //
-                            //     // // Sarvam Loan
-                            //     // GestureDetector(
-                            //     //   behavior: HitTestBehavior.opaque,
-                            //     //   onTap: () {
-                            //     //     widget.onCloseBottomSheet();
-                            //     //     onLoadSarvamLoanView();
-                            //     //   },
-                            //     //   child: Container(
-                            //     //     width: screenWidth / 3,
-                            //     //     padding: const EdgeInsets.symmetric(vertical: 8),
-                            //     //     child: Column(
-                            //     //       mainAxisSize: MainAxisSize.min,
-                            //     //       children: [
-                            //     //         Image.asset(
-                            //     //           'assets/images/dashboard-icons/sarvam_logo.png',
-                            //     //           width: iconSize,
-                            //     //           height: iconSize,
-                            //     //           color: isDarkMode ? whiteColor : greyColor6,
-                            //     //         ),
-                            //     //         SizedBox(height: iconTextGap),
-                            //     //         Text(
-                            //     //           'loan_by_sarvam'.tr(),
-                            //     //           style: TextStyle(
-                            //     //             color: isDarkMode ? whiteColor : greyColor6,
-                            //     //             fontSize: pathS / 5,
-                            //     //             fontWeight: FontWeight.w500,
-                            //     //             fontFamily: 'Roboto',
-                            //     //           ),
-                            //     //           textAlign: TextAlign.center,
-                            //     //         ),
-                            //     //       ],
-                            //     //     ),
-                            //     //   ),
-                            //     // ),
-                            //
-                            //
-                            //     // Sarvam Loan
-                            //     GestureDetector(
-                            //       behavior: HitTestBehavior.opaque,
-                            //       onTap: () {
-                            //         widget.onCloseBottomSheet();
-                            //         onLoadKoshDialogGetStartedConsent();
-                            //       },
-                            //       child: Container(
-                            //         width: screenWidth / 3,
-                            //         padding: const EdgeInsets.symmetric(vertical: 8),
-                            //         child: Column(
-                            //           mainAxisSize: MainAxisSize.min,
-                            //           children: [
-                            //             Image.asset(
-                            //               'assets/images/KoshImage/Earn with Kosh.png',
-                            //               width: iconSize,
-                            //               height: iconSize,
-                            //               color: isDarkMode ? whiteColor : greyColor6,
-                            //             ),
-                            //             SizedBox(height: iconTextGap),
-                            //             Text(
-                            //               'Earn with Kosh'.tr(),
-                            //               style: TextStyle(
-                            //                 color: isDarkMode ? whiteColor : greyColor6,
-                            //                 fontSize: pathS / 5,
-                            //                 fontWeight: FontWeight.w500,
-                            //                 fontFamily: 'Roboto',
-                            //               ),
-                            //               textAlign: TextAlign.center,
-                            //             ),
-                            //           ],
-                            //         ),
-                            //       ),
-                            //     ),
-                            //
-                            //
-                            //
-                            //     SizedBox(width: horizontalGap),
-                            //
-                            //     // Escort Duty
-                            //     GestureDetector(
-                            //       behavior: HitTestBehavior.opaque,
-                            //       onTap: () {
-                            //         widget.onCloseBottomSheet();
-                            //         onLoadEscortDutyView();
-                            //       },
-                            //       child: Container(
-                            //         width: screenWidth / 3,
-                            //         padding: const EdgeInsets.symmetric(vertical: 8),
-                            //         child: Column(
-                            //           mainAxisSize: MainAxisSize.min,
-                            //           children: [
-                            //             Image.asset(
-                            //               'assets/images/dashboard-icons/escort-duty.png',
-                            //               width: iconSize,
-                            //               height: iconSize,
-                            //               color: isDarkMode ? whiteColor : greyColor6,
-                            //             ),
-                            //             SizedBox(height: iconTextGap),
-                            //             Text(
-                            //               'Escort_Duty'.tr(),
-                            //               style: TextStyle(
-                            //                 color: isDarkMode ? whiteColor : greyColor6,
-                            //                 fontSize: pathS / 5,
-                            //                 fontWeight: FontWeight.w500,
-                            //                 fontFamily: 'Roboto',
-                            //               ),
-                            //               textAlign: TextAlign.center,
-                            //             ),
-                            //           ],
-                            //         ),
-                            //       ),
-                            //     ),
-                            //   ],
-                            // ),
-
-
-                          ],
+                              ),
+                            ],
+                          ),
                         ),
-                      ),
-                      Column(
-                        mainAxisAlignment: MainAxisAlignment.end,
-                        children: [
-                          Text(
-                            'app_version'.tr(),
-                            style: TextStyle(
-                              color: isDarkMode ? whiteColor:greyColor6,
-                              fontSize: pathS / 5.5,
-                              fontWeight: FontWeight.w600,
-                              fontFamily: 'Roboto',
-                            ),
-                            textAlign: TextAlign.center,
-                          ),
-                          Text(
-                            '${packageInfo.version}',
-                            // '${packageInfo.version}(${packageInfo.buildNumber})',
-
-                            style: TextStyle(
-                              color: isDarkMode ? whiteColor:greyColor6,
-                              fontSize: pathS / 5.5,
-                              fontWeight: FontWeight.w600,
-                              fontFamily: 'Roboto',
-                            ),
-                            textAlign: TextAlign.center,
-                          ),
-                          SizedBox(height: verticalGap/2),
-                          Container(
-                            width: screenWidth,
-                            height: 1,
-                            color: isDarkMode? greyColorDark:greyColor2,
-                          ),
-                          Padding(
-                            padding: EdgeInsets.only(top: pathS/4,bottom: pathS/4),
-                            child:  Row(
-                              mainAxisAlignment: MainAxisAlignment.center,
-                              children: [
-                                Text(
-                                  'dark_mode'.tr(),
-                                  style: TextStyle(
-                                    color: isDarkMode ? whiteColor:greyColor6,
-                                    fontSize: pathS / 5.5,
-                                    fontWeight: FontWeight.w600,
-                                    fontFamily: 'Roboto',
-                                  ),
-                                  textAlign: TextAlign.center,
-                                ),
-                                SizedBox(width: pathS/5),
-                                GestureDetector(
-                                  onTap: (){
-                                    themeProvider.toggleTheme();
-                                  },
-                                  child: Container(
-                                    decoration: BoxDecoration(
-                                      shape: BoxShape.rectangle,
-                                      borderRadius: BorderRadius.circular(pathS / 4),
-                                      color: isDarkMode ?  whiteColor:whiteColor,
-                                    ),
-                                    child:Padding(
-                                      padding: EdgeInsets.only(left: pathS/10,right: pathS/8,top: pathS/20,bottom: pathS/20), // Adjust top and left as needed
-                                      child: Row(
-                                        children: [
-                                          Container(
-                                            height: pathS/4,
-                                            width: pathS/4,
-                                            decoration: BoxDecoration(
-                                              // shape: BoxShape.circle,
-                                              image: DecorationImage(
-                                                image: AssetImage("assets/images/dashboard-icons/mode-red.png"),
-                                                fit: BoxFit.cover,
-                                              ),
-                                            ),
-                                          ),
-                                          SizedBox(width: pathS/20),
-
-                                          Text(
-                                            isDarkMode ? 'off'.tr().toUpperCase():'on'.tr().toUpperCase(),
-                                            style: TextStyle(
-                                              color: isDarkMode ?  greyColor7:greyColor7,
-                                              fontSize: pathS / 6,
-                                              fontWeight: FontWeight.w500,
-                                              fontFamily: 'Roboto',
-                                            ),
-                                            textAlign: TextAlign.center,
-                                          ),
-                                        ],
-                                      ),
-                                    ),
-                                  ),
-                                ),
-
-                              ],
-                            ),
-
-                          ),
-
-                        ],
-                      ),
-
-
-                    ],
-                  ),
-                )
-
+                      ],
+                    ),
+                  ],
+                ),
+              ),
             ),
           ),
         );
@@ -1066,7 +746,56 @@ class MenuItemViewState extends State<MenuItemView> {
     );
 
   }
+  Widget _menuItem({
+    required String icon,
+    required String title,
+    required double iconSize,
+    required double iconTextGap,
+    required double pathS,
+    required bool isDarkMode,
+  }) {
+    return Container(
+      width: double.infinity,
+      padding: const EdgeInsets.symmetric(
+        vertical: 8,
+      ),
+      child: Column(
+        mainAxisSize: MainAxisSize.min,
+        children: [
 
+          SizedBox(
+            width: iconSize,
+            height: iconSize,
+            child: Image.asset(
+              icon,
+              width: iconSize,
+              height: iconSize,
+              color: isDarkMode
+                  ? whiteColor
+                  : greyColor6,
+            ),
+          ),
+
+          SizedBox(height: iconTextGap),
+
+          Text(
+            title,
+            style: TextStyle(
+              color: isDarkMode
+                  ? whiteColor
+                  : greyColor6,
+              fontSize: pathS / 5,
+              fontWeight: FontWeight.w500,
+              fontFamily: 'Roboto',
+            ),
+            textAlign: TextAlign.center,
+            maxLines: 2,
+            overflow: TextOverflow.ellipsis,
+          ),
+        ],
+      ),
+    );
+  }
   void initialSetup() {
 
   }
@@ -1193,6 +922,21 @@ class MenuItemViewState extends State<MenuItemView> {
       builder: (context) {
         return KoshDialogGetStartedConsent();
       },
+    );
+    // Navigator.push(
+    //   context,
+    //   MaterialPageRoute(
+    //     builder: (context) => KoshDialogGetStartedConsent(),
+    //   ),
+    // );
+  }
+  void onLoadDutyVerification(){
+
+    Navigator.push(
+      context,
+      MaterialPageRoute(
+        builder: (context) => DutySummaryScreen(user: "AGR002430", deviceToken: "", password: "5054",mPin: "5054",),
+      ),
     );
     // Navigator.push(
     //   context,

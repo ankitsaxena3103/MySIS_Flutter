@@ -1,45 +1,42 @@
+import 'dart:ui';
+
 import 'package:flutter/cupertino.dart';
+import 'package:flutter/material.dart';
+
 import 'package:flutter/material.dart';
 
 class SignaturePainter extends CustomPainter {
   final List<Offset?> points;
+  final Color color;
+  final double strokeWidth;
 
   SignaturePainter({
     required this.points,
+    this.color = Colors.black,
+    this.strokeWidth = 3.0,
   });
 
   @override
-  void paint(
-    Canvas canvas,
-    Size size,
-  ) {
+  void paint(Canvas canvas, Size size) {
     final paint = Paint()
-      ..color = Colors.black
-      ..strokeWidth = 2.0
+      ..color = color
+      ..strokeWidth = strokeWidth
       ..strokeCap = StrokeCap.round
-      ..strokeJoin = StrokeJoin.round
       ..style = PaintingStyle.stroke;
 
     for (int i = 0; i < points.length - 1; i++) {
-      final current = points[i];
-      final next = points[i + 1];
+      final p1 = points[i];
+      final p2 = points[i + 1];
 
-      if (current == null || next == null) {
-        continue;
+      if (p1 != null && p2 != null) {
+        canvas.drawLine(p1, p2, paint);
+      } else if (p1 != null && p2 == null) {
+        // single tap -> draw a dot
+        canvas.drawPoints(PointMode.points, [p1], paint);
       }
-
-      canvas.drawLine(
-        current,
-        next,
-        paint,
-      );
     }
   }
 
   @override
-  bool shouldRepaint(
-    covariant SignaturePainter oldDelegate,
-  ) {
-    return oldDelegate.points != points;
-  }
+  bool shouldRepaint(covariant SignaturePainter oldDelegate) => true;
 }

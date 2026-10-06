@@ -1,18 +1,28 @@
+import 'dart:io';
 import 'dart:ui' as ui;
 
+import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/material.dart';
 import 'package:mysis/DutyVerification/AttendanceConsentScreen/AttendanceConsentPdf.dart';
 import 'package:mysis/DutyVerification/AttendanceConsentScreen/SignaturePainter.dart';
-import 'package:mysis/DutyVerification/DutySummaryScreen/DutySummaryScreen.dart';
+import 'package:mysis/DutyVerification/DutySummaryModule/DutySummaryScreen.dart';
 import 'package:mysis/constants/app_colors.dart';
 import 'package:flutter/services.dart';
 
 import 'package:flutter/rendering.dart';
 import 'package:printing/printing.dart';
 
-class AttendanceConsentScreen extends StatefulWidget {
-  const AttendanceConsentScreen({super.key});
+import 'SignatureScreenFile.dart';
 
+class AttendanceConsentScreen extends StatefulWidget {
+  String?startDate;
+  String?endDate;
+
+   AttendanceConsentScreen({
+    super.key,
+    required this.startDate,
+    required this.endDate,
+  });
   @override
   State<AttendanceConsentScreen> createState() =>
       _AttendanceConsentScreenState();
@@ -24,7 +34,8 @@ class _AttendanceConsentScreenState extends State<AttendanceConsentScreen> {
   // ==========================================================
 
   final List<Offset?> _signaturePoints = [];
-
+  File? _signatureFile;
+  DateTime? _signedAt;
   bool _isSigned = false;
 
   final GlobalKey _consentKey = GlobalKey();
@@ -39,6 +50,24 @@ class _AttendanceConsentScreenState extends State<AttendanceConsentScreen> {
   final String period = "11 Sep - 20 Sep 26";
 
   List<ui.Offset?>? get savedSignature => null;
+
+  Future<void> _openSignatureScreen() async {
+    final File? result = await Navigator.push<File?>(
+      context,
+      MaterialPageRoute(builder: (_) => const SignatureScreenFile()),
+    );
+
+    if (result != null) {
+      // delete the old file to avoid piling up storage
+      if (_signatureFile != null && await _signatureFile!.exists()) {
+        await _signatureFile!.delete();
+      }
+      setState(() {
+        _signatureFile = result;
+        _signedAt = DateTime.now();
+      });
+    }
+  }
 
   Future<Uint8List?> _captureConsentScreen() async {
     try {
@@ -669,105 +698,209 @@ class _AttendanceConsentScreenState extends State<AttendanceConsentScreen> {
         // SIGNATURE BOX
         // ----------------------------------------------------------
 
-        Container(
-          width: double.infinity,
-          height: 100,
-          decoration: BoxDecoration(
-            color: AppColors.white,
-            border: Border.all(
-              color: AppColors.border,
-              width: 0.8,
+        // Container(
+        //   width: double.infinity,
+        //   height: 100,
+        //   decoration: BoxDecoration(
+        //     color: AppColors.white,
+        //     border: Border.all(
+        //       color: AppColors.border,
+        //       width: 0.8,
+        //     ),
+        //     borderRadius: BorderRadius.circular(6),
+        //   ),
+        //   child: Stack(
+        //     children: [
+        //       // ==============================================
+        //       // SIGNATURE CANVAS
+        //       // ==============================================
+        //
+        //       // ==============================================
+        //       // DATE / TIME
+        //       // ==============================================
+        //
+        //       Positioned(
+        //         right: 10,
+        //         bottom: 12,
+        //         child: Column(
+        //           crossAxisAlignment: CrossAxisAlignment.end,
+        //           children: [
+        //             Text(
+        //               "23 Sep 2026 13:27",
+        //               style: TextStyle(
+        //                 fontSize: 10,
+        //                 fontWeight: FontWeight.w700,
+        //                 color: AppColors.textPrimary,
+        //               ),
+        //             ),
+        //             const SizedBox(height: 3),
+        //             Text(
+        //               "Date / दिनांक",
+        //               style: TextStyle(
+        //                 fontSize: 9.5,
+        //                 fontWeight: FontWeight.w600,
+        //                 color: AppColors.textPrimary,
+        //               ),
+        //             ),
+        //           ],
+        //         ),
+        //       ),
+        //
+        //       // ==============================================
+        //       // SIGN HERE TEXT
+        //       // ==============================================
+        //
+        //       if (!_isSigned)
+        //         Positioned(
+        //           left: 15,
+        //           bottom: 10,
+        //           child: Text(
+        //             "Sign here / यहाँ हस्ताक्षर करें",
+        //             style: TextStyle(
+        //               fontSize: 9,
+        //               color: AppColors.textSecondary,
+        //             ),
+        //           ),
+        //         ),
+        //     ],
+        //   ),
+        // ),
+        // Padding(
+        //   padding: const EdgeInsets.all(16),
+        //   child: Column(
+        //     crossAxisAlignment: CrossAxisAlignment.start,
+        //     children: [
+        //       const Text('Signature / हस्ताक्षर',
+        //           style: TextStyle(fontWeight: FontWeight.w600)),
+        //       const SizedBox(height: 8),
+        //
+        //       GestureDetector(
+        //         onTap: _openSignatureScreen,
+        //         child: Container(
+        //           height: 150,
+        //           width: double.infinity,
+        //           decoration: BoxDecoration(
+        //             color: Colors.white,
+        //             border: Border.all(color: Colors.grey.shade400),
+        //             borderRadius: BorderRadius.circular(8),
+        //           ),
+        //           child: _signatureFile == null
+        //               ? const Center(
+        //             child: Text('Tap to sign / हस्ताक्षर करने के लिए टैप करें'),
+        //           )
+        //               : Padding(
+        //             padding: const EdgeInsets.all(8),
+        //             child: Image.file(
+        //               _signatureFile!,
+        //               fit: BoxFit.contain,
+        //             ),
+        //           ),
+        //         ),
+        //       ),
+        //     ],
+        //   ),
+        // ),
+
+        Padding(
+          padding: const EdgeInsets.all(16),
+          child: GestureDetector(
+            onTap: _openSignatureScreen,
+            child: Container(
+              height: 190,
+              width: double.infinity,
+              decoration: BoxDecoration(
+                color: const Color(0xFFFFFFFFF),
+                border: Border.all(color: Colors.grey.shade400),
+                borderRadius: BorderRadius.circular(14),
+              ),
+              padding: const EdgeInsets.fromLTRB(14, 10, 14, 10),
+              child: Column(
+                children: [
+                  // Signature area (takes all remaining space)
+                  Expanded(
+                    child: Center(
+                      child: _signatureFile == null
+                          ? const SizedBox.shrink()
+                          : Image.file(_signatureFile!, fit: BoxFit.contain),
+                    ),
+                  ),
+
+                  const SizedBox(height: 6),
+
+                  // Footer row: labels never overlap because each side is flexible
+                  Row(
+                    crossAxisAlignment: CrossAxisAlignment.end,
+                    children: [
+                      // Left: Sign here
+                      Expanded(
+                        flex: 5,
+                        child: RichText(
+                          text: const TextSpan(
+                            style: TextStyle(
+                                fontSize: 14,
+                                color: Colors.black87,
+                                height: 1.3),
+                            children: [
+                              TextSpan(
+                                text: 'Sign here /\n',
+                                style: TextStyle(fontWeight: FontWeight.w700),
+                              ),
+                              TextSpan(text: 'यहाँ हस्ताक्षर करें'),
+                            ],
+                          ),
+                        ),
+                      ),
+
+                      const SizedBox(width: 12),
+
+                      // Right: Date value + label
+                      Expanded(
+                        flex: 5,
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.end,
+                          mainAxisSize: MainAxisSize.min,
+                          children: [
+                            FittedBox(
+                              fit: BoxFit.scaleDown,
+                              alignment: Alignment.centerRight,
+                              child: Text(
+                                DateFormat('dd MMM yyyy HH:mm')
+                                    .format(_signedAt ?? DateTime.now()),
+                                style: const TextStyle(
+                                  fontSize: 16,
+                                  fontWeight: FontWeight.w700,
+                                  color: Colors.black87,
+                                ),
+                              ),
+                            ),
+                            const SizedBox(height: 2),
+                            RichText(
+                              textAlign: TextAlign.right,
+                              text: const TextSpan(
+                                style: TextStyle(
+                                    fontSize: 14,
+                                    color: Colors.black87,
+                                    height: 1.3),
+                                children: [
+                                  TextSpan(
+                                    text: 'Date / ',
+                                    style:
+                                        TextStyle(fontWeight: FontWeight.w700),
+                                  ),
+                                  TextSpan(text: 'दिनांक'),
+                                ],
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
+                    ],
+                  ),
+                ],
+              ),
             ),
-            borderRadius: BorderRadius.circular(6),
-          ),
-          child: Stack(
-            children: [
-              // ==============================================
-              // SIGNATURE CANVAS
-              // ==============================================
-
-              Positioned.fill(
-                child: GestureDetector(
-                  onPanStart: (details) {
-                    setState(() {
-                      _isSigned = true;
-
-                      _signaturePoints.add(
-                        details.localPosition,
-                      );
-                    });
-                  },
-                  onPanUpdate: (details) {
-                    setState(() {
-                      _signaturePoints.add(
-                        details.localPosition,
-                      );
-                    });
-                  },
-                  onPanEnd: (details) {
-                    setState(() {
-                      _signaturePoints.add(null);
-                    });
-                  },
-                  child: CustomPaint(
-                    painter: SignaturePainter(
-                      points: _signaturePoints,
-                    ),
-                  ),
-                ),
-              ),
-
-              // ==============================================
-              // DATE / TIME
-              // ==============================================
-
-              Positioned(
-                right: 10,
-                bottom: 12,
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.end,
-                  children: [
-                    Text(
-                      "23 Sep 2026 13:27",
-                      style: TextStyle(
-                        fontSize: 10,
-                        fontWeight: FontWeight.w700,
-                        color: AppColors.textPrimary,
-                      ),
-                    ),
-                    const SizedBox(height: 3),
-                    Text(
-                      "Date / दिनांक",
-                      style: TextStyle(
-                        fontSize: 9.5,
-                        fontWeight: FontWeight.w600,
-                        color: AppColors.textPrimary,
-                      ),
-                    ),
-                  ],
-                ),
-              ),
-
-              // ==============================================
-              // SIGN HERE TEXT
-              // ==============================================
-
-              if (!_isSigned)
-                Positioned(
-                  left: 15,
-                  bottom: 10,
-                  child: Text(
-                    "Sign here / यहाँ हस्ताक्षर करें",
-                    style: TextStyle(
-                      fontSize: 9,
-                      color: AppColors.textSecondary,
-                    ),
-                  ),
-                ),
-            ],
           ),
         ),
-
         const SizedBox(height: 5),
 
         // ----------------------------------------------------------
@@ -840,7 +973,14 @@ class _AttendanceConsentScreenState extends State<AttendanceConsentScreen> {
           Navigator.pushReplacement(
             context,
             MaterialPageRoute(
-              builder: (context) => const DutySummaryScreen(),
+              builder: (context) =>  DutySummaryScreen(
+                isCompleted: true,
+                user: "",
+                deviceToken: "",
+                password: "",
+                mPin: "",
+                
+              ),
             ),
           );
         },
