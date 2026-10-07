@@ -3,16 +3,7 @@ import 'package:firebase_core/firebase_core.dart';
 import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:flutter/material.dart';
 import 'package:mysis/DutyVerification/AttendanceConsentScreen/AttendanceConsentScreen.dart';
-import 'package:mysis/DutyVerification/DutySummaryScreen/DutySummaryScreen.dart';
-import 'package:mysis/DutyVerification/Duty_verification.dart';
-import 'package:mysis/DutyVerification/Missing_Claim.dart';
-import 'package:mysis/DutyVerification/RaiseComplaintScreen/RaiseComplaint.dart';
-import 'package:mysis/DutyVerification/SelectShiftScreen.dart';
-import 'package:mysis/KoshLoan/KoshAlternateWhatsappDialog.dart';
-import 'package:mysis/KoshLoan/KoshBottomSheet.dart';
-import 'package:mysis/KoshLoan/ReferAndEarnScreen.dart';
-import 'package:mysis/KoshLoan/koshdialoggetstartedconsent.dart';
-import 'package:mysis/KoshLoan/KoshSuccessScreen.dart';
+import 'package:mysis/DutyVerification/DutySummaryModule/DutySummaryScreen.dart';
 import 'package:mysis/SharedClasses/LanguageProvider.dart';
 import 'package:mysis/SharedClasses/Preferences.dart';
 import 'package:mysis/Language/SelectLanguageView.dart';
@@ -158,8 +149,13 @@ class _MyAppState extends State<MyApp> with WidgetsBindingObserver {
       supportedLocales: context.supportedLocales,
       locale: context.locale,
       navigatorObservers: [routeObserver],
-    //home:  MyHomePage(),
-      home:  MissingClaimScreen(),
+      home: MyHomePage(),
+      // home:  DutySummaryScreen(user: "AGR002430", deviceToken: "", password: "5054",mPin: "5054",),
+      // home:  AttendanceConsentScreen(
+      //   startDate: "2026-09-23",
+      //   endDate: "2026-09-31",
+      //
+      // ),
     );
   }
 }

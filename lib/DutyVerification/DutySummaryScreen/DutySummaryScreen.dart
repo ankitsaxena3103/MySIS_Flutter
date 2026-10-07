@@ -536,12 +536,12 @@ class _DutySummaryScreenState
           onTap: () {
 
 
-            Navigator.push(
-              context,
-              MaterialPageRoute(
-                builder: (context) => const AttendanceConsentScreen(),
-              ),
-            );
+            // Navigator.push(
+            //   context,
+            //   MaterialPageRoute(
+            //     builder: (context) =>  AttendanceConsentScreen(),
+            //   ),
+            // );
 
             // NEXT SCREEN
             // Navigator.push(...);

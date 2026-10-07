@@ -1,6 +1,6 @@
 import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/material.dart';
-import 'package:mysis/DutyVerification/DutySummaryScreen/DutySummaryScreen.dart';
+import 'package:mysis/DutyVerification/DutySummaryModule/DutySummaryScreen.dart';
 import 'package:mysis/constants/app_colors.dart';
 
 
@@ -14,12 +14,12 @@ class SubmitComplaintButton extends StatelessWidget {
       height: 40,
       child: ElevatedButton.icon(
         onPressed: () {
-          Navigator.push(
-            context,
-            MaterialPageRoute(
-              builder: (context) => const DutySummaryScreen(),
-            ),
-          );
+          // Navigator.push(
+          //   context,
+          //   MaterialPageRoute(
+          //     builder: (context) => const DutySummaryScreen(),
+          //   ),
+          // );
         },
         icon: const Icon(
           Icons.send_outlined,
