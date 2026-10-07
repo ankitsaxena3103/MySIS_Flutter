@@ -1,3 +1,4 @@
+import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/material.dart';
 import 'package:mysis/constants/app_colors.dart';
 
@@ -22,7 +23,7 @@ class SelectUnitScreen extends StatelessWidget {
           ),
         ),
         title: Text(
-          "Select Unit",
+          'select_unit'.tr(),
           style: TextStyle(
             fontSize: 17,
             fontWeight: FontWeight.w600,

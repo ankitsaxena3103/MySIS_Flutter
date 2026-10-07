@@ -1,3 +1,4 @@
+import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/material.dart';
 import 'package:mysis/DutyVerification/Duty_verification.dart';
 
@@ -47,7 +48,7 @@ class _MissingClaimScreenState extends State<MissingClaimScreen> {
           ),
         ),
         title: Text(
-          "Missing Claim",
+          'missing_claim'.tr(),
           style: TextStyle(
             fontSize: 18,
             fontWeight: FontWeight.w600,
@@ -148,7 +149,7 @@ class _MissingClaimScreenState extends State<MissingClaimScreen> {
               ),
               const SizedBox(width: 8),
               Text(
-                "Claim Date",
+                'claim_date'.tr(),
                 style: TextStyle(
                   fontSize: 13,
                   fontWeight: FontWeight.w700,
@@ -197,7 +198,7 @@ class _MissingClaimScreenState extends State<MissingClaimScreen> {
                     mainAxisAlignment: MainAxisAlignment.center,
                     children: [
                       Text(
-                        "Date (can't be changed)",
+                        'date_cant_be_changed'.tr(),
                         style: TextStyle(
                           fontSize: 12,
                           color: AppColors.textSecondary,
@@ -266,7 +267,7 @@ class _MissingClaimScreenState extends State<MissingClaimScreen> {
               ),
               const SizedBox(width: 8),
               Text(
-                "Unit & Shift & Post Details",
+                'shift_post_details'.tr(),
                 style: TextStyle(
                   fontSize: 13,
                   fontWeight: FontWeight.w700,
@@ -402,7 +403,7 @@ class _MissingClaimScreenState extends State<MissingClaimScreen> {
               ),
               const SizedBox(width: 8),
               Text(
-                "Duty Time",
+                'duty_time'.tr(),
                 style: TextStyle(
                   fontSize: 13,
                   fontWeight: FontWeight.w700,
@@ -562,7 +563,7 @@ class _MissingClaimScreenState extends State<MissingClaimScreen> {
               ),
               const SizedBox(width: 8),
               Text(
-                "REASON FOR CLAIM",
+                'reason_for_claim'.tr(),
                 style: TextStyle(
                   fontSize: 12,
                   fontWeight: FontWeight.w700,
@@ -741,9 +742,9 @@ class _MissingClaimScreenState extends State<MissingClaimScreen> {
         ),
 
         // 🔥 BUTTON TEXT
-        label: const Text(
-          "SUBMIT MISSING CLAIM",
-          style: TextStyle(
+        label: Text(
+          'submit_missing_claim'.tr(),
+          style: const TextStyle(
             fontSize: 13,
             fontWeight: FontWeight.w700,
             letterSpacing: 0.7,

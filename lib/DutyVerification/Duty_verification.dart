@@ -1,3 +1,4 @@
+import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/material.dart';
 import 'package:mysis/DutyVerification/Missing_Claim.dart';
 import 'package:mysis/DutyVerification/RaiseComplaintScreen/RaiseComplaint.dart';
@@ -80,7 +81,7 @@ class _DutyVerificationScreenState extends State<DutyVerificationScreen> {
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
                       Text(
-                        'Duty Verification',
+                    'duty_verification'.tr(),
                         style: TextStyle(
                           fontSize: 19,
                           fontWeight: FontWeight.w600,
@@ -350,7 +351,7 @@ class _DutyVerificationScreenState extends State<DutyVerificationScreen> {
                                           CrossAxisAlignment.start,
                                       children: [
                                         Text(
-                                          'Duty Out not recorded',
+                                          'duty_out_not_recorded'.tr(),
                                           style: TextStyle(
                                             fontSize: 16,
                                             fontWeight: FontWeight.w700,
@@ -359,11 +360,7 @@ class _DutyVerificationScreenState extends State<DutyVerificationScreen> {
                                         ),
                                         const SizedBox(height: 5),
                                         Text(
-                                          'You did not mark Duty Out. '
-                                          'Please mark Duty Out before '
-                                          'leaving your shift. If you '
-                                          'missed it, raise a Missing '
-                                          'Claim.',
+                                          'duty_out_not_recorded_message'.tr(),
                                           style: TextStyle(
                                             fontSize: 13,
                                             height: 1.35,
@@ -372,10 +369,7 @@ class _DutyVerificationScreenState extends State<DutyVerificationScreen> {
                                         ),
                                         const SizedBox(height: 5),
                                         Text(
-                                          'आपने Duty Out नहीं किया। '
-                                          'शिफ्ट छोड़ने से पहले Duty Out '
-                                          'ज़रूर करें। अगर छूट गया है, '
-                                          'तो Missing Claim डालें।',
+                                          'late_duty_in_duty_out_not_recorded'.tr(),
                                           style: TextStyle(
                                             fontSize: 13,
                                             height: 1.4,
@@ -482,7 +476,7 @@ class _DutyVerificationScreenState extends State<DutyVerificationScreen> {
                                 Expanded(
                                   flex: 4,
                                   child: _timeBox(
-                                    title: 'Duty In',
+                                    title: 'Duty In'.tr(),
                                     time: '02:00 PM',
                                     background: AppColors.green100,
                                   ),
@@ -491,7 +485,7 @@ class _DutyVerificationScreenState extends State<DutyVerificationScreen> {
                                 Expanded(
                                   flex: 4,
                                   child: _timeBox(
-                                    title: 'Duty Out',
+                                    title: 'Duty Out'.tr(),
                                     time: '10:00 PM',
                                     background: AppColors.red100,
                                   ),
@@ -516,7 +510,7 @@ class _DutyVerificationScreenState extends State<DutyVerificationScreen> {
                                   ),
                                   const SizedBox(width: 7),
                                   Text(
-                                    'Status :',
+                                    'status_tag. :'.tr(),
                                     style: TextStyle(
                                       fontSize: 13,
                                       color: AppColors.textSecondary,
@@ -524,7 +518,7 @@ class _DutyVerificationScreenState extends State<DutyVerificationScreen> {
                                   ),
                                   const SizedBox(width: 5),
                                   Text(
-                                    'Attendance verified',
+                                    'attendance_verified'.tr(),
                                     style: TextStyle(
                                       fontSize: 13,
                                       fontWeight: FontWeight.w700,
@@ -577,9 +571,9 @@ class _DutyVerificationScreenState extends State<DutyVerificationScreen> {
                         Icons.check_circle_outline,
                         size: 22,
                       ),
-                      label: const Text(
-                        'VERIFIED & NEXT',
-                        style: TextStyle(
+                      label: Text(
+                        'verified_next'.tr(),
+                        style: const TextStyle(
                           fontSize: 15,
                           fontWeight: FontWeight.w700,
                           letterSpacing: 1,
@@ -629,9 +623,9 @@ class _DutyVerificationScreenState extends State<DutyVerificationScreen> {
                           borderRadius: BorderRadius.circular(13),
                         ),
                       ),
-                      child: const Text(
-                        'MISSING CLAIM',
-                        style: TextStyle(
+                      child: Text(
+                        'missing_claim'.tr(),
+                        style: const TextStyle(
                           fontSize: 14,
                           fontWeight: FontWeight.w700,
                           letterSpacing: 1,
@@ -655,9 +649,9 @@ class _DutyVerificationScreenState extends State<DutyVerificationScreen> {
                     Icons.arrow_forward_rounded,
                     size: 22,
                   ),
-                  label: const Text(
-                    'CONTINUE',
-                    style: TextStyle(
+                  label: Text(
+                    'Duty_Verification_continue'.tr(),
+                    style: const TextStyle(
                       fontSize: 15,
                       fontWeight: FontWeight.w700,
                       letterSpacing: 1,
@@ -699,7 +693,7 @@ class _DutyVerificationScreenState extends State<DutyVerificationScreen> {
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Text(
-            'Shift Timing',
+            'shift_timing'.tr(),
             style: TextStyle(
               fontSize: 10,
               fontWeight: FontWeight.w500,

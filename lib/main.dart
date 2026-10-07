@@ -158,8 +158,8 @@ class _MyAppState extends State<MyApp> with WidgetsBindingObserver {
       supportedLocales: context.supportedLocales,
       locale: context.locale,
       navigatorObservers: [routeObserver],
-      // home:  MyHomePage(),
-      home:  DutyVerificationScreen(),
+    //home:  MyHomePage(),
+      home:  MissingClaimScreen(),
     );
   }
 }

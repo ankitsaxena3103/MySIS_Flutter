@@ -1,3 +1,5 @@
+import 'package:easy_localization/easy_localization.dart'
+    show StringTranslateExtension;
 import 'package:flutter/material.dart';
 import 'package:mysis/constants/app_colors.dart';
 
@@ -46,16 +48,16 @@ class _ComplaintDetailsCardState extends State<ComplaintDetailsCard> {
           // TITLE
 
           Row(
-            children: const [
-              Icon(
+            children: [
+              const Icon(
                 Icons.description_outlined,
                 color: AppColors.red700,
                 size: 22,
               ),
-              SizedBox(width: 10),
+              const SizedBox(width: 10),
               Text(
-                'COMPLAINT DETAILS',
-                style: TextStyle(
+                'complaint_details'.tr(),
+                style: const TextStyle(
                   color: AppColors.red700,
                   fontSize: 14,
                   fontWeight: FontWeight.w700,
@@ -69,9 +71,9 @@ class _ComplaintDetailsCardState extends State<ComplaintDetailsCard> {
 
           // CATEGORY
 
-          const Text(
-            'Complaint Category *',
-            style: TextStyle(
+          Text(
+            'complaint_category *'.tr(),
+            style: const TextStyle(
               color: AppColors.textPrimary,
               fontSize: 14,
               fontWeight: FontWeight.w600,
@@ -143,9 +145,9 @@ class _ComplaintDetailsCardState extends State<ComplaintDetailsCard> {
 
           // PROBLEM
 
-          const Text(
-            'Tell us your problem *',
-            style: TextStyle(
+          Text(
+            'describe_issue *'.tr(),
+            style: const TextStyle(
               color: AppColors.textPrimary,
               fontSize: 14,
               fontWeight: FontWeight.w600,
@@ -162,14 +164,12 @@ class _ComplaintDetailsCardState extends State<ComplaintDetailsCard> {
               color: AppColors.textPrimary,
               fontSize: 16,
             ),
-
             decoration: InputDecoration(
-              hintText: 'Type your problem here, OR use the voice note...',
+              hintText: 'issue_hint...'.tr(),
               hintStyle: const TextStyle(
                 color: AppColors.textSecondary,
                 fontSize: 16,
               ),
-
               contentPadding: const EdgeInsets.all(16),
               border: OutlineInputBorder(
                 borderRadius: BorderRadius.circular(14),
@@ -177,14 +177,12 @@ class _ComplaintDetailsCardState extends State<ComplaintDetailsCard> {
                   color: AppColors.border,
                 ),
               ),
-
               enabledBorder: OutlineInputBorder(
                 borderRadius: BorderRadius.circular(14),
                 borderSide: const BorderSide(
                   color: AppColors.border,
                 ),
               ),
-
               focusedBorder: OutlineInputBorder(
                 borderRadius: BorderRadius.circular(14),
                 borderSide: const BorderSide(

@@ -1,3 +1,4 @@
+import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/material.dart';
 import 'package:mysis/DutyVerification/AttendanceConsentScreen/AttendanceConsentScreen.dart';
 import 'package:mysis/constants/app_colors.dart';
@@ -105,13 +106,13 @@ class _DutySummaryScreenState
 
           icon: Icon(
             Icons.arrow_back_ios_new,
-            size: 20,
+            size: 15,
             color: AppColors.red,
           ),
         ),
 
         title: Text(
-          "Duty Summary",
+          'duty_summary'.tr(),
           style: TextStyle(
             fontSize: 18,
             fontWeight: FontWeight.w500,
@@ -203,7 +204,7 @@ class _DutySummaryScreenState
 
           Expanded(
             child: _summaryBox(
-              title: "Duty Approved",
+              title: 'duty_approved'.tr(),
               count: "0/10",
               color: AppColors.green700,
               background:
@@ -220,7 +221,7 @@ class _DutySummaryScreenState
 
           Expanded(
             child: _summaryBox(
-              title: "Claim",
+              title: 'claim'.tr(),
               count: "0/10",
               color: AppColors.white,
               background:
@@ -237,7 +238,7 @@ class _DutySummaryScreenState
 
           Expanded(
             child: _summaryBox(
-              title: "Rejected",
+              title: 'rejected_tag'.tr(),
               count: "0/10",
               color: AppColors.white,
               background:
@@ -332,7 +333,7 @@ class _DutySummaryScreenState
             flex: 4,
 
             child: Text(
-              "DATE",
+              'date'.tr(),
               style: TextStyle(
                 fontSize: 13,
                 fontWeight: FontWeight.w700,
@@ -346,7 +347,7 @@ class _DutySummaryScreenState
             flex: 3,
 
             child: Text(
-              "DUTY COUNT",
+              'duty_count'.tr(),
               style: TextStyle(
                 fontSize: 13,
                 fontWeight: FontWeight.w700,
@@ -364,7 +365,7 @@ class _DutySummaryScreenState
               Alignment.centerRight,
 
               child: Text(
-                "STATUS",
+                'status_tag'.tr(),
                 style: TextStyle(
                   fontSize: 13,
                   fontWeight: FontWeight.w700,
@@ -524,7 +525,7 @@ class _DutySummaryScreenState
     return Container(
       width: double.infinity,
 
-      height: 58,
+      height: 45,
 
       color: AppColors.red,
 
@@ -549,7 +550,7 @@ class _DutySummaryScreenState
 
           child: Center(
             child: Text(
-              "Next",
+              'Duty_Summary_Next'.tr(),
 
               style: TextStyle(
                 fontSize: 17,
