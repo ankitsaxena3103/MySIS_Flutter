@@ -1,3 +1,4 @@
+import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/material.dart';
 import 'package:mysis/constants/app_colors.dart';
 
@@ -25,19 +26,19 @@ class ComplaintDateCard extends StatelessWidget {
         children: [
 
           Row(
-            children: const [
+            children: [
 
-              Icon(
+              const Icon(
                 Icons.calendar_month_outlined,
                 color: AppColors.red700,
                 size: 22,
               ),
 
-              SizedBox(width: 10),
+              const SizedBox(width: 10),
 
               Text(
-                'COMPLAINT DATE',
-                style: TextStyle(
+                'complaint_date'.tr(),
+                style: const TextStyle(
                   color: AppColors.red700,
                   fontSize: 14,
                   fontWeight: FontWeight.w700,
@@ -57,6 +58,7 @@ class ComplaintDateCard extends StatelessWidget {
               vertical: 14,
             ),
 
+
             decoration: BoxDecoration(
               border: Border.all(
                 color: AppColors.border,
@@ -75,23 +77,23 @@ class ComplaintDateCard extends StatelessWidget {
 
                 const SizedBox(width: 12),
 
-                const Expanded(
+                Expanded(
                   child: Column(
                     crossAxisAlignment:
                     CrossAxisAlignment.start,
                     children: [
 
                       Text(
-                        "Date (can't be changed)",
-                        style: TextStyle(
+                        'date_cant_be_changed'.tr(),
+                        style: const TextStyle(
                           color: AppColors.textSecondary,
                           fontSize: 12,
                         ),
                       ),
 
-                      SizedBox(height: 6),
+                      const SizedBox(height: 6),
 
-                      Text(
+                      const Text(
                         'Friday, 11 September 2026',
                         style: TextStyle(
                           color: AppColors.textPrimary,

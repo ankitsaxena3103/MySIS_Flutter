@@ -1,3 +1,4 @@
+import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/material.dart';
 import 'package:mysis/DutyVerification/RaiseComplaintScreen/ComplaintDateCard.dart';
 import 'package:mysis/DutyVerification/RaiseComplaintScreen/ComplaintDetailsCard.dart';
@@ -30,9 +31,9 @@ class RaiseComplaintScreen extends StatelessWidget {
           ),
         ),
 
-        title: const Text(
-          'Raise Complaint',
-          style: TextStyle(
+        title: Text(
+          'raise_complaint'.tr(),
+          style: const TextStyle(
             color: AppColors.textPrimary,
             fontSize: 20,
             fontWeight: FontWeight.w700,

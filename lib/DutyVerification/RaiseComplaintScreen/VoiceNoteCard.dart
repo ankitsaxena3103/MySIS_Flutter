@@ -1,6 +1,7 @@
 import 'dart:io';
 
 import 'package:audioplayers/audioplayers.dart';
+import 'package:easy_localization/easy_localization.dart' show StringTranslateExtension;
 import 'package:flutter/material.dart';
 import 'package:path_provider/path_provider.dart';
 
@@ -56,8 +57,12 @@ class _VoiceNoteCardState extends State<VoiceNoteCard> {
 
     if (!hasPermission) {
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
-          content: Text("Microphone permission is required"),
+        SnackBar(
+          content: Text(
+
+            'microphone_permission_required'.tr(),
+
+          ),
         ),
       );
       return;
@@ -139,17 +144,17 @@ class _VoiceNoteCardState extends State<VoiceNoteCard> {
 // =========================
 
           Row(
-            children: const [
-              Icon(
+            children: [
+              const Icon(
                 Icons.mic_none,
                 color: AppColors.red700,
                 size: 22,
               ),
-              SizedBox(width: 10),
+              const SizedBox(width: 10),
               Expanded(
                 child: Text(
-                  'VOICE NOTE (Optional — or use text above)',
-                  style: TextStyle(
+                  'voice_note_optional'.tr(),
+                  style: const TextStyle(
                     color: AppColors.red700,
                     fontSize: 14,
                     fontWeight: FontWeight.w700,
@@ -162,9 +167,9 @@ class _VoiceNoteCardState extends State<VoiceNoteCard> {
 
           const SizedBox(height: 16),
 
-          const Text(
-            'Voice Note Tip: Keep it short & to the point (under 30 sec)',
-            style: TextStyle(
+          Text(
+            'voice_note_tip'.tr(),
+            style: const TextStyle(
               color: AppColors.blue700,
               fontSize: 13,
             ),
@@ -180,10 +185,10 @@ class _VoiceNoteCardState extends State<VoiceNoteCard> {
 
           Text(
             isRecording
-                ? '🔴 Recording...'
+                ? 'recording'.tr()
                 : voiceNoteSaved
-                    ? '✓ Voice note saved'
-                    : 'Tap to start recording',
+                    ? 'voice_note_saved'.tr()
+                    : 'tap_to_start_recording'.tr(),
             style: const TextStyle(
               color: AppColors.textPrimary,
               fontSize: 14,
@@ -201,7 +206,7 @@ class _VoiceNoteCardState extends State<VoiceNoteCard> {
 // RECORD BUTTON
               Expanded(
                 child: SizedBox(
-                  height: 52,
+                  height: 40,
                   child: ElevatedButton.icon(
                     onPressed: _recordVoiceNote,
                     icon: Icon(
@@ -209,10 +214,13 @@ class _VoiceNoteCardState extends State<VoiceNoteCard> {
                     ),
                     label: Text(
                       isRecording
-                          ? 'STOP RECORDING'
+                          ? 'stop_recording'.tr()
                           : voiceNoteSaved
-                              ? 'RE-RECORD'
-                              : 'RECORD VOICE NOTE',
+                              ? 're_record'.tr()
+                              : 'record_voice_note'.tr(),
+                      style: TextStyle(
+                        fontSize: 12,                      ),
+
                     ),
                     style: ElevatedButton.styleFrom(
                       backgroundColor: AppColors.red700,
@@ -231,14 +239,18 @@ class _VoiceNoteCardState extends State<VoiceNoteCard> {
 // PLAY BUTTON
               Expanded(
                 child: SizedBox(
-                  height: 52,
+                  height: 40,
                   child: ElevatedButton.icon(
                     onPressed: voiceNoteSaved ? _playAudio : null,
                     icon: Icon(
                       isPlaying ? Icons.pause : Icons.play_arrow,
                     ),
                     label: Text(
-                      isPlaying ? 'PAUSE' : 'PLAY BACK',
+                      isPlaying ? 'pause'.tr() : 'play_back'.tr(),
+                      style: TextStyle(
+                        fontSize: 12,
+                      ),
+
                     ),
                     style: ElevatedButton.styleFrom(
                       backgroundColor: AppColors.blueGrey800,

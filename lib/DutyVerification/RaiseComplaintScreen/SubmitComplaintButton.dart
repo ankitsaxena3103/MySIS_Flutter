@@ -1,3 +1,4 @@
+import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/material.dart';
 import 'package:mysis/DutyVerification/DutySummaryModule/DutySummaryScreen.dart';
 import 'package:mysis/constants/app_colors.dart';
@@ -10,7 +11,7 @@ class SubmitComplaintButton extends StatelessWidget {
   Widget build(BuildContext context) {
     return SizedBox(
       width: double.infinity,
-      height: 58,
+      height: 40,
       child: ElevatedButton.icon(
         onPressed: () {
           // Navigator.push(
@@ -24,10 +25,10 @@ class SubmitComplaintButton extends StatelessWidget {
           Icons.send_outlined,
           size: 22,
         ),
-        label: const Text(
-          'SUBMIT COMPLAINT',
-          style: TextStyle(
-            fontSize: 16,
+        label: Text(
+          'submit_complaint'.tr(),
+          style: const TextStyle(
+            fontSize: 14,
             fontWeight: FontWeight.w700,
             letterSpacing: 1,
           ),

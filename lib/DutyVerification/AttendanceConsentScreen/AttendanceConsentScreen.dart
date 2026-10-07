@@ -233,11 +233,10 @@ class _AttendanceConsentScreenState extends State<AttendanceConsentScreen> {
 
                         _consentRow(
                           number: "1",
-                          english: "I verify that my attendance for the period "
-                              "mentioned above is fully correct and accurate.",
-                          hindi:
-                              "मैं पुष्टि करता/करती हूँ कि उपर्युक्त अवधि की "
-                              "मेरी उपस्थिति पूर्णतः सही और सटीक है।",
+                          english:  "I confirm that my attendance for the above-mentioned period is completely correct and accurate.",
+
+                            hindi:
+                          'attendance_declaration_1'.tr(),
                         ),
 
                         _divider(),
@@ -249,15 +248,8 @@ class _AttendanceConsentScreenState extends State<AttendanceConsentScreen> {
                         _consentRow(
                           number: "2",
                           english:
-                              "Other than the claim of attendance submitted "
-                              "by me, the acceptance of which is pending at "
-                              "the level of the appropriate authority, no "
-                              "other missing attendance claim or any other "
-                              "claim related to attendance is pending.",
-                          hindi: "मेरे द्वारा प्रस्तुत उपस्थिति दावे के अलावा, "
-                              "जिसकी स्वीकृति संबंधित प्राधिकारी स्तर पर "
-                              "लंबित है, कोई अन्य अनुपस्थित उपस्थिति दावा "
-                              "या उपस्थिति से संबंधित कोई अन्य दावा लंबित नहीं है।",
+                          "Other than the attendance claim submitted by me, which is pending for approval with the concerned authority, no other missing attendance claim or attendance-related claim is pending.",
+                          hindi: 'attendance_declaration_2'.tr(),
                         ),
 
                         _divider(),
@@ -269,12 +261,9 @@ class _AttendanceConsentScreenState extends State<AttendanceConsentScreen> {
                         _consentRow(
                           number: "3",
                           english:
-                              "I further agree that on the basis of the said "
-                              "attendance, the process of my salary generation "
-                              "should be proceeded.",
+                          "I also agree that my salary generation process may be continued based on the above attendance.",
                           hindi:
-                              "मैं यह भी सहमत हूँ कि उपयुक्त उपस्थिति के आधार "
-                              "पर मेरे वेतन निर्माण की प्रक्रिया आगे बढ़ाई जाए।",
+                          'attendance_declaration_3'.tr(),
                         ),
 
                         _divider(),
@@ -285,15 +274,9 @@ class _AttendanceConsentScreenState extends State<AttendanceConsentScreen> {
 
                         _consentRow(
                           number: "4",
-                          english: "I understand that in case any information "
-                              "provided by me is found to be incorrect, I "
-                              "shall be liable for appropriate action as "
-                              "per company policy.",
+                          english: "I understand that if any information provided by me is found to be incorrect, appropriate action may be taken as per company policy.",
                           hindi:
-                              "मैं समझता/समझती हूँ कि यदि मेरे द्वारा प्रदान "
-                              "की गई कोई भी जानकारी गलत पाई जाती है, तो मुझे "
-                              "कंपनी की नीति के अनुसार उचित कार्रवाई के लिए "
-                              "उत्तरदायी माना जाएगा।",
+                          'attendance_declaration_4.'.tr(),
                         ),
 
                         const SizedBox(height: 10),
@@ -362,7 +345,7 @@ class _AttendanceConsentScreenState extends State<AttendanceConsentScreen> {
             ),
           ),
           Text(
-            "Attendance Verification",
+            'attendance_verification'.tr(),
             style: TextStyle(
               fontSize: 16,
               fontWeight: FontWeight.w600,
@@ -427,7 +410,7 @@ class _AttendanceConsentScreenState extends State<AttendanceConsentScreen> {
       child: Column(
         children: [
           Text(
-            "Attendance Verification & Consent",
+            'attendance_verification_consent'.tr(),
             textAlign: TextAlign.center,
             style: TextStyle(
               fontSize: 20,
@@ -459,9 +442,8 @@ class _AttendanceConsentScreenState extends State<AttendanceConsentScreen> {
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         Text(
-          "I, the undersigned, hereby confirm and declare the "
-          "following regarding my attendance for the period "
-          "mentioned below.",
+          "I, the undersigned, confirm and declare the following regarding my attendance for the period mentioned below.",
+
           style: TextStyle(
             fontSize: 14,
             height: 1.25,
@@ -471,9 +453,7 @@ class _AttendanceConsentScreenState extends State<AttendanceConsentScreen> {
         ),
         const SizedBox(height: 7),
         Text(
-          "मैं, अधोहस्ताक्षरी, निम्नलिखित के संबंध में पुष्टि और घोषणा "
-          "करता/करती हूँ कि मेरे द्वारा नीचे उल्लिखित अवधि की उपस्थिति "
-          "के संबंध में निम्नलिखित कथन सत्य और सही हैं।",
+          'attendance_declaration_6'.tr(),
           style: TextStyle(
             fontSize: 13.5,
             height: 1.3,
@@ -659,9 +639,7 @@ class _AttendanceConsentScreenState extends State<AttendanceConsentScreen> {
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               Text(
-                "I, therefore, declare that the above statements "
-                "are true and correct to the best of my knowledge "
-                "and belief.",
+            "Therefore, I declare that the above statements are true and correct to the best of my knowledge and belief.",
                 style: TextStyle(
                   fontSize: 11.8,
                   height: 1.25,
@@ -670,8 +648,7 @@ class _AttendanceConsentScreenState extends State<AttendanceConsentScreen> {
               ),
               const SizedBox(height: 5),
               Text(
-                "अतः, मैं घोषणा करता/करती हूँ कि उपयुक्त कथन मेरे "
-                "ज्ञान और विश्वास के अनुसार सत्य और सही हैं।",
+                'attendance_declaration_5'.tr(),
                 style: TextStyle(
                   fontSize: 11.8,
                   height: 1.25,
@@ -992,9 +969,9 @@ class _AttendanceConsentScreenState extends State<AttendanceConsentScreen> {
             borderRadius: BorderRadius.circular(25),
           ),
         ),
-        child: const Text(
-          "SUBMIT & CONSENT",
-          style: TextStyle(
+        child: Text(
+          'submit_consent'.tr(),
+          style: const TextStyle(
             fontSize: 14,
             fontWeight: FontWeight.w800,
           ),

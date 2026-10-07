@@ -113,7 +113,7 @@ class _ReferAndEarnScreenState extends State<ReferAndEarnScreen> {
             userToken = (data[username] as String?) ?? '';
             print('findPersonByUser.....userToken$userToken');
             if (userToken == null || userToken!.isEmpty) {
-              showInvalidUserDialog(
+              showInvalidUserDialog11(
                 context,
                 onContinue: () {},
                 onCancel: () {
@@ -317,7 +317,7 @@ class _ReferAndEarnScreenState extends State<ReferAndEarnScreen> {
     loadPage(status, resetPage: false);
   }
 
-  Future<void> showInvalidUserDialog(BuildContext context, {
+  Future<void> showInvalidUserDialog11(BuildContext context, {
     required VoidCallback onContinue, // e.g. () => registerKoshLoan(context)
     required VoidCallback
     onCancel, // e.g. () => Navigator.pop(context) / finish equivalent

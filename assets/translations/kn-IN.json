@@ -650,6 +650,31 @@
   "disabled_biometric": "ಅಂಗುಲ ಮುದ್ರೆ / ಮುಖ ನಿಷ್ಕ್ರಿಯವಾಗಿದೆ",
   "biometric_message": "PIN ಅಗತ್ಯವಿಲ್ಲ. ಅಂಗುಲ ಮುದ್ರೆ ಅಥವಾ ಮುಖವನ್ನು ಬಳಸಿ.",
   "enable": "ಸಕ್ರಿಯಗೊಳಿಸಿ",
-  "invalid_qrcode": "ದಯವಿಟ್ಟು ಮಾನ್ಯ QR ಕೋಡ್ ಸ್ಕ್ಯಾನ್ ಮಾಡಿ"
+  "invalid_qrcode": "ದಯವಿಟ್ಟು ಮಾನ್ಯ QR ಕೋಡ್ ಸ್ಕ್ಯಾನ್ ಮಾಡಿ",
 
+  "Duty_Verification_continue": "ಡ್ಯೂಟಿ ಪರಿಶೀಲನೆ ಮುಂದುವರಿಸಿ",
+  "Duty In": "ಡ್ಯೂಟಿ ಪ್ರಾರಂಭ",
+  "Duty Out": "ಡ್ಯೂಟಿ ಮುಗಿಸಿ",
+  "submit_missing_claim": "ಮಿಸ್ಸಿಂಗ್ ಕ್ಲೈಮ್ ಸಲ್ಲಿಸಿ",
+  "submit_complaint": "ದೂರು ಸಲ್ಲಿಸಿ",
+  "microphone_permission_required": "ಮೈಕ್ರೋಫೋನ್ ಅನುಮತಿ ಅಗತ್ಯವಿದೆ",
+
+
+
+  "voice_note_tip": "ವಾಯ್ಸ್ ನೋಟ್ ಸಲಹೆ: ಚಿಕ್ಕದಾಗಿ ಮತ್ತು ವಿಷಯಕ್ಕೆ ಸೀಮಿತವಾಗಿರಲಿ (30 ಸೆಕೆಂಡ್‌ಗಳಿಗಿಂತ ಕಡಿಮೆ)",
+  "voice_note_optional": "ವಾಯ್ಸ್ ನೋಟ್ (ಐಚ್ಛಿಕ — ಅಥವಾ ಮೇಲಿನ ಪಠ್ಯವನ್ನು ಬಳಸಿ)",
+  "recording": "ರೆಕಾರ್ಡಿಂಗ್ ನಡೆಯುತ್ತಿದೆ...",
+  "voice_note_saved": "ವಾಯ್ಸ್ ನೋಟ್ ಉಳಿಸಲಾಗಿದೆ",
+  "tap_to_start_recording": "ರೆಕಾರ್ಡಿಂಗ್ ಪ್ರಾರಂಭಿಸಲು ಟ್ಯಾಪ್ ಮಾಡಿ",
+  "stop_recording": "ರೆಕಾರ್ಡಿಂಗ್ ನಿಲ್ಲಿಸಿ",
+  "re_record": "ಮತ್ತೆ ರೆಕಾರ್ಡ್ ಮಾಡಿ",
+  "record_voice_note": "ವಾಯ್ಸ್ ನೋಟ್ ರೆಕಾರ್ಡ್ ಮಾಡಿ",
+  "pause": "ವಿರಾಮ",
+  "play_back": "ಪ್ಲೇಬ್ಯಾಕ್",
+  "date_cant_be_changed": "ದಿನಾಂಕ (ಬದಲಾಯಿಸಲು ಸಾಧ್ಯವಿಲ್ಲ)",
+  "select_post": "ಪೋಸ್ಟ್ ಆಯ್ಕೆಮಾಡಿ",
+  "Duty_Summary_Next": "ಮುಂದೆ",
+  "attendance_verification": "ಹಾಜರಾತಿ ಪರಿಶೀಲನೆ",
+  "attendance_verification_consent": "ಹಾಜರಾತಿ ಪರಿಶೀಲನೆ ಮತ್ತು ಸಮ್ಮತಿ",
+  "submit_consent": "ಸಲ್ಲಿಸಿ ಮತ್ತು ಸಮ್ಮತಿ ನೀಡಿ"
 }

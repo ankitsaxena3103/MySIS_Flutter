@@ -316,9 +316,9 @@ class AttendanceConsentPdf {
 
             _consentRow(
               "4",
-              "I understand that in case any information provided "
-                  "by me is found to be incorrect, I shall be liable "
-                  "for appropriate action as per company policy.",
+                "I understand that in case any information provided "
+                    "by me is found to be incorrect, I shall be liable "
+                    "for appropriate action as per company policy.",
 
               "मैं समझता/समझती हूँ कि यदि मेरे द्वारा प्रदान की गई "
                   "कोई भी जानकारी गलत पाई जाती है, तो मुझे कंपनी की "
