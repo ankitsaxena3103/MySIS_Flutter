@@ -4,6 +4,7 @@ import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:flutter/material.dart';
 import 'package:mysis/DutyVerification/AttendanceConsentScreen/AttendanceConsentScreen.dart';
 import 'package:mysis/DutyVerification/DutySummaryModule/DutySummaryScreen.dart';
+import 'package:mysis/DutyVerification/Duty_verification.dart';
 import 'package:mysis/SharedClasses/LanguageProvider.dart';
 import 'package:mysis/SharedClasses/Preferences.dart';
 import 'package:mysis/Language/SelectLanguageView.dart';
@@ -149,7 +150,8 @@ class _MyAppState extends State<MyApp> with WidgetsBindingObserver {
       supportedLocales: context.supportedLocales,
       locale: context.locale,
       navigatorObservers: [routeObserver],
-      home: MyHomePage(),
+    home: MyHomePage(),
+
       // home:  DutySummaryScreen(user: "AGR002430", deviceToken: "", password: "5054",mPin: "5054",),
       // home:  AttendanceConsentScreen(
       //   startDate: "2026-09-23",

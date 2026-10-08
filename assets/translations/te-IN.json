@@ -858,7 +858,13 @@
   "date_cant_be_changed": "తేదీ (మార్చలేరు)",
   "attendance_verification": "హాజరు ధృవీకరణ",
   "attendance_verification_consent": "హాజరు ధృవీకరణ మరియు సమ్మతి",
-  "submit_consent": "సమర్పించి సమ్మతి ఇవ్వండి"
+  "submit_consent": "సమర్పించి సమ్మతి ఇవ్వండి",
+  "Cancel_Kosh": "కోష్ రద్దు చేయండి",
+  "continue_to_kosh_loan": "కోష్ లోన్‌కు కొనసాగించండి",
+  "Enter_Your_Phone_Number": "మీ ఫోన్ నంబర్‌ను నమోదు చేయండి",
+  "Successfully_referred": "విజయవంతంగా రెఫర్ చేయబడింది",
+  "No_leads_found": "లీడ్స్ ఏవీ కనుగొనబడలేదు",
+  "Approved_Hour": "ఆమోదించబడిన గంట"
 }
 
 

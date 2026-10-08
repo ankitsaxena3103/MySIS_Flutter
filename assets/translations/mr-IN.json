@@ -679,6 +679,13 @@
   "claim_date": "क्लेमची तारीख",
   "date_non_editable": "तारीख (बदलता येणार नाही)",
   "unit": "युनिट *",
+  "continue_to_kosh_loan": "कोश लोनकडे जा",
+  "Cancel_Kosh": "कोश रद्द करा",
+  "Enter_Your_Phone_Number": "तुमचा फोन नंबर प्रविष्ट करा",
+  "Successfully_referred": "यशस्वीरित्या रेफर केले",
+  "No_leads_found": "कोणतीही लीड सापडली नाही",
+  "Approved_Hour": "मंजूर तास",
+
   "select_unit_tag": "युनिट निवडा",
   "shift_tag": "शिफ्ट *",
   "select_shift_tag": "शिफ्ट निवडा",

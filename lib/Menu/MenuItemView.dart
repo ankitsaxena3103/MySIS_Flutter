@@ -1,10 +1,12 @@
 
 
+
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:mysis/CommonViews/Utility.dart';
 import 'package:easy_localization/easy_localization.dart';
 import 'package:mysis/DutyVerification/DutySummaryModule/DutySummaryScreen.dart';
+import 'package:mysis/DutyVerification/Duty_verification.dart';
 import 'package:mysis/KoshLoan/ReferAndEarnScreen.dart';
 import 'package:mysis/KoshLoan/koshdialoggetstartedconsent.dart';
 import 'package:mysis/Notifications/NotificationsView.dart';
@@ -935,7 +937,7 @@ class MenuItemViewState extends State<MenuItemView> {
     Navigator.push(
       context,
       MaterialPageRoute(
-        builder: (context) => DutySummaryScreen(user: "AGR002430", deviceToken: "", password: "5054",mPin: "5054",),
+        builder: (context) => DutyVerificationScreen(),
       ),
     );
     // Navigator.push(

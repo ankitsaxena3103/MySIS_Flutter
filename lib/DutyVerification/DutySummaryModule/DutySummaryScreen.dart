@@ -1,3 +1,4 @@
+import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/material.dart';
 import 'package:mysis/DutyVerification/AttendanceConsentScreen/AttendanceConsentScreen.dart';
 import 'package:mysis/DutyVerification/DutySummaryModule/summary_section.dart';
@@ -114,7 +115,7 @@ class _DutySummaryScreenState extends State<DutySummaryScreen> {
             ),
             Expanded(child: _buildContent()),
             BottomActionButton(
-              label: widget.isCompleted ? 'Back to Home' : 'Next',
+              label: widget.isCompleted ? 'Back to Home' : 'next'.tr(),
               onTap: _loading ? null : _onNext,
             ),
           ],
@@ -133,7 +134,7 @@ class _DutySummaryScreenState extends State<DutySummaryScreen> {
         icon: Icon(Icons.arrow_back_ios_new, size: 20, color: AppColors.red),
       ),
       title: Text(
-        'Duty Summary',
+        'duty_summary'.tr(),
         style: TextStyle(
           fontSize: 18,
           fontWeight: FontWeight.w500,

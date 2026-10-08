@@ -8,12 +8,12 @@ import 'package:mysis/DutyVerification/SelectUnitScreen.dart';
 import 'package:mysis/constants/app_colors.dart';
 
 class MissingClaimScreen extends StatefulWidget {
-  const MissingClaimScreen({
-    super.key,
-  });
+const MissingClaimScreen({
+super.key,
+});
 
-  @override
-  State<MissingClaimScreen> createState() => _MissingClaimScreenState();
+@override
+State<MissingClaimScreen> createState() => _MissingClaimScreenState();
 }
 
 class _MissingClaimScreenState extends State<MissingClaimScreen> {
@@ -30,9 +30,9 @@ class _MissingClaimScreenState extends State<MissingClaimScreen> {
     return Scaffold(
       backgroundColor: AppColors.grey400,
 
-      // =========================================================
-      // APP BAR
-      // =========================================================
+// =========================================================
+// APP BAR
+// =========================================================
 
       appBar: AppBar(
         backgroundColor: AppColors.white,
@@ -44,114 +44,114 @@ class _MissingClaimScreenState extends State<MissingClaimScreen> {
           icon: Icon(
             Icons.arrow_back_ios_new,
             color: AppColors.red,
-            size: 19,
+            size: 15,
           ),
         ),
         title: Text(
           'missing_claim'.tr(),
           style: TextStyle(
-            fontSize: 18,
+            fontSize: 12,
             fontWeight: FontWeight.w600,
             color: AppColors.textPrimary,
           ),
         ),
       ),
 
-      // =========================================================
-      // BODY
-      // =========================================================
+// =========================================================
+// BODY
+// =========================================================
 
       body: SingleChildScrollView(
         padding: const EdgeInsets.symmetric(
-          horizontal: 14,
-          vertical: 12,
+          horizontal: 12,
+          vertical: 10,
         ),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            // =====================================================
-            // CLAIM DATE CARD
-            // =====================================================
+// =====================================================
+// CLAIM DATE CARD
+// =====================================================
 
             _claimDateCard(),
 
-            const SizedBox(height: 12),
+            const SizedBox(height: 10),
 
-            // =====================================================
-            // UNIT + SHIFT + POST CARD
-            // =====================================================
+// =====================================================
+// UNIT + SHIFT + POST CARD
+// =====================================================
 
             _unitShiftPostCard(),
 
-            const SizedBox(height: 12),
+            const SizedBox(height: 10),
 
-            // =====================================================
-            // DUTY TIME CARD
-            // =====================================================
+// =====================================================
+// DUTY TIME CARD
+// =====================================================
 
             _dutyTimeCard(),
 
-            const SizedBox(height: 12),
+            const SizedBox(height: 10),
 
-            // =====================================================
-            // REASON FOR CLAIM
-            // =====================================================
+// =====================================================
+// REASON FOR CLAIM
+// =====================================================
 
             _reasonCard(),
 
-            const SizedBox(height: 20),
+            const SizedBox(height: 10),
 
-            // =====================================================
-            // SUBMIT BUTTON
-            // =====================================================
+// =====================================================
+// SUBMIT BUTTON
+// =====================================================
 
             _submitButton(),
 
-            const SizedBox(height: 25),
+            const SizedBox(height: 20),
           ],
         ),
       ),
     );
   }
 
-  // =============================================================
-  // CLAIM DATE CARD
-  // =============================================================
+// =============================================================
+// CLAIM DATE CARD
+// =============================================================
 
   Widget _claimDateCard() {
     return Container(
       width: double.infinity,
       padding: const EdgeInsets.fromLTRB(
-        16,
-        14,
-        16,
-        16,
+        12,
+        10,
+        12,
+        12,
       ),
       decoration: BoxDecoration(
         color: AppColors.white,
         borderRadius: BorderRadius.circular(18),
         border: Border.all(
           color: AppColors.border,
-          width: 0.8,
+          width: 0.5,
         ),
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          // ---------------- TITLE ----------------
+// ---------------- TITLE ----------------
 
           Row(
             children: [
               Icon(
                 Icons.event_note_outlined,
-                size: 19,
+                size: 15,
                 color: AppColors.textPrimary,
               ),
-              const SizedBox(width: 8),
+              const SizedBox(width: 6),
               Text(
                 'claim_date'.tr(),
                 style: TextStyle(
-                  fontSize: 13,
+                  fontSize: 9,
                   fontWeight: FontWeight.w700,
                   color: AppColors.textPrimary,
                 ),
@@ -159,38 +159,38 @@ class _MissingClaimScreenState extends State<MissingClaimScreen> {
             ],
           ),
 
-          const SizedBox(height: 14),
+          const SizedBox(height: 10),
 
-          // ---------------- DATE BOX ----------------
+// ---------------- DATE BOX ----------------
 
           Container(
             width: double.infinity,
-            height: 78,
+            height: 60,
             padding: const EdgeInsets.symmetric(
-              horizontal: 14,
-              vertical: 10,
+              horizontal: 10,
+              vertical: 6,
             ),
             decoration: BoxDecoration(
               color: AppColors.background,
               borderRadius: BorderRadius.circular(13),
               border: Border.all(
                 color: AppColors.border,
-                width: 0.8,
+                width: 0.5,
               ),
             ),
             child: Row(
               children: [
-                // Calendar icon
+// Calendar icon
 
                 Icon(
                   Icons.calendar_month_outlined,
-                  size: 27,
+                  size: 20,
                   color: AppColors.textPrimary,
                 ),
 
-                const SizedBox(width: 13),
+                const SizedBox(width: 10),
 
-                // Date text
+// Date text
 
                 Expanded(
                   child: Column(
@@ -208,7 +208,7 @@ class _MissingClaimScreenState extends State<MissingClaimScreen> {
                       Text(
                         "Saturday, 12 September 2026",
                         style: TextStyle(
-                          fontSize: 15,
+                          fontSize: 12,
                           fontWeight: FontWeight.w700,
                           color: AppColors.textPrimary,
                         ),
@@ -217,7 +217,7 @@ class _MissingClaimScreenState extends State<MissingClaimScreen> {
                   ),
                 ),
 
-                // Lock icon
+// Lock icon
 
                 Icon(
                   Icons.lock_outline,
@@ -232,9 +232,9 @@ class _MissingClaimScreenState extends State<MissingClaimScreen> {
     );
   }
 
-  // =============================================================
-  // UNIT SHIFT POST CARD
-  // =============================================================
+// =============================================================
+// UNIT SHIFT POST CARD
+// =============================================================
 
   Widget _unitShiftPostCard() {
     return Container(
@@ -256,7 +256,7 @@ class _MissingClaimScreenState extends State<MissingClaimScreen> {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          // ---------------- TITLE ----------------
+// ---------------- TITLE ----------------
 
           Row(
             children: [
@@ -269,7 +269,7 @@ class _MissingClaimScreenState extends State<MissingClaimScreen> {
               Text(
                 'shift_post_details'.tr(),
                 style: TextStyle(
-                  fontSize: 13,
+                  fontSize: 11,
                   fontWeight: FontWeight.w700,
                   color: AppColors.textPrimary,
                 ),
@@ -279,11 +279,11 @@ class _MissingClaimScreenState extends State<MissingClaimScreen> {
 
           const SizedBox(height: 16),
 
-          // =====================================================
-          // UNIT
-          // =====================================================
+// =====================================================
+// UNIT
+// =====================================================
 
-          _fieldTitle("Unit *"),
+          _fieldTitle('unit'.tr()),
 
           const SizedBox(height: 7),
 
@@ -308,11 +308,11 @@ class _MissingClaimScreenState extends State<MissingClaimScreen> {
 
           const SizedBox(height: 13),
 
-          // =====================================================
-          // SHIFT
-          // =====================================================
+// =====================================================
+// SHIFT
+// =====================================================
 
-          _fieldTitle("Shift *"),
+          _fieldTitle('shift_name'.tr()),
 
           const SizedBox(height: 7),
 
@@ -337,11 +337,11 @@ class _MissingClaimScreenState extends State<MissingClaimScreen> {
 
           const SizedBox(height: 13),
 
-          // =====================================================
-          // POST
-          // =====================================================
+// =====================================================
+// POST
+// =====================================================
 
-          _fieldTitle("Post *"),
+          _fieldTitle('post'.tr()),
 
           const SizedBox(height: 7),
 
@@ -368,9 +368,9 @@ class _MissingClaimScreenState extends State<MissingClaimScreen> {
     );
   }
 
-  // =============================================================
-  // DUTY TIME CARD
-  // =============================================================
+// =============================================================
+// DUTY TIME CARD
+// =============================================================
 
   Widget _dutyTimeCard() {
     return Container(
@@ -392,7 +392,7 @@ class _MissingClaimScreenState extends State<MissingClaimScreen> {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          // ---------------- TITLE ----------------
+// ---------------- TITLE ----------------
 
           Row(
             children: [
@@ -405,7 +405,7 @@ class _MissingClaimScreenState extends State<MissingClaimScreen> {
               Text(
                 'duty_time'.tr(),
                 style: TextStyle(
-                  fontSize: 13,
+                  fontSize: 11,
                   fontWeight: FontWeight.w700,
                   color: AppColors.textPrimary,
                 ),
@@ -415,14 +415,14 @@ class _MissingClaimScreenState extends State<MissingClaimScreen> {
 
           const SizedBox(height: 13),
 
-          // =====================================================
-          // DUTY IN
-          // =====================================================
+// =====================================================
+// DUTY IN
+// =====================================================
 
           _dutyTimeRow(
-            title: "Duty Out Time *",
+            title: 'duty_out_time_tag'.tr(),
             subtitle: dutyInTime == null
-                ? "Tap to pick time"
+                ? 'duty_out_time_tag'.tr()
                 : _formatTime(dutyInTime!),
             color: AppColors.green700,
             background: AppColors.green.withOpacity(0.15),
@@ -433,14 +433,14 @@ class _MissingClaimScreenState extends State<MissingClaimScreen> {
 
           const SizedBox(height: 9),
 
-          // =====================================================
-          // DUTY OUT
-          // =====================================================
+// =====================================================
+// DUTY OUT
+// =====================================================
 
           _dutyTimeRow(
-            title: "Duty Out time *",
+            title: 'duty_out_time_tag'.tr(),
             subtitle: dutyOutTime == null
-                ? "Tap to pick time"
+                ? 'duty_out_time_tag'.tr()
                 : _formatTime(dutyOutTime!),
             color: AppColors.red700,
             background: AppColors.red.withOpacity(0.10),
@@ -453,9 +453,9 @@ class _MissingClaimScreenState extends State<MissingClaimScreen> {
     );
   }
 
-  // =============================================================
-  // DUTY TIME ROW
-  // =============================================================
+// =============================================================
+// DUTY TIME ROW
+// =============================================================
 
   Widget _dutyTimeRow({
     required String title,
@@ -479,7 +479,7 @@ class _MissingClaimScreenState extends State<MissingClaimScreen> {
         ),
         child: Row(
           children: [
-            // LEFT ICON
+// LEFT ICON
 
             Icon(
               Icons.access_time_outlined,
@@ -488,7 +488,7 @@ class _MissingClaimScreenState extends State<MissingClaimScreen> {
             ),
 
             const SizedBox(width: 12),
-            // TEXT
+// TEXT
 
 
             Expanded(
@@ -498,7 +498,7 @@ class _MissingClaimScreenState extends State<MissingClaimScreen> {
                   Text(
                     title,
                     style: TextStyle(
-                      fontSize: 12,
+                      fontSize: 10,
                       fontWeight: FontWeight.w700,
                       color: color,
                     ),
@@ -507,7 +507,7 @@ class _MissingClaimScreenState extends State<MissingClaimScreen> {
                   Text(
                     subtitle,
                     style: TextStyle(
-                      fontSize: 13,
+                      fontSize: 11,
                       color: AppColors.textSecondary,
                     ),
                   ),
@@ -515,7 +515,7 @@ class _MissingClaimScreenState extends State<MissingClaimScreen> {
               ),
             ),
 
-            // RIGHT CLOCK
+// RIGHT CLOCK
 
             Icon(
               Icons.access_time_outlined,
@@ -528,7 +528,7 @@ class _MissingClaimScreenState extends State<MissingClaimScreen> {
     );
   }
 
-  // =============================================================
+// =============================================================
 // REASON FOR CLAIM
 // =============================================================
 
@@ -552,7 +552,7 @@ class _MissingClaimScreenState extends State<MissingClaimScreen> {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          // ================= TITLE =================
+// ================= TITLE =================
 
           Row(
             children: [
@@ -565,7 +565,7 @@ class _MissingClaimScreenState extends State<MissingClaimScreen> {
               Text(
                 'reason_for_claim'.tr(),
                 style: TextStyle(
-                  fontSize: 12,
+                  fontSize: 10,
                   fontWeight: FontWeight.w700,
                   color: AppColors.textPrimary,
                 ),
@@ -575,7 +575,7 @@ class _MissingClaimScreenState extends State<MissingClaimScreen> {
 
           const SizedBox(height: 12),
 
-          // ================= DROPDOWN =================
+// ================= DROPDOWN =================
 
           DropdownButtonFormField<String>(
             value: selectedReason,
@@ -587,7 +587,7 @@ class _MissingClaimScreenState extends State<MissingClaimScreen> {
             decoration: InputDecoration(
               hintText: "Choose reason",
               hintStyle: TextStyle(
-                fontSize: 13,
+                fontSize: 11,
                 color: AppColors.textSecondary,
               ),
               filled: true,
@@ -675,11 +675,11 @@ class _MissingClaimScreenState extends State<MissingClaimScreen> {
     );
   }
 
-  // =============================================================
-  // SUBMIT BUTTON
-  // =============================================================
+// =============================================================
+// SUBMIT BUTTON
+// =============================================================
 
-  // =============================================================
+// =============================================================
 // SUBMIT BUTTON
 // =============================================================
 
@@ -689,7 +689,6 @@ class _MissingClaimScreenState extends State<MissingClaimScreen> {
       height: 52,
       child: ElevatedButton.icon(
         onPressed: () {
-
           if (unit == null) {
             ScaffoldMessenger.of(context).showSnackBar(
               const SnackBar(
@@ -699,53 +698,49 @@ class _MissingClaimScreenState extends State<MissingClaimScreen> {
             return;
           }
 
-          if(shift== null) {
+          if (shift == null) {
             ScaffoldMessenger.of(context).showSnackBar(
-              const SnackBar(content: Text("Please choose Shift"),
-              )
-            );
-
-          }
-
-
-          if(post == null) {
-            ScaffoldMessenger.of(context).showSnackBar(
-              const SnackBar(content: Text("Pleasen choose Post"),
-              )
+                const SnackBar(content: Text("Please choose Shift"),
+                )
             );
           }
-          if(selectedReason == null) {
+
+
+          if (post == null) {
+            ScaffoldMessenger.of(context).showSnackBar(
+                const SnackBar(content: Text("Pleasen choose Post"),
+                )
+            );
+          }
+          if (selectedReason == null) {
             ScaffoldMessenger.of(context).showSnackBar(
                 const SnackBar(content: Text("Please choose reason for claim"),
                 )
             );
-          return;
-          // Submit logic
-        }
-        Navigator.push(
-        context,
-        MaterialPageRoute(
-          builder: (context) => DutyVerificationScreen(),
-        ),
-      );
-    },
+            return;
+// Submit logic
+          }
+          Navigator.push(
+            context,
+            MaterialPageRoute(
+              builder: (context) => DutyVerificationScreen(),
+            ),
+          );
+        },
 
 
-
-
-
-      // 🔥 LEFT SIDE ICON
+// 🔥 LEFT SIDE ICON
         icon: Icon(
           Icons.send_outlined,
           size: 20,
           color: AppColors.white,
         ),
 
-        // 🔥 BUTTON TEXT
+// 🔥 BUTTON TEXT
         label: Text(
           'submit_missing_claim'.tr(),
           style: const TextStyle(
-            fontSize: 13,
+            fontSize: 11,
             fontWeight: FontWeight.w700,
             letterSpacing: 0.7,
           ),
@@ -766,24 +761,24 @@ class _MissingClaimScreenState extends State<MissingClaimScreen> {
     );
   }
 
-  // =============================================================
-  // FIELD TITLE
-  // =============================================================
+// =============================================================
+// FIELD TITLE
+// =============================================================
 
   Widget _fieldTitle(String text) {
     return Text(
       text,
       style: TextStyle(
-        fontSize: 12,
+        fontSize: 10,
         fontWeight: FontWeight.w600,
         color: AppColors.textPrimary,
       ),
     );
   }
 
-  // =============================================================
-  // SELECTION BOX
-  // =============================================================
+// =============================================================
+// SELECTION BOX
+// =============================================================
 
   Widget _selectionBox({
     required String text,
@@ -820,7 +815,7 @@ class _MissingClaimScreenState extends State<MissingClaimScreen> {
                   text,
                   textAlign: TextAlign.center,
                   style: TextStyle(
-                    fontSize: 14,
+                    fontSize: 12,
                     fontWeight: FontWeight.w600,
                     letterSpacing: 1.2,
                     color: AppColors.textPrimary,
@@ -837,9 +832,9 @@ class _MissingClaimScreenState extends State<MissingClaimScreen> {
     );
   }
 
-  // =============================================================
-  // TIME PICKER
-  // =============================================================
+// =============================================================
+// TIME PICKER
+// =============================================================
 
   Future<void> _pickTime({
     required bool isDutyIn,
@@ -848,15 +843,15 @@ class _MissingClaimScreenState extends State<MissingClaimScreen> {
       context: context,
       initialTime: isDutyIn
           ? (dutyInTime ??
-              const TimeOfDay(
-                hour: 14,
-                minute: 0,
-              ))
+          const TimeOfDay(
+            hour: 14,
+            minute: 0,
+          ))
           : (dutyOutTime ??
-              const TimeOfDay(
-                hour: 22,
-                minute: 0,
-              )),
+          const TimeOfDay(
+            hour: 22,
+            minute: 0,
+          )),
     );
 
     if (picked == null) {
@@ -872,9 +867,9 @@ class _MissingClaimScreenState extends State<MissingClaimScreen> {
     });
   }
 
-  // =============================================================
-  // FORMAT TIME
-  // =============================================================
+// =============================================================
+// FORMAT TIME
+// =============================================================
 
   String _formatTime(TimeOfDay time) {
     final hour = time.hourOfPeriod == 0 ? 12 : time.hourOfPeriod;
@@ -886,3 +881,4 @@ class _MissingClaimScreenState extends State<MissingClaimScreen> {
     return "$hour:$minute $period";
   }
 }
+

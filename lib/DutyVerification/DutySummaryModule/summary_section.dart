@@ -1,3 +1,4 @@
+import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/material.dart';
 import 'package:mysis/constants/app_colors.dart';
 
@@ -27,7 +28,7 @@ class SummarySection extends StatelessWidget {
         children: [
           Expanded(
             child: SummaryBox(
-              title: 'Duty Approved',
+              title: 'duty_approved'.tr(),
               count: '$confirmed/$total',
               color: AppColors.green700,
               background: AppColors.white,
@@ -36,7 +37,7 @@ class SummarySection extends StatelessWidget {
           const SizedBox(width: 6),
           Expanded(
             child: SummaryBox(
-              title: 'Claim',
+              title: 'claim'.tr(),
               count: '$claim/$total',
               color: AppColors.white,
               background: AppColors.red700.withOpacity(0.75),
@@ -45,7 +46,7 @@ class SummarySection extends StatelessWidget {
           const SizedBox(width: 6),
           Expanded(
             child: SummaryBox(
-              title: 'Rejected',
+              title: 'rejected_tag'.tr(),
               count: '$rejected/$total',
               color: AppColors.white,
               background: AppColors.red,

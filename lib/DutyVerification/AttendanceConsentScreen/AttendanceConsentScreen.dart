@@ -410,7 +410,7 @@ class _AttendanceConsentScreenState extends State<AttendanceConsentScreen> {
       child: Column(
         children: [
           Text(
-            'attendance_verification_consent'.tr(),
+            "Attendance Verification & Consent",
             textAlign: TextAlign.center,
             style: TextStyle(
               fontSize: 20,
@@ -420,7 +420,7 @@ class _AttendanceConsentScreenState extends State<AttendanceConsentScreen> {
           ),
           const SizedBox(height: 3),
           Text(
-            "उपस्थिति सत्यापन एवं सहमति पत्र",
+            'attendance_verification_consent'.tr(),
             textAlign: TextAlign.center,
             style: TextStyle(
               fontSize: 17,
@@ -531,6 +531,10 @@ class _AttendanceConsentScreenState extends State<AttendanceConsentScreen> {
   // CONSENT ROW
   // ==============================================================
 
+  // ==============================================================
+// CONSENT ROW
+// ==============================================================
+
   Widget _consentRow({
     required String number,
     required String english,
@@ -538,61 +542,73 @@ class _AttendanceConsentScreenState extends State<AttendanceConsentScreen> {
   }) {
     return Padding(
       padding: const EdgeInsets.symmetric(
-        vertical: 10,
+        vertical: 16,
       ),
       child: Row(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          // NUMBER
+          // ========================================================
+          // NUMBER BOX
+          // ========================================================
+
           Container(
-            width: 23,
-            height: 23,
+            width: 30,
+            height: 30,
             alignment: Alignment.center,
             decoration: BoxDecoration(
               color: AppColors.red,
-              borderRadius: BorderRadius.circular(5),
+              borderRadius: BorderRadius.circular(6),
             ),
             child: Text(
               number,
               style: TextStyle(
                 color: AppColors.white,
-                fontSize: 12,
+                fontSize: 14,
                 fontWeight: FontWeight.w800,
               ),
             ),
           ),
 
-          const SizedBox(width: 7),
+          const SizedBox(width: 12),
 
+          // ========================================================
           // ENGLISH
+          // ========================================================
+
           Expanded(
             child: Text(
               english,
               style: TextStyle(
-                fontSize: 11.8,
-                height: 1.28,
+                fontSize: 13.5,
+                height: 1.45,
+                fontWeight: FontWeight.w500,
                 color: AppColors.textPrimary,
               ),
             ),
           ),
 
-          // CENTER LINE
+          // ========================================================
+          // CENTER DIVIDER
+          // ========================================================
+
           Container(
             width: 1,
             margin: const EdgeInsets.symmetric(
-              horizontal: 8,
+              horizontal: 14,
             ),
-            height: 95,
             color: AppColors.border,
           ),
 
+          // ========================================================
           // HINDI
+          // ========================================================
+
           Expanded(
             child: Text(
               hindi,
               style: TextStyle(
-                fontSize: 11.8,
-                height: 1.28,
+                fontSize: 13.5,
+                height: 1.45,
                 fontWeight: FontWeight.w600,
                 color: AppColors.textPrimary,
               ),

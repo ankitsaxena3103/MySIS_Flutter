@@ -12,7 +12,7 @@ class DutyRow extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Container(
-      height: 74,
+      height: 60,
       width: double.infinity,
       padding: const EdgeInsets.symmetric(horizontal: 14),
       decoration: BoxDecoration(
