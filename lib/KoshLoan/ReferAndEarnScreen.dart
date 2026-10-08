@@ -362,10 +362,10 @@ class _ReferAndEarnScreenState extends State<ReferAndEarnScreen> {
                     const SizedBox(height: 16),
 
                     // Title
-                    const Text(
-                      'You are not registered for a Kosh Loan. Click Continue to proceed with registration.',
+                    Text(
+                      'kosh_loan_not_eligible'.tr(),
                       textAlign: TextAlign.center,
-                      style: TextStyle(
+                      style: const TextStyle(
                         color: Colors.black,
                         fontSize: 13,
                         fontWeight: FontWeight.bold,
@@ -391,9 +391,9 @@ class _ReferAndEarnScreenState extends State<ReferAndEarnScreen> {
                           onContinue();
                           Navigator.of(dialogContext).pop();
                         },
-                        child: const Text(
-                          'Continue to Kosh Loan',
-                          style: TextStyle(
+                        child: Text(
+                          'continue_to_kosh_loan'.tr(),
+                          style: const TextStyle(
                             fontSize: 14,
                             fontWeight: FontWeight.bold,
                           ),
@@ -420,9 +420,9 @@ class _ReferAndEarnScreenState extends State<ReferAndEarnScreen> {
                           onCancel();
                           Navigator.of(dialogContext).pop();
                         },
-                        child: const Text(
-                          'Cancel',
-                          style: TextStyle(fontSize: 14),
+                        child: Text(
+                          'Cancel_Kosh'.tr(),
+                          style: const TextStyle(fontSize: 14),
                         ),
                       ),
                     ),
@@ -531,9 +531,9 @@ class _ReferAndEarnScreenState extends State<ReferAndEarnScreen> {
                             ),
                           ),
 
-                          const Text(
-                            "Refer And Earn",
-                            style: TextStyle(
+                          Text(
+                            'refer_and_earn_title'.tr(),
+                            style: const TextStyle(
                               fontSize: 20,
                               fontWeight: FontWeight.bold,
                               color: Colors.black,
@@ -544,9 +544,9 @@ class _ReferAndEarnScreenState extends State<ReferAndEarnScreen> {
                     ),
 
                     // ================= SUB TITLE =================
-                    const Text(
-                      "Refer friends. Earn rewards. Redeem anytime",
-                      style: TextStyle(
+                    Text(
+                      'refer_subtitle'.tr(),
+                      style: const TextStyle(
                         fontSize: 16,
                         fontWeight: FontWeight.w500,
                         color: Colors.black54,
@@ -556,13 +556,13 @@ class _ReferAndEarnScreenState extends State<ReferAndEarnScreen> {
                     const SizedBox(height: 28),
 
                     // ================= LABEL =================
-                    const Align(
+                    Align(
                       alignment: Alignment.centerLeft,
                       child: Padding(
-                        padding: EdgeInsets.only(left: 2),
+                        padding: const EdgeInsets.only(left: 2),
                         child: Text(
-                          "Please provide the mobile number you'd like to refer",
-                          style: TextStyle(
+                          'refer_hint'.tr(),
+                          style: const TextStyle(
                             color: Colors.black54,
                             fontSize: 15,
                           ),
@@ -597,7 +597,7 @@ class _ReferAndEarnScreenState extends State<ReferAndEarnScreen> {
                             vertical: 10,
                           ),
 
-                          hintText: "Enter Your Phone Number",
+                          hintText: 'Enter_Your_Phone_Number'.tr(),
                           hintStyle: const TextStyle(
                             fontSize: 14,
                             color: Colors.grey,
@@ -654,9 +654,9 @@ class _ReferAndEarnScreenState extends State<ReferAndEarnScreen> {
                             borderRadius: BorderRadius.circular(7),
                           ),
                         ),
-                        child: const Text(
-                          "Refer",
-                          style: TextStyle(
+                        child: Text(
+                          'refer_btn'.tr(),
+                          style: const TextStyle(
                             fontSize: 16,
                             color: Colors.white,
                             fontWeight: FontWeight.w500,
@@ -676,9 +676,9 @@ class _ReferAndEarnScreenState extends State<ReferAndEarnScreen> {
                               builder: (context) => const KoshBottomSheet(),
                             ));
                       },
-                      child: const Text(
-                        "See how it works",
-                        style: TextStyle(
+                      child: Text(
+                        'see_how_it_works'.tr(),
+                        style: const TextStyle(
                           fontSize: 16,
                           color: Colors.black,
                           fontWeight: FontWeight.w400,
@@ -693,12 +693,12 @@ class _ReferAndEarnScreenState extends State<ReferAndEarnScreen> {
                     Row(
                       children: [
                         _buildTab(
-                          title: "Wallet",
+                          title: 'tab_wallet'.tr(),
                           index: 0,
                         ),
                         const SizedBox(width: 10),
                         _buildTab(
-                          title: "Converted Leads",
+                          title: 'tab_converted_leads'.tr(),
                           index: 1,
                         ),
                         const SizedBox(
@@ -706,7 +706,7 @@ class _ReferAndEarnScreenState extends State<ReferAndEarnScreen> {
                           height: 9,
                         ),
                         _buildTab(
-                          title: "Leads",
+                          title: 'tab_leads'.tr(),
                           index: 2,
                         ),
                       ],
@@ -728,7 +728,7 @@ class _ReferAndEarnScreenState extends State<ReferAndEarnScreen> {
         ),
         ToastMessageView(
           isVisible: showToastMessageView,
-          message: "Successfully referred",
+          message: 'Successfully_referred'.tr(),
         ),
       ],
     );
@@ -1149,12 +1149,12 @@ class _ReferAndEarnScreenState extends State<ReferAndEarnScreen> {
           child: Column(
             children: [
               _loanSummaryRow(
-                "Your Loans",
+                'your_loans'.tr(),
                 "₹0",
               ),
               const SizedBox(height: 8),
               _loanSummaryRow(
-                "Amount disbursed",
+                'amount_disbursed'.tr(),
                 "₹0",
               ),
             ],
@@ -1169,16 +1169,16 @@ class _ReferAndEarnScreenState extends State<ReferAndEarnScreen> {
             // Filter action
           },
           child: Row(
-            children: const [
-              Icon(
+            children: [
+              const Icon(
                 Icons.tune,
                 size: 18,
                 color: Colors.grey,
               ),
-              SizedBox(width: 7),
+              const SizedBox(width: 7),
               Text(
-                "Select Filter",
-                style: TextStyle(
+                'select_filter'.tr(),
+                style: const TextStyle(
                   fontFamily: 'Inter',
                   fontSize: 14,
                   fontWeight: FontWeight.w400,
@@ -1230,12 +1230,12 @@ class _ReferAndEarnScreenState extends State<ReferAndEarnScreen> {
                 child: Column(
                   children: [
                     _loanSummaryRow(
-                      "Your Loans",
+                      'your_loans'.tr(),
                       "₹0",
                     ),
                     const SizedBox(height: 8),
                     _loanSummaryRow(
-                      "Amount disbursed",
+                      'amount_disbursed'.tr(),
                       "₹0",
                     ),
                   ],
@@ -1250,16 +1250,16 @@ class _ReferAndEarnScreenState extends State<ReferAndEarnScreen> {
                   // Filter action
                 },
                 child: Row(
-                  children: const [
-                    Icon(
+                  children: [
+                    const Icon(
                       Icons.tune,
                       size: 18,
                       color: Colors.grey,
                     ),
-                    SizedBox(width: 7),
+                    const SizedBox(width: 7),
                     Text(
-                      "Select Filter",
-                      style: TextStyle(
+                      'select_filter'.tr(),
+                      style: const TextStyle(
                         fontFamily: 'Inter',
                         fontSize: 14,
                         fontWeight: FontWeight.w400,
@@ -1445,9 +1445,9 @@ class _ReferAndEarnScreenState extends State<ReferAndEarnScreen> {
             ),
             child: Column(
               children: [
-                const Text(
-                  "Wallet Balance",
-                  style: TextStyle(
+                Text(
+                  'wallet_balance'.tr(),
+                  style: const TextStyle(
                     fontFamily: 'Inter',
                     fontSize: 23,
                     fontWeight: FontWeight.w400,
@@ -1479,22 +1479,22 @@ class _ReferAndEarnScreenState extends State<ReferAndEarnScreen> {
 
           // ================= WALLET ROWS =================
           _walletRow(
-            label: "Available",
+            label: 'available_amount'.tr(),
             value: formatAmount(wallet.fund),
           ),
 
           _walletRow(
-            label: "Total Withdrawn",
+            label: 'total_withdrawn'.tr(),
             value: formatAmount(wallet.totalPaid),
           ),
 
           _walletRow(
-            label: "Withdrawal in Process",
+            label: 'withdrawal_in_process'.tr(),
             value: formatAmount(wallet.withdrawable),
           ),
 
           _walletRow(
-            label: "Monthly RFD",
+            label: 'onthly_rfd'.tr(),
             value: formatAmount(wallet.rfdMonthToDate),
             showBottomBorder: true,
           ),

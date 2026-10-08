@@ -1,3 +1,4 @@
+import 'package:easy_localization/easy_localization.dart' show StringTranslateExtension;
 import 'package:flutter/material.dart';
 import 'package:mysis/KoshLoan/KoshAlternateWhatsappDialog.dart';
 import 'package:mysis/KoshLoan/repo/kosh_base_api_client.dart';
@@ -50,10 +51,10 @@ class _KoshDialogGetStartedConsentState
               ),
             ),
             const SizedBox(height: 18),
-            const Text(
-              'Get Started with Kosh Loan',
+            Text(
+              'kosh_get_started_title'.tr(),
               textAlign: TextAlign.center,
-              style: TextStyle(
+              style: const TextStyle(
                 fontFamily: 'Inter',
                 fontSize: 16,
                 color: Colors.black,
@@ -61,12 +62,10 @@ class _KoshDialogGetStartedConsentState
               ),
             ),
             const SizedBox(height: 12),
-            const Text(
-              'To check your loan eligibility, kosh needs your '
-                  'permission to securely fetch the following '
-                  'information from your employer',
+            Text(
+              'kosh_get_started_desc'.tr(),
               textAlign: TextAlign.center,
-              style: TextStyle(
+              style: const TextStyle(
                 fontSize: 15,
                 height: 1.4,
               ),
@@ -86,15 +85,15 @@ class _KoshDialogGetStartedConsentState
                 children: [
                   _infoRow(
                     Icons.phone_outlined,
-                    'Mobile Number',
+                    'kosh_mobile_number'.tr(),
                   ),
                   _infoRow(
                     Icons.chat_outlined,
-                    'WhatsApp Number',
+                    'kosh_whatsapp_number'.tr(),
                   ),
                   _infoRow(
                     Icons.badge_outlined,
-                    'Employment Vintage (joining Duration)',
+                    'kosh_employment_vintage'.tr(),
                   ),
                   _infoRow(
                     Icons.currency_rupee,
@@ -106,8 +105,7 @@ class _KoshDialogGetStartedConsentState
             const SizedBox(height: 12),
             _checkBoxRow(
               value: loanConsent,
-              text: 'I authorize Kosh to use the above information '
-                  'for loan eligibility verification.',
+              text: 'kosh_authorize_checkbox'.tr(),
               onChanged: (value) {
                 setState(() {
                   loanConsent = value;
@@ -118,7 +116,7 @@ class _KoshDialogGetStartedConsentState
             const SizedBox(height: 5),
             _checkBoxRow(
               value: termsConsent,
-              text: 'I agree to the Terms & Conditions and Privacy Policy.',
+              text: 'kosh_terms_checkbox'.tr(),
               onChanged: (value) {
                 setState(() {
                   termsConsent = value;
@@ -160,9 +158,9 @@ class _KoshDialogGetStartedConsentState
                     borderRadius: BorderRadius.circular(6),
                   ),
                 ),
-                child: const Text(
-                  "Yes, I'm Interested",
-                  style: TextStyle(
+                child: Text(
+                  'kosh_yes_interested'.tr(),
+                  style: const TextStyle(
                     fontSize: 16,
                     fontFamily: 'Inter',
                     fontWeight: FontWeight.bold,
@@ -188,9 +186,9 @@ class _KoshDialogGetStartedConsentState
                     borderRadius: BorderRadius.circular(6),
                   ),
                 ),
-                child: const Text(
-                  'Not Now',
-                  style: TextStyle(
+                child: Text(
+                  'kosh_not_now'.tr(),
+                  style: const TextStyle(
                     fontSize: 16,
                     fontFamily: 'Inter',
                     fontWeight: FontWeight.bold,

@@ -1,3 +1,4 @@
+import 'package:easy_localization/easy_localization.dart' show StringTranslateExtension;
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:mysis/KoshLoan/KoshSuccessScreen.dart';
@@ -94,10 +95,10 @@ class _AlternateWhatsappDialogState extends State<KoshAlternateWhatsappDialog> {
 
             const SizedBox(height: 20),
 
-            const Text(
-              "Add an Alternate WhatsApp Number (Optional)",
+            Text(
+              'kosh_alt_whatsapp_title'.tr(),
               textAlign: TextAlign.center,
-              style: TextStyle(
+              style: const TextStyle(
                 fontFamily: 'Inter',
                 fontSize: 17,
                 fontWeight: FontWeight.w900,
@@ -145,11 +146,11 @@ class _AlternateWhatsappDialogState extends State<KoshAlternateWhatsappDialog> {
                       onChanged: (value) {
                         setState(() {});
                       },
-                      decoration: const InputDecoration(
+                      decoration: InputDecoration(
                         counterText: "",
                         border: InputBorder.none,
-                        hintText: "Enter 10 digit number",
-                        hintStyle: TextStyle(
+                        hintText: 'kosh_enter_10_digit'.tr(),
+                        hintStyle: const TextStyle(
                           color: Colors.grey,
                           fontSize: 14,
                         ),
@@ -184,11 +185,10 @@ class _AlternateWhatsappDialogState extends State<KoshAlternateWhatsappDialog> {
                   ),
                 ),
                 const SizedBox(width: 8),
-                const Expanded(
+                Expanded(
                   child: Text(
-                    "This number belongs to me or I have permission to "
-                    "receive loan-related communication on it",
-                    style: TextStyle(
+                    'kosh_number_permission_checkbox'.tr(),
+                    style: const TextStyle(
                       fontFamily: 'Inter',
                       fontSize: 13,
                       height: 1.7,
@@ -218,9 +218,9 @@ class _AlternateWhatsappDialogState extends State<KoshAlternateWhatsappDialog> {
                           borderRadius: BorderRadius.circular(7),
                         ),
                       ),
-                      child: const Text(
-                        "Continue",
-                        style: TextStyle(
+                      child: Text(
+                        'kosh_continue'.tr(),
+                        style: const TextStyle(
                           fontFamily: 'Inter',
                           fontSize: 12,
                           fontWeight: FontWeight.w400,
@@ -248,9 +248,9 @@ class _AlternateWhatsappDialogState extends State<KoshAlternateWhatsappDialog> {
                           borderRadius: BorderRadius.circular(7),
                         ),
                       ),
-                      child: const Text(
-                        "Skip",
-                        style: TextStyle(
+                      child: Text(
+                        'kosh_skip'.tr(),
+                        style: const TextStyle(
                           fontFamily: 'Inter',
                           fontSize: 15,
                           fontWeight: FontWeight.w400,

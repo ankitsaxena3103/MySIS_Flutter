@@ -1,3 +1,4 @@
+import 'package:easy_localization/easy_localization.dart' show StringTranslateExtension;
 import 'package:flutter/material.dart';
 
 class KoshBottomSheet extends StatelessWidget {
@@ -26,9 +27,9 @@ class KoshBottomSheet extends StatelessWidget {
             ),
             child: Column(
               children: [
-                const Text(
-                  "How Refer and Earn works",
-                  style: TextStyle(
+                Text(
+                  'how_refer_earn_works'.tr(),
+                  style: const TextStyle(
                       fontSize: 16,
                       fontWeight: FontWeight.bold,
                       color: Colors.black),
@@ -36,35 +37,30 @@ class KoshBottomSheet extends StatelessWidget {
                 const SizedBox(height: 38),
                 _infoItem(
                   image: "assets/images/KoshImage/Phone_icon.png",
-                  title: "Refer a Friend",
-                  description: "Enter the mobile number of the person you want "
-                      "to refer. Once submitted, a lead is created "
-                      "instantly.",
+                  title: 'step1_title'.tr(),
+                  description: 'step1_desc'.tr(),
                 ),
                 const SizedBox(height: 22),
                 _infoItem(
                   image: "assets/images/KoshImage/Refer_icon.png",
-                  title: "Become Group Leader",
+                  title: 'step2_title'.tr(),
                   description:
-                      "When your referred person applies for a Group Loan from Kosh, "
-                      "you automatically become the Group Leader of that group.",
+                  'step2_desc'.tr(),
                 ),
                 const SizedBox(height: 22),
                 _infoItem(
                   image: "assets/images/KoshImage/wallet_icon.png",
-                  title: "Earn Your Reward",
-                  description: "Once the loan is approved and disbursed, "
-                      "and the referred person successfully completes "
-                      "the first EMI, your reward is credited to your wallet.",
+                  title: 'step3_title'.tr(),
+                  description: 'step3_desc'.tr(),
                 ),
                 const Spacer(),
                 GestureDetector(
                   onTap: () {
                     // Call functionality
                   },
-                  child: const Text(
-                    "Need Assistance? Call Us",
-                    style: TextStyle(
+                  child: Text(
+                    'need_assistance_call'.tr(),
+                    style: const TextStyle(
                       fontSize: 16,
                       color: Colors.red,
                       decoration: TextDecoration.underline,

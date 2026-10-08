@@ -850,10 +850,17 @@
   "record_voice_note": "வாய்ஸ் நோட்டை பதிவு செய்யவும்",
   "pause": "இடைநிறுத்து",
   "play_back": "மீண்டும் இயக்கவும்",
+  "continue_to_kosh_loan": "கோஷ் லோனுக்கு தொடரவும்",
   "date_cant_be_changed": "தேதி (மாற்ற முடியாது)",
   "select_post": "பதவியைத் தேர்ந்தெடுக்கவும்",
   "Duty_Summary_Next": "அடுத்து",
   "attendance_verification": "வருகை சரிபார்ப்பு",
+  "Cancel_Kosh": "கோஷ் ரத்து செய்யவும்",
+  "Enter_Your_Phone_Number": "உங்கள் தொலைபேசி எண்ணை உள்ளிடவும்",
+  "Successfully_referred": "வெற்றிகரமாக பரிந்துரைக்கப்பட்டது",
+  "No_leads_found": "லீட்கள் எதுவும் கிடைக்கவில்லை",
+  "Approved_Hour": "அங்கீகரிக்கப்பட்ட மணி",
+
   "attendance_verification_consent": "வருகை சரிபார்ப்பு மற்றும் ஒப்புதல்",
   "submit_consent": "சமர்ப்பித்து ஒப்புதல் அளிக்கவும்"
 }

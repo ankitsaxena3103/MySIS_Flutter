@@ -1,3 +1,4 @@
+import 'package:easy_localization/easy_localization.dart' show StringTranslateExtension;
 import 'package:flutter/material.dart';
 import 'package:mysis/KoshLoan/ReferAndEarnScreen.dart';
 import 'package:mysis/constants/app_colors.dart';
@@ -148,19 +149,19 @@ class KoshSuccessScreen extends StatelessWidget {
                 const SizedBox(height: 20),
                 RichText(
                   textAlign: TextAlign.center,
-                  text: const TextSpan(
-                    style: TextStyle(
+                  text: TextSpan(
+                    style: const TextStyle(
                       fontSize: 12,
                       fontWeight: FontWeight.w600,
                       color: Colors.black,
                     ),
                     children: [
                       TextSpan(
-                          text: "Interest Submitted ",
-                          style: TextStyle(
+                          text: 'kosh_interest_submitted'.tr(),
+                          style: const TextStyle(
                             fontSize: 20,
                           )),
-                      TextSpan(
+                      const TextSpan(
                         text: "Successfully!",
                         style: TextStyle(
                           fontSize: 20,
@@ -171,10 +172,10 @@ class KoshSuccessScreen extends StatelessWidget {
                   ),
                 ),
                 const SizedBox(height: 10),
-                const Text(
-                  "Kosh has received your interest.",
+                Text(
+                  'kosh_interest_received'.tr(),
                   textAlign: TextAlign.center,
-                  style: TextStyle(
+                  style: const TextStyle(
                     fontSize: 18,
                     color: AppColors.text,
                   ),
@@ -185,11 +186,10 @@ class KoshSuccessScreen extends StatelessWidget {
                   color: Colors.white,
                 ),
                 const SizedBox(height: 13),
-                const Text(
-                  "To apply for a loan and continue with the\n"
-                  "next steps, download the Kosh App",
+                Text(
+                  'kosh_download_app_desc'.tr(),
                   textAlign: TextAlign.center,
-                  style: TextStyle(
+                  style: const TextStyle(
                       fontSize: 18, fontFamily: 'Inter', color: Colors.grey),
                 ),
                 const SizedBox(height: 14),
@@ -228,19 +228,19 @@ class KoshSuccessScreen extends StatelessWidget {
                       ),
                     ),
 
-                    child: const Row(
+                    child: Row(
                       mainAxisAlignment: MainAxisAlignment.center,
                       children: [
-                        Icon(
+                        const Icon(
                           Icons.download_outlined,
                           size: 20,
                         ),
 
-                        SizedBox(width: 6),
+                        const SizedBox(width: 6),
 
                         Text(
-                          "Download Kosh App",
-                          style: TextStyle(
+                          'kosh_download_app_btn'.tr(),
+                          style: const TextStyle(
                             fontSize: 20,
                             fontFamily: 'Inter',
                             fontWeight: FontWeight.w500,
@@ -260,9 +260,9 @@ class KoshSuccessScreen extends StatelessWidget {
                     //       builder: (context) => const ReferAndEarnScreen(),
                     //     ));
                   },
-                  child: const Text(
-                    "Maybe Later",
-                    style: TextStyle(
+                  child: Text(
+                    "kosh_maybe_later".tr(),
+                    style: const TextStyle(
                       fontSize: 20,
                       fontFamily: 'Inter',
                       color: Colors.black,
@@ -307,29 +307,29 @@ class KoshSuccessScreen extends StatelessWidget {
 
                       const SizedBox(width: 20),
 
-                      const Expanded(
+                      Expanded(
                         child: Column(
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
                             Text(
-                              "Need help or have questions?",
-                              style: TextStyle(
+                              'kosh_need_help'.tr(),
+                              style: const TextStyle(
                                 fontSize: 16,
                                 fontFamily: 'Inter',
                                 fontWeight: FontWeight.w600,
                                 color: Colors.black,
                               ),
                             ),
-                            SizedBox(height: 3),
+                            const SizedBox(height: 3),
                             Text(
-                              "Our Kosh support team is here to help you.",
-                              style: TextStyle(
+                              'kosh_support_team'.tr(),
+                              style: const TextStyle(
                                   fontSize: 16,
                                   fontFamily: 'Inter',
                                   color: Colors.grey),
                             ),
-                            SizedBox(height: 5),
-                            Row(
+                            const SizedBox(height: 5),
+                            const Row(
                               children: [
                                 Icon(
                                   Icons.phone_outlined,
@@ -338,7 +338,7 @@ class KoshSuccessScreen extends StatelessWidget {
                                 ),
                                 SizedBox(width: 7),
                                 Text(
-                                  "Kosh Helpline  |  +918595623585",
+                                  'Kosh Helpline  |  +918595623585',
                                   style: TextStyle(
                                     fontFamily: 'Inter',
                                     fontSize: 16,

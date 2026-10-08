@@ -673,6 +673,9 @@
   "location_permission" : "Location Permission",
   "precise_location" : "Precise Location",
   "kosh_loan": "Kosh Loan",
+  "Successfully_referred": "Successfully Referred",
+  "No_leads_found": "No Leads Found",
+
 
 
 
@@ -738,8 +741,10 @@
   "rejected_tag": "Rejected",
   "duty_approved": "Duty Approved",
   "duty_count": "Duty Count",
+  "Approved_Hour": "Approved Hour",
+
   "status_tag": "Status",
-  "back_to_home": "Back to Home",
+  "back_to_home": "Back  to Home",
   "date": "Date",
   "voice_note_tip": "Voice Note Tip: Keep it short & to the point (under 30 sec)",
   "re_record": "Re-record",
@@ -805,11 +810,14 @@
   "kosh_continue": "Continue",
   "kosh_skip": "Skip",
   "kosh_loan": "Kosh Loan",
+  "continue_to_kosh_loan": "Continue to Kosh Loan",
+  "Cancel_Kosh": "Cancel Kosh",
 
   "refer_and_earn_title": "Refer And Earn",
   "refer_subtitle": "Refer friends. Earn rewards. Redeem anytime",
   "refer_hint": "Please provide the mobile number you'd like to refer",
   "refer_btn": "Refer",
+  "Enter_Your_Phone_Number": "Enter Your Phone Number",
   "see_how_it_works": "See how it works",
   "tab_wallet": "Wallet",
   "tab_converted_leads": "Converted Leads",
