@@ -3,22 +3,19 @@ import 'dart:ui' as ui;
 
 import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/material.dart';
-import 'package:mysis/DutyVerification/AttendanceConsentScreen/AttendanceConsentPdf.dart';
-import 'package:mysis/DutyVerification/AttendanceConsentScreen/SignaturePainter.dart';
-import 'package:mysis/DutyVerification/DutySummaryModule/DutySummaryScreen.dart';
 import 'package:mysis/constants/app_colors.dart';
 import 'package:flutter/services.dart';
-
 import 'package:flutter/rendering.dart';
-import 'package:printing/printing.dart';
-
+import '../../CommonViews/Utility.dart';
+import '../../SharedClasses/Preferences.dart';
+import '../repo/ConsentUploadService.dart';
 import 'SignatureScreenFile.dart';
 
 class AttendanceConsentScreen extends StatefulWidget {
   String?startDate;
   String?endDate;
 
-   AttendanceConsentScreen({
+  AttendanceConsentScreen({
     super.key,
     required this.startDate,
     required this.endDate,
@@ -38,6 +35,10 @@ class _AttendanceConsentScreenState extends State<AttendanceConsentScreen> {
   DateTime? _signedAt;
   bool _isSigned = false;
 
+  // true while the full page is being captured (hides Submit / Clear)
+  bool _isCapturing = false;
+  bool _isSubmitting = false;
+
   final GlobalKey _consentKey = GlobalKey();
   final GlobalKey _signatureKey = GlobalKey();
 
@@ -45,9 +46,9 @@ class _AttendanceConsentScreenState extends State<AttendanceConsentScreen> {
   // EMPLOYEE DETAILS
   // ==========================================================
 
-  final String employeeName = "SAMANT KUMAR JAISWA";
-  final String registrationNo = "PAT069548";
-  final String period = "11 Sep - 20 Sep 26";
+  String employeeName = "";
+  String registrationNo = "";
+  String period = "";
 
   List<ui.Offset?>? get savedSignature => null;
 
@@ -65,85 +66,108 @@ class _AttendanceConsentScreenState extends State<AttendanceConsentScreen> {
       setState(() {
         _signatureFile = result;
         _signedAt = DateTime.now();
+        _isSigned = true;
       });
     }
   }
 
+  /// Captures the COMPLETE consent page (not just the visible part),
+  /// same as captureFullScrollView() in ConsentLetterActivity.kt.
   Future<Uint8List?> _captureConsentScreen() async {
     try {
-      final RenderRepaintBoundary boundary = _consentKey.currentContext!
-          .findRenderObject() as RenderRepaintBoundary;
+      final ctx = _consentKey.currentContext;
+      if (ctx == null) return null;
 
-      final ui.Image image = await boundary.toImage(
-        pixelRatio: 3.0,
-      );
+      final RenderRepaintBoundary boundary =
+      ctx.findRenderObject() as RenderRepaintBoundary;
 
-      final ByteData? byteData = await image.toByteData(
-        format: ui.ImageByteFormat.png,
-      );
+      final ui.Image image = await boundary.toImage(pixelRatio: 2.0);
+      final ByteData? byteData =
+      await image.toByteData(format: ui.ImageByteFormat.png);
+      image.dispose();
 
-      if (byteData == null) {
-        return null;
-      }
-
-      return byteData.buffer.asUint8List();
+      return byteData?.buffer.asUint8List();
     } catch (e) {
-      debugPrint(
-        "Capture Error: $e",
-      );
-
+      debugPrint("Capture Error: $e");
       return null;
     }
   }
 
-  Future<void> _printConsent() async {
-    try {
-      final pdfBytes = await AttendanceConsentPdf.generatePdf(
-        employeeName: employeeName,
-        registrationNo: registrationNo,
-        period: period,
-        signaturePoints: savedSignature,
-      );
+  /// Equivalent of onSubmit() + captureAndUpload() in the Kotlin activity.
+  Future<void> _onSubmit() async {
+    if (_isSubmitting) return;
 
-      await Printing.layoutPdf(
-        onLayout: (format) async {
-          return pdfBytes;
-        },
+    if (!_isSigned || _signatureFile == null) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text("Please complete your signature first")),
       );
-    } catch (e) {
-      debugPrint(
-        "PDF Error: $e",
+      return;
+    }
+
+    setState(() {
+      _isSubmitting = true;
+      _isCapturing = true; // hides Submit + Clear (native: submitBtn GONE)
+    });
+
+    try {
+      // wait until the button is really removed from the tree, then paint
+      await WidgetsBinding.instance.endOfFrame;
+      await Future.delayed(const Duration(milliseconds: 50));
+
+      final Uint8List? png = await _captureConsentScreen();
+
+      if (mounted) setState(() => _isCapturing = false);
+
+      if (png == null) throw Exception('Could not capture consent page');
+
+      final result = await ConsentUploadService.submit(
+
+        png: png,
+        mContext: context,
+        regNo: registrationNo,
+        fromDate: widget.startDate ?? '',
+        toDate: widget.endDate ?? '',
       );
 
       if (!mounted) return;
 
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          content: Text(
-            "PDF generation failed: $e",
+      if (result.success) {
+        // TODO: mark local duty-verification record complete here
+        // (native: flashMessageDao -> IS_VERIFICATION_COMPLETE = 1)
+        await showDialog(
+          context: context,
+          barrierDismissible: false,
+          builder: (_) => AlertDialog(
+            content: const Text('Consent submitted successfully'),
+            actions: [
+              TextButton(
+                onPressed: () => Navigator.pop(context),
+                child: const Text('OK'),
+              ),
+            ],
           ),
-        ),
-      );
-    }
-  }
-
-  Future<Uint8List?> _getSignatureImage() async {
-    try {
-      final boundary = _signatureKey.currentContext!.findRenderObject()
-          as RenderRepaintBoundary;
-
-      final image = await boundary.toImage(
-        pixelRatio: 3.0,
-      );
-
-      final byteData = await image.toByteData(
-        format: ui.ImageByteFormat.png,
-      );
-
-      return byteData?.buffer.asUint8List();
+        );
+        if (!mounted) return;
+        Navigator.pop(context, 'COMPLETED'); // native: SIGNATURE_STATUS
+      } else {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text(result.message)),
+        );
+      }
     } catch (e) {
-      debugPrint("Signature Image Error: $e");
-      return null;
+      debugPrint('Submit error: $e');
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text('Submit failed, please try again')),
+        );
+      }
+    } finally {
+      if (mounted) {
+        setState(() {
+          _isCapturing = false;
+          _isSubmitting = false;
+        });
+      }
     }
   }
 
@@ -165,146 +189,149 @@ class _AttendanceConsentScreenState extends State<AttendanceConsentScreen> {
             // ==================================================
 
             Expanded(
-              child: RepaintBoundary(
-                key: _consentKey,
-                child: SingleChildScrollView(
-                  child: Padding(
-                    padding: const EdgeInsets.symmetric(
-                      horizontal: 22,
-                    ),
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        const SizedBox(height: 8),
+              child: SingleChildScrollView(
+                child: RepaintBoundary(
+                  key: _consentKey,
+                  child: Container(
+                    color: AppColors.white, // opaque bg for the screenshot
+                    child: Padding(
+                      padding: const EdgeInsets.symmetric(
+                        horizontal: 22,
+                      ),
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          const SizedBox(height: 8),
 
-                        // ==================================================
-                        // LOGO
-                        // ==================================================
+                          // ==================================================
+                          // LOGO
+                          // ==================================================
 
-                        _logoSection(),
+                          _logoSection(),
 
-                        const SizedBox(height: 8),
+                          const SizedBox(height: 8),
 
-                        // ==================================================
-                        // DATE
-                        // ==================================================
+                          // ==================================================
+                          // DATE
+                          // ==================================================
 
-                        Align(
-                          alignment: Alignment.centerRight,
-                          child: Text(
-                            "Date / दिनांक : 23 Sep 2026",
-                            style: TextStyle(
-                              fontSize: 12,
-                              fontWeight: FontWeight.w600,
-                              color: AppColors.textPrimary,
+                          Align(
+                            alignment: Alignment.centerRight,
+                            child: Text(
+                              "Date / दिनांक : ${DateFormat('dd MMM yyyy').format(DateTime.now())}",
+                              style: TextStyle(
+                                fontSize: 12,
+                                fontWeight: FontWeight.w600,
+                                color: AppColors.textPrimary,
+                              ),
                             ),
                           ),
-                        ),
 
-                        const SizedBox(height: 14),
+                          const SizedBox(height: 14),
 
-                        // ==================================================
-                        // TITLE
-                        // ==================================================
+                          // ==================================================
+                          // TITLE
+                          // ==================================================
 
-                        _title(),
+                          _title(),
 
-                        const SizedBox(height: 14),
+                          const SizedBox(height: 14),
 
-                        // ==================================================
-                        // INTRO
-                        // ==================================================
+                          // ==================================================
+                          // INTRO
+                          // ==================================================
 
-                        _introText(),
+                          _introText(),
 
-                        const SizedBox(height: 14),
+                          const SizedBox(height: 14),
 
-                        // ==================================================
-                        // EMPLOYEE TABLE
-                        // ==================================================
+                          // ==================================================
+                          // EMPLOYEE TABLE
+                          // ==================================================
 
-                        _employeeTable(),
+                          _employeeTable(),
 
-                        const SizedBox(height: 18),
+                          const SizedBox(height: 18),
 
-                        // ==================================================
-                        // POINT 1
-                        // ==================================================
+                          // ==================================================
+                          // POINT 1
+                          // ==================================================
 
-                        _consentRow(
-                          number: "1",
-                          english:  "I confirm that my attendance for the above-mentioned period is completely correct and accurate.",
+                          _consentRow(
+                            number: "1",
+                            english:  "I confirm that my attendance for the above-mentioned period is completely correct and accurate.",
 
                             hindi:
-                          'attendance_declaration_1'.tr(),
-                        ),
+                            'attendance_declaration_1'.tr(),
+                          ),
 
-                        _divider(),
+                          _divider(),
 
-                        // ==================================================
-                        // POINT 2
-                        // ==================================================
+                          // ==================================================
+                          // POINT 2
+                          // ==================================================
 
-                        _consentRow(
-                          number: "2",
-                          english:
-                          "Other than the attendance claim submitted by me, which is pending for approval with the concerned authority, no other missing attendance claim or attendance-related claim is pending.",
-                          hindi: 'attendance_declaration_2'.tr(),
-                        ),
+                          _consentRow(
+                            number: "2",
+                            english:
+                            "Other than the attendance claim submitted by me, which is pending for approval with the concerned authority, no other missing attendance claim or attendance-related claim is pending.",
+                            hindi: 'attendance_declaration_2'.tr(),
+                          ),
 
-                        _divider(),
+                          _divider(),
 
-                        // ==================================================
-                        // POINT 3
-                        // ==================================================
+                          // ==================================================
+                          // POINT 3
+                          // ==================================================
 
-                        _consentRow(
-                          number: "3",
-                          english:
-                          "I also agree that my salary generation process may be continued based on the above attendance.",
-                          hindi:
-                          'attendance_declaration_3'.tr(),
-                        ),
+                          _consentRow(
+                            number: "3",
+                            english:
+                            "I also agree that my salary generation process may be continued based on the above attendance.",
+                            hindi:
+                            'attendance_declaration_3'.tr(),
+                          ),
 
-                        _divider(),
+                          _divider(),
 
-                        // ==================================================
-                        // POINT 4
-                        // ==================================================
+                          // ==================================================
+                          // POINT 4
+                          // ==================================================
 
-                        _consentRow(
-                          number: "4",
-                          english: "I understand that if any information provided by me is found to be incorrect, appropriate action may be taken as per company policy.",
-                          hindi:
-                          'attendance_declaration_4.'.tr(),
-                        ),
+                          _consentRow(
+                            number: "4",
+                            english: "I understand that if any information provided by me is found to be incorrect, appropriate action may be taken as per company policy.",
+                            hindi:
+                            'attendance_declaration_4.'.tr(),
+                          ),
 
-                        const SizedBox(height: 10),
+                          const SizedBox(height: 10),
 
-                        // ==================================================
-                        // FINAL DECLARATION
-                        // ==================================================
+                          // ==================================================
+                          // FINAL DECLARATION
+                          // ==================================================
 
-                        _declaration(),
+                          _declaration(),
 
-                        const SizedBox(height: 20),
+                          const SizedBox(height: 20),
 
-                        // ==================================================
-                        // SIGNATURE AREA
-                        // ==================================================
+                          // ==================================================
+                          // SIGNATURE AREA
+                          // ==================================================
 
-                        _signatureSection(),
+                          _signatureSection(),
 
-                        const SizedBox(height: 22),
+                          const SizedBox(height: 22),
 
-                        // ==================================================
-                        // SUBMIT BUTTON
-                        // ==================================================
+                          // ==================================================
+                          // SUBMIT BUTTON
+                          // ==================================================
 
-                        _submitButton(),
+                          _submitButton(),
 
-                        const SizedBox(height: 25),
-                      ],
+                          const SizedBox(height: 25),
+                        ],
+                      ),
                     ),
                   ),
                 ),
@@ -497,9 +524,9 @@ class _AttendanceConsentScreenState extends State<AttendanceConsentScreen> {
   }
 
   TableRow _tableRow(
-    String title,
-    String value,
-  ) {
+      String title,
+      String value,
+      ) {
     return TableRow(
       children: [
         Padding(
@@ -655,7 +682,7 @@ class _AttendanceConsentScreenState extends State<AttendanceConsentScreen> {
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               Text(
-            "Therefore, I declare that the above statements are true and correct to the best of my knowledge and belief.",
+                "Therefore, I declare that the above statements are true and correct to the best of my knowledge and belief.",
                 style: TextStyle(
                   fontSize: 11.8,
                   height: 1.25,
@@ -802,7 +829,7 @@ class _AttendanceConsentScreenState extends State<AttendanceConsentScreen> {
               height: 190,
               width: double.infinity,
               decoration: BoxDecoration(
-                color: const Color(0xFFFFFFFFF),
+                color: const Color(0xFFFFFFFF),
                 border: Border.all(color: Colors.grey.shade400),
                 borderRadius: BorderRadius.circular(14),
               ),
@@ -878,7 +905,7 @@ class _AttendanceConsentScreenState extends State<AttendanceConsentScreen> {
                                   TextSpan(
                                     text: 'Date / ',
                                     style:
-                                        TextStyle(fontWeight: FontWeight.w700),
+                                    TextStyle(fontWeight: FontWeight.w700),
                                   ),
                                   TextSpan(text: 'दिनांक'),
                                 ],
@@ -900,19 +927,15 @@ class _AttendanceConsentScreenState extends State<AttendanceConsentScreen> {
         // SIGNATURE LABEL
         // ----------------------------------------------------------
 
-        if (_isSigned)
+        if (_isSigned && !_isCapturing)
           Align(
             alignment: Alignment.centerRight,
             child: GestureDetector(
               onTap: () {
                 setState(() {
-                  // Signature clear
                   _signaturePoints.clear();
-
-                  // Saved signature bhi clear
-                  var savedSignature = null;
-
-                  // Sign status reset
+                  _signatureFile = null;
+                  _signedAt = null;
                   _isSigned = false;
                 });
               },
@@ -940,43 +963,14 @@ class _AttendanceConsentScreenState extends State<AttendanceConsentScreen> {
   // ==============================================================
 
   Widget _submitButton() {
+    // removed from the layout while capturing so it is not in the image
+    if (_isCapturing) return const SizedBox.shrink();
+
     return SizedBox(
       width: double.infinity,
       height: 48,
       child: ElevatedButton(
-        onPressed: () async {
-          if (!_isSigned || savedSignature == null) {
-            ScaffoldMessenger.of(context).showSnackBar(
-              const SnackBar(
-                content: Text(
-                  "Please complete your signature first",
-                ),
-              ),
-            );
-
-            return;
-          }
-
-          // Generate + Print / Save PDF
-          await _printConsent();
-
-          if (!mounted) return;
-
-          // Next page
-          Navigator.pushReplacement(
-            context,
-            MaterialPageRoute(
-              builder: (context) =>  DutySummaryScreen(
-                isCompleted: true,
-                user: "",
-                deviceToken: "",
-                password: "",
-                mPin: "",
-                
-              ),
-            ),
-          );
-        },
+        onPressed: _isSubmitting ? null : _onSubmit,
         style: ElevatedButton.styleFrom(
           backgroundColor: AppColors.red,
           foregroundColor: AppColors.white,
@@ -985,7 +979,16 @@ class _AttendanceConsentScreenState extends State<AttendanceConsentScreen> {
             borderRadius: BorderRadius.circular(25),
           ),
         ),
-        child: Text(
+        child: _isSubmitting
+            ? const SizedBox(
+          width: 20,
+          height: 20,
+          child: CircularProgressIndicator(
+            strokeWidth: 2,
+            color: Colors.white,
+          ),
+        )
+            : Text(
           'submit_consent'.tr(),
           style: const TextStyle(
             fontSize: 14,
@@ -994,5 +997,42 @@ class _AttendanceConsentScreenState extends State<AttendanceConsentScreen> {
         ),
       ),
     );
+  }
+
+  Future<void> _loadUserData() async {
+    final name =
+        await Preferences.getUserPreference(keyUserName) ?? '';
+
+    final regNo =
+        await Preferences.getUserPreference(keyUserID) ?? '';
+
+    if (!mounted) return;
+
+    setState(() {
+      employeeName = name;
+      registrationNo = regNo;
+      period = formatPeriod(
+        widget.startDate ?? '',
+        widget.endDate ?? '',
+      );    });
+  }
+  @override
+  void initState() {
+    super.initState();
+    _loadUserData();
+
+  }
+  String formatPeriod(String startDate, String endDate) {
+
+    if (startDate.isEmpty || endDate.isEmpty) {
+      return '';
+    }
+    final start = DateTime.parse(startDate);
+    final end = DateTime.parse(endDate);
+
+    final startFormatted = DateFormat('dd MMM').format(start);
+    final endFormatted = DateFormat('dd MMM yy').format(end);
+
+    return '$startFormatted - $endFormatted';
   }
 }
