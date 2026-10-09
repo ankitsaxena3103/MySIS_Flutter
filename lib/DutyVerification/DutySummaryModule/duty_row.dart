@@ -60,14 +60,14 @@ class DutyRow extends StatelessWidget {
                   style:
                       TextStyle(fontSize: 14, color: AppColors.textPrimary),
                 ),
-                if (day.shiftLabels.isNotEmpty)
-                  Text(
-                    day.shiftLabels.join(', '),
-                    maxLines: 1,
-                    overflow: TextOverflow.ellipsis,
-                    style: TextStyle(
-                        fontSize: 11, color: AppColors.textSecondary),
-                  ),
+                // if (day.shiftLabels.isNotEmpty)
+                //   Text(
+                //     day.shiftLabels.join(', '),
+                //     maxLines: 1,
+                //     overflow: TextOverflow.ellipsis,
+                //     style: TextStyle(
+                //         fontSize: 11, color: AppColors.textSecondary),
+                //   ),
               ],
             ),
           ),

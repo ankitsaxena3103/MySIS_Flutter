@@ -720,12 +720,12 @@ class _MissingClaimScreenState extends State<MissingClaimScreen> {
             return;
 // Submit logic
           }
-          Navigator.push(
-            context,
-            MaterialPageRoute(
-              builder: (context) => DutyVerificationScreen(),
-            ),
-          );
+          // Navigator.push(
+          //   context,
+          //   MaterialPageRoute(
+          //     builder: (context) => DutyVerificationScreen(),
+          //   ),
+          // );
         },
 
 

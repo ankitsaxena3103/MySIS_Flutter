@@ -21,7 +21,7 @@ class AttendanceGrouper {
     final byDate = <String, List<AttendanceRecord>>{};
     for (final r in records) {
       final key = r.dateKey;
-      if (key == null || key.isEmpty) continue;
+      if (key.isEmpty) continue;
       byDate.putIfAbsent(key, () => []).add(r);
     }
 
@@ -111,7 +111,6 @@ class AttendanceGrouper {
   }
 
   static int countConfirmed(List<AttendanceDay> days) =>
-      // days.where((d) => d.status == AttendanceStatus.approved).length;
       days.where((d) => d.status == AttendanceStatus.approved).length;
 
   static int countRejected(List<AttendanceDay> days) =>

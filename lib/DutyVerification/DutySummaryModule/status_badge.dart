@@ -24,8 +24,8 @@ class StatusBadge extends StatelessWidget {
         fg = AppColors.red;
         break;
       default:
-        text = day.claimPending ? 'Claim' : 'Pending';
-        fg = day.claimPending ? AppColors.red700 : AppColors.textSecondary;
+        text = 'Pending';
+        fg = AppColors.textSecondary;
     }
 
     return Container(
