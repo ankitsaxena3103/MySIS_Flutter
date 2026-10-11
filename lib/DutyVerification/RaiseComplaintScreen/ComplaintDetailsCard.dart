@@ -3,32 +3,35 @@ import 'package:easy_localization/easy_localization.dart'
 import 'package:flutter/material.dart';
 import 'package:mysis/constants/app_colors.dart';
 
-class ComplaintDetailsCard extends StatefulWidget {
-  const ComplaintDetailsCard({super.key});
+/// Order matters: index + 1 is sent to the server as COMPLAINT_CATEGORY
+/// (same as the Android spinner position, where 0 = "Select category").
+const List<String> complaintCategories = [
+  'Incorrect shift assigned',
+  'Attendance not recorded',
+  'Wrong punch time',
+  'Unauthorized deduction',
+  'Post mismatch',
+  'Other',
+];
 
-  @override
-  State<ComplaintDetailsCard> createState() => _ComplaintDetailsCardState();
-}
+class ComplaintDetailsCard extends StatelessWidget {
+  final TextEditingController descriptionController;
 
-class _ComplaintDetailsCardState extends State<ComplaintDetailsCard> {
-  final TextEditingController problemController = TextEditingController();
+  /// 1-based category value (null = nothing selected)
+  final int? selectedCategory;
+  final ValueChanged<int?> onCategoryChanged;
 
-  String? selectedCategory;
+  const ComplaintDetailsCard({
+    super.key,
+    required this.descriptionController,
+    required this.selectedCategory,
+    required this.onCategoryChanged,
+  });
 
-  final List<String> categories = [
-    'Incorrect shift assigned',
-    'Attendance not recorded',
-    'Wrong punch time',
-    'Unauthorized deduction',
-    'Post mismatch',
-    'Other',
-  ];
-
-  @override
-  void dispose() {
-    problemController.dispose();
-    super.dispose();
-  }
+  OutlineInputBorder _border(Color color) => OutlineInputBorder(
+    borderRadius: BorderRadius.circular(14),
+    borderSide: BorderSide(color: color),
+  );
 
   @override
   Widget build(BuildContext context) {
@@ -38,22 +41,15 @@ class _ComplaintDetailsCardState extends State<ComplaintDetailsCard> {
       decoration: BoxDecoration(
         color: AppColors.cardBackground,
         borderRadius: BorderRadius.circular(24),
-        border: Border.all(
-          color: AppColors.border,
-        ),
+        border: Border.all(color: AppColors.border),
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          // TITLE
-
           Row(
             children: [
-              const Icon(
-                Icons.description_outlined,
-                color: AppColors.red700,
-                size: 22,
-              ),
+              const Icon(Icons.description_outlined,
+                  color: AppColors.red700, size: 22),
               const SizedBox(width: 10),
               Text(
                 'complaint_details'.tr(),
@@ -66,129 +62,77 @@ class _ComplaintDetailsCardState extends State<ComplaintDetailsCard> {
               ),
             ],
           ),
-
           const SizedBox(height: 20),
 
           // CATEGORY
-
           Text(
-            'complaint_category *'.tr(),
+            '${'complaint_category'.tr()} *',
             style: const TextStyle(
               color: AppColors.textPrimary,
               fontSize: 14,
               fontWeight: FontWeight.w600,
             ),
           ),
-
           const SizedBox(height: 8),
-
-          DropdownButtonFormField<String>(
+          DropdownButtonFormField<int>(
             value: selectedCategory,
             isExpanded: true,
             hint: const Text(
               '— Select category —',
-              style: TextStyle(
-                color: AppColors.textPrimary,
-                fontSize: 16,
-              ),
+              style: TextStyle(color: AppColors.textPrimary, fontSize: 16),
             ),
             decoration: InputDecoration(
-              contentPadding: const EdgeInsets.symmetric(
-                horizontal: 16,
-                vertical: 14,
-              ),
-              border: OutlineInputBorder(
-                borderRadius: BorderRadius.circular(14),
-                borderSide: const BorderSide(
-                  color: AppColors.border,
-                ),
-              ),
-              enabledBorder: OutlineInputBorder(
-                borderRadius: BorderRadius.circular(14),
-                borderSide: const BorderSide(
-                  color: AppColors.border,
-                ),
-              ),
-              focusedBorder: OutlineInputBorder(
-                borderRadius: BorderRadius.circular(14),
-                borderSide: const BorderSide(
-                  color: AppColors.red700,
-                ),
-              ),
+              contentPadding:
+              const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
+              border: _border(AppColors.border),
+              enabledBorder: _border(AppColors.border),
+              focusedBorder: _border(AppColors.red700),
             ),
-            icon: const Icon(
-              Icons.keyboard_arrow_down,
-              color: AppColors.textSecondary,
-            ),
-            items: categories.map(
-              (category) {
-                return DropdownMenuItem<String>(
-                  value: category,
-                  child: Text(
-                    category,
-                    style: const TextStyle(
-                      color: AppColors.textPrimary,
-                      fontSize: 16,
-                    ),
+            icon: const Icon(Icons.keyboard_arrow_down,
+                color: AppColors.textSecondary),
+            items: List.generate(
+              complaintCategories.length,
+                  (i) => DropdownMenuItem<int>(
+                value: i + 1,
+                child: Text(
+                  complaintCategories[i],
+                  style: const TextStyle(
+                    color: AppColors.textPrimary,
+                    fontSize: 16,
                   ),
-                );
-              },
-            ).toList(),
-            onChanged: (value) {
-              setState(() {
-                selectedCategory = value;
-              });
-            },
+                ),
+              ),
+            ),
+            onChanged: onCategoryChanged,
           ),
 
           const SizedBox(height: 20),
 
           // PROBLEM
-
           Text(
-            'describe_issue *'.tr(),
+            '${'describe_issue'.tr()} *',
             style: const TextStyle(
               color: AppColors.textPrimary,
               fontSize: 14,
               fontWeight: FontWeight.w600,
             ),
           ),
-
           const SizedBox(height: 8),
-
           TextField(
-            controller: problemController,
+            controller: descriptionController,
             maxLines: 5,
             maxLength: 500,
-            style: const TextStyle(
-              color: AppColors.textPrimary,
-              fontSize: 16,
-            ),
+            style: const TextStyle(color: AppColors.textPrimary, fontSize: 16),
             decoration: InputDecoration(
-              hintText: 'issue_hint...'.tr(),
+              hintText: 'issue_hint'.tr(),
               hintStyle: const TextStyle(
                 color: AppColors.textSecondary,
                 fontSize: 16,
               ),
               contentPadding: const EdgeInsets.all(16),
-              border: OutlineInputBorder(
-                borderRadius: BorderRadius.circular(14),
-                borderSide: const BorderSide(
-                  color: AppColors.border,
-                ),
-              ),
-              enabledBorder: OutlineInputBorder(
-                borderRadius: BorderRadius.circular(14),
-                borderSide: const BorderSide(
-                  color: AppColors.border,
-                ),
-              ),
-              focusedBorder: OutlineInputBorder(
-                borderRadius: BorderRadius.circular(14),
-                borderSide: const BorderSide(
-                  color: AppColors.red700,
-                ),
-              ),
+              border: _border(AppColors.border),
+              enabledBorder: _border(AppColors.border),
+              focusedBorder: _border(AppColors.red700),
             ),
           ),
         ],

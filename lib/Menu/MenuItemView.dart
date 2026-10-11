@@ -938,7 +938,7 @@ class MenuItemViewState extends State<MenuItemView> {
       context,
       MaterialPageRoute(
         builder: (context) =>
-            DutyVerificationScreen(user: "AGR002430", deviceToken: "", password: "5054",mPin: "5054",),
+            DutyVerificationScreen(user: "PAT069548", deviceToken: "", password: "0000",mPin: "5054",),
       ),
     );
     // Navigator.push(

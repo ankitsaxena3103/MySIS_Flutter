@@ -8,7 +8,11 @@ import 'dart:convert';
 import 'package:http/http.dart' as http;
 import 'package:intl/intl.dart';
 
+import '../../CommonViews/Utility.dart';
+import '../../SharedClasses/Preferences.dart';
+import '../models/CredentialModel.dart';
 import '../models/attendance_verify_model.dart';
+import 'missing_claim_service.dart';
 
 /// TODO: fill from Constants.java (not part of the uploaded files).
 class AttendanceApi {
@@ -61,10 +65,9 @@ class AttendanceRepository {
       'PASSWORD': password,
     });
 
-    final res = await _client
-        .get(
-          Uri.parse(AttendanceApi.baseUrl +
-              AttendanceApi.getAttendanceForVerification),
+    final res = await _client.get(
+      Uri.parse(
+          AttendanceApi.baseUrl + AttendanceApi.getAttendanceForVerification),
       headers: {
         'UserName': user,
         'DeviceID': deviceToken,
@@ -73,12 +76,11 @@ class AttendanceRepository {
         'AuthType': 'DEVICE',
         'AppType': 'GUARD',
         'VERSION': "2.3.6",
-        'CompanyCode':"",
+        'CompanyCode': "",
         'AUTH_TOKEN': "",
         'VERSION_CODE': "169"
       },
-        )
-        .timeout(const Duration(seconds: 60));
+    ).timeout(const Duration(seconds: 60));
 
     if (res.statusCode != 200) {
       throw AttendanceApiException('Server error (${res.statusCode})');
@@ -92,29 +94,150 @@ class AttendanceRepository {
     return parseResponse(json);
   }
 
+  static Future<CredentialModel> _credentialBody() async {
+    return CredentialModel(
+      userName: await Preferences.getUserPreference(keyUserID) ?? '',
+      deviceToken: '',
+      password: await Preferences.getUserPreference(keyPwd) ?? '',
+      pin: await Preferences.getUserPreference(keyPIN) ?? '',
+    );
+  }
+
+
+   Future<bool> submitPostRequest(
+      List<Map<String, dynamic>> payload,
+      ) async {
+    final credentials = await _credentialBody();
+
+    final Map<String, dynamic> jsonObject = {
+      'data': payload,
+    };
+
+    final res = await _postJson(
+        Uri.parse(AttendanceApi.baseUrl + AttendanceApi.syncVerifyAttendance).toString(),
+
+      jsonObject,
+      credentials.toJson(),
+    );
+print('POSt..RESPONSE....${res.body}');
+    if (res.statusCode < 200 || res.statusCode >= 300) {
+      throw Exception(
+        'HTTP ${res.statusCode}: ${res.body}',
+      );
+    }
+
+    final responseBody = res.body.replaceFirst('\uFEFF', '').trim();
+
+    final j = jsonDecode(responseBody);
+
+    return j is Map && j['status']?.toString().toLowerCase() == 'true';
+  }
+
+  static Future<http.Response> _postJson(
+      String url,
+      Object body,
+      Map<String, dynamic>? headers,
+      ) async {
+    try {
+      final String requestBody = jsonEncode(body);
+
+      final Map<String, String> requestHeaders = {
+        'Content-Type': 'text',
+        'Accept': 'application/json',
+        if (headers != null)
+          ...headers.map(
+                (key, value) => MapEntry(key, value.toString()),
+          ),
+      };
+
+      print('REQUEST URL: $url');
+      print('REQUEST HEADERS: $requestHeaders');
+      print('REQUEST BODY: $requestBody');
+
+      final request = http.Request('POST', Uri.parse(url))
+        ..headers.addAll(requestHeaders)
+        ..bodyBytes = utf8.encode(requestBody);
+
+      final streamedResponse = await request.send().timeout(
+        const Duration(seconds: 45),
+      );
+
+      final response = await http.Response.fromStream(streamedResponse);
+
+      print('HTTP STATUS: ${response.statusCode}');
+      print('RESPONSE HEADERS: ${response.headers}');
+      print('RESPONSE BODY: ${response.body}');
+
+      return response;
+    } on Exception catch (e) {
+      print('POST ERROR: $e');
+
+      if (e.toString().contains('SocketException')) {
+        throw NoInternetException();
+      }
+
+      rethrow;
+    }
+  }
+
+
+
+
   // ────────────────────────────────────────────────────────────
   // 2. POST verify  (SyncVerifyAttendance) – body is [{"ID": "..."}, ...]
   // ────────────────────────────────────────────────────────────
-  Future<void> verifyRecords(List<String> ids) async {
-    final body = jsonEncode(ids.map((id) => {'ID': id}).toList());
-
-    final res = await _client
-        .post(
-          Uri.parse(AttendanceApi.baseUrl + AttendanceApi.syncVerifyAttendance),
-          headers: {'Content-Type': 'application/json'},
-          body: body,
-        )
-        .timeout(const Duration(seconds: 60));
-
-    if (res.statusCode != 200) {
-      throw AttendanceApiException('Server error (${res.statusCode})');
-    }
-    final json = jsonDecode(res.body) as Map<String, dynamic>;
-    if (json['status'].toString().toLowerCase() != 'true') {
-      throw AttendanceApiException(
-          json['error']?.toString() ?? 'Verification failed');
-    }
-  }
+  // Future<void> verifyRecords(List<String> ids) async {
+  //   // final body = jsonEncode(ids.map((id) => {'ID': id}).toList());
+  //   final credentials = await _credentialBody();
+  //   final Map<String, String> requestHeaders = {
+  //     'Content-Type': 'text',
+  //     'Accept': 'application/json',
+  //     if (credentials.toJson() != null)
+  //       ...credentials.toJson().map(
+  //             (key, value) => MapEntry(key, value.toString()),
+  //           ),
+  //   };
+  //   final Map<String, dynamic> jsonObject = {
+  //     'data': ids,
+  //   };
+  //   print('verifyRecords...jsonObject...${jsonObject}');
+  //   final String requestBody = jsonEncode(body);
+  //
+  //   final res = await _client
+  //       .post(
+  //         Uri.parse(AttendanceApi.baseUrl + AttendanceApi.syncVerifyAttendance),
+  //         headers:requestHeaders,
+  //         body: jsonObject,
+  //       )
+  //       .timeout(const Duration(seconds: 60));
+  //   print('REQUEST URL: ${Uri.parse(AttendanceApi.baseUrl + AttendanceApi.syncVerifyAttendance)}');
+  //   print('REQUEST HEADERS: $requestHeaders');
+  //   print('REQUEST BODY: $requestBody');
+  //
+  //   final request = http.Request('POST', Uri.parse(url))
+  //     ..headers.addAll(requestHeaders)
+  //     ..bodyBytes = utf8.encode(requestBody);
+  //
+  //   final streamedResponse = await request.send().timeout(
+  //     const Duration(seconds: 45),
+  //   );
+  //
+  //   final response = await http.Response.fromStream(streamedResponse);
+  //
+  //   print('HTTP STATUS: ${response.statusCode}');
+  //   print('RESPONSE HEADERS: ${response.headers}');
+  //   print('RESPONSE BODY: ${response.body}');
+  //
+  //
+  //   if (res.statusCode != 200) {
+  //     throw AttendanceApiException('Server error (${res.statusCode})');
+  //   }
+  //   final json = jsonDecode(res.body) as Map<String, dynamic>;
+  //   if (json['status'].toString().toLowerCase() != 'true') {
+  //     throw AttendanceApiException(
+  //         json['error']?.toString() ?? 'Verification failed');
+  //   }
+  // }
 
   // ────────────────────────────────────────────────────────────
   // 3. parseRealResponse
