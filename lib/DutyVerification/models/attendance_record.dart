@@ -14,6 +14,7 @@ class AttendanceRecord {
   final double? dutyCount;
   final String? claimSubmittedOn;
   final int? claimStatus; // nullable, 0 = pending
+  final String? shiftId;        // ← add
 
   AttendanceRecord({
     this.id,
@@ -27,6 +28,7 @@ class AttendanceRecord {
     this.dutyCount,
     this.claimSubmittedOn,
     this.claimStatus,
+    this.shiftId
   });
 
   factory AttendanceRecord.fromJson(Map<String, dynamic> j) {
@@ -34,6 +36,7 @@ class AttendanceRecord {
       id: j['ID']?.toString(),
       unitCode: j['UNIT_CODE']?.toString(),
       unitName: j['UNIT_NAME']?.toString(),
+      shiftId: j['SHIFT_ID']?.toString(),   // ← add
       postName: j['POST_NAME']?.toString(),
       shiftName: j['SHIFT_NAME']?.toString(),
       shiftStartDate: j['SHIFT_START_DATE']?.toString(),

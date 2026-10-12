@@ -5,6 +5,7 @@ import 'package:mysis/DutyVerification/Missing_Claim.dart';
 import 'package:mysis/DutyVerification/repo/attendance_repository.dart';
 import 'package:mysis/constants/app_colors.dart';
 
+import 'RaiseComplaintScreen/RaiseComplaint.dart';
 import 'models/attendance_verify_model.dart';
 
 class DutyVerificationScreen extends StatefulWidget {
@@ -141,6 +142,16 @@ class _DutyVerificationScreenState extends State<DutyVerificationScreen> {
   // ============================================================
   // VERIFIED & NEXT  (btnVerifiedNext)
   // ============================================================
+
+
+  Future<Map<String, dynamic>> _buildPayload(String ids) async {
+
+    return {
+      'ID': ids,
+
+    };
+  }
+
   Future<void> _onVerifiedNext() async {
     final entry = _entry;
     if (entry == null || _submitting) return;
@@ -154,8 +165,17 @@ class _DutyVerificationScreenState extends State<DutyVerificationScreen> {
 
     setState(() => _submitting = true);
     try {
+
+
+      final List<Map<String, dynamic>> recordsArray = entry.records
+          .where((r) => r.id != null)
+          .map((r) => <String, dynamic>{
+        'ID': r.id,
+      })
+          .toList();
       // body: [{"ID": rec.id}, ...]
-      await _repo.verifyRecords(entry.records.map((r) => r.id).toList());
+      // await _repo.submitPostRequest(entry.records.map((r) => r.id).toList());
+      await _repo.submitPostRequest(recordsArray);
       if (!mounted) return;
       setState(() {
         entry.markVerified();
@@ -188,10 +208,16 @@ class _DutyVerificationScreenState extends State<DutyVerificationScreen> {
     // MissingClaimFragment.newInstance(fullDateLabel, apiDate, records)):
     //   MissingClaimScreen(dateLabel: entry.fullDateLabel,
     //                      apiDate: entry.apiDate, records: entry.records)
+
+   print('API_DATE...${entry.apiDate}');
     final result = await Navigator.push(
       context,
-      MaterialPageRoute(builder: (_) => MissingClaimScreen()),
+      MaterialPageRoute(builder: (_) => MissingClaimScreen(
+        apiDate: entry.apiDate,
+        records: entry.records,
+      )),
     );
+
 
     if (result == true) {
       await _load(keepSelection: true); // re-fetch, stay on same day
@@ -359,7 +385,7 @@ class _DutyVerificationScreenState extends State<DutyVerificationScreen> {
                 : Column(
               children: [
                 for (final r in entry.records) ...[
-                  _mainDutyCard(r),
+                  _mainDutyCard(r,entry),
                   const SizedBox(height: 12),
                 ],
               ],
@@ -616,7 +642,7 @@ class _DutyVerificationScreenState extends State<DutyVerificationScreen> {
     );
   }
 
-  Widget _mainDutyCard(AttendanceVerifyModel r) {
+  Widget _mainDutyCard(AttendanceVerifyModel r, DateEntry entry) {
     final topColor = _statusColor(r.status);
 
     return Container(
@@ -735,10 +761,19 @@ class _DutyVerificationScreenState extends State<DutyVerificationScreen> {
                 ),
                 const SizedBox(height: 11),
                 _statusBar(r.status),
-                if (r.isClaimSubmitted) ...[
-                  const SizedBox(height: 8),
-                  _claimBadge(r),
-                ],
+            if (r.status.toLowerCase()=='rejected')    ElevatedButton(onPressed: ()async{
+              final result = await Navigator.push(
+                context,
+                MaterialPageRoute(builder: (_) => RaiseComplaintScreen(
+                  apiDate: entry.apiDate,
+                  attendanceId: r.id,
+                )),
+              );
+                }, child: Text("Raise complaint"))
+                // if (r.isClaimSubmitted) ...[
+                //   const SizedBox(height: 8),
+                //   _claimBadge(r),
+                // ],
               ],
             ),
           ),
