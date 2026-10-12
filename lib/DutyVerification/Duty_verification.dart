@@ -70,7 +70,7 @@ class _DutyVerificationScreenState extends State<DutyVerificationScreen> {
       );
       if (!mounted) return;
       setState(() {
-        _entries = result.entries;
+        _entries = result.entries.cast<DateEntry>();
         _allowedMaxIndex = 0;
         _loading = false;
         if (!keepSelection || _selectedIndex >= _entries.length) {
@@ -740,6 +740,41 @@ class _DutyVerificationScreenState extends State<DutyVerificationScreen> {
                   _claimBadge(r),
                 ],
               ],
+            ),
+          ),
+          const SizedBox(height: 12),
+
+          SizedBox(
+            width: double.infinity,
+            height: 48,
+            child: ElevatedButton.icon(
+              onPressed: () {
+                ScaffoldMessenger.of(context).showSnackBar(
+                  const SnackBar(
+                    content: Text('Complaint to BH clicked'),
+                  ),
+                );
+              },
+              icon: const Icon(
+                Icons.description_outlined,
+                size: 21,
+                color: Colors.white,
+              ),
+              label: const Text(
+                'COMPLAINT TO BH',
+                style: TextStyle(
+                  fontSize: 14,
+                  fontWeight: FontWeight.w700,
+                ),
+              ),
+              style: ElevatedButton.styleFrom(
+                backgroundColor: const Color(0xFFB71C2C),
+                foregroundColor: Colors.white,
+                elevation: 2,
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(13),
+                ),
+              ),
             ),
           ),
         ],

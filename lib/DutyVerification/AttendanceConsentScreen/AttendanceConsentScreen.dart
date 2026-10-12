@@ -41,6 +41,7 @@ class _AttendanceConsentScreenState extends State<AttendanceConsentScreen> {
 
   final GlobalKey _consentKey = GlobalKey();
   final GlobalKey _signatureKey = GlobalKey();
+  bool _isDeclarationChecked = false;
 
   // ==========================================================
   // EMPLOYEE DETAILS
@@ -662,49 +663,79 @@ class _AttendanceConsentScreenState extends State<AttendanceConsentScreen> {
   // DECLARATION
   // ==============================================================
 
+
   Widget _declaration() {
     return Row(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        Container(
-          width: 20,
-          height: 20,
-          color: AppColors.red,
-          child: Icon(
-            Icons.check,
-            size: 15,
-            color: AppColors.white,
+        GestureDetector(
+          onTap: () {
+            setState(() {
+              _isDeclarationChecked = !_isDeclarationChecked;
+            });
+          },
+          child: AnimatedContainer(
+            duration: const Duration(milliseconds: 200),
+            width: 22,
+            height: 22,
+            decoration: BoxDecoration(
+              color: _isDeclarationChecked
+                  ? AppColors.red
+                  : Colors.white,
+              border: Border.all(
+                color: AppColors.red,
+                width: 1.5,
+              ),
+              borderRadius: BorderRadius.circular(4),
+            ),
+            child: _isDeclarationChecked
+                ? const Icon(
+              Icons.check,
+              color: Colors.white,
+              size: 18,
+            )
+                : null,
           ),
         ),
-        const SizedBox(width: 7),
+
+        const SizedBox(width: 8),
+
         Expanded(
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Text(
-                "Therefore, I declare that the above statements are true and correct to the best of my knowledge and belief.",
-                style: TextStyle(
-                  fontSize: 11.8,
-                  height: 1.25,
-                  color: AppColors.textPrimary,
+          child: GestureDetector(
+            onTap: () {
+              setState(() {
+                _isDeclarationChecked = !_isDeclarationChecked;
+              });
+            },
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  "Therefore, I declare that the above statements are true and correct to the best of my knowledge and belief.",
+                  style: TextStyle(
+                    fontSize: 11.8,
+                    height: 1.25,
+                    color: AppColors.textPrimary,
+                  ),
                 ),
-              ),
-              const SizedBox(height: 5),
-              Text(
-                'attendance_declaration_5'.tr(),
-                style: TextStyle(
-                  fontSize: 11.8,
-                  height: 1.25,
-                  fontWeight: FontWeight.w600,
-                  color: AppColors.textPrimary,
+                const SizedBox(height: 5),
+                Text(
+                  'attendance_declaration_5'.tr(),
+                  style: TextStyle(
+                    fontSize: 11.8,
+                    height: 1.25,
+                    fontWeight: FontWeight.w600,
+                    color: AppColors.textPrimary,
+                  ),
                 ),
-              ),
-            ],
+              ],
+            ),
           ),
         ),
       ],
     );
   }
+
 
   // ==============================================================
   // SIGNATURE SECTION

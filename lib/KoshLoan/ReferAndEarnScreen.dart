@@ -1494,7 +1494,7 @@ class _ReferAndEarnScreenState extends State<ReferAndEarnScreen> {
           ),
 
           _walletRow(
-            label: 'onthly_rfd'.tr(),
+            label: 'withdrawal_limit'.tr(),
             value: formatAmount(wallet.rfdMonthToDate),
             showBottomBorder: true,
           ),
